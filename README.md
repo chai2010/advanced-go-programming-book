@@ -10,6 +10,7 @@
 ## 在线阅读
 
 - https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
+- [SUMMARY.md](SUMMARY.md)
 
 ## 版权声明
 
