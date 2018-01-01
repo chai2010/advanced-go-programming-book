@@ -14,17 +14,17 @@ Notepad++是Windows操作系统下严肃程序员们编写代码的利器！Note
 
 下面是Go语言的语法高亮预览，其中右侧是Go函数列表：
 
-![](../images/npp-go.png)
+![](../images/ch1-08-npp-go.png)
 
 下面是Go语言汇编的语法高亮预览：其中右侧是汇编函数列表:
 
-![](../images/npp-go-asm.png)
+![](../images/ch1-08-npp-go-asm.png)
 
 对于Protobuf或GRPC的用户，可以从 https://github.com/chai2010/notepadplus-protobuf 下载相应的插件。
 
 下面是Protobuf的语法高亮预览：
 
-![](../images/npp-proto.png)
+![](../images/ch1-08-npp-proto.png)
 
 **配置Notepad++的语法高亮**
 
@@ -49,7 +49,7 @@ Notepad++还支持关键字的自动补全。假设Notepad++安装在`<DIR>`目�
 
 下面是内置函数`println`自动补全后函数参数提示的预览图:
 
-![](../images/npp-auto-completion.png)
+![](../images/ch1-08-npp-auto-completion.png)
 
 这是一个比较鸡肋的功能，用户根据自己需要选择是否安装。
 
@@ -59,7 +59,7 @@ Notepad++还支持关键字的自动补全。假设Notepad++安装在`<DIR>`目�
 
 不过Windows自带的命令行工具比较简陋，不是理想的命令行开发环境。如果读者还没有自己合适命令行环境，可以试试ConEmu这个免费命令行软件。ConEmu支持多标签页窗口，复制粘贴也比较方便。下面是ConEmu的预览图：
 
-![](../images/ConEmu.png)
+![](../images/ch1-08-ConEmu.png)
 
 
 ConEmu的主页在：http://conemu.github.io/ 。
@@ -68,7 +68,7 @@ ConEmu的主页在：http://conemu.github.io/ 。
 
 对于macOS平台的用户，免费的轻量级软件推荐TextMate编辑器。TextMate是macOS下的Notepadd++工具。支持目录列表，支持Go语言的诸多特性。下面是TextMate的预览图：
 
-![](../images/TextMate-1.png)
+![](../images/ch1-08-TextMate-1.png)
 
 对于iPad Pro用户，目前也有不少编辑软件对Go语言提供了不错的支持。比如Textastic Code、Coda等，很多都支持iPad和macOS平台的同步，它们一般都是需要单独购买的收费软件。
 
@@ -86,7 +86,7 @@ Textastic是一款收费应用，它是macOS/iOS下著名的轻量级代码编�
 
 在macOS下，Textastic的界面和TextMate非常相似。不过Textastic在左边侧栏提供了基于工程的检索工具。下面是macOS下Textastic的预览图：
 
-![](../images/macos-textastic.png)
+![](../images/ch1-08-macos-textastic.png)
 
 因为iOS环境不支持编译和调试，如果需要在iOS环境编写Go程序，首先要解决和其他平台的共享问题。这样可以在iOS环境编写代码，然后在其他电脑上进行编译和测试。
 
@@ -94,13 +94,13 @@ Textastic是一款收费应用，它是macOS/iOS下著名的轻量级代码编�
 
 下面是iPad Pro下Textastic的预览图：
 
-![](../images/ios-textastic-02.png)
+![](../images/ch1-08-ios-textastic-02.png)
 
 如果Go语言代码是放在Git服务器中，可以通过Working Copy应用将仓库克隆到iOS中，然后再Textastic中通过iOS协议打开工作区文件。编辑完成之后，在通过Working Copy将修改提交到中心仓库中。
 
 下面是iPad Pro下Working Copy查看Git更新日志的预览图：
 
-![](../images/ios-working-copy-02.png)
+![](../images/ch1-08-ios-working-copy-02.png)
 
 
 ## 跨平台编辑器: Github Atom
@@ -109,7 +109,7 @@ Gtihub Atom是Github专门为程序员推出的一个跨平台文本编辑器。
 
 Github Atom的预览图:
 
-![](images/atom-01.png)
+![](../images/ch1-08-atom-01.png)
 
 Github Atom作为一个Go语言编辑器，不足之处是没有Go汇编语言的高亮显示插件。而且Github Atom对于大文件的支持性能不是很好。
 
@@ -121,11 +121,11 @@ VSCode虽然是基于Gtihub Atom而来，不过VSCode支持Go语言的代码自�
 
 下面是用VScode打开的Go语言工程的预览图:
 
-![](../images/vscode-01.png)
+![](../images/ch1-08-vscode-01.png)
 
 因为，VSCode和Gtihub Atom都是采用的Chrome核心，它不仅仅能编辑显示代码，还可以用来显示网页查看图像，甚至可以在一个分屏窗口中播放视频文件：
 
-![](../images/vscode-02.jpg)
+![](../images/ch1-08-vscode-02.jpg)
 
 VSCode安装Go语言插件中，默认的很多参数设置比较严格。比如，默认会使用`golint`来严格检查代码是否符合编码规范，对于git工程启动时还会自动获取和刷新。对于一般的Go语言代码来说，`golint`检测过于严格，很难完全通过（Go语言标准库也无法完全通过），从而导致每次保存时都会提示很多干扰信息。当然，对相对稳定的程序定期做`golint`检查也是有必要，它的信息可以作为我们改进代码的参考。同样的，如果git仓库有密码认证的话，VSCode在启动的时候总是弹出输入密码的对话框。
 
