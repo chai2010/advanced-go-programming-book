@@ -1,0 +1,26 @@
+digraph G {
+	ranksep = .75; size = "7.5,7.5";
+	rankdir="LR";
+
+	node [shape=plaintext];
+
+	{
+		1970, 1972; 1985; 1989; 1992; 1995; 2007;
+		"B";
+	}
+
+	{
+		node [shape=circle];
+		"Go";
+	}
+
+	{ rank = same; "1970"; "B"; }
+	{ rank = same; "1972"; "C"; }
+	{ rank = same; "1985"; "Squeak"; }
+	{ rank = same; "1989"; "NewSqueak"; }
+	{ rank = same; "1992"; "Alef"; }
+	{ rank = same; "1995"; "Limbo"; }
+	{ rank = same; "2007"; "Go"; }
+
+	"B" -> "C" -> "Squeak" -> "NewSqueak" -> "Alef" -> "Limbo" -> "Go";
+}

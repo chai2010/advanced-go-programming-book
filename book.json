@@ -1,0 +1,13 @@
+{
+	"gitbook": "2.x",
+	"title": "Go语言高级编程",
+	"description": "Go语言高级编程",
+	"language": "zh-cn",
+
+	"structure": {
+		"readme": "README.md"
+	},
+	"plugins": [
+		"-search"
+	]
+}

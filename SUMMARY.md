@@ -1,0 +1,15 @@
+# Summary
+
+* [第一章 语言基础](ch1-basic/readme.md)
+   * [1.1. Go语言创世纪](ch1-basic/ch1-01-genesis.md)
+   * [1.2. Hello, World 的革命](ch1-basic/ch1-02-hello-revolution.md)
+   * [1.3. 数组、字符串和切片](ch1-basic/ch1-03-array-string-and-slice.md)
+   * [1.4. 函数、方法和接口](ch1-basic/ch1-04-func-method-interface.md)
+   * [1.5. 面向并发的内存模型](ch1-basic/ch1-05-mem.md)
+   * [1.6. 常见的并发模式](ch1-basic/ch1-06-goroutine.md)
+   * [1.7. 错误和异常](ch1-basic/ch1-07-error-and-panic.md)
+   * [1.8. 配置开发环境](ch1-basic/ch1-08-ide.md)
+* [附录](appendix/readme.md)
+   * [附录A: Go语言常见坑](appendix/appendix-a-trap.md)
+   * [附录B: 参考资料](appendix/appendix-b-ref.md)
+   * [附录C: 作者简介](appendix/appendix-c-author.md)
