@@ -6,3 +6,7 @@
 
 - 作者：柴树杉 (chai2010, chaishushan@gmail.com)
 - 网址：https://github.com/chai2010/advanced-go-programming-book
+
+## 在线阅读
+
+- https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
