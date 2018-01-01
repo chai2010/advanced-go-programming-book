@@ -1,4 +1,4 @@
-# Summary
+# 目录
 
 * [第一章 语言基础](ch1-basic/readme.md)
    * [1.1. Go语言创世纪](ch1-basic/ch1-01-genesis.md)
