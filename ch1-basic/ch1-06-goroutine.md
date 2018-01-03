@@ -139,13 +139,13 @@ Go语言实现生产者消费者并发很简单：
 // 生产者: 生成 factor 整数倍的序列
 func Producer(factor int, out chan<- int) {
 	for i := 0; ; i++ {
-		item <- i*factor
+		out <- i*factor
 	}
 }
 
 // 消费者
 func Consumer(in <-chan int) {
-	for _, v := range in {
+	for v := range in {
 		fmt.Println(v)
 	}
 }
@@ -174,9 +174,9 @@ func main() {
 	go Consumer(ch)    // 消费 生成的队列
 
 	// Ctrl+C 退出
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
-	fmt.Printf("quit (%v)\n", <-ch)
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	fmt.Printf("quit (%v)\n", <-sig)
 }
 ```
 
