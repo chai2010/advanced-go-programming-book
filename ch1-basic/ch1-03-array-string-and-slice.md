@@ -365,8 +365,8 @@ type SliceHeader struct {
 
 ```go
 var (
-	a []int               // 空切片, 和 nil 相等
-	b = []int{}           // 空切片, 和 nil 相等
+	a []int               // nil切片, 和 nil 相等, 一般用来表示一个不存在的切片
+	b = []int{}           // 空切片, 和 nil 不相等, 一般用来表示一个空的集合
 	c = []int{1, 2, 3}    // 有3个元素的切片, len和cap都为3
 	d = c[:2]             // 有2个元素的切片, len为2, cap为3
 	e = c[0:2:cap(c)]     // 有2个元素的切片, len为2, cap为3
