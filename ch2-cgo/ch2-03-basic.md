@@ -1,4 +1,4 @@
-# 2.3. CGO编程基础(TODO)
+# 2.3. CGO编程基础
 
 Go是一门以实用为主要目的的编程语言，我们可以通过cgo来直接调用C语言代码，也可以在C语言代码中直接调用Go函数。要使用CGO特性，需要安装C／C++构建工具链，在macOS和Linux下是要安装和GCC，在windows下是需要安装MinGW工具。同时需要保证环境变量`CGO_ENABLED`被设置为1，这表示CGO是被启用的状态。在本地构建时`CGO_ENABLED`默认是启用的，当交叉构建时CGO默认是禁止的。比如要交叉构建ARM环境运行的Go程序，需要手工设置好C/C++交叉构建的工具链，同时开启`CGO_ENABLED`环境变量。
 
@@ -101,16 +101,71 @@ import "C"
 
 对于在cgo环境混合使用C和C++的用户来说，可能有三种不同的编译选项：其中CFLAGS对应C语言特有的编译选项、CXXFLAGS对应是C++特有的编译选项、CPPFLAGS则对应C和C++共有的便于选项。但是在链接阶段，C和C++的链接选项是通用，因此这个时候已经不在有C和C++语言的区别，它们都是相同的类型的目标文件。
 
-如果是针对特定平台的参数，可以通过Go语言的build tag来指定：
+`#cgo`指令还支持条件选择，当满足某个操作系统或某个CPU架构类型时后面的编译或链接选项生效。比如下面是分别针对windows和非windows下平台的编译和链接选项：
 
 ```
-// #cgo amd64 386 CFLAGS: -DX86=1
+// #cgo windows CFLAGS: -DX86=1
+// #cgo !windows LDFLAGS: -lm
 ```
 
-TODO
+其中在windows平台下，编译前会预定义X86宏为1；再非widnows平台下，再链接阶段会要求链math数学库。这种用法对应在不太平台下只有少数编译选项差异的场景比较适用。
 
-<!--
-文件后缀名和 cgo 指令的对应关系
+如果是在不同的系统下cgo对应者不同的c代码，我们可以通过在`#cgo`指令定义不同的宏，然后通过C语言的宏来区分不同的代码：
 
-自定义的 build 类型（不是cgo特有的）
--->
+```go
+package main
+
+/*
+#cgo windows CFLAGS: -DCGO_OS_WINDOWS=1
+#cgo darwin CFLAGS: -DCGO_OS_DARWIN=1
+#cgo linux CFLAGS: -DCGO_OS_LINUX=1
+
+#if defined(CGO_OS_WINDOWS)
+	static char* os = "windows";
+#elif defined(CGO_OS_DARWIN)
+	static char* os = "darwin";
+#elif defined(CGO_OS_LINUX)
+	static char* os = "linux";
+#else
+#	error(unknown os)
+#endif
+*/
+import "C"
+
+func main() {
+	print(C.GoString(C.os))
+}
+```
+
+这样我们就可以用C语言中常用的技术来处理不同平台之间的差异代码。
+
+## build tag 条件编译
+
+build tag 是在Go或cgo环境下的C/C++文件开头的一种特殊的注释。条件编译类似签名的`#cgo`指令针对不同平台定义的宏，只有在对应平台的宏被定义之后才会构建对应的代码。但是通过`#cgo`指令定义宏有个限制，它只能是基于Go语言支持的windows、darwin和linux等已经支持的操作系统。如果我们希望定义一个DEBUG标志的宏，`#cgo`指令就无能为力了。而Go语言提供的build tag 条件编译特性则可以简单做到。
+
+比如下面的源文件只有在设置debug构建标志时才会被构建：
+
+```go
+// +build debug
+
+package main
+
+var buildMode = "debug"
+```
+
+可以用以下命令构建：
+
+```
+go build -tags="debug"
+go build -tags="windows,debug"
+```
+
+我们可以通过`-tags`命令行参数同时指定多个build标志，它们之间用逗号分割。
+
+当有多个build tag时，我们将多个标志通过与或的规则来组合使用。比如以下的构建标志表示只有在linux/386或非cgo环境的darwin平台下才进行构建。
+
+```go
+// +build linux,386 darwin,!cgo
+```
+
+其中`linux,386`中linux和386用逗号链接表示AND的意思；而`linux,386`和`darwin,!cgo`之间通过空白分割表示OR的意思。

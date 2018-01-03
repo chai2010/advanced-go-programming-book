@@ -12,7 +12,7 @@
 * [第二章 CGO编程](ch2-cgo/readme.md)
    * [2.1. 你好, CGO!](ch2-cgo/ch2-01-hello-cgo.md)
    * [2.2. 基础类型转换](ch2-cgo/ch2-02-cgo-types.md)
-   * [2.3. CGO编程基础(TODO)](ch2-cgo/ch2-03-basic.md)
+   * [2.3. CGO编程基础](ch2-cgo/ch2-03-basic.md)
    * [2.4. CGO内存模型(TODO)](ch2-cgo/ch2-04-memory.md)
    * [2.5. C++类包装(TODO)](ch2-cgo/ch2-05-class.md)
    * [2.6. 命令行工具和构建参数(TODO)](ch2-cgo/ch2-06-build.md)
