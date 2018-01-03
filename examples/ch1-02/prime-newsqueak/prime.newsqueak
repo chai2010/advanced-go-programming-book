@@ -1,0 +1,41 @@
+// 向管道输出从2开始的自然数序列
+counter := prog(c:chan of int) {
+	i := 2;
+	for(;;) {
+		c <-= i++;
+	}
+};
+
+// 针对listen管道获取的数列，过滤掉是prime倍数的数
+// 新的序列输出到send管道
+filter := prog(prime:int, listen, send:chan of int) {
+	i:int;
+	for(;;) {
+		if((i = <-listen)%prime) {
+			send <-= i;
+		}
+	}
+};
+
+// 主函数
+// 每个管道第一个流出的数必然是素数
+// 然后基于这个新的素数构建新的素数过滤器
+sieve := prog() of chan of int {
+	c := mk(chan of int);
+	begin counter(c);
+	prime := mk(chan of int);
+	begin prog(){
+		p:int;
+		newc:chan of int;
+		for(;;){
+			prime <-= p =<- c;
+			newc = mk();
+			begin filter(p, c, newc);
+			c = newc;
+		}
+	}();
+	become prime;
+};
+
+// 启动素数筛
+prime := sieve();
