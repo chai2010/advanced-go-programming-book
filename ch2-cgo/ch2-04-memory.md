@@ -1,4 +1,4 @@
-# 2.4. CGO内存模型(Doing)
+# 2.4. CGO内存模型
 
 CGO是架接Go语言和C语言的桥梁，它不仅仅在二进制接口层面实现互通，同时要考虑两种语言的内存模型的差异。如果在CGO处理的跨语言函数调用时涉及指针的传递，则可能会出现Go语言和C语言共享某一段内存的场景。我们知道C语言的内存在分配之后就是稳定的，但是Go语言因为函数栈的动态伸缩可能导致栈中内存地址的移动。如果C语言持有的是移动之前的Go指针，那么以旧指针访问Go对象时会导致程序崩溃。这是Go和C内存模型的最大差异。
 
@@ -118,4 +118,110 @@ pb := (*int16)(unsafe.Pointer(tmp))
 
 ## C长期持有Go指针对象
 
-TODO
+作为一个Go程序员在使用CGO时潜意识会认为总是Go调用C函数。其实CGO中，C语言函数也可以回调Go语言实现的函数。特别是我们可以用Go语言写一个动态库，导出C语言规范的接口给其它用户调用。当C语言函数调用Go语言函数的时候，C语言函数就成了程序的调用方，Go语言函数返回的Go对象内存的生命周期也就自然超出了Go语言运行时的管理。简言之，我们不能在C语言函数中直接使用Go语言对象的内存。
+
+虽然Go语言禁止在C语言函数中长期持有Go指针对象，但是这种需求是切实存在的。如果需要在C语言中访问Go语言内存对象，我们可以将Go语言内存对象在Go语言空间映射为一个int类型的id，然后构建此id来间接访问和空着Go语言对象。
+
+以下代码用于将Go对应映射为整数类型的ObjectId，用完之后需要手工调用free方法释放该对象ID：
+
+```go
+package main
+
+import "sync"
+
+type ObjectId int32
+
+var refs struct {
+	sync.Mutex
+	objs map[ObjectId]interface{}
+	next ObjectId
+}
+
+func init() {
+	refs.Lock()
+	defer refs.Unlock()
+
+	refs.objs = make(map[ObjectId]interface{})
+	refs.next = 1000
+}
+
+func NewObjectId(obj interface{}) ObjectId {
+	refs.Lock()
+	defer refs.Unlock()
+
+	id := refs.next
+	refs.next++
+
+	refs.objs[id] = obj
+	return id
+}
+
+func (id ObjectId) IsNil() bool {
+	return id == 0
+}
+
+func (id ObjectId) Get() interface{} {
+	refs.Lock()
+	defer refs.Unlock()
+
+	return refs.objs[id]
+}
+
+func (id *ObjectId) Free() interface{} {
+	refs.Lock()
+	defer refs.Unlock()
+
+	obj := refs.objs[*id]
+	delete(refs.objs, *id)
+	*id = 0
+
+	return obj
+}
+```
+
+我们通过一个map来管理Go语言对象和id对象的映射关系。其中NewObjectId用于创建一个和对象绑定的id，而id对象的方法可用于解码出原始的Go对象，也可以用于接触id和原始Go对象的绑定。
+
+下面一组函以C接口规范导出，可以被C语言函数调用：
+
+```go
+package main
+
+/*
+export char* NewGoString(char* );
+export void FreeGoString(char* );
+export void PrintGoString(char* );
+
+void printString(const char* s) {
+	char* gs = NewGoString(s);
+	PrintGoString(gs);
+	FreeGoString(gs);
+}
+*/
+import "C"
+
+//export NewGoString
+func NewGoString(s *C.char) *C.char {
+	gs := C.GoString(s)
+	id := NewObjectId(gs)
+	return (*C.char)(unsafe.Pointer(uintptr(id)))
+}
+
+//export FreeGoString
+func FreeGoString(p *C.char) {
+	id := ObjectId(uintptr(unsafe.Pointer(p)))
+	id.Free()
+}
+
+//export PrintGoString
+func PrintGoString(s *C.char) {
+	id := ObjectId(uintptr(unsafe.Pointer(p)))
+	gs := id.Get().(string)
+	print(gs)
+}
+
+func main() {
+	C.printString("hello")
+}
+```
+
+在printString函数中，我们通过NewGoString创建一个对应的Go字符串对象，返回的其实是一个ID，不能直接使用。我们借助PrintGoString函数将id解析为Go语言字符串后打印。该字符串在C语言函数中完全跨越了Go语言的内存管理，在PrintGoString调用前即时发生了栈伸缩导致的Go字符串地址发生变化也依然可以正常工作，因为该字符串对应的id是稳定的，在Go语言空间通过id解码得到的字符串也就是有效的。
