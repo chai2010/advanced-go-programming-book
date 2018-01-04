@@ -86,7 +86,7 @@ package main
 void cgoPuts(char* s);
 
 static void SayHello(const char* s) {
-	cgoPuts(s);
+	cgoPuts((char*)(s));
 }
 */
 import "C"
