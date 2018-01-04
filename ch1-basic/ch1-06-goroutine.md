@@ -301,13 +301,13 @@ func main() {
 	p.Publish("hello, golang!")
 
 	go func() {
-		for _, msg := all {
+		for  msg := range all {
 			fmt.Println("all:", msg)
 		}
 	} ()
 
 	go func() {
-		for _, msg := golang {
+		for  msg := range golang {
 			fmt.Println("golang:", msg)
 		}
 	} ()
