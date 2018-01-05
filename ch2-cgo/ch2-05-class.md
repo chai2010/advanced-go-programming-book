@@ -1,4 +1,4 @@
-# 2.5. C++ 类包装(Doing)
+# 2.5. C++ 类包装
 
 CGO是C语言和Go语言之间的桥梁，原则上无法直接支持C++的类。CGO不支持C++语法的根本原因是C++至今为止还没有一个二进制接口规范(ABI)。一个C++类的构造函数在编译为目标文件时如何生成链接符号名称到方法在不太平台甚至是C++到不同版本之间都是不一样的。但是C++的最大优势是兼容C语言，我们可以通过增加一组C语言函数接口作为C++类和CGO之间的桥梁，这样就可以间接地实现C++和Go之间的互联。当然，因为CGO只支持C语言中值类型的数据类型，我们是无法直接使用C++的引用参数等特性的。
 
@@ -210,4 +210,194 @@ func main() {
 
 ## Go 语言对象到 C++ 类
 
-TODO
+要实现Go语言对象到C++类的包装需要经过以下几个步骤：首先是将Go对象映射为一个id；然后基于id导出对应的C接口函数；最后是基于C接口函数包装为C++对象。
+
+### 构造一个Go对象
+
+为了便于演示，我们用Go语言构建了一个Person对象，每个Person可以有名字和年龄信息：
+
+```go
+package main
+
+type Person struct {
+	name string
+	age  int
+}
+
+func NewPerson(name string, age int) *Person {
+	return &Person{
+		name: name,
+		age:  age,
+	}
+}
+
+func (p *Person) Set(name string, age int) {
+	p.name = name
+	p.age = age
+}
+
+func (p *Person) Get() (name string, age int) {
+	return p.name, p.age
+}
+```
+
+Person对象如果想要在C/C++中访问，需要通过cgo导出C接口来访问。
+
+### 导出C接口
+
+我们前面仿照C++对象到C接口的过程，也抽象一组C接口描述Person对象。创建一个`person_capi.h`文件，对应C接口规范文件：
+
+```c
+// person_capi.h
+#include <stdint.h>
+
+typedef uintptr_t person_handle_t;
+
+person_handle_t person_new(char* name, int age);
+void person_delete(person_handle_t p);
+
+void person_set(person_handle_t p, char* name, int age);
+char* person_get_name(person_handle_t p, char* buf, int size);
+int person_get_age(person_handle_t p);
+```
+
+然后是在Go语言中实现这一组C函数。
+
+需要注意的是，通过CGO导出C函数时，输入参数和返回值类型都不支持const修饰，同时也不支持可变参数的函数类型。同时如内存模式一节所述，我们无法在C/C++中直接长期访问Go内存对象。因此我们前一节所讲述的技术将Go对象映射为一个整数id。
+
+下面是`person_capi.go`文件，对应C接口函数的实现：
+
+```go
+// person_capi.go
+package main
+
+//#include "./person_capi.h"
+import "C"
+import "unsafe"
+
+//export person_new
+func person_new(name *C.char, age C.int) C.person_handle_t {
+	id := NewObjectId(NewPerson(C.GoString(name), int(age)))
+	return C.person_handle_t(id)
+}
+
+//export person_delete
+func person_delete(h C.person_handle_t) {
+	ObjectId(h).Free()
+}
+
+//export person_set
+func person_set(h C.person_handle_t, name *C.char, age C.int) {
+	p := ObjectId(h).Get().(*Person)
+	p.Set(C.GoString(name), int(age))
+}
+
+//export person_get_name
+func person_get_name(h C.person_handle_t, buf *C.char, size C.int) *C.char {
+	p := ObjectId(h).Get().(*Person)
+	name, _ := p.Get()
+
+	n := int(size) - 1
+	bufSlice := ((*[1 << 31]byte)(unsafe.Pointer(buf)))[0:n:n]
+	n = copy(bufSlice, []byte(name))
+	bufSlice[n] = 0
+
+	return buf
+}
+
+//export person_get_age
+func person_get_age(h C.person_handle_t) C.int {
+	p := ObjectId(h).Get().(*Person)
+	_, age := p.Get()
+	return C.int(age)
+}
+```
+
+在创建Go对象后，我们通过NewObjectId将Go对应映射为id。然后将id强制转义为person_handle_t类型返回。其它的接口函数则是根据person_handle_t所表示的id，让根据id解析出对应的Go对象。
+
+### 封装C++对象
+
+有了C接口之后封装C++对象就比较简单了。常见的做法是新建一个Person类，里面包含一个person_handle_t类型的成员对应真实的Go对象，然后在Person类的构造函数中通过C接口创建Go对象，在析构函数中通过C接口释放Go对象。下面是采用这种技术的实现：
+
+```c++
+extern "C" {
+	#include "./person_capi.h"
+}
+
+struct Person {
+	person_handle_t goobj_;
+
+	Person(const char* name, int age) {
+		this->goobj_ = person_new((char*)name, age);
+	}
+	~Person() {
+		person_delete(this->goobj_);
+	}
+
+	void Set(char* name, int age) {
+		person_set(this->goobj_, name, age);
+	}
+	char* GetName(char* buf, int size) {
+		return person_get_name(this->goobj_ buf, size);
+	}
+	int GetAge() {
+		return person_get_age(this->goobj_);
+	}
+}
+```
+
+包装后我们就可以像普通C++类那样使用了：
+
+```c++
+#include "person.h"
+
+#include <stdio.h>
+
+int main() {
+	auto p = new Person("gopher", 10);
+
+	char buf[64];
+	char* name = p->GetName(buf, sizeof(buf)-1);
+	int age = p->GetAge();
+
+	printf("%s, %d years old.\n", name, age);
+	delete p;
+
+	return 0;
+}
+```
+
+### 封装C++对象改进
+
+在前面的封装C++对象的实现中，每次通过new创建一个Person实例需要进行两次内存分配：一次是针对C++版本的Person，再一次是针对Go语言版本的Person。其实C++版本的Person内部只有一个person_handle_t类型的id，用于映射Go对象。我们完全可以将person_handle_t直接当中C++对象来使用。
+
+下面时改进后的包装方式：
+
+```c++
+extern "C" {
+	#include "./person_capi.h"
+}
+
+struct Person {
+	static Person* New(const char* name, int age) {
+		return (Person*)person_new((char*)name, age);
+	}
+	void Delete() {
+		person_delete(person_handle_t(this));
+	}
+
+	void Set(char* name, int age) {
+		person_set(person_handle_t(this), name, age);
+	}
+	char* GetName(char* buf, int size) {
+		return person_get_name(person_handle_t(this), buf, size);
+	}
+	int GetAge() {
+		return person_get_age(person_handle_t(this));
+	}
+};
+```
+
+我们在Person类中增加类一个New静态成员函数，用于创建新的Person实例。在New函数中通过调用person_new来创建Person实例，返回的是`person_handle_t`类型的id，我们将其强制转型作为`Person*`类型指针返回。在其它的成员函数中，我们通过将this指针再反向转型为`person_handle_t`类型，谈话通过C接口调用对应的函数。
+
+到此，我们就实现了将Go对象导出为C接口，然后基于C接口再包装为C++对象便于使用。
