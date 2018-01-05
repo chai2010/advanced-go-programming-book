@@ -1,8 +1,8 @@
 ## 1.8. 配置开发环境
 
-工欲善其事，必先利其器！Go语言编程对外部的编辑工具要求甚低，但是配置适合自己的开发环境依然可以达到事倍功半的效果。本节简单介绍几个作者经常使用的Go语言编辑器和轻量级集成开发环境。
+工欲善其事，必先利其器！Go语言编程对外部的编辑工具要求甚低，但是配置适合自己的开发环境却可以达到事倍功半的效果。本节简单介绍几个作者常用的Go语言编辑器和轻量级集成开发环境。
 
-经过多年的发展完善，目前支持Go语言的开发工具已经很多了。其中LiteIDE是国人visualfc用Qt专门为Go语言开发的跨平台轻量级集成开发环境。在早期的Go语言的核心代码库中也包含了vim/Emacs/Netepad++/Eclipse等工具对Go语言支持的各种插件，目前这些第三方的扩展已经从核心库剥离到外部仓库独立维护。相对完整的IDE或插件列表可以从Go语言的官方wiki页面查看: https://github.com/golang/go/wiki/IDEsAndTextEditorPlugins 。
+经过多年的发展完善，目前支持Go语言的开发工具已经很多了。其中LiteIDE是国人visualfc用Qt专门为Go语言开发的跨平台轻量级集成开发环境。在早期的Go语言的核心代码库中也包含了vim/Emacs/Netepad++/Eclipse等工具对Go语言支持的各种插件，目前这些第三方扩展已经从核心库剥离到外部仓库去独立维护。相对完整的IDE或插件列表可以从Go语言的官方wiki页面查看: https://github.com/golang/go/wiki/IDEsAndTextEditorPlugins 。
 
 对于Windows环境，Go语言纯代码编写的话推荐Notepad++工具，如果需要代码自动补全和调试的话推荐使用微软的Visual Studio Code集成开发环境。如果是Mac OS X用户，可以选择免费的TextMate编辑器，它被誉为macOS下的Notepad++。如果是想基于iPad Pro平台做轻办公，可以选择收费的Textastic应用，它可以完美地配合Working Copy的Git工作流程，同时支持WebDAV协议。在Linux环境，Go语言纯代码编写的话推荐Gtihub Atom工具，如果是命令行的老司机用户也可以配置自己的Vim/Emacs开发环境，调试环境依然推荐Visual Studio Code。
 
@@ -51,7 +51,7 @@ Notepad++还支持关键字的自动补全。假设Notepad++安装在`<DIR>`目�
 
 ![](../images/ch1-08-npp-auto-completion.png)
 
-这是一个比较鸡肋的功能，用户根据自己需要选择是否安装。
+这是一个比较鸡肋的功能，建议用户根据自己需要选择安装。
 
 ## 命令行窗口
 
@@ -66,7 +66,7 @@ ConEmu的主页在：http://conemu.github.io/ 。
 
 ## macOS: TextMate
 
-对于macOS平台的用户，免费的轻量级软件推荐TextMate编辑器。TextMate是macOS下的Notepadd++工具。支持目录列表，支持Go语言的诸多特性。下面是TextMate的预览图：
+对于macOS平台的用户，免费的轻量级编辑器软件推荐TextMate。TextMate是macOS下的Notepadd++工具。支持目录列表，支持Go语言的诸多特性。下面是TextMate的预览图：
 
 ![](../images/ch1-08-TextMate-1.png)
 
@@ -77,7 +77,7 @@ ConEmu的主页在：http://conemu.github.io/ 。
 
 Textastic是一款收费应用，它是macOS/iOS下著名的轻量级代码编辑工具，支持包含Go语言在内的多达80多种编程语言的高亮显示。Textastic功能特点有：
 
-- 句法高亮，同时支持80余种语言，包含Go语言
+- 句法高亮，同时支持80余种语言
 - 与TextMate句法定义，主题兼容
 - 对HTML、CSS、JavaScript、PHP、C、Objective-C支持自动补全代码
 - Symbol list快速导航内容
@@ -90,7 +90,7 @@ Textastic是一款收费应用，它是macOS/iOS下著名的轻量级代码编�
 
 因为iOS环境不支持编译和调试，如果需要在iOS环境编写Go程序，首先要解决和其他平台的共享问题。这样可以在iOS环境编写代码，然后在其他电脑上进行编译和测试。
 
-最简单的共享方式是在iCloud的Textastic专有的目录中创建Go语言的工作区目录，然后通过iCloud方案实现和其他平台共享。此外，还可以通过WebDAV标准协议来实现文件的共享，常见的NAS系统都会提供WebDAV协议的共享方式。另外，用Go语言也很容易临时实现一个WebDAV的服务器，具体请参考第七章中WebDAV的相关主题。
+最简单的共享方式是在iCloud的Textastic专有的目录中创建Go语言的工作区目录，然后通过iCloud方案实现和其他平台共享。此外，还可以通过WebDAV标准协议来实现文件的共享，常见的NAS系统都会提供WebDAV协议的共享方式。另外，用Go语言也能很容易实现一个WebDAV的服务器，具体请参考第七章中WebDAV的相关主题。
 
 下面是iPad Pro下Textastic的预览图：
 
@@ -111,7 +111,7 @@ Github Atom的预览图:
 
 ![](../images/ch1-08-atom-01.png)
 
-Github Atom作为一个Go语言编辑器，不足之处是没有Go汇编语言的高亮显示插件。而且Github Atom对于大文件的支持性能不是很好。
+Github Atom作为一个Go语言编辑器，不足之处是没有Go汇编语言的高亮显示插件。而且Github Atom对于大文件的支持，性能不是很好。
 
 ## 跨平台IDE: Visual Studio Code
 
