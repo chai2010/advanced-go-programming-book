@@ -23,3 +23,9 @@ _obj
 
 # macOS
 .DS_Store
+
+*.so
+*.dll
+*.obj
+*.o
+a.out
