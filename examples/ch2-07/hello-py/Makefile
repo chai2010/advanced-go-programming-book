@@ -1,6 +1,7 @@
 default:
 	go build -buildmode=c-shared -o gopkg.so main.go
 	python3 -c 'import gopkg; print(gopkg.system("time"))'
+	python3 -c 'import gopkg; print(gopkg.sum(2, 3))'
 
 clean:
 	-rm *.so

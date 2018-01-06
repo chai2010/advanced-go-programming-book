@@ -27,12 +27,15 @@ spam_system(PyObject *self, PyObject *args) {
 	return PyLong_FromLong(status);
 }
 
+extern PyObject *sum(PyObject *self, PyObject *args);
+
 static PyMethodDef modMethods[] = {
 	{"system",  spam_system, METH_VARARGS, "Execute a shell command."},
+	{"sum",  sum, METH_VARARGS, "Execute a shell command."},
 	{NULL, NULL, 0, NULL}
 };
 
-void* PyInit_gopkg(void) {
+static PyObject* PyInit_gopkg_(void) {
 	static struct PyModuleDef module = {
 		PyModuleDef_HEAD_INIT, "gopkg", NULL, -1, modMethods,
 	};
@@ -41,11 +44,23 @@ void* PyInit_gopkg(void) {
 */
 import "C"
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {}
 
 //  export SayHello
 func SayHello(name *C.char) {
 	fmt.Printf("hello %s!\n", C.GoString(name))
+}
+
+//export sum
+func sum(self, args *C.PyObject) *C.PyObject {
+	return C.PyLong_FromLongLong(9527) // TODO
+}
+
+//export PyInit_gopkg
+func PyInit_gopkg() *C.PyObject {
+	return C.PyInit_gopkg_()
 }
