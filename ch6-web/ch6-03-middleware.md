@@ -169,7 +169,7 @@ customizedHandler = logger(timeout(ratelimit(helloHandler)))
 
 这个函数链在执行过程中的上下文可以用下面这张图来表示。
 
-![](images/middleware_flow.png)
+![](../images/ch6-03-middleware_flow.png)
 
 再直白一些，这个流程在进行请求处理的时候实际上就是不断地进行函数压栈再出栈，有一些类似于递归的执行流：
 
@@ -266,7 +266,7 @@ throttler.go
 
 比如开源界很火的 gin 这个框架，就专门为用户贡献的 middleware 开了一个仓库：
 
-![](images/gin_contrib.png)
+![](../images/ch6-03-gin_contrib.png)
 
 如果读者去阅读 gin 的源码的话，可能会发现 gin 的 middleware 中处理的并不是 http.Handler，而是一个叫 gin.HandlerFunc 的函数类型，和本节中讲解的 http.Handler 签名并不一样。不过实际上 gin 的 handler 也只是针对其框架的一种封装，middleware 的原理与本节中的说明是一致的。
 
