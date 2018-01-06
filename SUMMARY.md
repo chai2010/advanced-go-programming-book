@@ -21,6 +21,8 @@
    * [2.9. 补充说明(TODO)](ch2-cgo/ch2-09-faq.md)
 * [第六章 Go和Web](ch6-web/readme.md)
    * [6.1. Web开发简介](ch6-web/ch6-01-introduction.md)
+   * [6.2. Router请求路由](ch6-web/ch6-02-router.md)
+   * [6.3. Middleware中间件](ch6-web/ch6-03-middleware.md)
 * [附录](appendix/readme.md)
    * [附录A: Go语言常见坑](appendix/appendix-a-trap.md)
    * [附录B: 参考资料](appendix/appendix-b-ref.md)
