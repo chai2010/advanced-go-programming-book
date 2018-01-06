@@ -59,6 +59,39 @@ uint64_t | C.uint64_t | uint64
 
 前文说过，如果C语言的类型是由多个关键字组成，无法通过虚拟的“C”包直接访问。比如C语言的`unsigned short`不能直接通过`C.unsigned short`访问。但是，在`<stdint.h>`中通过使用C语言的`typedef`关键字将`unsigned short`重新定义为`uint16_t`一个单词的类型后，我们就可以通过`C.uint16_t`访问原来的`unsigned short`类型了。对于比较复杂的C语言类型，推荐使用`typedef`关键字提高一个规则的类型命名，这样更利于在CGO中访问。
 
+## Go 字符串和切片
+
+在CGO生成的`_cgo_export.h`头文件中还会为Go语言特有的字符串、切片、字典、接口和管道等特有的数据类型生成对应的C语言类型：
+
+```c
+typedef struct { const char *p; GoInt n; } GoString;
+typedef void *GoMap;
+typedef void *GoChan;
+typedef struct { void *t; void *v; } GoInterface;
+typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
+```
+
+不过需要注意的是，其中只有Go语言的字符串和切片在CGO中有一定的使用价值，因为字符串和切片可以在Go调用C语言函数时马上使用。而其它的类型在C语言环境并无使用的价值，因为CGO并未针对这些类型提供相关的辅助函数，而且因为Go语言特有的内存模型的原因导致我们无法保持这些由Go语言管理的内存指针。
+
+在导出的C语言函数中我们可以直接使用Go字符串和切片。假设有以下两个导出函数：
+
+```go
+//export helloString
+func helloString(s string) {}
+
+//export helloSlice
+func helloSlice(s []byte) {}
+```
+
+CGO生成的`_cgo_export.h`头文件会包含以下的函数声明：
+
+```c
+extern void helloString(GoString p0);
+extern void helloSlice(GoSlice p0);
+```
+
+不过需要注意的是，如果使用了GoString类型会对`_cgo_export.h`头文件产生依赖，而这个头文件是动态输出的。更严谨的做法是为C语言函数接口定义严格的头文件，然后基于稳定的头文件实现代码。
+
 ## 结构体、联合、枚举类型
 
 C语言的结构体、联合、枚举类型不能作为匿名成员被嵌入到Go语言的结构体中。在Go语言中，我们可以通过`C.struct_xxx`来访问C语言中定义的`struct xxx`结构体类型。结构体的内存布局按照C语言的通用对齐规则，在32位Go语言环境C语言结构体也按照32位对齐规则，在64位Go语言环境按照64位的对齐规则。对于指定了特殊对齐规则的结构体，无法在CGO中访问。
