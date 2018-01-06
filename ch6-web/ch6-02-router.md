@@ -33,7 +33,7 @@ GET /user/info/:name
 POST /user/:id
 ```
 
-简单来讲的话，如果两个路由拥有一致的 http method (指 GET/POST/PUT/DELETE) 前缀，且在某个位置出现了 A 路由是 wildcard (指 :id 这种形式) 参数，B 路由则是普通字符串，那么就会发生路由冲突。路由冲突会在初始化阶段直接 panic：
+简单来讲的话，如果两个路由拥有一致的 http method (指 GET/POST/PUT/DELETE) 和请求路径前缀，且在某个位置出现了 A 路由是 wildcard (指 :id 这种形式) 参数，B 路由则是普通字符串，那么就会发生路由冲突。路由冲突会在初始化阶段直接 panic：
 
 ```shell
 panic: wildcard route ':id' conflicts with existing children in path '/user/:id'
