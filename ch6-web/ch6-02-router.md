@@ -105,15 +105,16 @@ httprouter 和众多衍生 router 使用的数据结构被称为 radix tree，�
 ```
 PUT /user/installations/:installation_id/repositories/:repository_id
 
+GET /marketplace_listing/plans/
+GET /marketplace_listing/plans/:id/accounts
 GET /search
 GET /status
 GET /support
-GET /user/installations/:installation_id/repositories
-GET /installation/repositories
-GET /repos/:owner/:repo/commits
-GET /repos/:owner/:repo/issues/events
+
+补充路由：
+GET /marketplace_listing/plans/ohyes
 ```
-这些 API 均来自于 api.github.com。
+最后一条补充路由是我们臆想的，除此之外所有 API 路由均来自于 api.github.com。
 
 ### root 节点创建
 httprouter 的 Router struct 中存储压缩字典树使用的是下述数据结构：
@@ -168,8 +169,20 @@ indices: 子节点索引，当子节点为非参数类型，即本节点的 wild
 当然，PUT 路由只有唯一的一条路径。接下来，我们以后续的多条 GET 路径为例，讲解子节点的插入过程。
 
 ### 子节点插入
-当插入 `GET /search` 时，
+当插入 `GET /marketplace_listing/plans` 时，类似前面 PUT 的过程，GET 树的结构如图所示：
+![get radix step 1](../images/ch6-02-radix-get-1.png)
+
+因为第一个路由没有参数，path 都被存储到根节点上了。所以只有一个节点。
+
+然后插入 `GET /marketplace_listing/plans/:id/accounts`，新的路径与之前的路径有共同的前缀，且可以直接在之前叶子节点后进行插入，那么结果也很简单，插入后树变成了这样：
+
+![get radix step 2](../images/ch6-02-radix-get-2.png)
+
+由于 `:id` 这个节点只有一个字符串的普通子节点，所以 indices 还依然不需要处理。
+
+上面这种情况比较简单，新的路由可以直接作为原路由的子节点进行插入。实际情况不会这么美好，接下来我们插入 `GET /search`，这时会导致树的边分裂。
+
+### 边分裂
 
 ### 子节点冲突处理
 
-### 边分裂
