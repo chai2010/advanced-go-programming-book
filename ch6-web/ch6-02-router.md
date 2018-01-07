@@ -91,18 +91,62 @@ httprouter 和众多衍生 router 使用的数据结构被称为 radix tree，�
 
 ![trie tree](../images/ch6-02-trie.png)
 
-字典树常用来进行字符串检索，例如用给定的字符串序列建立字典树。对于目标字符串，只要从根结点开始深度优先搜索，即可判断出该字符串是否曾经出现过，时间复杂度为 O(n)，n 可以认为是目标字符串的长度。为什么要这样做？字符串本身不像数值类型可以进行数值比较，两个字符串对比的时间复杂度取决于字符串长度。如果不用字典树来完成上述功能要复杂得多，可能要对历史字符串进行排序，时间复杂度也没有办法更低。亦可认为字典树是一种空间换时间的典型做法。
+字典树常用来进行字符串检索，例如用给定的字符串序列建立字典树。对于目标字符串，只要从根结点开始深度优先搜索，即可判断出该字符串是否曾经出现过，时间复杂度为 O(n)，n 可以认为是目标字符串的长度。为什么要这样做？字符串本身不像数值类型可以进行数值比较，两个字符串对比的时间复杂度取决于字符串长度。如果不用字典树来完成上述功能，要对历史字符串进行排序，再利用二分查找之类的算法去搜索，时间复杂度只高不低。可认为字典树是一种空间换时间的典型做法。
 
 普通的字典树有一个比较明显的缺点，就是每个字母都需要建立一个孩子结点，这样会导致字典树的层树比较深，压缩字典树相对好地平衡了字典树的优点和缺点。下图是典型的压缩字典树结构：
 
 ![radix tree](../images/ch6-02-radix.png)
 
-每个结点上不只存储一个字母了，这也是压缩字典树中“压缩”的主要含义。使用压缩字典树可以减少树的层数，同时因为每个结点上数据存储也比通常的字典树要多，所以程序的局部性较好，从而对 CPU 缓存友好。
+每个结点上不只存储一个字母了，这也是压缩字典树中“压缩”的主要含义。使用压缩字典树可以减少树的层数，同时因为每个结点上数据存储也比通常的字典树要多，所以程序的局部性较好(一个结点的 path 加载到 cache 即可进行多个字符的对比)，从而对 CPU 缓存友好。
 
 ## 压缩字典树创建过程
-我们来跟踪一下 httprouter 中，一个典型的字典树的创建过程，路由设定如下：
+我们来跟踪一下 httprouter 中，一个典型的压缩字典树的创建过程，路由设定如下：
+
+```
+PUT /user/installations/:installation_id/repositories/:repository_id
+
+GET /search
+GET /status
+GET /support
+GET /user/installations/:installation_id/repositories
+GET /installation/repositories
+GET /repos/:owner/:repo/commits
+GET /repos/:owner/:repo/issues/events
+```
+这些 API 均来自于 api.github.com。
 
 ### root 结点创建
+httprouter 的 Router struct 中存储压缩字典树使用的是下述数据结构：
+```go
+// 略去了其它部分的 Router struct
+type Router struct {
+	// ...
+	trees map[string]*node
+	// ...
+}
+```
+
+trees 中的 key 即为 http 1.1 的 RFC 中定义的各种 method，具体有：
+
+```
+GET
+HEAD
+OPTIONS
+POST
+PUT
+PATCH
+DELETE
+```
+
+每一种 method 对应的都是一棵独立的压缩字典树，这些树彼此之间不共享数据。具体到我们上面用到的路由，PUT 和 GET 是两棵树而非一棵。
+
+简单来讲，某个 method 第一次插入的路由就会导致对应字典树的根结点被创建，我们按顺序，先是一个 PUT：
+
+```go
+r := httprouter.New()
+r.PUT("/user/installations/:installation_id/repositories/:reposit", Hello)
+```
+这样 PUT 对应的根结点就会被创建出来。把这棵 PUT 的树画出来：
 
 ### 子结点插入
 TODO
