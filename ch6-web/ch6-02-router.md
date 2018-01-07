@@ -194,4 +194,14 @@ indices: 子节点索引，当子节点为非参数类型，即本节点的 wild
 ![get radix step 4](../images/ch6-02-radix-get-4.png)
 
 ### 子节点冲突处理
+在路由本身只有字符串的情况下，不会发生任何冲突。只有当路由中含有 wildcard(类似 :id) 或者 catchAll 的情况下才可能冲突。这一点在前面已经提到了。
 
+子节点的冲突处理很简单，分几种情况：
+
+1. 在插入 wildcard 节点时，父节点的 children 数组非空且 wildCard 被设置为 false。例如：`GET /user/getAll` 和 `GET /user/:id/getAddr`，或者 `GET /user/*aaa` 和 `GET /user/:id`。 
+2. 在插入 wildcard 节点时，父节点的 children 数组非空且 wildCard 被设置为 true，但该父节点的 wildCard 子节点要插入的 wildCard 名字不一样。例如：`GET /user/:id/info` 和 `GET /user/:name/info`。
+3. 在插入 catchAll 节点时，父节点的 children 非空。例如：`GET /src/abc` 和 `GET /src/*filename`，或者 `GET /src/:id` 和 `GET /src/*filename`。
+4. 在插入 static 节点时，父节点的 wildCard 字段被设置为 true。
+5. 在插入 static 节点时，父节点的 children 非空，且子节点 nType 为 catchAll。
+
+只要发生冲突，都会在初始化的时候 panic。
