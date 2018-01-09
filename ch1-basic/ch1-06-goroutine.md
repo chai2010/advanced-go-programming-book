@@ -26,7 +26,7 @@ func main() {
         mu.Lock()
     }()
 
-	mu.Unock()
+	mu.Unlock()
 }
 ```
 
