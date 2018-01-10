@@ -75,9 +75,67 @@ func main() {
 
 ## 使用C动态库
 
-好处是跨编译器
-坏处是多了一个依赖
+动态库出现的初衷是对于相同的库，多个进程可以共享一个动态库，可以节省内存和磁盘资源。但是在磁盘和内存已经白菜价的今天，动态库能节省的空间已经微不足道了，那么动态库还有哪些存在的价值呢？从库开发角度来说，动态库可以隔离不同动态库之间的关系，减少链接时出现符号冲突的风险。而且对于windows等平台，动态库是跨越VC和GCC不太编译器平台的唯一的可行方式。
 
+对于CGO来说，使用动态库和静态库是一样的，因为动态库也必须要有一个小的静态导出库用于链接动态库（Linux下可以直接链接so文件，但是在Windows下必须为dll创建一个`.a`文件用于链接）。我们还是以前面的number库为例来说明如何以动态库方式使用。
+
+对于在macOS和Linux系统下的gcc环境，我们可以用以下命令创建number库的的动态库：
+
+```
+$ cd number
+$ gcc -shared -o libnumber.so number.c
+```
+
+因为动态库和静态库的基础名称都是libnumber，只是后缀名不同而已。因此Go语言部分的代码和静态库版本完全一样：
+
+```go
+package main
+
+//#cgo CFLAGS: -I./number
+//#cgo LDFLAGS: -L${SRCDIR}/number -lnumber
+//
+//#include "number.h"
+import "C"
+import "fmt"
+
+func main() {
+	fmt.Println(C.number_add_mod(10, 5, 12))
+}
+```
+
+编译时GCC会自动找到libnumber.a或libnumber.so进行链接。
+
+对于windows平台，我们还可以用VC工具来生成动态库（windows下有一些复杂的C++库只能用VC构建）。我们需要先为number.dll创建一个def文件，用于控制要导出到动态库的符号。
+
+number.def文件的内容如下：
+
+```
+LIBRARY number.dll
+
+EXPORTS
+number_add_mod
+```
+
+其中第一行的LIBRARY指明动态库的文件名，然后的EXPORTS语句之后是要导出的符号名列表。
+
+现在我们可以用以下命令来创建动态库（需要进入VC对于的x64命令行环境）。
+
+```
+$ cl /c number.c
+$ link /DLL /OUT:number.dll number.obj number.def
+```
+
+这时候会为dll同时生成一个number.lib的导出库。但是在CGO中我们无法使用lib格式的链接库。
+
+要生成`.a`格式的导出库需要通过mingw工具箱中的dlltool命令完成：
+
+```
+$ dlltool -dllname number.dll --def number.def --output-lib libnumber.a
+```
+
+生成了libnumber.a文件之后，就可以通过`-lnumber`链接参数进行链接了。
+
+需要注意的是，在运行时需要将动态库放到系统能够找到的位置。对于windows来说，可以将动态库和可执行程序放到同一个目录，或者将动态库所在的目录绝对路径添加到PATH环境变量中。对于macOS来说，需要设置DYLD_LIBRARY_PATH环境变量。而对于Linux系统来说，需要设置LD_LIBRARY_PATH环境变量。
 
 ## 导出C静态库
 
