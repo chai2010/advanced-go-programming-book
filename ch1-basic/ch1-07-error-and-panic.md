@@ -8,7 +8,7 @@
 
 ```go
 if v, ok := m["key"]; ok {
-	return value
+	return v
 }
 ```
 
@@ -66,7 +66,7 @@ func CopyFile(dstName, srcName string) (written int64, err error) {
 }
 ```
 
-上面的代码虽然能够工作，但是隐藏一个bug。如果第二个`os.Open`调用失败，那么会在没有释放`src`文件资源的情况下返回。虽然我们可以通过在第二个返回语句前添加`src.Close()`调用来修复这个BUG；但是当代码变得复杂时，类似的问题将很难被发现和修复。我们可以通过`defer`语句来确保每个被正常打开的文件都能被正常关闭：
+上面的代码虽然能够工作，但是隐藏一个bug。如果第一个`os.Open`调用失败，那么会在没有释放`src`文件资源的情况下返回。虽然我们可以通过在第二个返回语句前添加`src.Close()`调用来修复这个BUG；但是当代码变得复杂时，类似的问题将很难被发现和修复。我们可以通过`defer`语句来确保每个被正常打开的文件都能被正常关闭：
 
 ```go
 func CopyFile(dstName, srcName string) (written int64, err error) {
