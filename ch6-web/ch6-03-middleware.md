@@ -228,7 +228,7 @@ func (r *Router) Use(m middleware) {
 func (r *Router) Add(route string, h http.Handler) {
     var mergedHandler = h
 
-    for i := len(r.middlewareChain); i>=0; i-- {
+    for i := len(r.middlewareChain) - 1; i >= 0; i-- {
         mergedHandler = r.middlewareChain[i](mergedHandler)
     }
 
