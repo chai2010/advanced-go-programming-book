@@ -15,7 +15,7 @@
    * [2.3. CGO编程基础](ch2-cgo/ch2-03-basic.md)
    * [2.4. CGO内存模型](ch2-cgo/ch2-04-memory.md)
    * [2.5. C++类包装](ch2-cgo/ch2-05-class.md)
-   * [2.6. 动态库和静态库(Doing)](ch2-cgo/ch2-06-static-shared-lib.md)
+   * [2.6. 静态库和动态库(Doing)](ch2-cgo/ch2-06-static-shared-lib.md)
    * [2.7. Go实现Python模块(TODO)](ch2-cgo/ch2-07-py-module.md)
    * [2.8. SWIG(TODO)](ch2-cgo/ch2-08-swig.md)
    * [2.9. 补充说明(TODO)](ch2-cgo/ch2-09-faq.md)
