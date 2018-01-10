@@ -225,3 +225,79 @@ func main() {
 ```
 
 在printString函数中，我们通过NewGoString创建一个对应的Go字符串对象，返回的其实是一个ID，不能直接使用。我们借助PrintGoString函数将id解析为Go语言字符串后打印。该字符串在C语言函数中完全跨越了Go语言的内存管理，在PrintGoString调用前即时发生了栈伸缩导致的Go字符串地址发生变化也依然可以正常工作，因为该字符串对应的id是稳定的，在Go语言空间通过id解码得到的字符串也就是有效的。
+
+## 导出C函数不能返回Go内存
+
+在Go语言中，Go是从一个固定的虚拟地址空间分配内存。而C语言分配的内存则不能使用Go语言保留的虚拟内存空间。在CGO环境，Go语言运行时默认会检查导出返回返回的内存是否是Go语言分配的，如果是则会抛出运行时异常。
+
+下面是CGO运行时异常的例子：
+
+```go
+/*
+extern int* getGoPtr();
+
+static void Main() {
+	int* p = getGoPtr();
+	*p = 42;
+}
+*/
+import "C"
+
+func main() {
+	C.Main()
+}
+
+//export getGoPtr
+func getGoPtr() *C.int {
+	return new(C.int)
+}
+```
+
+其中getGoPtr返回的虽然是C语言类型的指针，但是内存本身是从Go语言的new函数分配，也就是由Go语言运行时统一管理的内存。然后我们在C语言的Main函数中调用了getGoPtr函数，此时默认将发送运行时异常：
+
+```
+$ go run main.go
+panic: runtime error: cgo result has Go pointer
+
+goroutine 1 [running]:
+main._cgoexpwrap_cfb3840e3af2_getGoPtr.func1(0xc420051dc0)
+        command-line-arguments/_obj/_cgo_gotypes.go:60 +0x3a
+main._cgoexpwrap_cfb3840e3af2_getGoPtr(0xc420016078)
+        command-line-arguments/_obj/_cgo_gotypes.go:62 +0x67
+main._Cfunc_Main()
+        command-line-arguments/_obj/_cgo_gotypes.go:43 +0x41
+main.main()
+        /Users/chai/go/src/github.com/chai2010/advanced-go-programming-book/examples/ch2-xx/return-go-ptr/main.go:17 +0x20
+exit status 2
+```
+
+异常说明cgo函数返回的结果中含义Go语言分配的指针。指针的检查操作发生在C语言版的getGoPtr函数中，它是由cgo生成的桥接C语言和Go语言的函数。
+
+下面是cgo生成的C语言版本getGoPtr函数的具体细节（在cgo生成的`_cgo_export.c`文件定义）：
+
+```c
+int* getGoPtr()
+{
+	__SIZE_TYPE__ _cgo_ctxt = _cgo_wait_runtime_init_done();
+	struct {
+		int* r0;
+	} __attribute__((__packed__)) a;
+	_cgo_tsan_release();
+	crosscall2(_cgoexp_95d42b8e6230_getGoPtr, &a, 8, _cgo_ctxt);
+	_cgo_tsan_acquire();
+	_cgo_release_context(_cgo_ctxt);
+	return a.r0;
+}
+```
+
+其中`_cgo_tsan_acquire`是从LLVM项目移植过来的内存指针扫描函数，它会检查cgo函数返回的结果是否包含Go指针。
+
+如果说明的是，cgo默认对返回结果的指针检查是有代价的，特别是cgo函数返回的结果是一个复杂的数据结构时将花费更多的时间。如果已经确保了cgo函数返回的结果是安全的话，可以通过设置环境变量`GODEBUG=cgocheck=0`来关闭指针检查行为。
+
+```
+$ GODEBUG=cgocheck=0 go run main.go
+```
+
+关闭cgocheck功能后再运行上面的代码就不会出现上面的异常的。但是要注意的是，如果期间对应的内存被Go运行时释放了，将会导致更严重的崩溃问题。同时，cgocheck默认的值是1，对应一个简化版本的检测，如果需要完整的检测功能可以将cgocheck设置为2。
+
+关于cgo运行时指针检测的功能详细说明可以参考Go语言的官方文档。
