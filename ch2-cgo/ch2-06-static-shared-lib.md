@@ -139,23 +139,178 @@ $ dlltool -dllname number.dll --def number.def --output-lib libnumber.a
 
 ## 导出C静态库
 
+CGO不仅可以使用C静态库，也可以将Go实现的函数导出为C静态库。我们现在用Go实现前面的number库的莫加法函数。
+
+创建number.go，内容如下：
+
+```go
+package main
+
+import "C"
+
+func main() {}
+
+//export number_add_mod
+func number_add_mod(a, b, mod C.int) C.int {
+	return (a + b) % mod
+}
+```
+
+根据CGO文档的要求，我们需要在main包中导出C函数。对于C静态库构建方式来说，会忽略main包中的main函数，只是简单导出C函数。采用以下命令构建：
+
+```
+$ go build -buildmode=c-archive -o number.a
+```
+
+在生成number.a静态库的同时，cgo还会生成一个number.h文件。
+
+number.h文件的内容如下（为了便于显示，内容做了精简）：
+
+```c
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern int number_add_mod(int p0, int p1, int p2);
+
+#ifdef __cplusplus
+}
+#endif
+```
+
+其中`extern "C"`部分的语法是为了同时适配C和C++两种语言。核心内容是声明了要导出的number_add_mod函数。
+
+然后我们创建一个`_test_main.c`的C文件用于测试生成的C静态库（用下划线作为前著名是让go build构建C静态库时忽略这个文件）：
+
+```c
+#include "number.h"
+
+#include <stdio.h>
+
+int main() {
+	int a = 10;
+	int b = 5;
+	int c = 12;
+
+	int x = number_add_mod(a, b, c);
+	printf("(%d+%d)%%%d = %d\n", a, b, c, x);
+
+	return 0;
+}
+```
+
+通过以下命令编译并运行：
+
+```
+$ gcc -o a.out _test_main.c number.a
+$ ./a.out
+```
+
+使用CGO创建静态库的过程非常简单。
+
 ## 导出C动态库
+
+CGO导出动态库的过程和静态库类似，只是将构建模式改为`c-shared`，输出文件名改为`number.so`而已：
+
+```
+$ go build -buildmode=c-shared -o number.so
+```
+
+`_test_main.c`文件内容不变，然后用以下命令编译并运行：
+
+```
+$ gcc -o a.out _test_main.c number.so
+$ ./a.out
+```
 
 ## 导出非main包的函数
 
-## Plugin
+通过`go help buildmode`命令可以查看C静态库和C动态库的构建说明：
 
-静态注入
-C动态库注入
-Goplugin特性
+```
+-buildmode=c-archive
+	Build the listed main package, plus all packages it imports,
+	into a C archive file. The only callable symbols will be those
+	functions exported using a cgo //export comment. Requires
+	exactly one main package to be listed.
 
-<!--
-使用c静态库
-使用c动态库
-创建c静态库
-创建c动态库
+-buildmode=c-shared
+	Build the listed main package, plus all packages it imports,
+	into a C shared library. The only callable symbols will
+	be those functions exported using a cgo //export comment.
+	Requires exactly one main package to be listed.
+```
 
-跨越多个go包导出函数
+文档说明导出的C函数必须是在main包导出，然后才能在生成的头文件包含声明的语句。但是很多时候我们可能更希望将不太类型的导出函数组织到不同的Go包中，然后统一导出为一个静态库或动态库。
 
-动态库的注意点
--->
+要实现从是从非main包导出C函数，或者是多个包导出C函数（因为只能有一个main包），我们需要自己提供导出C函数对应的头文件（因为CGO无法为非main包的导出函数生成头文件）。
+
+假设我们先创建一个number子包，用于提供莫加法函数：
+
+```go
+package number
+
+import "C"
+
+//export number_add_mod
+func number_add_mod(a, b, mod C.int) C.int {
+	return (a + b) % mod
+}
+```
+
+然后是当前的main包：
+
+```go
+package main
+
+import "C"
+
+import (
+	"fmt"
+
+	_ "./number"
+)
+
+func main() {
+	println("Done")
+}
+
+//export goPrintln
+func goPrintln(s *C.char) {
+	fmt.Println("goPrintln:", C.GoString(s))
+}
+```
+
+其中我们导入了number子包，在number子包中有导出的C函数number_add_mod，同时我们在main包也导出了goPrintln函数。
+
+通过以下命令创建C静态库：
+
+```
+$ go build -buildmode=c-archive -o main.a
+```
+
+这时候在生成main.a静态库的同时，也会生成一个main.h头文件。但是main.h头文件中只有main包中导出的goPrintln函数的声明，并没有number子包导出函数的声明。其实number_add_mod函数在生成的C静态库中是存在的，我们可以直接使用。
+
+创建`_test_main.c`测试文件如下：
+
+```c
+#include <stdio.h>
+
+void goPrintln(char*);
+int number_add_mod(int a, int b, int mod);
+
+int main() {
+	int a = 10;
+	int b = 5;
+	int c = 12;
+
+	int x = number_add_mod(a, b, c);
+	printf("(%d+%d)%%%d = %d\n", a, b, c, x);
+
+	goPrintln("done");
+	return 0;
+}
+```
+
+我们并没有包含CGO自动生成的main.h头文件，而是通过手工方式声明了goPrintln和number_add_mod两个导出函数。这样我们就实现了从多个Go包导出C函数了。
+
