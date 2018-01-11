@@ -37,3 +37,30 @@ func register(req RegisterReq) error{
 ```
 
 我们在 golang 里成功写出了 hadoken 开路的箭头型代码。。这种代码一般怎么进行优化呢？
+
+很简单，在《重构》一书中已经给出了方案：[Guard Clauses](https://refactoring.com/catalog/replaceNestedConditionalWithGuardClauses.html)。
+
+```go
+func register(req RegisterReq) error{
+    if len(req.Username) == 0 {
+        return errors.New("length of username cannot be 0")
+    }
+
+    if len(req.PasswordNew) == 0 || len(req.PasswordRepeat) == 0 {
+        return errors.New("password and password reinput must be longer than 0")
+    }
+
+    if req.PasswordNew != req.PasswordRepeat {
+        return errors.New("password and reinput must be the same")
+    }
+
+    if emailFormatValid(req.Email) {
+        return errors.New("invalid email")
+    }
+
+    createUser()
+    return nil
+}
+```
+
+代码更清爽，看起来也不那么别扭了。这是比较通用的重构理念。
