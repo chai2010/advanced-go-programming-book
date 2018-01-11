@@ -81,12 +81,15 @@ func register(req RegisterReq) error{
 import "gopkg.in/go-playground/validator.v9"
 
 type RegisterReq struct {
+    // 字符串的 gt=0 表示长度必须 > 0，gt = greater than
     Username        string   `validate:"gt=0"`
+    // 同上
     PasswordNew     string   `validate:"gt=0"`
+    // eqfield 跨字段相等校验
     PasswordRepeat  string   `validate:"eqfield=PasswordNew"`
+    // 合法 email 格式校验
     Email           string   `validate:"email"`
 }
-
 
 func validate(req RegisterReq) error {
     err := validate.Struct(mystruct)
@@ -98,6 +101,24 @@ func validate(req RegisterReq) error {
 
 ```
 
-这样就不需要在每个请求进入业务逻辑之前都写重复的 validate 函数了。如果觉得这个 validator 提供的错误信息不够人性化，也可以针对每种 tag 进行错误信息订制，读者可以自行探索。
+这样就不需要在每个请求进入业务逻辑之前都写重复的 validate 函数了。本例中只列出了这个 validator 非常简单的几个功能。
+
+我们试着跑一下这个程序，输入参数设置为：
+
+```go
+//...
+
+var req = RegisterReq {
+    Username       : "Xargin",
+    PasswordNew    : "ohno",
+    PasswordRepeat : "ohn",
+    Email          : "alex@abc.com",
+}
+
+err := validate.Struct(mystruct)
+fmt.Println(err) // Key: 'RegisterReq.PasswordRepeat' Error:Field validation for 'PasswordRepeat' failed on the 'eqfield' tag
+```
+
+如果觉得这个 validator 提供的错误信息不够人性化，例如要把错误信息返回给用户，那就不应该直接显示英文了。可以针对每种 tag 进行错误信息订制，读者可以自行探索。
 
 ## 原理
