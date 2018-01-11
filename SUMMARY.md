@@ -25,6 +25,7 @@
    * [6.1. Web开发简介](ch6-web/ch6-01-introduction.md)
    * [6.2. Router请求路由](ch6-web/ch6-02-router.md)
    * [6.3. Middleware中间件](ch6-web/ch6-03-middleware.md)
+   * [6.4. Validator请求校验](ch6-web/ch6-04-validator.md)
 * [附录](appendix/readme.md)
    * [附录A: Go语言常见坑](appendix/appendix-a-trap.md)
    * [附录B: 参考资料](appendix/appendix-b-ref.md)
