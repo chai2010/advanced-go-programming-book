@@ -98,6 +98,6 @@ func validate(req RegisterReq) error {
 
 ```
 
-这样就不需要在每个请求进入业务逻辑之前都写重复的 validate 函数了。
+这样就不需要在每个请求进入业务逻辑之前都写重复的 validate 函数了。如果觉得这个 validator 提供的错误信息不够人性化，也可以针对每种 tag 进行错误信息订制，读者可以自行探索。
 
-当然 validator 也不是万能的。
+## 原理
