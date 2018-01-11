@@ -1,0 +1,4 @@
+LIBRARY number-win64.dll
+
+EXPORTS
+number_add_mod
