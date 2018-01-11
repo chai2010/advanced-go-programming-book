@@ -5,10 +5,7 @@ package main
 
 /*
 // macOS:
-// python3-config --cflags
-// python3-config --ldflags
-#cgo darwin CFLAGS: -I/Library/Frameworks/Python.framework/Versions/3.6/include/python3.6m -I/Library/Frameworks/Python.framework/Versions/3.6/include/python3.6m -fno-strict-aliasing -Wsign-compare -fno-common -dynamic -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes  -g
-#cgo darwin LDFLAGS: -L/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/config-3.6m-darwin -lpython3.6m -ldl -framework CoreFoundation
+#cgo darwin pkg-config: python3
 
 // linux
 #cgo linux pkg-config: python3
@@ -19,51 +16,38 @@ package main
 #define Py_LIMITED_API
 #include <Python.h>
 
-static PyObject *
-spam_system(PyObject *self, PyObject *args) {
-	const char *command;
-	if (!PyArg_ParseTuple(args, "s", &command)) {
-		return NULL;
-	}
+extern PyObject* PyInit_gopkg();
+extern PyObject* Py_gopkg_sum(PyObject *, PyObject *);
 
-	int status = system(command);
-	return PyLong_FromLong(status);
+static int cgo_PyArg_ParseTuple_ii(PyObject *arg, int *a, int *b) {
+	return PyArg_ParseTuple(arg, "ii", a, b);
 }
 
-extern PyObject *sum(PyObject *self, PyObject *args);
-
-static PyMethodDef modMethods[] = {
-	{"system",  spam_system, METH_VARARGS, "Execute a shell command."},
-	{"sum",  sum, METH_VARARGS, "Execute a shell command."},
-	{NULL, NULL, 0, NULL}
-};
-
-static PyObject* PyInit_gopkg_(void) {
-	static struct PyModuleDef module = {
-		PyModuleDef_HEAD_INIT, "gopkg", NULL, -1, modMethods,
+static PyObject* cgo_PyInit_gopkg(void) {
+	static PyMethodDef methods[] = {
+		{"sum", Py_gopkg_sum, METH_VARARGS, "Add two numbers."},
+		{NULL, NULL, 0, NULL},
 	};
-	return (void*)PyModule_Create(&module);
+	static struct PyModuleDef module = {
+		PyModuleDef_HEAD_INIT, "gopkg", NULL, -1, methods,
+	};
+	return PyModule_Create(&module);
 }
 */
 import "C"
 
-import (
-	"fmt"
-)
-
 func main() {}
-
-//  export SayHello
-func SayHello(name *C.char) {
-	fmt.Printf("hello %s!\n", C.GoString(name))
-}
-
-//export sum
-func sum(self, args *C.PyObject) *C.PyObject {
-	return C.PyLong_FromLongLong(9527) // TODO
-}
 
 //export PyInit_gopkg
 func PyInit_gopkg() *C.PyObject {
-	return C.PyInit_gopkg_()
+	return C.cgo_PyInit_gopkg()
+}
+
+//export Py_gopkg_sum
+func Py_gopkg_sum(self, args *C.PyObject) *C.PyObject {
+	var a, b C.int
+	if C.cgo_PyArg_ParseTuple_ii(args, &a, &b) == 0 {
+		return nil
+	}
+	return C.PyLong_FromLong(C.long(a + b))
 }
