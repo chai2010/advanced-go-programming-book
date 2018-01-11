@@ -8,10 +8,10 @@
 
 ```go
 type RegisterReq struct {
-    Username        string
-    PasswordNew     string
-    PasswordRepeat  string
-    Email           string
+    Username        string   `json:"username"`
+    PasswordNew     string   `json:"password_new"`
+    PasswordRepeat  string   `json:"password_repeat"`
+    Email           string   `json:"email"`
 }
 
 func register(req RegisterReq) error{
