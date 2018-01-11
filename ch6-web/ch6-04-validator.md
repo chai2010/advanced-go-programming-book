@@ -70,3 +70,34 @@ func register(req RegisterReq) error{
 代码更清爽，看起来也不那么别扭了。这是比较通用的重构理念。虽然使用了重构方法使我们的 validate 过程看起来优雅了，但我们还是得为每一个 http 请求都去写这么一套差不多的 validate 函数，有没有更好的办法来帮助我们解除这项体力劳动？答案就是 validator。
 
 ## 用 validator 解放体力劳动
+
+从设计的角度讲，我们一定会为每个请求都声明一个 struct。前文中提到的校验场景我们都可以通过 validator 完成工作。还以前文中的 struct 为例。为了美观起见，我们先把 json tag 省略掉。
+
+这里我们引入一个新的 validator 库：
+
+> https://github.com/go-playground/validator
+
+```go
+import "gopkg.in/go-playground/validator.v9"
+
+type RegisterReq struct {
+    Username        string   `validate:"gt=0"`
+    PasswordNew     string   `validate:"gt=0"`
+    PasswordRepeat  string   `validate:"eqfield=PasswordNew"`
+    Email           string   `validate:"email"`
+}
+
+
+func validate(req RegisterReq) error {
+    err := validate.Struct(mystruct)
+    if err != nil {
+        doSomething()
+    }
+    ...
+}
+
+```
+
+这样就不需要在每个请求进入业务逻辑之前都写重复的 validate 函数了。
+
+当然 validator 也不是万能的。
