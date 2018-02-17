@@ -127,6 +127,32 @@ func SayHello(s *C.char) {
 }
 ```
 
+
+现在中国版本的CGO代码中C语言代码的比例已经很少了，但是我们依然可以进一步以Go语言的思维来提炼我们的CGO代码。通过分析可以发现`SayHello`函数的参数如果可以直接使用Go字符串是最直接的。在Go1.10中CGO新增加了一个`_GoString_`预定义的C语言类型，用来表示Go语言字符串。下面是改进后的代码：
+
+```go
+// +build go1.10
+
+package main
+
+//void SayHello(_GoString_ s);
+import "C"
+
+import (
+	"fmt"
+)
+
+func main() {
+	C.SayHello("Hello, World\n")
+}
+
+//export SayHello
+func SayHello(s string) {
+	fmt.Print(s)
+}
+```
+
 虽然看起来全部是Go语言代码，但是执行的时候是先从Go语言的`main`函数，到CGO自动生成的C语言版本`SayHello`桥接函数，最后又回到了Go语言环境的`SayHello`函数。虽然看起来有点绕，但CGO确实是这样运行的。
+
 
 需要注意的是，CGO导出Go语言函数时，函数参数中不再支持C语言中`const`修饰符。
