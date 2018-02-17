@@ -90,7 +90,22 @@ extern void helloString(GoString p0);
 extern void helloSlice(GoSlice p0);
 ```
 
-不过需要注意的是，如果使用了GoString类型则会对`_cgo_export.h`头文件产生依赖，而这个头文件是动态输出的。更严谨的做法是为C语言函数接口定义严格的头文件，然后基于稳定的头文件实现代码。
+不过需要注意的是，如果使用了GoString类型则会对`_cgo_export.h`头文件产生依赖，而这个头文件是动态输出的。
+
+Go1.10针对Go字符串增加了一个`_GoString_`预定义类型，可以降低在cgo代码中可能对`_cgo_export.h`头文件产生的循环依赖的风险。我们可以调整helloString函数的C语言声明为：
+
+```c
+extern void helloString(_GoString_ p0);
+```
+
+因为`_GoString_`是预定义类型，我们无法通过此类型直接访问字符串的长度和指针等信息。Go1.10同时也增加了以下两个函数用于获取字符串结构中的长度和指针信息：
+
+```c
+size_t _GoStringLen(_GoString_ s);
+const char *_GoStringPtr(_GoString_ s);
+```
+
+更严谨的做法是为C语言函数接口定义严格的头文件，然后基于稳定的头文件实现代码。
 
 ## 结构体、联合、枚举类型
 

@@ -19,5 +19,6 @@ func main() {
 
 //export SayHello
 func SayHello(s string) {
+	fmt.Println(int(C._GoStringLen(s)))
 	fmt.Print(s)
 }
