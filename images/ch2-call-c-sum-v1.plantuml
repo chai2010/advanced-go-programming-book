@@ -1,0 +1,46 @@
+' Copyright 2017 <chaishushan{AT}gmail.com>. All rights reserved.
+' Use of this source code is governed by a Apache
+' license that can be found in the LICENSE file.
+
+@startuml
+
+title C.sum(2, 3)
+
+|main.go|
+:func main() {
+	C.sum(2, 3))
+};
+
+|#AntiqueWhite|main.cgo1.go|
+:func main() {
+	_Cfunc_sum(2, 3))
+};
+
+|#AntiqueWhite|_cgo_types.go|
+:func _Cfunc_sum(2, 3) double {
+	_cgo_runtime_cgocall(...)
+	return
+};
+
+|runtime.cgocall|
+:_cgo_runtime_cgocall(...);
+
+fork
+
+|#AntiqueWhite|main.cgo2.c|
+: double _cgo_xxx_Cfunc_sum(2, 3) {
+	return sum(2, 3)
+};
+
+|#AntiqueWhite|_cgo_export.c|
+:sum(2, 3);
+
+endfork
+
+|runtime.cgocall|
+:_cgo_runtime_cgocall(...);
+
+|main.go|
+stop
+
+@enduml
