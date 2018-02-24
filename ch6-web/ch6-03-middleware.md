@@ -153,10 +153,24 @@ func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request)
 func (ResponseWriter, *Request)
 ```
 
-那么这个 handler 就是一个 HandlerFunc 类型了，也就相当于实现了 http.Handler 这个接口，这要归功于 golang 的 duck typing 式的类型系统。在 http 库需要调用你的 handler 函数来处理 http 请求时，会调用 HandlerFunc 的 ServeHTTP 函数，可见一个请求的基本调用链是这样的：
+那么这个 handler 和 http.HandlerFunc 就有了一致的函数签名，可以将该 handler 函数进行类型转换，转为 http.HandlerFunc。而 http.HandlerFunc 实现了 http.Handler 这个接口。在 http 库需要调用你的 handler 函数来处理 http 请求时，会调用 HandlerFunc 的 ServeHTTP 函数，可见一个请求的基本调用链是这样的：
 
 ```go
 h = getHandler() => h.ServeHTTP(w, r) => h(w, r)
+```
+
+上面提到的把自定义 handler 转换为 http.HandlerFunc 这个过程是必须的，因为我们的 handler 没有直接实现 ServeHTTP 这个接口。上面的代码中我们看到的 HandleFunc(注意 HandlerFunc 和 HandleFunc 的区别)里也可以看到这个强制转换过程：
+
+```go
+func HandleFunc(pattern string, handler func(ResponseWriter, *Request)) {
+	DefaultServeMux.HandleFunc(pattern, handler)
+}
+
+// 调用
+
+func (mux *ServeMux) HandleFunc(pattern string, handler func(ResponseWriter, *Request)) {
+	mux.Handle(pattern, HandlerFunc(handler))
+}
 ```
 
 知道 handler 是怎么一回事，我们的中间件通过包装 handler，再返回一个新的 handler 就好理解了。

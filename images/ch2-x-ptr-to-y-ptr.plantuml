@@ -1,0 +1,23 @@
+' Copyright 2017 <chaishushan{AT}gmail.com>. All rights reserved.
+' Use of this source code is governed by a Apache
+' license that can be found in the LICENSE file.
+
+@startuml
+
+title *X <=> *Y
+
+participant "~*X" as x_ptr
+participant unsafe.Pointer as unsafe_Pointer
+participant "~*Y" as y_ptr
+
+== *X => *Y ==
+
+x_ptr -> unsafe_Pointer: ~*X to unsafe.Pointer
+unsafe_Pointer -> y_ptr: unsafe.Pointer to *Y
+
+== *Y => *X ==
+
+y_ptr -> unsafe_Pointer: ~*Y to unsafe.Pointer
+unsafe_Pointer -> x_ptr: unsafe.Pointer to *X
+
+@enduml

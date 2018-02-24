@@ -5,12 +5,9 @@
 /* Start of preamble from import "C" comments.  */
 
 
-#line 3 "/Users/chai/go/src/github.com/chai2010/advanced-go-programming-book/examples/ch2-07/hello-py/main.go"
+#line 6 "/Users/chai/go/src/github.com/chai2010/advanced-go-programming-book/examples/ch2-07/hello-py/main.go"
 
 // macOS:
-// python3-config --cflags
-// python3-config --ldflags
-
 
 
 // linux
@@ -22,30 +19,22 @@
 #define Py_LIMITED_API
 #include <Python.h>
 
-static PyObject *
-spam_system(PyObject *self, PyObject *args) {
-	const char *command;
-	if (!PyArg_ParseTuple(args, "s", &command)) {
-		return NULL;
-	}
+extern PyObject* PyInit_gopkg();
+extern PyObject* Py_gopkg_sum(PyObject *, PyObject *);
 
-	int status = system(command);
-	return PyLong_FromLong(status);
+static int cgo_PyArg_ParseTuple_ii(PyObject *arg, int *a, int *b) {
+	return PyArg_ParseTuple(arg, "ii", a, b);
 }
 
-extern PyObject *sum(PyObject *self, PyObject *args);
-
-static PyMethodDef modMethods[] = {
-	{"system",  spam_system, METH_VARARGS, "Execute a shell command."},
-	{"sum",  sum, METH_VARARGS, "Execute a shell command."},
-	{NULL, NULL, 0, NULL}
-};
-
-static PyObject* PyInit_gopkg_(void) {
-	static struct PyModuleDef module = {
-		PyModuleDef_HEAD_INIT, "gopkg", NULL, -1, modMethods,
+static PyObject* cgo_PyInit_gopkg(void) {
+	static PyMethodDef methods[] = {
+		{"sum", Py_gopkg_sum, METH_VARARGS, "Add two numbers."},
+		{NULL, NULL, 0, NULL},
 	};
-	return (void*)PyModule_Create(&module);
+	static struct PyModuleDef module = {
+		PyModuleDef_HEAD_INIT, "gopkg", NULL, -1, methods,
+	};
+	return PyModule_Create(&module);
 }
 
 #line 1 "cgo-generated-wrapper"
@@ -97,9 +86,9 @@ extern "C" {
 #endif
 
 
-extern PyObject* sum(PyObject* p0, PyObject* p1);
-
 extern PyObject* PyInit_gopkg();
+
+extern PyObject* Py_gopkg_sum(PyObject* p0, PyObject* p1);
 
 #ifdef __cplusplus
 }
