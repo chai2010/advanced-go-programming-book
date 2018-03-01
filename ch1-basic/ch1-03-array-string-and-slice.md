@@ -299,7 +299,7 @@ func str2bytes(s string) []byte {
 func bytes2str(s []byte) (p string) {
 	data := make([]byte, len(s))
 	for i, c := s {
-		p[i] = c
+		data[i] = c
 	}
 
 	hdr := (*reflect.StringHeader)(unsafe.Pointer(&p))
