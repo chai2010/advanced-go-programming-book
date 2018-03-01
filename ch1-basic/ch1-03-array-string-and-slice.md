@@ -281,9 +281,10 @@ func forOnString(s string, forBody func(i int, r rune)) {
 **`[]byte(s)`转换模拟实现**
 
 ```go
-func str2bytes(s []byte) []bytes {
+func str2bytes(s string) []byte {
 	p := make([]byte, len(s))
-	for i, c := []byte(s) {
+	for i := 0; i < len(s); i++ {
+		c := s[i]
 		p[i] = c
 	}
 	return p
@@ -298,7 +299,7 @@ func str2bytes(s []byte) []bytes {
 func bytes2str(s []byte) (p string) {
 	data := make([]byte, len(s))
 	for i, c := s {
-		p[i] = c
+		data[i] = c
 	}
 
 	hdr := (*reflect.StringHeader)(unsafe.Pointer(&p))
