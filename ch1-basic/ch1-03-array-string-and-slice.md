@@ -283,7 +283,8 @@ func forOnString(s string, forBody func(i int, r rune)) {
 ```go
 func str2bytes(s string) []byte {
 	p := make([]byte, len(s))
-	for i, c := range []byte(s) {
+	for i := 0; i < len(s); i++ {
+		c := s[i]
 		p[i] = c
 	}
 	return p
