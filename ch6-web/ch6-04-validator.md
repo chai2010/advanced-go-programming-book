@@ -123,11 +123,23 @@ fmt.Println(err) // Key: 'RegisterReq.PasswordRepeat' Error:Field validation for
 
 ## 原理
 
-从结构上来看，每一个 struct 都可以看成是一棵树。i
+从结构上来看，每一个 struct 都可以看成是一棵树。假如我们有如下定义的 struct：
 
-## TODO 这里需要一张图
+```go
+type Nested struct {
+    Email string `validate:"email"`
+}
+type T struct {
+    Age    int `validate:"eq=10"`
+    Nested Nested
+}
+```
 
-从字段校验这个角度来讲，无论我们采用深度优先搜索还是广度优先搜索来对这棵 struct 树来进行遍历，都是可以的。
+把这个 struct 画成一棵树：
+
+![struct-tree](../images/ch6-04-validate-struct-tree.png)
+
+从字段校验的需求来讲，无论我们采用深度优先搜索还是广度优先搜索来对这棵 struct 树来进行遍历，都是可以的。
 
 我们来写一个递归的深度优先搜索方式的遍历 demo：
 
