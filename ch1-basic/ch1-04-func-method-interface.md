@@ -71,7 +71,6 @@ func Find(m map[int]int, key int) (value int, ok bool) {
 
 ```go
 func Inc() (v int) {
-	v = 42
 	defer func(){ v++ } ()
 	return 42
 }
