@@ -70,10 +70,10 @@ func Find(m map[int]int, key int) (value int, ok bool) {
 如果返回值命名了，可以通过名字来修改返回值，也可以通过`defer`语句在`return`语句之后修改返回值：
 
 ```go
-func Inc(x int) (v int) {
+func Inc() (v int) {
 	v = 42
 	defer func(){ v++ } ()
-	return v
+	return 42
 }
 ```
 
