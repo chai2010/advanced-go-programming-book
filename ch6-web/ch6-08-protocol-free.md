@@ -107,7 +107,7 @@ func CreateOrder(ctx context.Context, req *CreateOrderStruct) (*CreateOrderRespS
 }
 ```
 
-直接使用一个入参 struct 和返回 struct，在外部处理协议细节的入口层：
+CreateOrder 有两个参数，ctx 用来传入 trace_id 一类的需要串联请求的全局参数，req 里存储了我们创建订单所需要的所有输入信息。返回结果是一个响应结构体和错误。可以认为，我们的代码运行到 logic 层之后，就没有任何与“协议”相关的代码了。在这里你找不到 http.Request，也找不到 http.ResponseWriter，也找不到任何与 thrift 或者 gRPC 相关的字眼。
 
 ```go
 
