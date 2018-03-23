@@ -77,10 +77,7 @@ func (he HTTPGetOrderEntry) GetCreateOrderParams() dto.CreateOrderParams {
 // thrift serve on 9000
 func ThriftCreateOrderHandler(req ThriftCreateOrderRequest) (resp ThriftCreateOrderResp, error){
     thriftEntryInstance  := ThriftGetOrderEntry{
-        OrderID :    req.OrderID,
-        ShopID :     req.ShopID,
-        ProductID :  req.ProductID,
-        CreateTime : req.CreateTime,
+       thriftRequestParams : req,
     }
 
     logicResp,err := logic.CreateOrder(thriftEntryInstance)
@@ -91,10 +88,7 @@ func ThriftCreateOrderHandler(req ThriftCreateOrderRequest) (resp ThriftCreateOr
 // http serve on 8000
 func HTTPGetOrderHandler(wr http.ResponseWriter, r *http.Request) {
     httpEntryInstance  := HTTPGetOrderEntry{
-        OrderID : req.OrderID,
-        ShopID : req.ShopID,
-        ProductID : req.ProductID,
-        CreateTime : req.CreateTime,
+        r : r,
     }
 
     logicResp,err := logic.CreateOrder(thriftEntryInstance)
