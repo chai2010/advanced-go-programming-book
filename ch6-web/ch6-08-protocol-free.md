@@ -16,5 +16,43 @@ type RecordStore interface {
 }
 ```
 
+通过在业务逻辑层定义 interface 来对业务逻辑进行一定的保护。这样在周边的代码发生变动时，不会对业务逻辑产生任何影响。比较典型的应用，例如你们公司的服务原来是 C/S 架构，在 web 2.0 时代突然流行起了 B/S 架构，然后在移动互联网的浪潮下又开始流行 C/S 或者一些 hybrid app 架构，但是这些变化对于后端程序来说，大多数的代码应该能够做到置身事外。再比如你们公司之前因为技术升级，可能多次切换底层存储，但在存储迁移过程中，哪怕是 dao 层的相关代码要做一些修改，这些修改的影响也不应该侵入到业务逻辑层。
 
-通过在业务逻辑层定义 interface 来对业务逻辑进行一定的保护。这样在周边的代码发生变动时，不会对业务逻辑产生任何影响。比较典型的应用，例如你们公司的服务原来是 C/S 架构，在 web 2.0 时代突然流行起了 B/S 架构，然后在移动互联网的浪潮下又开始流行 C/S 或者一些 hybrid app 架构，但是这些变化对于后端程序来说，大多数的代码应该能够做到置身事外。再比如你们公司之前因为技术实力限制，没有适合自己用的可以持久化的 kv 存储。
+接口的最大好处，就是帮我们完成了这样的依赖反转。针对本节的处理协议的场景具体要怎么做呢？假如我们现在有一个下订单的需求，我们可以在 logic 层(或者叫 service 层) 定义一个 interface：
+
+```go
+// project/service/dto
+type CreateOrderParams struct {
+    OrderID int64
+    ShopID int64
+    ProductID int64
+    CreateTime time.Time
+}
+
+type Entry interface {
+    GetCreateOrderParams() dto.CreateOrderParams
+}
+
+func CreateOrder(e Entry) error {
+    params := e.GetCreateOrderParams()
+}
+
+// project/controller
+type ThriftEntry struct{}
+type HTTPEntry struct{}
+
+func (te ThriftEntry) GetCreateOrderParams() dto.CreateOrderParams {
+}
+
+func (he HTTPEntry) GetCreateOrderParams() dto.CreateOrderParams {
+
+}
+
+var thriftEntryInstance ThriftEntry
+var httpEntryInstance HTTPEntry
+
+// thrift serve on 9000
+
+// http serve on 8000
+
+```
