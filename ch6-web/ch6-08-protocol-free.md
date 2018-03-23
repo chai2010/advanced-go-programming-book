@@ -62,7 +62,7 @@ func (te ThriftGetOrderEntry) GetCreateOrderParams() dto.CreateOrderParams {
 }
 
 func (he HTTPGetOrderEntry) GetCreateOrderParams() dto.CreateOrderParams {
-    //r := he.r
+    // r := he.r
     // get data
     err := json.Unmarshal(data, &req) // or read body or something
 
@@ -86,7 +86,7 @@ func ThriftCreateOrderHandler(req ThriftCreateOrderRequest) (resp ThriftCreateOr
 }
 
 // http serve on 8000
-func HTTPGetOrderHandler(wr http.ResponseWriter, r *http.Request) {
+func HTTPCreateOrderHandler(wr http.ResponseWriter, r *http.Request) {
     httpEntryInstance  := HTTPGetOrderEntry{
         r : r,
     }
@@ -97,4 +97,37 @@ func HTTPGetOrderHandler(wr http.ResponseWriter, r *http.Request) {
 }
 
 ```
-这样在对协议层进行修改时，就可以对 logic 层没有任何影响了。当然，如果完全按照 clean architecture 的设计来写代码着实有一些麻烦。
+
+这样在对协议层进行修改时，就可以对 logic 层没有任何影响了。像前面提到的，这样的做法我们同样可以用在 logic 和 dao 层的交接处，也没有什么问题。
+
+当然，如果完全按照 clean architecture 的设计来写代码还是有一些麻烦。在可预见的范围内，我们需要处理的协议类型是有限的。现在互联网公司内部 API 常用的就只有三种 gRPC、thrift 和 http。我们甚至可以通过一些手段，使我们每写一个接口，都可以支持这三种协议。再把 logic 的入口简化一些，这里我们使用生产环境的 logic 函数签名作为样例：
+
+```go
+func CreateOrder(ctx context.Context, req *CreateOrderStruct) (*CreateOrderRespStruct, error) {
+}
+```
+
+直接使用一个入参 struct 和返回 struct，在外部处理协议细节的入口层：
+
+```go
+
+// in logic
+type CreateOrderRequest struct {
+    OrderID `json:"order_id"`
+    // ...
+}
+
+func HTTPCreateOrderHandler(wr http.ResponseWriter, r *http.Request) {
+    var params CreateOrderRequest
+    ctx := context.TODO()
+    // bind data to req
+    logicResp,err := logic.CreateOrder(ctx, &params)
+    if err != nil {}
+    // ...
+}
+```
+
+理论上我们可以用同一个 request struct 组合上不同的 tag，来达到一个 struct 来给不同的协议复用的目的。不过遗憾的是在 thrift 中，request struct 也是通过 IDL 生成的，其内容在自动生成的 ttypes.go 文件中，我们还是需要在 thrift 的入口将这个自动生成的 struct 映射到我们 logic 入口所需要的 struct 上。gRPC 也是类似。
+
+聪明的读者可能已经可以看出来了，协议细节处理这一层实际上有大量重复劳动，每一个接口的具体处理实际上都是一些差不多的代码。自然，我们可以想想办法。用 codegen 来把这一部分从劳动中排除掉。
+
