@@ -91,7 +91,7 @@ func HTTPGetOrderHandler(wr http.ResponseWriter, r *http.Request) {
         r : r,
     }
 
-    logicResp,err := logic.CreateOrder(thriftEntryInstance)
+    logicResp,err := logic.CreateOrder(httpEntryInstance)
     if err != nil {}
     // ...
 }
