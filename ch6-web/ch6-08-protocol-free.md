@@ -29,30 +29,78 @@ type CreateOrderParams struct {
     CreateTime time.Time
 }
 
+// 对订单服务入口的定义
 type Entry interface {
     GetCreateOrderParams() dto.CreateOrderParams
 }
 
 func CreateOrder(e Entry) error {
     params := e.GetCreateOrderParams()
+
+    // do some thing to create order
+
+    return nil
 }
 
 // project/controller
-type ThriftEntry struct{}
-type HTTPEntry struct{}
-
-func (te ThriftEntry) GetCreateOrderParams() dto.CreateOrderParams {
+type ThriftGetOrderEntry struct{
+    thriftRequestParams ThriftCreateOrderRequest
 }
 
-func (he HTTPEntry) GetCreateOrderParams() dto.CreateOrderParams {
-
+type HTTPGetOrderEntry struct{
+    r *http.Request
 }
 
-var thriftEntryInstance ThriftEntry
-var httpEntryInstance HTTPEntry
+func (te ThriftGetOrderEntry) GetCreateOrderParams() dto.CreateOrderParams {
+    thriftRequestParams := te.thriftRequestParams
+    return logic.CreateOrderParams{
+        OrderID :    thriftRequestParams.OrderID,
+        ShopID :     thriftRequestParams.ShopID,
+        ProductID :  thriftRequestParams.ProductID,
+        CreateTime : thriftRequestParams.CreateTime,
+    }
+}
+
+func (he HTTPGetOrderEntry) GetCreateOrderParams() dto.CreateOrderParams {
+    //r := he.r
+    // get data
+    err := json.Unmarshal(data, &req) // or read body or something
+
+    return logic.CreateOrderParams{
+        OrderID : req.OrderID,
+        ShopID : req.ShopID,
+        ProductID : req.ProductID,
+        CreateTime : req.CreateTime,
+    }
+}
 
 // thrift serve on 9000
+func ThriftCreateOrderHandler(req ThriftCreateOrderRequest) (resp ThriftCreateOrderResp, error){
+    thriftEntryInstance  := ThriftGetOrderEntry{
+        OrderID :    req.OrderID,
+        ShopID :     req.ShopID,
+        ProductID :  req.ProductID,
+        CreateTime : req.CreateTime,
+    }
+
+    logicResp,err := logic.CreateOrder(thriftEntryInstance)
+    if err != nil {}
+    // ...
+}
 
 // http serve on 8000
+func HTTPGetOrderHandler(wr http.ResponseWriter, r *http.Request) {
+    httpEntryInstance  := HTTPGetOrderEntry{
+        OrderID : req.OrderID,
+        ShopID : req.ShopID,
+        ProductID : req.ProductID,
+        CreateTime : req.CreateTime,
+    }
+
+    logicResp,err := logic.CreateOrder(thriftEntryInstance)
+    if err != nil {}
+    // ...
+}
 
 ```
+这样在对协议层进行修改时，就可以对 logic 层没有任何影响了。当然，如果完全按照 clean architecture 的设计来写代码着实有一些麻烦。
