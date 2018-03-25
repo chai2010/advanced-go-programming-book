@@ -1,12 +1,33 @@
-# 6.8. Protocol-free 协议无关的服务入口
+# 6.8. interface 和 web 编程
 
 我们在之前的小节中看到了如何编写一个 thrift/grpc 协议的服务。在更早的小节中，我们看到了如何编写一个 http 的服务。
 
 如果对于我们的服务模块，提出了更进一步的要求，想要同时支持 http 和 thrift 协议。要怎么办。
 
-## clean architecture
+公司内的基础架构因为技术实力原因，最早是从别人那里借来的 kv 存储方案。随着公司的发展，渐渐有大牛加入，想要甩掉这个借来的包袱自研 kv 存储，但接口与之前的 kv 存储不兼容。接入时需要业务改动接入代码，怎么写代码才能让我的核心业务逻辑不受这些外部资源变化影响呢。
 
-在 Uncle Bob 的 《Clean Architecture》 中对插件化架构(plugin architecture) 的阐释能够给我们一些启示。我们先来看看什么是“插件化架构”。
+## interface 与依赖反转
+学习 Golang 时一般对 interface 都会建立较基本的理解。从架构的角度上来讲，interface 解决的最大的问题是依赖方向问题。例如在一个典型的 web 程序中：
+
+TODOTODO 这里有图，标明控制流的方向
+
+我们的控制流方向是从 controller -> logic -> dao，在不使用 interface 的前提下，我们在 controller 中需要 import logic 的 package，然后在 logic 中需要 import dao 的 package。这种 import 关系和控制流的方向是一致的，因为我们需要用到 a.x 函数，那么 import a 就显得自然而然了。
+
+从架构的角度讲，这个控制流会给我们带来很多问题：
+
+```
+1. dao 的变动必然会引起 logic 的变动
+2.
+3.
+```
+
+interface 这时候就成为了我们的救星，如果我们在 a->b 这个控制方向上不满意，不想让 b 的变化引起 a 的不适，那么我们就在 a 与 b 之间插入一层 interface 。
+
+```
+a (interface) <- b
+```
+
+这样就可以让 b 成为 a 的 plugin，即插件。如果我们要把 b 替换为 b2，那么也只要实现之前被插入中间的 interface 就可以，a 不需要任何变化。这就是所谓的插件化架构。具体一点来说：
 
 ![插件化架构](../images/ch6-08-plugin-arch.jpg)
 
