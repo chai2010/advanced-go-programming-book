@@ -107,7 +107,7 @@ func hello(wr http.ResponseWriter, r *http.Request) {
 }
 
 func timeMiddleware(next http.Handler) http.Handler {
-    return func(wr http.ResponseWriter, r *http.Request) {
+    return http.HandlerFunc(func(wr http.ResponseWriter, r *http.Request) {
         timeStart := time.Now()
 
         // next handler
@@ -115,7 +115,7 @@ func timeMiddleware(next http.Handler) http.Handler {
 
         timeElapsed := time.Since(timeStart)
         logger.Println(timeElapsed)
-    }
+    })
 }
 
 func main() {
