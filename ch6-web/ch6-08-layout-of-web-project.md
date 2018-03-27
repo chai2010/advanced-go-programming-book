@@ -18,7 +18,9 @@
 
 TODOTODO，这里是一个请求，从 c->l->d 的流程，和返回的示意图。
 
-讲解多协议支持
+划分为 CLD 三层之后，在 C 层我们可能还需要同时支持多种协议。本章前面讲到的 thrift、gRPC 和 http 并不是一定只选择其中一种，有时我们需要支持其中的两种，比如同一个接口，我们既需要效率较高的 thrift，也需要方便 debug 的 http 入口。这样请求的流程会变成下面这样：
+
+TODOTODO，thrift protocol -> controller -> logic -> dao|| http protocol -> controller -> logic -> dao
 
 ```go
 func CreateOrder(ctx context.Context, req *CreateOrderStruct) (*CreateOrderRespStruct, error) {
@@ -55,3 +57,13 @@ func HTTPCreateOrderHandler(wr http.ResponseWriter, r *http.Request) {
 ```
 
 我们需要一个基准 request struct，来根据这个 request struct 生成我们需要的入口代码。这个基准要怎么找呢？
+
+我们成功地使自己的项目在入口支持了多种交互协议，但是还有一些问题没有解决。本节中所叙述的分层没有将 middleware 作为项目的分层考虑进去。如果我们考虑 middleware 的话，请求的流程是什么样的？
+
+TODOTODO，这里是带上 middleware 之后的请求图。
+
+middleware 是和 http 协议强相关的，但 middleware 显然不应该和协议强绑定。如果我们坚持用之前的 middleware 方案的话，这里 thrift 的请求路线就还需要再多写一套 thrift 自己的 middleware。
+
+这也是很多企业项目所面临的真实问题，遗憾的是开源界并没有这样方便的多协议 middleware 解决方案。
+
+是不是感觉项目变的越来越复杂了？真实的项目就是这样一步一步，根据需求演进而来的。
