@@ -96,7 +96,7 @@ var (
 )
 
 func Instance() *singleton {
-    if atomic.LoadUInt32(&initialized) == 1 {
+    if atomic.LoadUint32(&initialized) == 1 {
 		return instance
 	}
 
