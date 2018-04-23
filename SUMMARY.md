@@ -13,7 +13,7 @@
    * [2.1. 快速入门](ch2-cgo/ch2-01-hello-cgo.md)
    * [2.2. CGO基础](ch2-cgo/ch2-02-basic.md)
    * [2.3. 类型转换](ch2-cgo/ch2-03-cgo-types.md)
-   * [2.4. 函数调用(TODO)](ch2-cgo/ch2-04-func.md)
+   * [2.4. 函数调用](ch2-cgo/ch2-04-func.md)
    * [2.5. 内部机制(TODO)](ch2-cgo/ch2-05-internal.md)
    * [2.6. 实战: 封装qsort(TODO)](ch2-cgo/ch2-06-qsort.md)
    * [2.7. CGO内存模型](ch2-cgo/ch2-07-memory.md)
