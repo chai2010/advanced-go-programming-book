@@ -14,8 +14,12 @@
 
 ## Go调用C函数
 
+![](../images/ch2-call-c-sum-v1.uml.png)
+
 TODO
 
 ## C调用Go函数
+
+![](../images/ch2-call-c-sum-v2.uml.png)
 
 TODO

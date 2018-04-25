@@ -19,8 +19,6 @@ _book
 *.obj
 *.exe
 
-_obj
-
 # macOS
 .DS_Store
 
