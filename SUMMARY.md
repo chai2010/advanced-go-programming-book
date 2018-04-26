@@ -15,7 +15,7 @@
    * [2.3. 类型转换](ch2-cgo/ch2-03-cgo-types.md)
    * [2.4. 函数调用](ch2-cgo/ch2-04-func.md)
    * [2.5. 内部机制](ch2-cgo/ch2-05-internal.md)
-   * [2.6. 实战: 封装qsort(TODO)](ch2-cgo/ch2-06-qsort.md)
+   * [2.6. 实战: 封装qsort(Doing)](ch2-cgo/ch2-06-qsort.md)
    * [2.7. CGO内存模型](ch2-cgo/ch2-07-memory.md)
    * [2.8. C++类包装](ch2-cgo/ch2-08-class.md)
    * [2.9. 静态库和动态库](ch2-cgo/ch2-09-static-shared-lib.md)
