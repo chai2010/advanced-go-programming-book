@@ -138,6 +138,112 @@ void _cgo_506f45f9fa85_Cfunc_sum(void *v) {
 
 ## C调用Go函数
 
+在简单分析了Go调用C函数的流程后，我们现在来分析C反向调用Go函数的流程。同样，我们现构造一个Go语言版本的sum函数，文件名同样为`main.go`：
+
+```
+package main
+
+//int sum(int a, int b);
+import "C"
+
+//export sum
+func sum(a, b C.int) C.int {
+	return a + b
+}
+
+func main() {}
+```
+
+CGO的语法细节不在赘述。为了在C语言中使用sum函数，我们需要将Go代码编译为一个C静态库：
+
+```
+$ go build -buildmode=c-archive -o sum.a sum.go
+```
+
+如果没有错误的话，以上编译命令将生成一个`sum.a`静态库和`sum.h`头文件。其中`sum.h`头文件将包含sum函数的声明，静态库中将包含sum函数的实现。
+
+要分析生成的C语言版sum函数的调用流程，同样需要分析cgo生成的中间文件：
+
+```
+$ go tool cgo main.go
+```
+
+_obj目录还是生成类似的中间文件。为了查看方便，我们刻意忽略了无关的几个文件：
+
+```
+$ ls _obj | awk '{print $NF}'
+_cgo_export.c
+_cgo_export.h
+_cgo_gotypes.go
+main.cgo1.go
+main.cgo2.c
+```
+
+其中`_cgo_export.h`文件的内容和生成C静态库时产生的`sum.h`头文件是同一个文件，里面同样包含sum函数的声明。
+
+既然C语言是主调用者，我们需要先从C语言版sum函数的实现开始分析。C语言版本的sum函数在生成的`_cgo_export.c`文件中（该文件包含的是Go语言导出函数对应的C语言函数实现）：
+
+```c
+int sum(int p0, int p1)
+{
+	__SIZE_TYPE__ _cgo_ctxt = _cgo_wait_runtime_init_done();
+	struct {
+		int p0;
+		int p1;
+		int r0;
+		char __pad0[4];
+	} __attribute__((__packed__)) a;
+	a.p0 = p0;
+	a.p1 = p1;
+	_cgo_tsan_release();
+	crosscall2(_cgoexp_8313eaf44386_sum, &a, 16, _cgo_ctxt);
+	_cgo_tsan_acquire();
+	_cgo_release_context(_cgo_ctxt);
+	return a.r0;
+}
+```
+
+sum函数的内容采用和前面类似的技术，将sum函数的参数和返回值打包到一个结构体中，然后通过`runtime/cgo.crosscall2`函数将结构体传给`_cgoexp_8313eaf44386_sum`函数执行。
+
+`runtime/cgo.crosscall2`函数采用汇编语言实现，它对应的函数声明如下：
+
+```go
+func runtime/cgo.crosscall2(
+	fn func(a unsafe.Pointer, n int32, ctxt uintptr),
+	a unsafe.Pointer, n int32,
+	ctxt uintptr,
+)
+```
+
+其中关键的是fn和a，fn是中间代理函数的指针，a是对应调用参数和返回值的结构体指针。
+
+中间的`_cgoexp_8313eaf44386_sum`代理函数在`_cgo_gotypes.go`文件：
+
+```go
+func _cgoexp_8313eaf44386_sum(a unsafe.Pointer, n int32, ctxt uintptr) {
+	fn := _cgoexpwrap_8313eaf44386_sum
+	_cgo_runtime_cgocallback(**(**unsafe.Pointer)(unsafe.Pointer(&fn)), a, uintptr(n), ctxt);
+}
+
+func _cgoexpwrap_8313eaf44386_sum(p0 _Ctype_int, p1 _Ctype_int) (r0 _Ctype_int) {
+	return sum(p0, p1)
+}
+```
+
+内部将sum的包装函数`_cgoexpwrap_8313eaf44386_sum`作为函数指针，然后由`_cgo_runtime_cgocallback`函数完成C语言到Go函数的回调工作。
+
+
+`_cgo_runtime_cgocallback`函数对应`runtime.cgocallback`函数，函数的类型如下：
+
+```go
+func runtime.cgocallback(fn, frame unsafe.Pointer, framesize, ctxt uintptr)
+```
+
+参数分别是函数指针，函数参数和返回值对应结构体的指针，函数调用帧大小和上下文参数。
+
+整个调用流程图如下：
+
 ![](../images/ch2-call-c-sum-v2.uml.png)
 
-TODO
+其中`runtime.cgocallback`函数是实现C语言到Go语言函数跨界调用的关键。更详细的细节可以参考相关函数的实现。
+
