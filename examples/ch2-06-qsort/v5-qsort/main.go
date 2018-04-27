@@ -3,48 +3,85 @@
 
 package main
 
-import (
-	"fmt"
-)
-
 /*
 #include <stdlib.h>
 
 typedef int (*qsort_cmp_func_t)(const void* a, const void* b);
-extern int go_qsort_compare(void* a, void* b);
+
+extern int  go_qsort_compare(void* a, void* b);
 */
 import "C"
+
 import (
+	"fmt"
+	"reflect"
 	"sync"
 	"unsafe"
 )
 
-func main() {
-	values := []int32{42, 9, 101, 95, 27, 25}
+var go_qsort_compare_info struct {
+	slice    interface{}
+	base     uintptr
+	elemsize uintptr
+	fn       func(a, b int) int
+	sync.Mutex
+}
 
-	go_qsort_compare_info.Lock()
-	defer go_qsort_compare_info.Unlock()
-
-	go_qsort_compare_info.fn = func(a, b unsafe.Pointer) C.int {
-		pa := (*C.int)(a)
-		pb := (*C.int)(b)
-		return C.int(*pa - *pb)
-	}
-
-	C.qsort(unsafe.Pointer(&values[0]),
-		C.size_t(len(values)), C.size_t(unsafe.Sizeof(values[0])),
-		(C.qsort_cmp_func_t)(unsafe.Pointer(C.go_qsort_compare)),
-	)
-
-	fmt.Println(values)
+//export go_qsort_compare_save_base
+func go_qsort_compare_save_base(base unsafe.Pointer) {
+	go_qsort_compare_info.base = uintptr(base)
 }
 
 //export go_qsort_compare
 func go_qsort_compare(a, b unsafe.Pointer) C.int {
-	return go_qsort_compare_info.fn(a, b)
+	if go_qsort_compare_info.base == 0 {
+		sv := reflect.ValueOf(go_qsort_compare_info.slice)
+		go_qsort_compare_info.base = uintptr(unsafe.Pointer(sv.Index(0).Addr().Pointer()))
+	}
+
+	var (
+		// array memory is locked
+		base     = go_qsort_compare_info.base
+		elemsize = go_qsort_compare_info.elemsize
+	)
+
+	i := int((uintptr(a) - base) / elemsize)
+	j := int((uintptr(b) - base) / elemsize)
+
+	return C.int(go_qsort_compare_info.fn(i, j))
 }
 
-var go_qsort_compare_info struct {
-	fn func(a, b unsafe.Pointer) C.int
-	sync.RWMutex
+func qsort(slice interface{}, fn func(a, b int) int) {
+	sv := reflect.ValueOf(slice)
+	if sv.Kind() != reflect.Slice {
+		panic(fmt.Sprintf("qsort called with non-slice value of type %T", slice))
+	}
+	if sv.Len() == 0 {
+		return
+	}
+
+	go_qsort_compare_info.Lock()
+	defer go_qsort_compare_info.Unlock()
+
+	// baseMem = unsafe.Pointer(sv.Index(0).Addr().Pointer())
+	// baseMem maybe moved, so must saved after call C.fn
+	go_qsort_compare_info.slice = slice
+	go_qsort_compare_info.elemsize = sv.Type().Elem().Size()
+	go_qsort_compare_info.fn = fn
+
+	C.qsort(
+		unsafe.Pointer(sv.Index(0).Addr().Pointer()),
+		C.size_t(sv.Len()), C.size_t(sv.Type().Elem().Size()),
+		C.qsort_cmp_func_t(C.go_qsort_compare),
+	)
+}
+
+func main() {
+	values := []int64{42, 9, 101, 95, 27, 25}
+
+	qsort(values, func(i, j int) int {
+		return int(values[i] - values[j])
+	})
+
+	fmt.Println(values)
 }

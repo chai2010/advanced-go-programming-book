@@ -3,6 +3,10 @@
 
 package main
 
+import (
+	"fmt"
+)
+
 /*
 #include <stdlib.h>
 
@@ -11,25 +15,40 @@ extern int go_qsort_compare(void* a, void* b);
 */
 import "C"
 import (
-	"fmt"
+	"sync"
 	"unsafe"
 )
 
-func main() {
-	values := []int32{42, 9, 101, 95, 27, 25}
-
-	C.qsort(unsafe.Pointer(&values[0]),
-		C.size_t(len(values)), C.size_t(unsafe.Sizeof(values[0])),
-		(C.qsort_cmp_func_t)(unsafe.Pointer(C.go_qsort_compare)),
-	)
-
-	fmt.Println(values)
+var go_qsort_compare_info struct {
+	fn func(a, b unsafe.Pointer) int
+	sync.Mutex
 }
 
 //export go_qsort_compare
 func go_qsort_compare(a, b unsafe.Pointer) C.int {
-	pa := (*C.int)(a)
-	pb := (*C.int)(b)
+	return C.int(go_qsort_compare_info.fn(a, b))
+}
 
-	return C.int(*pa - *pb)
+func qsort(base unsafe.Pointer, num, size int, cmp func(a, b unsafe.Pointer) int) {
+	go_qsort_compare_info.Lock()
+	defer go_qsort_compare_info.Unlock()
+
+	go_qsort_compare_info.fn = cmp
+
+	C.qsort(base, C.size_t(num), C.size_t(size),
+		C.qsort_cmp_func_t(C.go_qsort_compare),
+	)
+}
+
+func main() {
+	values := []int32{42, 9, 101, 95, 27, 25}
+
+	qsort(unsafe.Pointer(&values[0]), len(values), int(unsafe.Sizeof(values[0])),
+		func(a, b unsafe.Pointer) int {
+			pa, pb := (*C.int)(a), (*C.int)(b)
+			return int(*pa - *pb)
+		},
+	)
+
+	fmt.Println(values)
 }
