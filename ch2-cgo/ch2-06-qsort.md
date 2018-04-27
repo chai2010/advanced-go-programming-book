@@ -331,6 +331,27 @@ func Slice(slice interface{}, less func(a, b int) bool) {
 ```
 
 首先需要判断传入的接口类型必须是切片类型。然后通过反射获取qsort函数需要的切片信息，并调用C语言的qsort函数。
+
+基于新包装的函数我们可以采用和标准库相似的方式排序切片：
+
+```go
+import (
+	"fmt"
+
+	qsort "."
+)
+
+func main() {
+	values := []int64{42, 9, 101, 95, 27, 25}
+
+	qsort.Slice(values, func(i, j int) bool {
+		return values[i] < values[j]
+	})
+
+	fmt.Println(values)
+}
+```
+
 为了避免在排序过程中，排序数组的上下文信息`go_qsort_compare_info`被修改，我们进行了全局加锁。
 因此目前版本的qsort.Slice函数是无法并发执行的，读者可以自己尝试改进这个限制。
 
