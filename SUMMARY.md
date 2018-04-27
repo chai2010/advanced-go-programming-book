@@ -20,7 +20,7 @@
    * [2.8. C++类包装](ch2-cgo/ch2-08-class.md)
    * [2.9. 静态库和动态库](ch2-cgo/ch2-09-static-shared-lib.md)
    * [2.10. Go实现Python模块](ch2-cgo/ch2-10-py-module.md)
-   * [2.11. 编译和链接参数(TODO)](ch2-cgo/ch2-11-link.md)
+   * [2.11. 编译和链接参数](ch2-cgo/ch2-11-link.md)
    * [2.12. 补充说明](ch2-cgo/ch2-12-faq.md)
 * [第三章 汇编语言(TODO)](ch3-asm/readme.md)
    * [3.1. 汇编基础(TODO)](ch3-asm/ch3-01-basic.md)
