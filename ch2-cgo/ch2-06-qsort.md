@@ -13,7 +13,7 @@ void qsort(
 );
 ```
 
-其中base参数是要排序数组的首个元素的地址，num是数组中元素的个数，size是数组中每个元素的大小。最关键是cmp比较函数，用于对数组中任意两个元素进行排序。cmp排序函数的两个指针参数分别是要比较的两个元素的地址，如果第一个参数对应元素大于第二个参数对应的元素将返回1，如果两个元素相等则返回0，如果第一个元素小于第二个元素则返回-1。
+其中base参数是要排序数组的首个元素的地址，num是数组中元素的个数，size是数组中每个元素的大小。最关键是cmp比较函数，用于对数组中任意两个元素进行排序。cmp排序函数的两个指针参数分别是要比较的两个元素的地址，如果第一个参数对应元素大于第二个参数对应的元素将返回结果大于0，如果两个元素相等则返回0，如果第一个元素小于第二个元素则返回结果小于0。
 
 下面的例子是用C语言的qsort对一个int类型的数组进行排序：
 
@@ -48,14 +48,14 @@ int main() {
 /*
 #include <stdlib.h>
 
-#define DIM(x) (sizeof(x)/sizeof((x)[0]))
-
 static int compare(const void* a, const void* b) {
-    return ( *(int*)a - *(int*)b );
+	const int* pa = (int*)a;
+	const int* pb = (int*)b;
+	return *pa - *pb;
 }
 
-static void qsort_proxy(int values[], size_t len, size_t elemsize) {
-    qsort(values, DIM(values), sizeof(values[0]), compare);
+static void qsort_proxy(int* values, size_t len, size_t elemsize) {
+	qsort(values, len, sizeof(values[0]), compare);
 }
 */
 import "C"
@@ -64,15 +64,17 @@ import "unsafe"
 import "fmt"
 
 func main() {
-    values := []int32{ 42, 9, 101, 95, 27, 25 };
-    C.qsort_proxy(
-        unsafe.Pointer(&values[0]),
-        C.size_t(len(values)),
-        C.size_t(unsafe.Sizeof(values[0])),
-    )
-    fmt.Println(values)
+	values := []int32{ 42, 9, 101, 95, 27, 25 };
+	C.qsort_proxy(
+		(*C.int)(unsafe.Pointer(&values[0])),
+		C.size_t(len(values)),
+		C.size_t(unsafe.Sizeof(values[0])),
+	)
+	fmt.Println(values)
 }
 ```
+
+因为 compare 函数固定了元素的大小，导致只能针对特点的数值类型排序。
 
 ## 在Go中自传入比较函数
 
@@ -81,16 +83,16 @@ func main() {
 extern int go_qsort_compare(void* a, void* b);
 
 static int compare(const void* a, const void* b) {
-    return go_qsort_compare((void*)(a), (void*)(b))
+	return go_qsort_compare((void*)(a), (void*)(b));
 }
 */
 import "C"
 
 //export go_qsort_compare
 func go_qsort_compare(a, b unsafe.Pointer) C.int {
-    pa := (*C.int)(a)
-    pb := (*C.int)(b)
-    return C.int(*pa - *pb)
+	pa := (*C.int)(a)
+	pb := (*C.int)(b)
+	return C.int(*pa - *pb)
 }
 ```
 
@@ -112,6 +114,8 @@ func main() {
     )
 }
 ```
+
+直接传入Go导出的比较函数，需要进行一次类型转换（因为参数少了const修饰）。
 
 
 ```go
