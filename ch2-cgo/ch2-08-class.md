@@ -401,3 +401,76 @@ struct Person {
 我们在Person类中增加了一个叫New静态成员函数，用于创建新的Person实例。在New函数中通过调用person_new来创建Person实例，返回的是`person_handle_t`类型的id，我们将其强制转型作为`Person*`类型指针返回。在其它的成员函数中，我们通过将this指针再反向转型为`person_handle_t`类型，然后通过C接口调用对应的函数。
 
 到此，我们就达到了将Go对象导出为C接口，然后基于C接口再包装为C++对象以便于使用的目的。
+
+## 彻底解放C++的this指针
+
+熟悉Go语言的用法会发现Go语言中方法是绑定到类型的。比如我们基于int定义一个新的Int类型，就可以有自己的方法：
+
+```go
+type Int int
+
+func (p Int) Twice() int {
+	return int(p)*2
+}
+
+func main() {
+	var x = Int(42)
+	fmt.Println(int(x))
+	fmt.Println(x.Twice())
+}
+```
+
+这样就可以在不改变原有数据底层内存结构的前提下，自由切换int和Int类型来使用变量。
+
+而在C++中要实现类似的特性，一般会采用以下实现：
+
+```c++
+class Int {
+	int v_;
+
+	Int(v int) { this.v_ = v; }
+	int Twice() const{ return this.v_*2; }
+};
+
+int main() {
+	Int v(42);
+
+	printf("%d\n", v); // error
+	printf("%d\n", v.Twice());
+}
+```
+
+新包装后的Int类虽然增加了Twice方法，但是失去了自由转回int类型的权利。这时候不仅连printf都无法输出Int本身的值，而且也失去了int类型运算的所有特性。这就是C++构造函数的邪恶之处：以失去原有的一切特性的代价换取class的施舍。
+
+造成这个问题的根源是C++中this被固定为class的指针类型了。我们重新回顾下this在Go语言中的本质：
+
+```go
+func (this Int) Twice() int
+func Int_Twice(this Int) int
+```
+
+在Go语言中，和this有着相似功能的类型接收者参数其实只是一个普通的函数参数，我们可以自由选择值或指针类型。
+
+如果以C语言的角度来思考，this也只是一个普通的`void*`类型的指针，我们可以随意自由地将this转换为其它类型。
+
+```c++
+struct Int {
+	int Twice() {
+		const int* p = (int*)(this);
+		return (*p) * 2;
+    }
+};
+int main() {
+	int x = 42;
+	printf("%d\n", x);
+	printf("%d\n", ((Int*)(&x))->Twice());
+	return 0;
+}
+```
+
+这样我们就可以通过将int类型指针强制转为Int类型指针，代替通过默认的构造函数后new来构造Int对象。
+在Twice函数的内部，以相反的操作将this指针转回int类型的指针，就可以解析出原有的int类型的值了。
+这时候Int类型只是编译时的一个壳子，并不会在运行时占用额外的空间。
+
+因此C++的方法其实也可以用于普通非 class 类型，C++到普通成员函数其实也是可以绑定到类型的。
+只有纯虚方法是绑定到对象，那就是接口。
