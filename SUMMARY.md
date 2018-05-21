@@ -23,7 +23,7 @@
    * [2.11. 编译和链接参数](ch2-cgo/ch2-11-link.md)
    * [2.12. 补充说明](ch2-cgo/ch2-12-faq.md)
 * [第三章 汇编语言](ch3-asm/readme.md)
-   * [3.1. 快速入门(Doing)](ch3-asm/ch3-01-basic.md)
+   * [3.1. 快速入门](ch3-asm/ch3-01-basic.md)
    * [3.2. 冯·诺伊曼计算机(TODO)](ch3-asm/ch3-02-arch.md)
    * [3.3. 常量和变量(TODO)](ch3-asm/ch3-03-const-and-var.md)
    * [3.4. 函数(TODO)](ch3-asm/ch3-04-func.md)
