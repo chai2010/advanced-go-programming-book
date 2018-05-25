@@ -24,7 +24,7 @@
 
 划分为 CLD 三层之后，在 C 层我们可能还需要同时支持多种协议。本章前面讲到的 thrift、gRPC 和 http 并不是一定只选择其中一种，有时我们需要支持其中的两种，比如同一个接口，我们既需要效率较高的 thrift，也需要方便 debug 的 http 入口。这样请求的流程会变成下面这样：
 
-TODOTODO，thrift protocol -> controller -> logic -> dao|| http protocol -> controller -> logic -> dao
+![control-flow](../images/ch6-08-control-flow.png)
 
 ```go
 func CreateOrder(ctx context.Context, req *CreateOrderStruct) (*CreateOrderRespStruct, error) {
