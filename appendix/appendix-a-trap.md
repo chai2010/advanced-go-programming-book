@@ -389,7 +389,7 @@ func main() {
 
 上面的程序中后台Goroutine向管道输入自然数序列，main函数中输出序列。但是当break跳出for循环的时候，后台Goroutine就处于无法被回收的状态了。
 
-我们可以通过context包来避免做个问题：
+我们可以通过context包来避免这个问题：
 
 
 ```go
