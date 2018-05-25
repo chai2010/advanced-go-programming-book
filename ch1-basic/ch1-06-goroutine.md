@@ -889,7 +889,7 @@ func main() {
 
 当并发体超时或`main`主动停止工作者Goroutine时，每个工作者都可以安全退出。
 
-Go语言是带内存自动回收的特性，因此内存一般不会泄漏。在前面素数筛的例子中，`GenerateNatural`和`PrimeFilter`函数内部都启动了新的Goroutine，当`main`函数不再使用管道时后台Goroutine有泄漏的风险。我们可以通过`contxt`包来避免做个问题，下面是改进的素数筛实现：
+Go语言是带内存自动回收的特性，因此内存一般不会泄漏。在前面素数筛的例子中，`GenerateNatural`和`PrimeFilter`函数内部都启动了新的Goroutine，当`main`函数不再使用管道时后台Goroutine有泄漏的风险。我们可以通过`context`包来避免做个问题，下面是改进的素数筛实现：
 
 ```go
 // 返回生成自然数序列的管道: 2, 3, 4, ...
