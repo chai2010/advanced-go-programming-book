@@ -127,16 +127,8 @@ type FeatureSetParams struct {
 
 虽然我们成功地使自己的项目在入口支持了多种交互协议，但是还有一些问题没有解决。本节中所叙述的分层没有将 middleware 作为项目的分层考虑进去。如果我们考虑 middleware 的话，请求的流程是什么样的？
 
-TODOTODO，这里是带上 middleware 之后的请求图。
+![control flow 2](../images/ch6-08-control-flow-2.png)
 
-之前我们学习的 middleware 是和 http 协议强相关的，在项目支持了多种协议之后，这种和协议强绑定的 middleware 成为了我们的瓶颈。如果我们坚持用之前的 middleware 方案的话，这里 thrift 的请求路线就还需要再多写一套 thrift 自己的 middleware，将业务无关的代码重复地写了两遍。请求流程变成了这样：
-
-TODOTODO，这里是加入 middleware 之后的多协议框架请求处理流程。
+之前我们学习的 middleware 是和 http 协议强相关的，遗憾的是在 thrift 中看起来没有和 http 中对等的解决这些非功能性逻辑代码重复问题的 middleware。所以我们在图上写 `thrift stuff`。这些 `stuff` 可能需要你手写去实现，然后每次增加一个新的 thrift 接口，就需要去写一遍这些非功能性代码。。
 
 这也是很多企业项目所面临的真实问题，遗憾的是开源界并没有这样方便的多协议 middleware 解决方案。
-
-怎么解决这个问题呢，也不麻烦。把协议处理从 controller 中独立出去，新的 middleware 写在协议处理层后面。如图：
-
-TODOTODO，这里有图，是将 middleware 后置之后的请求处理流程。
-
-是不是感觉项目变的越来越复杂了？真实的项目就是这样一步一步，根据需求演进而来的。
