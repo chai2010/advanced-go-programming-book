@@ -22,20 +22,23 @@
 
 ![controller-logic-dao](../images/ch6-08-controller-logic-dao.png)
 
-划分为 CLD 三层之后，在 C 层我们可能还需要同时支持多种协议。本章前面讲到的 thrift、gRPC 和 http 并不是一定只选择其中一种，有时我们需要支持其中的两种，比如同一个接口，我们既需要效率较高的 thrift，也需要方便 debug 的 http 入口。这样请求的流程会变成下面这样：
+划分为 CLD 三层之后，在 C 层之前我们可能还需要同时支持多种协议。本章前面讲到的 thrift、gRPC 和 http 并不是一定只选择其中一种，有时我们需要支持其中的两种，比如同一个接口，我们既需要效率较高的 thrift，也需要方便 debug 的 http 入口。即除了 CLD 之外，还需要一个单独的 protocol 层，负责处理各种交互协议的细节。这样请求的流程会变成下面这样：
 
 ![control-flow](../images/ch6-08-control-flow.png)
+
+这样我们 controller 中的入口函数就变成了下面这样：
 
 ```go
 func CreateOrder(ctx context.Context, req *CreateOrderStruct) (*CreateOrderRespStruct, error) {
 }
 ```
 
-CreateOrder 有两个参数，ctx 用来传入 trace_id 一类的需要串联请求的全局参数，req 里存储了我们创建订单所需要的所有输入信息。返回结果是一个响应结构体和错误。可以认为，我们的代码运行到 logic 层之后，就没有任何与“协议”相关的代码了。在这里你找不到 http.Request，也找不到 http.ResponseWriter，也找不到任何与 thrift 或者 gRPC 相关的字眼。
+CreateOrder 有两个参数，ctx 用来传入 trace_id 一类的需要串联请求的全局参数，req 里存储了我们创建订单所需要的所有输入信息。返回结果是一个响应结构体和错误。可以认为，我们的代码运行到 controller 层之后，就没有任何与“协议”相关的代码了。在这里你找不到 http.Request，也找不到 http.ResponseWriter，也找不到任何与 thrift 或者 gRPC 相关的字眼。
+
+在 protocol 层，处理 http 协议的大概代码如下：
 
 ```go
-
-// in logic
+// in protocol layer
 type CreateOrderRequest struct {
     OrderID `json:"order_id"`
     // ...
@@ -45,7 +48,7 @@ func HTTPCreateOrderHandler(wr http.ResponseWriter, r *http.Request) {
     var params CreateOrderRequest
     ctx := context.TODO()
     // bind data to req
-    logicResp,err := logic.CreateOrder(ctx, &params)
+    logicResp,err := controller.CreateOrder(ctx, &params)
     if err != nil {}
     // ...
 }
@@ -53,7 +56,7 @@ func HTTPCreateOrderHandler(wr http.ResponseWriter, r *http.Request) {
 
 理论上我们可以用同一个 request struct 组合上不同的 tag，来达到一个 struct 来给不同的协议复用的目的。不过遗憾的是在 thrift 中，request struct 也是通过 IDL 生成的，其内容在自动生成的 ttypes.go 文件中，我们还是需要在 thrift 的入口将这个自动生成的 struct 映射到我们 logic 入口所需要的 struct 上。gRPC 也是类似。这部分代码还是需要的。
 
-聪明的读者可能已经可以看出来了，协议细节处理这一层实际上有大量重复劳动，每一个接口在协议这一层的处理，无非是把数据从协议特定的 struct(例如 http.Request，thrift 的被包装过了) 读出来，再绑定到我们协议相关的 struct 上，再把这个 struct 映射到 logic 入口的 struct 上，这些代码实际上长得都差不多。差不多的代码都遵循着某种模式，那么我们可以对这些模式进行简单的抽象，用 codegen 来把繁复的协议处理代码从工作内容中抽离出去。
+聪明的读者可能已经可以看出来了，协议细节处理这一层实际上有大量重复劳动，每一个接口在协议这一层的处理，无非是把数据从协议特定的 struct(例如 http.Request，thrift 的被包装过了) 读出来，再绑定到我们协议无关的 struct 上，再把这个 struct 映射到 controller 入口的 struct 上，这些代码实际上长得都差不多。差不多的代码都遵循着某种模式，那么我们可以对这些模式进行简单的抽象，用 codegen 来把繁复的协议处理代码从工作内容中抽离出去。
 
 还是举个例子：
 
