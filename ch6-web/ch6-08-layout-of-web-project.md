@@ -38,16 +38,25 @@ CreateOrder 有两个参数，ctx 用来传入 trace_id 一类的需要串联请
 在 protocol 层，处理 http 协议的大概代码如下：
 
 ```go
-// in protocol layer
+// defined in protocol layer
 type CreateOrderRequest struct {
-    OrderID `json:"order_id"`
+    OrderID int64 `json:"order_id"`
     // ...
 }
 
+// defined in controller
+type CreateOrderParams struct {
+    OrderID int64
+}
+
 func HTTPCreateOrderHandler(wr http.ResponseWriter, r *http.Request) {
-    var params CreateOrderRequest
+    var req CreateOrderRequest
+    var params CreateOrderParams
     ctx := context.TODO()
     // bind data to req
+    bind(r, &req)
+    // map protocol binded to protocol-independent
+    map(req, params)
     logicResp,err := controller.CreateOrder(ctx, &params)
     if err != nil {}
     // ...
@@ -58,14 +67,65 @@ func HTTPCreateOrderHandler(wr http.ResponseWriter, r *http.Request) {
 
 聪明的读者可能已经可以看出来了，协议细节处理这一层实际上有大量重复劳动，每一个接口在协议这一层的处理，无非是把数据从协议特定的 struct(例如 http.Request，thrift 的被包装过了) 读出来，再绑定到我们协议无关的 struct 上，再把这个 struct 映射到 controller 入口的 struct 上，这些代码实际上长得都差不多。差不多的代码都遵循着某种模式，那么我们可以对这些模式进行简单的抽象，用 codegen 来把繁复的协议处理代码从工作内容中抽离出去。
 
-还是举个例子：
+先来看看 http 对应的 struct、thrift 对应的 struct 和我们协议无关的 struct 分别长什么样子：
 
 ```go
+// http request struct
+type CreateOrder struct {
+    OrderID int64 `json:"order_id" validate:"required"`
+    UserID int64 `json:"user_id" validate:"required"`
+    ProductID int `json:"prod_id" validate:"required"`
+    Addr string `json:"addr" validate:"required"`
+}
+
+// thrift request struct
+type FeatureSetParams struct {
+    DriverID int64             `thrift:"driverID,1,required"`
+    OrderID int64 `thrift:"OrderID,2,required"`
+    UserID int64 `thrift:"UserID,3,required"`
+    ProductID int `thrift:"ProductID,4,required"`
+    Addr string `thrift:"Addr,5,required"`
+}
+
+// controller input struct
+type CreateOrderParams struct {
+    OrderID int64
+    UserID int64
+    ProductID int
+    Addr string
+}
+
 ```
 
-我们需要一个基准 request struct，来根据这个 request struct 生成我们需要的入口代码。这个基准要怎么找呢？
+我们需要通过一个源 struct 来生成我们需要的 http 和 thrift 入口代码。再观察一下上面定义的三种 struct，实际上我们只要能用一个 struct 生成 thrift 的 IDL，以及 http 服务的 “IDL(实际上就是带 json/form 相关 tag 的 struct 定义)” 就可以了。这个初始的 struct 我们可以把 struct 上的 http 的 tag 和 thrift 的 tag 揉在一起：
 
-我们成功地使自己的项目在入口支持了多种交互协议，但是还有一些问题没有解决。本节中所叙述的分层没有将 middleware 作为项目的分层考虑进去。如果我们考虑 middleware 的话，请求的流程是什么样的？
+```go
+type FeatureSetParams struct {
+    DriverID int64             `thrift:"driverID,1,required" json:"driver_id"`
+    OrderID int64 `thrift:"OrderID,2,required" json:"order_id"`
+    UserID int64 `thrift:"UserID,3,required" json:"user_id"`
+    ProductID int `thrift:"ProductID,4,required" json:"prod_id"`
+    Addr string `thrift:"Addr,5,required" json:"addr"`
+}
+```
+
+然后通过代码生成把 thrift 的 IDL 和 http 的 request struct 都生成出来：
+
+![code gen](../images/ch6-08-code-gen.png)
+
+至于用什么手段来生成，你可以通过 go 语言内置的 parser 读取文本文件中的 Go 源代码，然后根据 ast 来生成目标代码，也可以简单地把这个源 struct 和 generator 的代码放在一起编译，让 struct 作为 generator 的输入参数(这样会更简单一些)，都是可以的。
+
+当然这种思路并不是唯一选择，我们还可以通过解析 thrift 的 IDL，生成一套 http 接口的 struct。如果你选择这么做，那整个流程就变成了这样：
+
+![code gen](../images/ch6-08-code-gen.png)
+
+看起来比之前的图顺畅一点，不过如果你选择了这么做，你需要自行对 thrift 的 IDL 进行解析，也就是相当于可能要手写一个 thrift 的 IDL 的 parser，虽然现在有 antlr 或者 peg 能帮你简化这些 parser 的书写工作，但在“解析”的这一步我们不希望引入太多的工作量，所以量力而行即可。
+
+既然工作流已经成型，我们可以琢磨一下怎么让整个流程对用户更加友好。
+
+比如在前面的生成环境引入 GUI 或者 web 页面，只要让用户点点鼠标就能生成 SDK，这些就靠读者自己去探索了。
+
+虽然我们成功地使自己的项目在入口支持了多种交互协议，但是还有一些问题没有解决。本节中所叙述的分层没有将 middleware 作为项目的分层考虑进去。如果我们考虑 middleware 的话，请求的流程是什么样的？
 
 TODOTODO，这里是带上 middleware 之后的请求图。
 
