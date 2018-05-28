@@ -117,7 +117,7 @@ type FeatureSetParams struct {
 
 当然这种思路并不是唯一选择，我们还可以通过解析 thrift 的 IDL，生成一套 http 接口的 struct。如果你选择这么做，那整个流程就变成了这样：
 
-![code gen](../images/ch6-08-code-gen.png)
+![code gen](../images/ch6-08-code-gen-2.png)
 
 看起来比之前的图顺畅一点，不过如果你选择了这么做，你需要自行对 thrift 的 IDL 进行解析，也就是相当于可能要手写一个 thrift 的 IDL 的 parser，虽然现在有 antlr 或者 peg 能帮你简化这些 parser 的书写工作，但在“解析”的这一步我们不希望引入太多的工作量，所以量力而行即可。
 
