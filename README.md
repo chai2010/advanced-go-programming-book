@@ -12,6 +12,11 @@
 - https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
 - [SUMMARY.md](SUMMARY.md)
 
+## 相关 报告
+
+- 深入CGO编程: https://github.com/chai2010/gopherchina2018-cgo-talk
+
+
 ## 版权声明
 
 [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/)。
