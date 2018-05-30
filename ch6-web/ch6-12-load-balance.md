@@ -31,10 +31,6 @@ var endpoints = []string {
     "100.69.62.101:3232",
 }
 
-func init() {
-    rand.Seed(time.Now().UnixNano())
-}
-
 // 重点在这个 shuffle
 func shuffle(slice []int) {
     for i := 0; i < len(slice); i++ {
@@ -74,6 +70,14 @@ func request(params map[string]interface{}) error {
 
 ## 有没有什么问题？
 
-## 修正后的负载均衡算法
+真的没有问题么？实际上还是有问题的。这段简短的程序里有两个隐藏的隐患:
+
+1. 没有随机种子。在没有随机种子的情况下，rand.Intn 返回的伪随机数序列是固定的。
+
+2. 洗牌不均匀，会导致整个数组第一个节点有大概率被选中，并且多个节点的负载分布不均衡。
+
+第一点比较简单，应该不用在这里给出证明了。关于第二点，我们可以用概率知识来简单证明一下。假设
+
+## 修正后的负载均衡算
 
 ## zk 集群的随机节点挑选问题
