@@ -86,8 +86,8 @@ func request(params map[string]interface{}) error {
 
 ```go
 func shuffle(indexes []int) {
-    lastIdx := len(indexes) - 1
     for i:=len(indexes); i>0; i-- {
+        lastIdx := i - 1
         idx := rand.Int(i)
         indexes[lastIdx], indexes[idx] = indexes[idx], indexes[lastIdx]
     }
@@ -119,4 +119,62 @@ rand.Seed(time.Now().UnixNano())
 
 ## 负载均衡算法效果验证
 
-我们这里不考虑加权负载均衡的情况，既然名字是负载“均衡”。那么最重要的就是均衡。
+我们这里不考虑加权负载均衡的情况，既然名字是负载“均衡”。那么最重要的就是均衡。我们把开篇中的 shuffle 算法，和之后的 fisher yates 算法的结果进行简单地对比：
+
+```go
+package main
+
+import (
+    "fmt"
+    "math/rand"
+    "time"
+)
+
+func init() {
+    rand.Seed(time.Now().UnixNano())
+}
+
+func shuffle1(slice []int) {
+    for i := 0; i < len(slice); i++ {
+        a := rand.Intn(len(slice))
+        b := rand.Intn(len(slice))
+        slice[a], slice[b] = slice[b], slice[a]
+    }
+}
+
+func shuffle2(indexes []int) {
+    for i := len(indexes); i > 0; i-- {
+        lastIdx := i - 1
+        idx := rand.Intn(i)
+        indexes[lastIdx], indexes[idx] = indexes[idx], indexes[lastIdx]
+    }
+}
+
+func main() {
+    var cnt1 = map[int]int{}
+    for i := 0; i < 1000000; i++ {
+        var sl = []int{0, 1, 2, 3, 4, 5, 6}
+        shuffle1(sl)
+        cnt1[sl[0]]++
+    }
+
+    var cnt2 = map[int]int{}
+    for i := 0; i < 1000000; i++ {
+        var sl = []int{0, 1, 2, 3, 4, 5, 6}
+        shuffle2(sl)
+        cnt2[sl[0]]++
+    }
+
+    fmt.Println(cnt1, "\n", cnt2)
+}
+
+```
+
+输出：
+
+```shell
+map[0:224436 1:128780 5:129310 6:129194 2:129643 3:129384 4:129253]
+map[6:143275 5:143054 3:143584 2:143031 1:141898 0:142631 4:142527]
+```
+
+分布结果和我们推导出的理论是一致的。
