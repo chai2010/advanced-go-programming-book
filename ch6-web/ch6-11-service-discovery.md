@@ -22,4 +22,35 @@ ip+port 的组合往往被称为 endpoint。通过“订单服务”去找到这
 
 TODOTODO，这里应该有图
 
+服务名和 endpoints 的对应也很直观，无非 `字符串` -> `endpoint 列表`。
+
+我们自己来设计的话，只需要有一个 kv 存储就可以了。拿 redis 举例，我们可以用 set 来存储 endpoints 列表:
+
+```shell
+redis-cli> sadd order_service.http 100.10.1.15:1002
+redis-cli> sadd order_service.http 100.10.2.11:1002
+redis-cli> sadd order_service.http 100.10.5.121:1002
+redis-cli> sadd order_service.http 100.10.6.1:1002
+redis-cli> sadd order_service.http 100.10.10.1:1002
+redis-cli> sadd order_service.http 100.10.100.11:1002
+```
+
+获取 endpoint 列表也很简单:
+
+```shell
+127.0.0.1:6379> smembers order_service.http
+1) "100.10.1.15:1002"
+2) "100.10.5.121:1002"
+3) "100.10.10.1:1002"
+4) "100.10.100.11:1002"
+5) "100.10.2.11:1002"
+6) "100.10.6.1:1002"
+```
+
+从存储的角度来讲，既然 kv 能存，那几乎所有其它的存储系统都可以存。如果我们对这些数据所在的存储系统可靠性有要求，还可以把这些服务名字和列表的对应关系存储在 MySQL 中，也没有问题。
+
 ## 故障节点摘除
+
+上一小节讲的是存储的问题，在服务发现中，还有一个比较重要的命题，就是故障摘除。之所以开源界有很多服务发现的轮子，也正是因为这件事情并不是把 kv 映射存储下来这么简单。更重要的是我们能够在某个服务节点在宕机时，能够让依赖该节点的其它服务感知得到这个“宕机”的变化，从而不再向其发送任何请求。
+
+最早的解决方案是 zookeeper 的 ephemeral node，java 技术栈的服务发现框架很多是基于此来做故障服务节点摘除。
