@@ -47,6 +47,8 @@
    * [6.5. Database和数据库打交道](ch6-web/ch6-05-database.md)
    * [6.8. Layout大型web项目分层](ch6-web/ch6-08-layout-of-web-project.md)
    * [6.12. Load-balance负载均衡](ch6-web/ch6-12-load-balance.md)
+* [第七章 Go和那些生产力工具](ch7-tools/readme.md)
+   * [7.1. json2go](ch7-tools/ch7-01-json2go.md)
 * [附录](appendix/readme.md)
    * [附录A: Go语言常见坑](appendix/appendix-a-trap.md)
    * [附录B: 参考资料](appendix/appendix-b-ref.md)
