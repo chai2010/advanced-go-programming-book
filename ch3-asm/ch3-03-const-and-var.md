@@ -1,4 +1,4 @@
-# 3.3. 常量和全局变量(Doing)
+# 3.3. 常量和全局变量
 
 程序中的一切变量的初始值都直接或间接地依赖常量或常量表达式生成。在Go语言中很多变量是默认零值初始化的，但是Go汇编中定义的变量最好还是手工通过常量初始化。有了常量之后，就可以定义全局变量，并使用常量组成的表达式初始化全部变量。本节将简单讨论Go汇编语言中常量和全局变量的用法。
 
@@ -126,21 +126,172 @@ DATA ·uint32Value(SB)/4,$0x01020304 // 第1-4字节
 
 ## float型变量
 
-TODO
+Go汇编语言通用无法取区分变量是否是浮点数类型，之上相关的浮点数机器指令会将变量当作浮点数处理。Go语言的浮点数遵循IEEE754标准，有float32单精度浮点数和float64双精度浮点数之分。
+
+IEEE754标准中，最高位1bit为符号位，然后是指数位（指数为采用移码格式表示），然后是有效数部分（其中小数点左边的一个bit位被省略）。下图是IEEE754中float32类型浮点数的bit布局：
+
+![](../images/ch3-03-ieee754.jpg)
+
+IEEE754浮点数还有一些奇妙的特性：比如有正负两个0；除了无穷大和无穷小还有inf非数；同时如果两个浮点数如果有序那么bit对应的整数也是有序的。
+
+下面是在Go语言中先声明两个浮点数（如果没有在汇编中定义变量，那么声明的同时也会定义变量）。
+
+```go
+var float32Value float32
+
+var float64Value float64
+```
+
+然后在汇编中定义并初始化浮点数：
+
+```
+GLOBL ·float32Value(SB),$4
+DATA ·float32Value+0(SB)/4,$1.5      // var float32Value = 1.5
+
+GLOBL ·float64Value(SB),$8
+DATA ·float64Value(SB)/4,$0x01020304 // bit 方式初始化
+```
+
+我们在上一节精简的算术指令中都是针对整数，如果要通过整数指令的处理浮点数加减法必须根据浮点数的运算规则进行：先对齐小数点，然后进行整数加减法，最后再对结果进行归一化并处理精度舍入问题。
+
 
 ## string类型变量
 
-TODO
+从Go汇编语言角度看，字符串只是一种结构体。string的头结构定义如下：
+
+```go
+type reflect.StringHeader struct {
+	Data uintptr
+	Len  int
+}
+```
+
+在amd64环境中StringHeader有16个字节大写，因此我们先在Go代码声明字符串比阿里，然后在汇编中定义一个16字节大小的变量：
+
+```go
+var helloworld string
+```
+
+```
+GLOBL ·helloworld(SB),$16
+```
+
+同时我们可以为字符串准备真正的数据。在下面的汇编代码中，我们定义了一个text当前文件内的私有变量（以`<>`为后缀名），内容为“Hello World!”：
+
+```
+GLOBL text<>(SB),$16
+DATA text<>+0(SB)/8,$"Hello Wo"
+DATA text<>+8(SB)/8,$"rld!"
+```
+
+虽然text私有变量表示的字符串只有12个字符长度，但是我们依然需要将变量的长度扩展为2的指数倍数，这里也就是16个字节的长度。
+
+然后使用text私有变量对应的内存地址来初始化字符串头结构体中的Data部分，并且手工指定Len部分为字符串的长度：
+
+```
+DATA ·helloworld+0(SB)/8,$text<>(SB) // StringHeader.Data
+DATA ·helloworld+8(SB)/8,$12         // StringHeader.Len
+```
+
+需要注意的是，字符串是只读类型，要避免在汇编中直接修改字符串底层数据的内容。
 
 ## slice类型变量
 
-TODO
+slice变量和string变量相似，只不过是对应的是切片头结构体而已。切片头的结构如下：
+
+```go
+type reflect.SliceHeader struct {
+	Data uintptr
+	Len  int
+	Cap  int
+}
+```
+
+对比可以发现，切片的头的前2个成员字符串是一样的。因此我们可以在前面字符串变量的基础上，再扩展一个Cap成员就成了切片类型了：
+
+```go
+var helloworld []byte
+```
+
+```
+GLOBL ·helloworld(SB),$24            // var helloworld []byte("Hello World!")
+DATA ·helloworld+0(SB)/8,$text<>(SB) // StringHeader.Data
+DATA ·helloworld+8(SB)/8,$12         // StringHeader.Len
+DATA ·helloworld+16(SB)/8,$16        // StringHeader.Len
+
+GLOBL text<>(SB),$16
+DATA text<>+0(SB)/8,$"Hello Wo"      // ...string data...
+DATA text<>+8(SB)/8,$"rld!"          // ...string data...
+```
+
+因为切片和字符串的相容性，我们可以将切片头的前16个字节临时作为字符串使用，这样可以省去不必要的转换。
 
 ## map/channel类型变量
 
-TODO
+map/channel等类型并没有公开的内部结构，它们只是一种未知类型的指针，无法直接初始化。在汇编代码中我们只能为类似变量定义并进行0值初始化：
+
+```go
+var m map[string]int
+
+var ch chan int
+```
+
+```
+GLOBL ·m(SB),$8  // var m map[string]int
+DATA  ·m+0(SB)/8,$0
+
+GLOBL ·ch(SB),$8 // var ch chan int
+DATA  ·ch+0(SB)/8,$0
+```
+
+在runtime包其实为汇编提供了一些辅助函数。比如在汇编中可以通过runtime.makemap和runtime.makechan内部函数来创建map和chan变量。辅助函数的签名如下：
+
+```go
+func makemap(mapType *byte, hint int, mapbuf *any) (hmap map[any]any)
+func makechan(chanType *byte, size int) (hchan chan any)
+```
+
+需要注意的是，makemap函数可以创建不同类型的map，map的具体类型是通过mapType参数指定。
+
 
 ## 标识符规则和特殊标志
 
-TODO
+Go语言的标识符可以由绝对的包路径加标识符本身定位，因此不同包中的标识符即使同名也不会有问题。Go汇编是通过特殊的符号来表示斜杠和点符号，因为这样可以简化汇编器词法扫描部分代码的编写，只要通过字符串替换就可以了。
+
+下面是汇编中常见的几种标识符的使用方式（通用也适用于函数标识符）：
+
+```
+GLOBL ·pkg_name1(SB),$1
+GLOBL main·pkg_name2(SB),$1
+GLOBL my/pkg·pkg_name(SB),$1
+```
+
+此外，Go汇编中可以可以定义仅当前文件可以访问的私有标识符（类似C语言中文件内static修饰的变量），以`<>`为后缀名：
+
+```
+GLOBL file_private<>(SB),$1
+```
+
+这样可以减少私有标识符对其它文件内标识符命名的干扰。
+
+此外，Go汇编语言还在"textflag.h"文件定义了一些标志。其中用于变量的标志有个DUPOK、RODATA和NOPTR几个。DUPOK表示该变量对应的标识符可能有多个，在链接时只选择其中一个即可（一般用于合并相同的常量字符串，减少重复数据占用的空间）。RODATA标志表示将变量定义在只读内存段，因此后续任何对此变量的修改操作将导致异常（panic也无法捕获）。NOPTR则表示此变量的内部不含指针数据，让垃圾回收器忽略对该变量的扫描。如果变量已经在Go代码中声明过的话，Go编译器会自动分析出该变量是否包含指针，这种时候可以不用手写NOPTR标志。
+
+下面是通过汇编来定义一个只读的int类型的变量：
+
+```go
+var const_id int // readonly
+```
+
+```
+#include "textflag.h"
+
+GLOBL ·const_id(SB),NOPTR|RODATA,$8
+DATA  ·const_id+0(SB)/8,$9527
+```
+
+我们使用#include语句包含定义标志的"textflag.h"头文件（和C语言中预处理相同）。然后GLOBL汇编命令在定义变量时，给变量增加了NOPTR和RODATA两个标志（多个标志之间采用竖杠分割），表示变量中没有指针数据同时定义在只读代码段。
+
+变量一般是可取地址的值，但是const_id虽然可以取地址，但是确实不能修改。不能修改的限制并不是由编译器提供，而是因为对该变量的修改会导致对只读内存段进行写导致，从而导致异常。
+
+
 
