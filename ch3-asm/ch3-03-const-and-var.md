@@ -76,11 +76,53 @@ DATA ·count+0(SB)/4,$0x01020304
 
 ## bool型变量
 
-TODO
+Go汇编语言定义变量无法指定类型信息，因此需要先通过Go语言声明变量的类型。以下是在Go语言中声明的几个bool类型变量：
+
+```go
+var (
+	boolValue  bool
+	trueValue  bool
+	falseValue bool
+)
+```
+
+在Go语言中声明的变量不能含有初始化语句。然后下面是amd64环境的汇编定义：
+
+```
+GLOBL ·boolValue(SB),$1   // 未初始化
+
+GLOBL ·trueValue(SB),$1   // var trueValue = true
+DATA ·trueValue(SB)/1,$1  // 非 0 均为 true
+
+GLOBL ·falseValue(SB),$1  // var falseValue = true
+DATA ·falseValue(SB)/1,$0
+```
+
+bool类型的内存大小为1个字节。并且汇编中定义的变量需要手工指定初始化值，否则将可能导致产生未初始化的变量。
 
 ## int型变量
 
-TODO
+所有的整数类型均有类似的定义的方式，比较大的差异是整数类型的内存大学和整数是否是有符号。下面是声明的int32和uint32类型变量：
+
+```go
+var int32Value int32
+
+var uint32Value uint32
+```
+
+在Go语言中声明的变量不能含有初始化语句。然后下面是amd64环境的汇编定义：
+
+```
+GLOBL ·int32Value(SB),$4
+DATA ·int32Value+0(SB)/1,$0x01  // 第0字节
+DATA ·int32Value+1(SB)/1,$0x02  // 第1字节
+DATA ·int32Value+2(SB)/2,$0x03  // 第3-4字节
+
+GLOBL ·uint32Value(SB),$4
+DATA ·uint32Value(SB)/4,$0x01020304 // 第1-4字节
+```
+
+汇编定义变量时并不区分整数是否有符号。
 
 ## float型变量
 
