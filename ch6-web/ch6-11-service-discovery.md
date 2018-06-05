@@ -4,7 +4,9 @@
 
 ip+port 的组合往往被称为 endpoint。通过“订单服务”去找到这些 endpoint 的过程，叫做服务发现。选择把请求发送给哪一台机器，以最大化利用下游机器的过程，叫做负载均衡。本节主要讨论服务发现。
 
-## 为什么不用 ip+port 直接连依赖服务？
+## 为什么不把 ip+port 写死在自己的配置文件中
+
+TODO 从系统的演化角度来讲，加图
 
 在大多数公司发展初期，物理机器比较少，内网 ip 也很少。一些创业公司虽然开发人员众多，但因为业务限制，每一个服务的 QPS 都不高。因此确实有很多公司服务之间是通过 ip+port 来进行相互调用的。再原始一些的话，甚至可能所有服务都在一个工程下，那也就没有什么依赖问题了。
 
@@ -66,3 +68,20 @@ redis-cli> sadd order_service.http 100.10.100.11:1002
 被动故障摘除，顾名思义。依赖出问题了要别人通知我。这个通知一般通过服务注册中心发给我。
 
 被动故障摘除，最早的解决方案是 zookeeper 的 ephemeral node，java 技术栈的服务发现框架很多是基于此来做故障服务节点摘除。
+
+TODO，这里是 go-zookeeper 的临时节点使用 demo。
+
+比如我们是电商的平台部的订单系统，那么可以建立类似这样的永久节点:
+
+```shell
+/platform/order-system/create-order-service-http
+```
+
+然后把我们的 endpoints 作为临时节点，建立在上述节点之下:
+
+
+```shell
+ls /platform/order-system/create-order-service-http
+
+[]
+```
