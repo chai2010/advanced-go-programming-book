@@ -44,9 +44,90 @@ func Add() (a []int) // reflect.SliceHeader 切片头刚好也是 3 个 int 成�
 
 ## 函数参数和返回值
 
-<!-- 代码中有栈的布局注释 -->
+对于函数来说，最重要是是函数对外提供的API约定，包含函数的名称、参数和返回值。当名称和参数返回都确定之后，如何精确计算参数和返回值的大小是第一个需要解决的问题。
 
-TODO
+比如有一个Foo函数的签名如下：
+
+```go
+func Foo(a, b int) (c int)
+```
+
+对于这个函数，我们可以轻易看出它需要3个int类型的空间，参数和返回值的大小也就是24个字节：
+
+```
+TEXT ·Foo(SB), $0-24
+```
+
+那么如何在汇编中引用这3个参数呢？为此Go汇编中引入了一个FP伪寄存器，表示函数当前帧的地址，也就是第一个参数的地址。因此我们以通过`+0(FP)`、`+8(FP)`和`+16(FP)`来分别引用a、b、c三个参数。
+
+但是在汇编代码中，我们并不能直接使用`+0(FP)`来使用参数。为了编写易于维护的汇编代码，Go汇编语言要求，任何通过FP寄存器访问的变量必和一个临时标识符前缀组合后才能有效，一般使用参数对应的变量名作为前缀。
+
+下面的代码演示了如何在汇编函数中使用参数和返回值：
+
+```
+TEXT ·Foo(SB), $0
+	MOVEQ a+0(FP), AX  // a
+	MOVEQ b+8(FP), BX  // b
+	MOVEQ c+16(FP), CX // c
+	RET
+```
+
+如果是参数和返回值类型比较复杂的情况改如何处理呢？下面我们再尝试一个更复杂的函数参数和返回值的计算。比如有以下一个函数：
+
+```go
+func SomeFunc(a, b int, c bool) (d float64, err error) int
+```
+
+函数的参数有不同的类型，同时含义多个返回值，而且返回值中含有更复杂的接口类型。我们该如何计算每个参数的位置和总的大小呢？
+
+其实函数参数和返回值的大小以及对齐问题和结构体的大小和成员对齐问题是一致的。我们先看看如果用Go语言函数来模拟Foo函数中参数和返回值的地址：
+
+```go
+func Foo(FP *struct{a, b, c int}) {
+	_ = unsafe.Offsetof(FP.a) + uintptr(FP) // a
+	_ = unsafe.Offsetof(FP.b) + uintptr(FP) // b
+	_ = unsafe.Offsetof(FP.c) + uintptr(FP) // c
+
+	_ = unsafe.Sizeof(*FP) // argsize
+
+	return
+}
+```
+
+我们尝试将全部的参数和返回值以同样的顺序放到一个结构体中，将FP伪寄存器作为唯一的一个指针参数，而每个成员的地址也就是对应原来参数的地址。
+
+用同样的策略可以很容易计算前面的SomeFunc函数的参数和返回值的地址和总大小。
+
+因为SomeFunc函数的参数比较多，我们临时定一个`SomeFunc_args_and_returns`结构体用于对应参数和返回值：
+
+```go
+type SomeFunc_args_and_returns struct {
+	a int
+	b int
+	c bool
+	d float64
+	e error
+}
+```
+
+然后将SomeFunc原来的参数替换为结构体形式，并且只保留唯一的FP作为参数：
+
+```go
+func SomeFunc(FP *SomeFunc_args_and_returns) {
+	_ = unsafe.Offsetof(FP.a) + uintptr(FP) // a
+	_ = unsafe.Offsetof(FP.b) + uintptr(FP) // b
+	_ = unsafe.Offsetof(FP.c) + uintptr(FP) // c
+	_ = unsafe.Offsetof(FP.d) + uintptr(FP) // d
+	_ = unsafe.Offsetof(FP.e) + uintptr(FP) // e
+
+	_ = unsafe.Sizeof(*FP) // argsize
+
+	return
+}
+```
+
+代码完全和Foo函数参数的方式类似。唯一的差异是每个函数的偏移量，这有`unsafe.Offsetof`函数自动计算生成。因为Go结构体中的每个成员已经满足了对齐要求，因此采用通用方式得到每个参数的偏移量也是满足对齐要求的。
+
 
 ## 函数中的局部变量
 
