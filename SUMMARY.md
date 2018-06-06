@@ -37,7 +37,7 @@
    * [3.12. AVX/SSE/JIT高级优化(TODO)](ch3-asm/ch3-12-avx-sse-jit.md)
    * [3.13. ARM汇编(TODO)](ch3-asm/ch3-13-arm.md)
    * [3.14. 补充说明(TODO)](ch3-asm/ch3-14-faq.md)
-* [第四章 Go&JS编程(TODO)](ch4-js/readme.md)
+* [第四章 RPC(TODO)](ch4-rpc/readme.md)
 * [第五章 移动平台(TODO)](ch5-mobile/readme.md)
 * [第六章 Go和Web](ch6-web/readme.md)
    * [6.1. Web开发简介](ch6-web/ch6-01-introduction.md)
