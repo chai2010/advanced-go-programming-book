@@ -27,7 +27,7 @@
    * [3.2. 计算机结构](ch3-asm/ch3-02-arch.md)
    * [3.3. 常量和全局变量](ch3-asm/ch3-03-const-and-var.md)
    * [3.4. 函数](ch3-asm/ch3-04-func.md)
-   * [3.5. 控制流(Doing)](ch3-asm/ch3-05-control-flow.md)
+   * [3.5. 控制流](ch3-asm/ch3-05-control-flow.md)
    * [3.6. 再论函数(TODO)](ch3-asm/ch3-06-func-again.md)
    * [3.7. FUNCDATA和PCDATA(TODO)](ch3-asm/ch3-07-funcdata-pcdata.md)
    * [3.8. C预处理器(TODO)](ch3-asm/ch3-08-c-preprocessors.md)

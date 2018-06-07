@@ -1,4 +1,4 @@
-# 3.5. 控制流(Doing)
+# 3.5. 控制流
 
 程序执行的流程主要有顺序、分支和循环几种执行流程。本节主要讨论如何将Go语言的控制流比较直观地转译为汇编程序，或者说如何以汇编思维来编写Go语言代码。
 
@@ -133,11 +133,12 @@ func If(ok bool, a, b int) int {
 func If(ok int, a, b int) int {
 	if ok == 0 { goto L }
 	return a
-L:	return b
+L:
+	return b
 }
 ```
 
-因为汇编语言中没有bool类型，我们改用int类型代替bool类型。当ok参数非0时返回变量a，否则返回变量b。我们将ok的逻辑反转下：当ok参数为0时，表示返回b，否则返回变量a。在if语句中，当ok参数为0时goto到L标号指定的语句，也就是返回变量b。如果if条件不满足，也就考试ok残非0，执行后门的语句返回变量a。
+因为汇编语言中没有bool类型，我们改用int类型代替bool类型（真实的汇编是用byte表示bool类型，可以通过MOVBQZX指令加载byte类型的值）。当ok参数非0时返回变量a，否则返回变量b。我们将ok的逻辑反转下：当ok参数为0时，表示返回b，否则返回变量a。在if语句中，当ok参数为0时goto到L标号指定的语句，也就是返回变量b。如果if条件不满足，也就考试ok残非0，执行后门的语句返回变量a。
 
 上述函数的实现已经非常接近汇编语言，下面是改为汇编实现的代码：
 
@@ -163,4 +164,78 @@ L:
 
 ## for循环
 
-TODO
+Go语言的for循环有多种用法，我们这里只选择最经典的for结构来讨论。经典的for循环由初始化、结束条件、迭代步长三个部分组成，再配合循环体内部的if条件语言，这种for结构可以模拟其它各种循环类型。
+
+基于经典的for循环结构，我们定一个一个LoopAdd函数，可以用于计算任意等差数列的和：
+
+```go
+func LoopAdd(cnt, v0, step int) int {
+	result := v0
+	for i := 0; i < cnt; i++ {
+		result += step
+	}
+	return result
+}
+```
+
+比如`1+2+...+100`可以这样计算`LoopAdd(100, 1, 1)`，`10+8+...+0`可以这样计算`LoopAdd(5, 10, -2)`。现在采用前面`if/goto`类似的技术来改造for循环。
+
+新的LoopAdd函数只有if/goto语句构成：
+
+```go
+
+func LoopAdd(cnt, v0, step int) int {
+	var i = 0
+	var result = 0
+
+LOOP_INIT:
+	result = v0
+
+LOOP_IF:
+	if i < cnt { goto LOOP_BODY }
+	goto LOOP_END
+
+LOOP_BODY
+	i = i+1
+	result = result + step
+	goto LOOP_IF
+
+LOOP_END:
+
+	return result
+}
+```
+
+函数的开头先定义两个局部变量便于后续代码使用。然后将for语句的初始化、结束条件、迭代步长三个部分拆分为三个代码段，分别用LOOP_INIT、LOOP_IF、LOOP_BODY三个标号表示。其中LOOP_INIT循环初始化部分只会执行一次，因此该标号并不会被引用，可以省略。最后LOOP_END语句表示for循环的结束。四个标号分隔出的三个代码段分别对应for循环的初始化语句、循环条件和循环体，其中迭代语句被合并到循环体中了。
+
+下面用汇编语言重新实现LoopAdd函数
+
+```
+// func LoopAdd(cnt, v0, step int) int
+TEXT ·LoopAdd(SB), NOSPLIT, $0-32
+	MOVQ cnt+0(FP), AX   // cnt
+	MOVQ v0+8(FP), BX    // v0/result
+	MOVQ step+16(FP), CX // step
+
+LOOP_INIT:
+	MOVQ $0, DX          // i
+
+LOOP_IF:
+	CMPQ DX, AX          // compare i, cnt
+	JL   LOOP_BODY       // if i < cnt: goto LOOP_BODY
+	goto LOOP_END
+
+LOOP_BODY:
+	ADDQ $1, DX          // i++
+	ADDQ CX, BX          // result += step
+	goto LOOP_IF
+
+LOOP_END:
+
+	MOVQ BX, ret+24(FP)  // return result
+	RET
+```
+
+其中v0和result变量复用了一个BX寄存器。在LOOP_INIT标号对应的指令部分，用MOVQ将DX寄存器初始化为0，DX对应变量i，循环的迭代变量。在LOOP_IF标号对应的指令部分，使用CMPQ指令比较AX和AX，如果循环没有结束则跳转到LOOP_BODY部分，否则跳转到LOOP_END部分结束循环。在LOOP_BODY部分，更新迭代变量并且执行循环体中到累加语句，然后直接跳转到LOOP_IF部分进入下一轮循环条件判断。LOOP_END标号之后就是返回返回累加结果到语句。
+
+循环是最复杂到控制流，循环中隐含了分支和跳转语句。掌握了循环到下方基本也就掌握了汇编语言到写法。掌握规律之后，其实汇编语言编程会变得异常简单。
