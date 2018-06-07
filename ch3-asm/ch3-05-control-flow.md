@@ -188,7 +188,7 @@ func LoopAdd(cnt, v0, step int) int {
 	var i = 0
 	var result = 0
 
-LOOP_INIT:
+LOOP_BEGIN:
 	result = v0
 
 LOOP_IF:
@@ -206,7 +206,7 @@ LOOP_END:
 }
 ```
 
-函数的开头先定义两个局部变量便于后续代码使用。然后将for语句的初始化、结束条件、迭代步长三个部分拆分为三个代码段，分别用LOOP_INIT、LOOP_IF、LOOP_BODY三个标号表示。其中LOOP_INIT循环初始化部分只会执行一次，因此该标号并不会被引用，可以省略。最后LOOP_END语句表示for循环的结束。四个标号分隔出的三个代码段分别对应for循环的初始化语句、循环条件和循环体，其中迭代语句被合并到循环体中了。
+函数的开头先定义两个局部变量便于后续代码使用。然后将for语句的初始化、结束条件、迭代步长三个部分拆分为三个代码段，分别用LOOP_BEGIN、LOOP_IF、LOOP_BODY三个标号表示。其中LOOP_BEGIN循环初始化部分只会执行一次，因此该标号并不会被引用，可以省略。最后LOOP_END语句表示for循环的结束。四个标号分隔出的三个代码段分别对应for循环的初始化语句、循环条件和循环体，其中迭代语句被合并到循环体中了。
 
 下面用汇编语言重新实现LoopAdd函数
 
@@ -217,7 +217,7 @@ TEXT ·LoopAdd(SB), NOSPLIT, $0-32
 	MOVQ v0+8(FP), BX    // v0/result
 	MOVQ step+16(FP), CX // step
 
-LOOP_INIT:
+LOOP_BEGIN:
 	MOVQ $0, DX          // i
 
 LOOP_IF:
@@ -236,6 +236,6 @@ LOOP_END:
 	RET
 ```
 
-其中v0和result变量复用了一个BX寄存器。在LOOP_INIT标号对应的指令部分，用MOVQ将DX寄存器初始化为0，DX对应变量i，循环的迭代变量。在LOOP_IF标号对应的指令部分，使用CMPQ指令比较AX和AX，如果循环没有结束则跳转到LOOP_BODY部分，否则跳转到LOOP_END部分结束循环。在LOOP_BODY部分，更新迭代变量并且执行循环体中到累加语句，然后直接跳转到LOOP_IF部分进入下一轮循环条件判断。LOOP_END标号之后就是返回返回累加结果到语句。
+其中v0和result变量复用了一个BX寄存器。在LOOP_BEGIN标号对应的指令部分，用MOVQ将DX寄存器初始化为0，DX对应变量i，循环的迭代变量。在LOOP_IF标号对应的指令部分，使用CMPQ指令比较AX和AX，如果循环没有结束则跳转到LOOP_BODY部分，否则跳转到LOOP_END部分结束循环。在LOOP_BODY部分，更新迭代变量并且执行循环体中到累加语句，然后直接跳转到LOOP_IF部分进入下一轮循环条件判断。LOOP_END标号之后就是返回返回累加结果到语句。
 
 循环是最复杂到控制流，循环中隐含了分支和跳转语句。掌握了循环到下方基本也就掌握了汇编语言到写法。掌握规律之后，其实汇编语言编程会变得异常简单。
