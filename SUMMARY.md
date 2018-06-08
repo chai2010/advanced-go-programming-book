@@ -28,7 +28,7 @@
    * [3.3. 常量和全局变量](ch3-asm/ch3-03-const-and-var.md)
    * [3.4. 函数](ch3-asm/ch3-04-func.md)
    * [3.5. 控制流](ch3-asm/ch3-05-control-flow.md)
-   * [3.6. 再论函数(Doing)](ch3-asm/ch3-06-func-again.md)
+   * [3.6. 再论函数](ch3-asm/ch3-06-func-again.md)
    * [3.7. Go核心对象结构(TODO)](ch3-asm/ch3-07-core-type.md)
    * [3.8. runtime内置函数(TODO)](ch3-asm/ch3-08-runtime-func.md)
    * [3.9. 调用C函数(TODO)](ch3-asm/ch3-09-call-c-leaf-func.md)

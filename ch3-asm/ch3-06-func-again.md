@@ -1,4 +1,4 @@
-# 3.6. 再论函数(Doing)
+# 3.6. 再论函数
 
 在前面的章节中我们已经简单讨论过Go的汇编函数，但是那些主要是叶子函数。叶子函数的最大特点是不会调用其他函数，也就是栈的大小是可以预期的，叶子函数也就是可以基本忽略爆栈的问题（如果已经爆了，那也是上级函数的问题）。如果没有爆栈问题，那么也就是不会有栈的分裂问题；如果没有栈的分裂也就不需要移动栈上的指针，也就不会有栈上指针管理的问题。但是是现实中Go语言的函数是可以任意深度调用的，永远不用担心爆栈的风险。那么这些近似黑科技的特殊是如何通过低级的汇编语言实现的呢？这些都是本节尝试讨论的问题。
 
@@ -139,10 +139,101 @@ type stack struct {
 
 以上是栈的扩容，但是栈到收缩是在何时处理到呢？我们知道Go运行时会定期进行垃圾回收操作，这其中栈的回收工作。如果栈使用到比例小于一定到阈值，则分配一个较小到栈空间，然后将栈上面到数据移动到新的栈中，栈移动的过程和栈扩容的过程类似。
 
-## PCDATA和PCDATA
+## PCDATA和FUNCDATA
 
-TODO
+Go语言中有个runtime.Caller函数可以获取当前函数的调用者列表。我们可以非常容易在运行时定位每个函数的调用位置，以及函数的调用链。因此在panic异常或用log输出信息时，可以精确定位代码的位置。
+
+比如以下代码可以打印程序的启动流程：
+
+```go
+func main() {
+	for skip := 0; ; skip++ {
+		pc, file, line, ok := runtime.Caller(skip)
+		if !ok {
+			break
+		}
+
+		p := runtime.FuncForPC(pc)
+		fnfile, fnline := p.FileLine(0)
+
+		fmt.Printf("skip = %d, pc = 0x%08X\n", skip, pc)
+		fmt.Printf("  func: file = %s, line = L%03d, name = %s, entry = 0x%08X\n", fnfile, fnline, p.Name(), p.Entry())
+		fmt.Printf("  call: file = %s, line = L%03d\n", file, line)
+	}
+}
+```
+
+其中runtime.Caller先获取当时的PC寄存器值，以及文件和行号。然后根据PC寄存器表示的指令位置，通过runtime.FuncForPC函数获取函数的基本信息。Go语言是如何实现这种特性的呢？
+
+Go语言作为一终静态编译型语言，在执行时每个函数的地址都是固定的，函数的每条指令也时固定的。如果针对每个函数和函数的每个指令生成一个地址表格（也叫PC表格），那么在运行时我们就可以根据PC寄存器的值轻松查询到指令当时对应的函数和位置信息。而Go语言也时采用类似的策略，只不过地址表格经过裁剪，舍弃了不必要的信息。因为要在运行时获取任意一个地址的位置，必然是要有一个函数调用，因此我们只需要为函数的开始和结束位置，以及每个函数调用位置生成地址表格就可以了。同时地址是有大小顺序的，在排序后可以通过只记录增量来减少数据的大小；在查询时可以通过二分法加快查找的速度。
+
+在汇编中有个PCDATA用于生成PC表格，PCDATA的指令用法为：`PCDATA tableid, tableoffset`。PCDATA有个两个参数，第一个参数为表格的类型，第二个是表格的地址。在目前的实现中，有PCDATA_StackMapIndex和PCDATA_InlTreeIndex两种表格类型。两种表格的数据是类似的，应该包含了代码所在的文件路径、行号和函数的信息，只不过PCDATA_InlTreeIndex用于内內联函数的表格。
+
+此外对于汇编函数中返回值包含指针的类型，在返回值指针被初始化之后需要执行一个GO_RESULTS_INITIALIZED指令：
+
+```c
+#define GO_RESULTS_INITIALIZED	PCDATA $PCDATA_StackMapIndex, $1
+```
+
+GO_RESULTS_INITIALIZED记录的也是PC表格的信息，表示PC指针越过某个地址之后返回值才完成被初始化的状态。
+
+Go语言二进制文件中除了有PC表格，还有FUNC表格用于记录函数的参数、局部变量的指针信息。FUNCDATA指令和PCDATA的格式类似：`FUNCDATA tableid, tableoffset`，第一个参数为表格的类型，第二个是表格的地址。目前的实现中定义了三种FUNC表格类型：FUNCDATA_ArgsPointerMaps表示函数参数的指针信息表，FUNCDATA_LocalsPointerMaps表示局部指针信息表，FUNCDATA_InlTree表示被内联展开的指针信息表。通过FUNC表格，Go语言的垃圾回收器可以跟踪全部指针的生命周期，同时根据指针指向的地址在是否被移动的栈范围来确定是否要进行指针移动。
+
+在前面递归函数的例子中，我们遇到一个NO_LOCAL_POINTERS宏。它的定义如下：
+
+```c
+#define FUNCDATA_ArgsPointerMaps 0 /* garbage collector blocks */
+#define FUNCDATA_LocalsPointerMaps 1
+#define FUNCDATA_InlTree 2
+
+#define NO_LOCAL_POINTERS FUNCDATA $FUNCDATA_LocalsPointerMaps, runtime·no_pointers_stackmap(SB)
+```
+
+因此NO_LOCAL_POINTERS宏表示的是FUNCDATA_LocalsPointerMaps对应的局部指针表格，而runtime·no_pointers_stackmap是一个空的指针表格，也就是表示函数没有指针类型的局部变量。
+
+PCDATA和FUNCDATA的数据一般是由编译器自动生成的，手工编写并不现实。如果函数已经有Go语言声明，那么编译器可以自动输出参数和返回值的指针表格。同时所有的函数调用一般是对应CALL指令，编译器也是可以辅助生成PCDATA表格的。编译器唯一无法自动生成是函数局部变量的表格，因此我们一般要在汇编函数的局部变量中谨慎使用指针类型。
+
+对于PCDATA和FUNCDATA细节敢兴趣的同学可以尝试从debug/gosym包入手，参考包的实现和测试代码。
+
 
 ## 方法函数
 
-TODO
+Go语言中方法函数和全局函数非常相似，比如有以下的方法：
+
+```go
+package main
+
+type MyInt int
+
+func (v MyInt) Twice() int {
+	return int(v)*2
+}
+
+func MyInt_Twice(v MyInt) int {
+	return int(v)*2
+}
+```
+
+其中MyInt类型的Twice方法和MyInt_Twice函数的类型是完全一样的，只不过Twice在目标文件中被修饰为`main.MyInt.Twice`名称。我们可以用汇编实现该方法函数：
+
+```
+// func (v MyInt) Twice() int
+TEXT ·MyInt·Twice(SB), NOSPLIT, $0-16
+	MOVQ a+0(FP), AX   // v
+	MOVQ AX, AX        // AX *= 2
+	MOVQ AX, ret+8(FP) // return v
+	RET
+```
+
+不过这只是最多非指针类型的解释函数。现在增加一个接收参数是指针类型的Ptr方法，指针返回传入的指针：
+
+```go
+func (p *MyInt) Ptr() *MyInt {
+	return p
+}
+```
+
+在目标文件中，Ptr方法名被修饰为`main.(*MyInt).Ptr`，也就是对应汇编中的`·(*MyInt)·Ptr`。不过在Go汇编语言中，星号和小括弧都无法用作函数名字，也就是无法用汇编直接实现接收参数是指针类型的方法。
+
+在最终的目标文件中的标识符名字中还有很多Go汇编语言不支持的特殊符号（比如`type.string."hello"`中的双引号），这导致了无法通过手写的汇编代码实现全部的特性。或许是Go语言官方故意限制了汇编语言的特性。
+
