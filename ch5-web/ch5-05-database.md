@@ -1,4 +1,4 @@
-# 6.4. Database 和数据库打交道
+# 5.4. Database 和数据库打交道
 
 本节将对 db/sql 官方标准库作一些简单分析，并介绍一些应用比较广泛的开源 orm 和 sql builder。并从企业级应用开发和公司架构的角度来分析哪种技术栈对于现代的企业级应用更为合适。
 
@@ -151,7 +151,7 @@ num, err := o.QueryTable("cardgroup").Filter("Cards__Card__Name", cardName).All(
 除了 limit 的问题，我们再看一遍这个 beego orm 的查询：
 
 ```go
-num, err := o.QueryTable("cardgroup").Filter("Cards__Card__Name", cardName).All(&cardgroups) 
+num, err := o.QueryTable("cardgroup").Filter("Cards__Card__Name", cardName).All(&cardgroups)
 ```
 
 你可以看得出来这个 Filter 是有表 join 的操作么？当然了，对 beego orm 有过深入使用经验的用户还是会觉得这是在吹毛求疵。但这样的分析想证明的是，orm 想从设计上隐去太多的细节。而方便的代价是其背后的运行完全失控。这样的项目在经过几任维护人员之后，将变得面目全非，难以维护。

@@ -1,4 +1,4 @@
-# 6.4. validator 请求校验
+# 5.4. validator 请求校验
 
 社区里曾经有人用这张图来嘲笑 PHP：
 

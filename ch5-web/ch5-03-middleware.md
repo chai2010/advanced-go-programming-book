@@ -1,4 +1,4 @@
-# 6.3. middleware 中间件
+# 5.3. middleware 中间件
 
 本章将对现在流行的 web 框架中的中间件技术原理进行分析，并介绍如何使用中间件技术将业务和非业务代码功能进行解耦。
 
@@ -267,7 +267,7 @@ logger.go
 profiler.go
   => 挂载 pprof 需要的路由，如 /pprof、/pprof/trace 到系统中
 realip.go
-  => 从请求头中读取 X-Forwarded-For 和 X-Real-IP，将 http.Request 中的 RemoteAddr 修改为得到的 RealIP 
+  => 从请求头中读取 X-Forwarded-For 和 X-Real-IP，将 http.Request 中的 RemoteAddr 修改为得到的 RealIP
 requestid.go
   => 为本次请求生成单独的 requestid，可一路透传，用来生成分布式调用链路，也可用于在日志中串连单次请求的所有逻辑
 timeout.go
