@@ -1,4 +1,4 @@
-# 5.8. layout 常见大型 web 项目分层
+# 5.7. layout 常见大型 web 项目分层
 
 流行的 web 框架大多数是 MVC 框架，MVC 这个概念最早由 Trygve Reenskaug 在 1978 年提出，为了能够对 GUI 类型的应用进行方便扩展，将程序划分为：
 
