@@ -77,6 +77,25 @@ if err != nil {
 
 在节点管理时，会对 Unhealthy 过多的节点进行摘除，这个过程可以在 Unhealthy 的数量超过一定的阈值之后自动触发，也就是在 Vote 函数中实现即可。
 
+如果你选择用应用层心跳，那需要下游提供 healthcheck 的接口，这个接口一般就简单返回 success 就可以了。上游要做的事情就是每隔一小段时间，去请求 healthcheck 接口，如果超时、响应失败，那么就把该节点摘除:
+
+```go
+healthcheck := func(endpoint string) {
+    for {
+        time.Sleep(time.Second * 10)
+
+        resp, err := callRemoteHealthcheckAPI(endpoint)
+        if err != nil {
+            dropThisAPINode()
+        }
+    }
+}()
+
+for _, endpoint := range endpointList {
+    go healthcheck(endpoint)
+}
+```
+
 被动故障摘除，顾名思义。依赖出问题了要别人通知我。这个通知一般通过服务注册中心发给我。
 
 被动故障摘除，最早的解决方案是 zookeeper 的 ephemeral node，java 技术栈的服务发现框架很多是基于此来做故障服务节点摘除。
@@ -102,7 +121,9 @@ ls /platform/order-system/create-order-service-http
 ```go
 ```
 
-有了临时节点、监视功能、故障时的自动摘除功能，我们实现一套服务发现的基本元件也就齐全了。
+有了临时节点、监视功能、故障时的自动摘除功能，我们实现一套服务发现以及故障节点摘除的基本元件也就齐全了。
+
+目前在企业级应用中，上述几种故障摘除方案都是存在的。读者朋友可以根据自己公司的发展阶段，灵活选用对应的方案。需要明白的一点是，并非一定要有 zk、etcd 这样的组件才能完成故障摘除。
 
 ## 服务发现究竟应该是 CP 还是 AP 系统
 
@@ -112,4 +133,10 @@ ls /platform/order-system/create-order-service-http
 
 TODO，网络分区示例图
 
+如果分区之后再分区，那我们可能都无法从注册中心拿到任何数据了，服务之间的连通性也就无从谈起了。
+
 当几千或者上万个服务同时依赖同一个下游服务时，这些服务对应的万级以上的机器实例都需要对服务注册中心的依赖服务的注册节点进行监视。该依赖服务一旦发生 endpoint 变动，就会产生广播风暴。
+
+## eureka 新时代的服务发现
+
+eureka 是大名鼎鼎的 Netflix 公司对服务发现场景重新思考的结果。和传统的服务发现工具相比，eureka 将 CP 改为了 AP。
