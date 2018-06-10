@@ -117,6 +117,77 @@ func isTrue(phone string) bool {
 
 ## 如何实现一套灰度发布系统
 
+前面也提到了，提供给用户的接口大概可以分为和业务绑定的简单灰度判断逻辑。以及输入稍微复杂一些的哈希灰度。我们来分别看看怎么实现这样的灰度系统(函数)。
+
+### 业务相关的简单灰度
+
+公司内一般都会有公共的城市名字和 id 的映射关系，如果业务只涉及中国国内，那么城市数量不会特别多，且 id 可能都在 10000 范围以内。那么我们只要开辟一个一万大小左右的 bool 数组，就可以满足需求了：
+
+```go
+var cityID2Open = [12000]bool{}
+
+func init() {
+    readConfig()
+    for i:=0;i<len(cityID2Open);i++ {
+        if city i is opened in configs {
+            cityID2Open = true
+        }
+    }
+}
+
+func isPassed(cityID int) bool {
+    return cityID2Open[cityID]
+}
+```
+
+如果公司给 cityID 赋的值比较大，那么我们可以考虑用 map 来存储映射关系，map 的查询比数组稍慢，但扩展会灵活一些：
+
+```go
+var cityID2Open = map[int]struct{}{}
+
+func init() {
+    readConfig()
+    for _, city := range openCities {
+        cityID2Open[city] = struct{}{}
+    }
+}
+
+func isPassed(cityID int) bool {
+    if _, ok := cityID2Open[cityID]; ok {
+        return true
+    }
+
+    return false
+}
+
+```
+
+按白名单、按业务线、按 UA、按分发渠道发布，本质上和按城市发布是一样的，这里就不再赘述了。
+
+按概率发布稍微特殊一些，不过不考虑输入实现起来也很简单：
+
+```go
+
+func init() {
+    rand.Seed(time.Now().UnixNano())
+}
+
+// rate 为 0~100
+func isPassed(rate int) bool {
+    if rate >= 100 {
+        return true
+    }
+
+    if rate > 0 && rand.Int(100) > rate {
+        return true
+    }
+
+    return false
+}
+```
+
+注意初始化种子。
+
 ### 哈希算法
 
 求哈希可用的算法非常多，比如 md5，crc32，sha1 等等，但我们这里的目的只是为了给这些数据做个映射，并不想要因为计算哈希消耗过多的 cpu，所以现在业界使用较多的算法是 murmurhash，下面是我们对这些常见的 hash 算法的简单 benchmark，可见 murmurhash 的优势很大：
@@ -124,4 +195,6 @@ func isTrue(phone string) bool {
 ```go
 ```
 
-### 分布是否均匀
+#### 分布是否均匀
+
+对于哈希算法来说，最重要的就是在真实业务场景下是否分布均匀的问题。
