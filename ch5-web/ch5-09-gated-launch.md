@@ -270,4 +270,37 @@ ok  	_/Users/caochunhui/test/go/hash_bench	7.050s
 
 #### 分布是否均匀
 
-对于哈希算法来说，最重要的就是在真实业务场景下是否分布均匀的问题。
+对于哈希算法来说，性能是一方面的问题，另一方面还要考虑哈希后的值是否分布均匀。
+
+我们先以 15810000000 开头，造一千万个和手机号类似的数字，然后将计算后的哈希值分十个桶，并观察计数是否均匀：
+
+```go
+package main
+
+import (
+    "fmt"
+
+    "github.com/spaolacci/murmur3"
+)
+
+var bucketSize = 10
+
+func main() {
+    var bucketMap = map[uint32]int{}
+    for i := 15000000000; i < 15000000000+10000000; i++ {
+        hashInt := murmur64(fmt.Sprint(i)) % bucketSize
+        bucketMap[hashInt]++
+    }
+    fmt.Println(bucketMap)
+}
+
+func murmur32(p string) uint64 {
+    return murmur3.Sum64([]byte(p))
+}
+```
+
+```shell
+map[7:999475 5:1000359 1:999945 6:1000200 3:1000193 9:1000765 2:1000044 4:1000343 8:1000823 0:997853]
+```
+
+偏差基本都在 1/100 以内，是可以接受的。
