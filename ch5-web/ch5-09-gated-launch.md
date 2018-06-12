@@ -190,10 +190,83 @@ func isPassed(rate int) bool {
 
 ### 哈希算法
 
-求哈希可用的算法非常多，比如 md5，crc32，sha1 等等，但我们这里的目的只是为了给这些数据做个映射，并不想要因为计算哈希消耗过多的 cpu，所以现在业界使用较多的算法是 murmurhash，下面是我们对这些常见的 hash 算法的简单 benchmark，可见 murmurhash 的优势很大：
+求哈希可用的算法非常多，比如 md5，crc32，sha1 等等，但我们这里的目的只是为了给这些数据做个映射，并不想要因为计算哈希消耗过多的 cpu，所以现在业界使用较多的算法是 murmurhash，下面是我们对这些常见的 hash 算法的简单 benchmark：
+
+hash.go:
 
 ```go
+package main
+
+import "crypto/md5"
+import "crypto/sha1"
+import "github.com/spaolacci/murmur3"
+
+var str = "hello world"
+
+func md5Hash() [16]byte {
+    return md5.Sum([]byte(str))
+}
+
+func sha1Hash() [20]byte {
+    return sha1.Sum([]byte(str))
+}
+
+func murmur32() uint32 {
+    return murmur3.Sum32([]byte(str))
+}
+
+func murmur64() uint64 {
+    return murmur3.Sum64([]byte(str))
+}
+
 ```
+
+hash_test.go
+
+```go
+package main
+
+import "testing"
+
+func BenchmarkMD5(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        md5Hash()
+    }
+}
+
+func BenchmarkSHA1(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        sha1Hash()
+    }
+}
+
+func BenchmarkMurmurHash32(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        murmur32()
+    }
+}
+
+func BenchmarkMurmurHash64(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        murmur64()
+    }
+}
+
+```
+
+```shell
+~/t/g/hash_bench git:master ❯❯❯ go test -bench=.
+goos: darwin
+goarch: amd64
+BenchmarkMD5-4            	10000000	       180 ns/op
+BenchmarkSHA1-4           	10000000	       211 ns/op
+BenchmarkMurmurHash32-4   	50000000	        25.7 ns/op
+BenchmarkMurmurHash64-4   	20000000	        66.2 ns/op
+PASS
+ok  	_/Users/caochunhui/test/go/hash_bench	7.050s
+```
+
+可见 murmurhash 相比其它的算法有三倍以上的性能提升。
 
 #### 分布是否均匀
 
