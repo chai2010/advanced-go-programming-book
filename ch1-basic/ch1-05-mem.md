@@ -267,7 +267,7 @@ Go程序的初始化和执行总是从`main.main`函数开始的。但是如果`
 
 ## Goroutine的创建
 
-`go`语句会在当前Goroutine对应函数开始执行前启动新的Goroutine. 例如:
+`go`语句会在当前Goroutine对应函数返回前创建新的Goroutine. 例如:
 
 
 ```go
