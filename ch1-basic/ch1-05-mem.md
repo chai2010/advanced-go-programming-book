@@ -43,6 +43,8 @@ func worker(wg *sync.WaitGroup) {
 }
 
 func main() {
+	var wg sync.WaitGroup
+	wg.Add(2)
 	go worker(&wg)
 	go worker(&wg)
 	wg.Wait()
@@ -84,7 +86,7 @@ func main() {
 
 `atomic.AddUint64`函数调用保证了`total`的读取、更新和保存是一个原子操作，因此在多线程中访问也是安全的。
 
-原子操作配合互斥锁可以实现非常高效的单件模式。互斥锁的代价比普通整数的原子读写高很多，在性能敏感的地方可以增加一个数字型的标志位，通过原子检测标志位状态通过降低互斥锁的次数来提高性能。
+原子操作配合互斥锁可以实现非常高效的单件模式。互斥锁的代价比普通整数的原子读写高很多，在性能敏感的地方可以增加一个数字型的标志位，通过原子检测标志位状态降低互斥锁的使用次数来提高性能。
 
 ```go
 type singleton struct {}
@@ -265,7 +267,7 @@ Go程序的初始化和执行总是从`main.main`函数开始的。但是如果`
 
 ## Goroutine的创建
 
-`go`语句会在当前Goroutine对应函数开始执行前启动新的Goroutine. 例如:
+`go`语句会在当前Goroutine对应函数返回前创建新的Goroutine. 例如:
 
 
 ```go
