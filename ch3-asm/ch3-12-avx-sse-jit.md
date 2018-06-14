@@ -1,3 +1,0 @@
-# 3.12. AVX/SSE/JIT高级优化(TODO)
-
-TODO

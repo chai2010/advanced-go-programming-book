@@ -1,3 +1,0 @@
-# 3.6. FUNCDATA和PCDATA(TODO)
-
-TODO
