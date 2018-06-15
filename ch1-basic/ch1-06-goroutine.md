@@ -401,7 +401,7 @@ type gatefs struct {
 func (fs gatefs) Lstat(p string) (os.FileInfo, error) {
 	fs.enter()
 	defer fs.leave()
-	return fs.fs.Lstat(p)
+	return fs.Lstat(p)
 }
 ```
 
