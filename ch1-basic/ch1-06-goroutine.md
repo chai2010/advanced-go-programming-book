@@ -54,14 +54,14 @@ func main() {
 
 ```go
 func main() {
-    done := make(chan int)
+	done := make(chan int)
 
-    go func(){
-        fmt.Println("你好, 世界")
-        <-done
-    }()
+	go func(){
+		fmt.Println("你好, 世界")
+		<-done
+	}()
 
-    done <- 1
+	done <- 1
 }
 ```
 
@@ -71,12 +71,12 @@ func main() {
 
 ```go
 func main() {
-    done := make(chan int, 1) // 带缓存的管道
+	done := make(chan int, 1) // 带缓存的管道
 
-    go func(){
-        fmt.Println("你好, 世界")
+	go func(){
+		fmt.Println("你好, 世界")
 		done <- 1
-    }()
+	}()
 
 	<-done
 }
