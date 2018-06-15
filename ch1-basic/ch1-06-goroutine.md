@@ -54,14 +54,14 @@ func main() {
 
 ```go
 func main() {
-    done := make(chan int)
+	done := make(chan int)
 
-    go func(){
-        fmt.Println("你好, 世界")
-        <-done
-    }()
+	go func(){
+		fmt.Println("你好, 世界")
+		<-done
+	}()
 
-    done <- 1
+	done <- 1
 }
 ```
 
@@ -71,12 +71,12 @@ func main() {
 
 ```go
 func main() {
-    done := make(chan int, 1) // 带缓存的管道
+	done := make(chan int, 1) // 带缓存的管道
 
-    go func(){
-        fmt.Println("你好, 世界")
+	go func(){
+		fmt.Println("你好, 世界")
 		done <- 1
-    }()
+	}()
 
 	<-done
 }
@@ -513,23 +513,23 @@ Go语言中不同Goroutine之间主要依靠管道进行通信和同步。要同
 基于`select`实现的管道的超时判断：
 
 ```go
-    select {
-    case v := <-in:
-        fmt.Println(v)
-    case <-time.After(time.Second):
-        return // 超时
-    }
+select {
+case v := <-in:
+	fmt.Println(v)
+case <-time.After(time.Second):
+	return // 超时
+}
 ```
 
 通过`select`的`default`分支实现非阻塞的管道发送或接收操作：
 
 ```go
-    select {
-    case v := <-in:
-        fmt.Println(v)
-    default:
-        // 没有数据
-    }
+select {
+case v := <-in:
+	fmt.Println(v)
+default:
+	// 没有数据
+}
 ```
 
 通过`select`来阻止`main`函数退出：
@@ -569,9 +569,9 @@ func worker(cannel chan bool) {
 		select {
 		default:
 			fmt.Println("hello")
-        	// 正常工作
+			// 正常工作
 		case <-cannel:
-        	// 退出
+			// 退出
 		}
 	}
 }
@@ -593,9 +593,9 @@ func worker(cannel chan bool) {
 		select {
 		default:
 			fmt.Println("hello")
-        	// 正常工作
+			// 正常工作
 		case <-cannel:
-        	// 退出
+			// 退出
 		}
 	}
 }
@@ -623,7 +623,7 @@ func worker(wg *sync.WaitGroup, cannel chan bool) {
 		default:
 			fmt.Println("hello")
 		case <-cannel:
-        	return
+			return
 		}
 	}
 }
