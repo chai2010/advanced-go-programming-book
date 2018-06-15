@@ -115,10 +115,10 @@ func main() {
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
 
-    	go func() {
-        	fmt.Println("你好, 世界")
- 			wg.Done()
-     	}()
+		go func() {
+			fmt.Println("你好, 世界")
+			wg.Done()
+		}()
 	}
 
 	// 等待N个后台线程完成
