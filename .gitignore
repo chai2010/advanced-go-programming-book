@@ -29,3 +29,5 @@ _book
 *.obj
 *.o
 a.out
+
+.oracle_jre_usage
