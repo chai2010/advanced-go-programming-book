@@ -567,7 +567,7 @@ func main() {
 func worker(cannel chan bool) {
 	for {
 		select {
-    	default:
+		default:
 			fmt.Println("hello")
         	// 正常工作
 		case <-cannel:
@@ -591,7 +591,7 @@ func main() {
 func worker(cannel chan bool) {
 	for {
 		select {
-    	default:
+		default:
 			fmt.Println("hello")
         	// 正常工作
 		case <-cannel:
@@ -620,7 +620,7 @@ func worker(wg *sync.WaitGroup, cannel chan bool) {
 
 	for {
 		select {
-    	default:
+		default:
 			fmt.Println("hello")
 		case <-cannel:
         	return
@@ -863,10 +863,10 @@ func worker(ctx context.Context, wg *sync.WaitGroup) error {
 
 	for {
 		select {
-    	default:
+		default:
 			fmt.Println("hello")
 		case <-ctx.Done():
-        	return ctx.Err()
+			return ctx.Err()
 		}
 	}
 }
