@@ -19,12 +19,12 @@ Go语言最吸引人的地方是它内建的并发支持。Go语言并发体系�
 
 ```go
 func main() {
-    var mu sync.Mutex
+	var mu sync.Mutex
 
-    go func(){
-        fmt.Println("你好, 世界")
-        mu.Lock()
-    }()
+	go func(){
+		fmt.Println("你好, 世界")
+		mu.Lock()
+	}()
 
 	mu.Unlock()
 }
@@ -36,15 +36,15 @@ func main() {
 
 ```go
 func main() {
-    var mu sync.Mutex
+	var mu sync.Mutex
 
-    mu.Lock()
-    go func(){
-        fmt.Println("你好, 世界")
-        mu.Unlock()
-    }()
+	mu.Lock()
+	go func(){
+		fmt.Println("你好, 世界")
+		mu.Unlock()
+	}()
 
-    mu.Lock()
+	mu.Lock()
 }
 ```
 
@@ -88,14 +88,14 @@ func main() {
 
 ```go
 func main() {
-    done := make(chan int, 10) // 带 10 个缓存
+	done := make(chan int, 10) // 带 10 个缓存
 
 	// 开N个后台打印线程
 	for i := 0; i < cap(done); i++ {
-    	go func(){
-        	fmt.Println("你好, 世界")
+		go func(){
+			fmt.Println("你好, 世界")
 			done <- 1
-    	}()
+		}()
 	}
 
 	// 等待N个后台线程完成
@@ -115,10 +115,10 @@ func main() {
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
 
-    	go func() {
-        	fmt.Println("你好, 世界")
- 			wg.Done()
-     	}()
+		go func() {
+			fmt.Println("你好, 世界")
+			wg.Done()
+		}()
 	}
 
 	// 等待N个后台线程完成
