@@ -112,13 +112,35 @@ Transfer/sec:      5.51MB
 
 ```go
 func NewBucket(fillInterval time.Duration, capacity int64) *Bucket
+```
 
+默认的令牌桶，fillInterval 指每过多长时间向桶里放一个令牌，capacity 是桶的容量，超过桶容量的部分会被直接丢弃。桶初始是满的。
+
+```go
 func NewBucketWithQuantum(fillInterval time.Duration, capacity, quantum int64) *Bucket
+```
 
+和普通的 NewBucket 的区别是，每次向桶中放令牌时，是放 quantum 个令牌，而不是一个令牌。
+
+```go
 func NewBucketWithRate(rate float64, capacity int64) *Bucket
 ```
 
-## 如何实现一个流量限制器
+这个就有点特殊了，会按照提供的比例，每秒钟填充令牌数。例如 capacity 是 100，而 rate 是 0.1，那么每秒会填充 10 个令牌。
+
+从桶中获取令牌也提供了几个 API：
+
+```go
+func (tb *Bucket) Take(count int64) time.Duration {}
+func (tb *Bucket) TakeAvailable(count int64) int64 {}
+func (tb *Bucket) TakeMaxDuration(count int64, maxWait time.Duration) (time.Duration, bool) {}
+func (tb *Bucket) Wait(count int64) {}
+func (tb *Bucket) WaitMaxDuration(count int64, maxWait time.Duration) bool {}
+```
+
+名称和功能都比较直观，这里就不再赘述了。相比于开源界更为有名的 google 的 Java 工具库 Guava 中提供的 ratelimiter，这个库不支持令牌桶预热，且无法修改初始的令牌容量，所以可能个别情况下的需求可能会无法满足。但在明白令牌桶的基本原理之后，如果没办法满足需求，相信你也可以很快对其进行修改并支持自己的业务场景。
+
+## 原理
 
 ## 题外话: 分布式流量限制
 
