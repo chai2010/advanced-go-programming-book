@@ -108,6 +108,8 @@ Transfer/sec:      5.51MB
 
 这两种方法看起来很像，不过还是有区别的。漏桶流出的速率固定，而令牌桶只要在桶中有令牌，那就可以拿。也就是说令牌桶是允许一定程度的并发的，比如同一个时刻，有 100 个用户请求，只要令牌桶中有 100 个令牌，那么这 100 个请求全都会放过去。令牌桶在桶中没有令牌的情况下也会退化为漏桶模型。
 
+TODO，这里需要画漏桶和令牌桶的图
+
 实际应用中令牌桶应用较为广泛，开源界流行的限流器大多数都是基于令牌桶思想的。并且在此基础上进行了一定程度的扩充，比如 `github.com/juju/ratelimit` 提供了几种不同特色的令牌桶填充方式：
 
 ```go
@@ -141,6 +143,108 @@ func (tb *Bucket) WaitMaxDuration(count int64, maxWait time.Duration) bool {}
 名称和功能都比较直观，这里就不再赘述了。相比于开源界更为有名的 google 的 Java 工具库 Guava 中提供的 ratelimiter，这个库不支持令牌桶预热，且无法修改初始的令牌容量，所以可能个别极端情况下的需求无法满足。但在明白令牌桶的基本原理之后，如果没办法满足需求，相信你也可以很快对其进行修改并支持自己的业务场景。
 
 ## 原理
+
+从功能上来看，令牌桶模型实际上就是对全局计数的加减法操作过程，但使用计数需要我们自己加读写锁，有小小的思想负担。如果我们对 Go 语言已经比较熟悉的话，很容易想到可以用 buffered channel 来完成简单的加令牌取令牌操作：
+
+```go
+var tokenBucket = make(chan struct{}, capacity)
+```
+
+每过一段时间向 tokenBucket 中添加 token，如果 bucket 已经满了，那么直接放弃：
+
+```go
+fillToken := func() {
+	ticker := time.NewTicker(fillInterval)
+	for {
+		select {
+		case <-ticker.C:
+			select {
+			case tokenBucket <- struct{}{}:
+			default:
+			}
+			fmt.Println("current token cnt:", len(tokenBucket), time.Now())
+		}
+	}
+}
+```
+
+把代码组合起来：
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	var fillInterval = time.Millisecond * 10
+	var capacity = 100
+	var tokenBucket = make(chan struct{}, capacity)
+
+	fillToken := func() {
+		ticker := time.NewTicker(fillInterval)
+		for {
+			select {
+			case <-ticker.C:
+				select {
+				case tokenBucket <- struct{}{}:
+				default:
+				}
+				fmt.Println("current token cnt:", len(tokenBucket), time.Now())
+			}
+		}
+	}
+
+	go fillToken()
+	time.Sleep(time.Hour)
+}
+
+```
+
+看看运行结果：
+
+```shell
+current token cnt: 98 2018-06-16 18:17:50.234556981 +0800 CST m=+0.981524018
+current token cnt: 99 2018-06-16 18:17:50.243575354 +0800 CST m=+0.990542391
+current token cnt: 100 2018-06-16 18:17:50.254628067 +0800 CST m=+1.001595104
+current token cnt: 100 2018-06-16 18:17:50.264537143 +0800 CST m=+1.011504180
+current token cnt: 100 2018-06-16 18:17:50.273613018 +0800 CST m=+1.020580055
+current token cnt: 100 2018-06-16 18:17:50.2844406 +0800 CST m=+1.031407637
+current token cnt: 100 2018-06-16 18:17:50.294528695 +0800 CST m=+1.041495732
+current token cnt: 100 2018-06-16 18:17:50.304550145 +0800 CST m=+1.051517182
+current token cnt: 100 2018-06-16 18:17:50.313970334 +0800 CST m=+1.060937371
+```
+
+在 1s 钟的时候刚好填满 100 个，没有太大的偏差。不过这里可以看到，Go 的定时器存在大约 0.001s 的误差，所以如果令牌桶大小在 1000 以上的填充可能会有一定的误差。对于一般的服务来说，这一点误差无关紧要。
+
+上面的令牌桶的取令牌操作实现起来也比较简单，简化问题，我们这里只取一个令牌：
+
+```go
+func TakeAvailable(block bool) bool{
+    var takenResult bool
+    if block {
+        select {
+        case <-tokenBucket:
+            takenResult = true
+        }
+    } else {
+        select {
+        case <-tokenBucket:
+            takenResult = true
+        default:
+            takenResult = false
+        }
+    }
+
+    return takenResult
+}
+```
+
+一些公司自己造的限流的轮子就是用上面这种方式来实现的，不过如果开源版 ratelimit 也如此的话，那我们也没什么可说的了。现实并不是这样的。
+
+TODO
 
 ## 题外话: 分布式流量限制
 
