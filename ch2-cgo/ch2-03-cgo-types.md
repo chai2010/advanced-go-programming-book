@@ -14,7 +14,7 @@ char                   | C.char      | byte
 singed char            | C.schar     | int8
 unsigned char          | C.uchar     | uint8
 short                  | C.short     | int16
-unsigned short         | C.short     | uint16
+unsigned short         | C.ushort     | uint16
 int                    | C.int       | int32
 unsigned int           | C.uint      | uint32
 long                   | C.long      | int32
