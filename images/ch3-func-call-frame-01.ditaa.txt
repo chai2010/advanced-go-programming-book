@@ -1,0 +1,51 @@
+                               function call frame
+
++----------+<-=-g.stack.hi
+| stack    |
+| cRED     |         func main()
+|          |         main frame
++----------+<-=-----+----------+
+|   main   |        | cGRE     |
+|  cGRE    |        |  local   |         func printsum(a, b int)
+|          |        |          |         printsum frame
+|          |        +----------+         +----------+
+|          |        |          |         :          |
+|          |        |  +8(SP)  |----=--->| b+8(FP)  |
+|   call   |  +8(SP)| cPNK     |  arg b  | cGRE     |b+8(FP)
+| printsum |        +----------+         +----------+
+|          |        |          |         :          |
+|          |        |  +0(SP)  |----=--->| a+0(FP)  |
+|          |  +0(SP)| cPNK     |  arg a  | cGRE     |a+0(FP)
++----------+<-=-----+----------+<-=------+----------+
+| printsum |                             |          |
+| cYEL     |                             |var c int |         func sum(a, b int) int
+|          |                             | cYEL     |c-8(SP)  sum frame
+|          |                             +----------+         +----------+
+| call sum |                             |          |         :          |
+|          |                             |  sum.ret |<----=---|ret+24(FP)|
+|          |                      +16(SP)| cPNK     | return  |          |ret+16(FP)
+|          |                             +----------+         +----------+
+|          |                             |          |         :          |
+|          |                             |  sum.b   |-----=-->|  b+8(FP) |
+|          |                       +8(SP)| cPNK     | arg b   |          |b+8(FP)
+|          |                             +----------+         +----------+
+|          |                             |          |         :          |
+|          |                             |  sum.a   |-----=-->|  a+0(FP) |
+|          |                       +0(SP)| cPNK     | arg a   |          |a+0(FP)
++----------+<-=--------------------------+----------+<-=------+----------+
+| func sum |                                                  |  cBLU    |t-8(SP)
+| cBLU     |                                                  |  local   |
+| ret a+b  |                                                  |          |
++----------+<-=-----------------------------------------------+----------++0(SP)
+| cAAA     |+0(SP)
+|  unused  |
+|          |
+|          |
+|          |
+|          |
++----------+<-=-g.stack.lo
+| cRED     |
+|StackLimit|
+|StackGuard|
++----------+
+
