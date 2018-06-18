@@ -161,3 +161,32 @@ func BusinessProcess(bi BusinessInstance) {
 ## 要不要用继承？
 
 ## table-driven 开发
+
+熟悉开源 lint 工具的同学应该见到过圈复杂度的说法，在函数中如果有 if 和 switch 的话，会使函数的圈复杂度上升，所以有强迫症的同学即使在入口一个函数中有 switch，还是想要干掉这个 switch，有没有什么办法呢？当然有，用表驱动的方式来存储我们需要实例：
+
+```go
+func entry() {
+    var bi BusinessInstance
+    switch businessType {
+        case TravelBusiness:
+            bi = travelorder.New()
+        case MarketBusiness:
+            bi = marketorder.New()
+        default:
+            return errors.New("not supported business")
+    }
+}
+```
+
+可以修改为：
+
+```go
+var businessInstanceMap = map[int]BusinessInstance {
+    TravelBusiness : travelorder.New(),
+    MarketBusiness : marketorder.New(),
+}
+
+func entry() {
+    bi := businessInstanceMap[businessType]
+}
+```
