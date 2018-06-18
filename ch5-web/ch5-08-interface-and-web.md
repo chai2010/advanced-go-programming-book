@@ -18,6 +18,8 @@
 
 通过拆解和异步化虽然解决了一部分问题，但并不能解决所有问题。随着业务发展，单一职责的模块也会变得越来越复杂，这是必然的趋势。一件事情本身变的复杂的话，这时候拆解和异步化就不灵了。我们还是要对事情本身进行一定程度的封装抽象。
 
+## 使用函数封装业务流程
+
 最基本的封装过程，我们把相似的行为放在一起，然后打包成一个一个的函数，让自己杂乱无章的代码变成下面这个样子：
 
 ```go
@@ -71,6 +73,55 @@ type OrderCreator interface {
 ```
 
 我们只要把之前写过的步骤函数签名都提到一个 interface 中，就可以完成抽象了。
+
+在进行抽象之前，我们应该想明白的一点是，引入 interface 对我们的系统本身是否有意义，这是要按照场景去进行分析的。假如我们的系统只服务一条产品线，并且内部的代码只是针对很具体的场景进行定制化开发，那么实际上引入 interface 是不会带来任何收益的。至于说是否方便测试，这一点我们会在之后的章节来讲。
+
+如果我们正在做的是平台系统，需要由平台来定义统一的业务流程和业务规范，那么基于 interface 的抽象就是有意义的。举个例子：
+
+TODO，interface 实现的 uml 图
+
+平台需要服务多条业务线，但数据定义需要统一，所以希望都能走平台定义的流程。作为平台方，我们可以定义一套类似上文的 interface，然后要求接入方的业务必须将这些 interface 都实现。如果 interface 中有其不需要的步骤，那么只要返回 nil，或者忽略就好。
+
+在业务进行迭代时，平台的代码是不用修改的，这样我们便把这些接入业务当成了平台代码的插件(plugin)引入进来了。如果没有 interface 的话，我们会怎么做？
+
+```go
+import (
+    "sample.com/travelorder"
+    "sample.com/marketorder"
+)
+
+func CreateOrder() {
+    switch businessType {
+        case TravelBusiness:
+            travelorder.CreateOrder()
+        case MarketBusiness:
+            marketorder.CreateOrderForMarket()
+        default:
+            return errors.New("not supported business")
+    }
+}
+
+func ValidateUser() {
+    switch businessType {
+        case TravelBusiness:
+            travelorder.ValidateUserVIP()
+        case MarketBusiness:
+            marketorder.ValidateUserRegistered()
+        default:
+            return errors.New("not supported business")
+    }
+}
+
+// ...
+switch ...
+switch ...
+switch ...
+```
+
+没错，就是无穷无尽的 switch，和没完没了的垃圾代码。引入了 interface 之后，我们的 switch 只需要在业务入口做一次。
+
+
+## interface 是必须的吗？
 
 ## 要不要用继承？
 
