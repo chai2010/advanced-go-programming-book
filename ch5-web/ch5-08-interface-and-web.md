@@ -52,6 +52,26 @@ func CreateOrder() {
 
 ## 使用 interface 来做抽象
 
+业务发展的早期，是不适宜引入 interface 的，很多时候业务流程变化很大，过早引入 interface 会使业务系统本身增加很多不必要的分层，从而导致每次修改几乎都要全盘否定之前的工作。
+
+当业务发展到一定阶段，主流程稳定之后，就可以适当地使用 interface 来进行抽象了。这里的稳定，是指主流程的大部分业务步骤已经确定，即使再进行修改，也不会进行大规模的变动，而只是小修小补，或者只是增加或删除少量业务步骤。
+
+如果我们在开发过程中，已经对业务步骤进行了良好的封装，这时候进行 interface 抽象化就会变的非常容易，伪代码：
+
+```go
+// OrderCreator 创建订单流程
+type OrderCreator interface {
+    ValidateDistrict()    // 判断是否是地区限定商品
+    ValidateVIPProduct()  // 检查是否是只提供给 vip 的商品
+    GetUserInfo()         // 从用户系统获取更详细的用户信息
+    GetProductDesc()      // 从商品系统中获取商品在该时间点的详细信息
+    DecrementStorage()    // 扣减库存
+    CreateOrderSnapshot() // 创建订单快照
+}
+```
+
+我们只要把之前写过的步骤函数签名都提到一个 interface 中，就可以完成抽象了。
+
 ## 要不要用继承？
 
 ## table-driven 开发
