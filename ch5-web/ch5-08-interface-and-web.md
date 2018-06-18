@@ -120,6 +120,41 @@ switch ...
 
 没错，就是无穷无尽的 switch，和没完没了的垃圾代码。引入了 interface 之后，我们的 switch 只需要在业务入口做一次。
 
+```go
+type BusinessInstance interface {
+    ValidateLogin()
+    ValidateParams()
+    AntispamCheck()
+    GetPrice()
+    CreateOrder()
+    UpdateUserStatus()
+    NotifyDownstreamSystems()
+}
+
+func entry() {
+    var bi BusinessInstance
+    switch businessType {
+        case TravelBusiness:
+            bi = travelorder.New()
+        case MarketBusiness:
+            bi = marketorder.New()
+        default:
+            return errors.New("not supported business")
+    }
+}
+
+func BusinessProcess(bi BusinessInstance) {
+    bi.ValidateLogin()
+    bi.ValidateParams()
+    bi.AntispamCheck()
+    bi.GetPrice()
+    bi.CreateOrder()
+    bi.UpdateUserStatus()
+    bi.NotifyDownstreamSystems()
+}
+```
+
+直接面向 interface 编程，而不用关心具体的实现了。如果对应的业务在迭代中发生了修改，所有的逻辑对平台方来说也是完全透明的。
 
 ## interface 是必须的吗？
 
