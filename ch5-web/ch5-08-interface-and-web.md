@@ -158,6 +158,50 @@ func BusinessProcess(bi BusinessInstance) {
 
 ## interface 是必须的吗？
 
+Go 被人称道的最多的地方是其 interface 设计的正交性，模块之间不需要知晓相互的存在，A 模块定义 interface，B 模块实现这个 interface 就可以。如果 interface 中没有 A 模块中定义的数据类型，那 B 模块中甚至都不用 import A。比如标准库中的 `io.Writer`：
+
+```go
+type Writer interface {
+    Write(p []byte) (n int, err error)
+}
+```
+
+我们可以在自己的模块中实现 `io.Writer` 接口：
+
+```go
+type MyType struct {}
+
+func (m MyType) Write(p []byte) (n int, err error) {
+    return 0, nil
+}
+```
+
+那么我们就可以把我们自己的 MyType 传给任何使用 `io.Writer` 作为参数的函数来使用了，比如：
+
+```go
+package log
+
+func SetOutput(w io.Writer) {
+    output = w
+}
+```
+
+然后：
+
+```go
+package my-business
+
+import "xy.com/log"
+
+func init() {
+    log.SetOutput(MyType)
+}
+```
+
+在 MyType 定义的地方，不需要 `import "io"` 就可以直接实现 `io.Writer` interface，我们还可以随意地组合很多函数，以实现各种类型的接口，同时接口实现方和接口定义方都不用建立 import 产生的依赖关系。因此很多人认为 Go 的这种正交是一种很优秀的设计。
+
+但这种“正交”性也会给我们带来一些麻烦。
+
 ## 要不要用继承？
 
 ## table-driven 开发
