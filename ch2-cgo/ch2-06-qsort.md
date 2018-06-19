@@ -173,7 +173,7 @@ package qsort
 func Sort(base unsafe.Pointer, num, size int, cmp func(a, b unsafe.Pointer) int)
 ```
 
-闭包函数函数无法导出为C语言函数，因此无法之间将闭包函数传入C语言的qsort函数。
+闭包函数无法导出为C语言函数，因此无法直接将闭包函数传入C语言的qsort函数。
 为此我们可以用Go构造一个可以导出为C语言的代理函数，然后通过一个全局变量临时保存当前的闭包比较函数。
 
 代码如下：
