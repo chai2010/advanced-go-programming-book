@@ -42,7 +42,7 @@ int main() {
 }
 ```
 
-其中`DIM(values)`宏用于几十数组元素的个数，`sizeof(values[0])`用于计算数组元素的大小。
+其中`DIM(values)`宏用于计算数组元素的个数，`sizeof(values[0])`用于计算数组元素的大小。
 cmp是用于排序时比较两个元素大小的回调函数。为了避免对全局名字空间的污染，我们将cmp回调函数定义为仅当前文件内可访问的静态函数。
 
 ## 将qsort函数从Go包导出
@@ -68,7 +68,7 @@ func Sort(
 
 因为Go语言的CGO语言不好直接表达C语言的函数类型，因此在C语言空间将比较函数类型重新定义为一个`qsort_cmp_func_t`类型。
 
-虽然Sort函数已经导出了，但是对于qsort包之外的用户依然不能直角使用该函数——Sort函数的参数还包含了虚拟的C包提供的类型。
+虽然Sort函数已经导出了，但是对于qsort包之外的用户依然不能直接使用该函数——Sort函数的参数还包含了虚拟的C包提供的类型。
 在CGO的内部机制一节中我们已经提过，虚拟的C包下的任何名称其实都会被映射为包内的私有名字。比如`C.size_t`会被展开为`_Ctype_size_t`，`C.qsort_cmp_func_t`类型会被展开为`_Ctype_qsort_cmp_func_t`。
 
 被CGO处理后的Sort函数的类型如下：
@@ -173,7 +173,7 @@ package qsort
 func Sort(base unsafe.Pointer, num, size int, cmp func(a, b unsafe.Pointer) int)
 ```
 
-闭包函数函数无法导出为C语言函数，因此无法之间将闭包函数传入C语言的qsort函数。
+闭包函数无法导出为C语言函数，因此无法直接将闭包函数传入C语言的qsort函数。
 为此我们可以用Go构造一个可以导出为C语言的代理函数，然后通过一个全局变量临时保存当前的闭包比较函数。
 
 代码如下：
