@@ -29,7 +29,7 @@
    * [3.4. 函数](ch3-asm/ch3-04-func.md)
    * [3.5. 控制流](ch3-asm/ch3-05-control-flow.md)
    * [3.6. 再论函数](ch3-asm/ch3-06-func-again.md)
-   * [3.7. 例子：Goroutine ID](ch3-asm/ch3-07-goroutine-id)
+   * [3.7. 例子：Goroutine ID](ch3-asm/ch3-07-goroutine-id.md)
    * [3.8. 补充说明](ch3-asm/ch3-08-faq.md)
 * [第四章 RPC和Protobuf](ch4-rpc/readme.md)
    * [4.1. RPC入门(TODO)](ch4-rpc/ch4-01-rpc-intro.md)
