@@ -154,3 +154,28 @@ Go汇编为了简化汇编代码的编写，引入了PC、FP、SP、SB四个伪�
 帧大小相对复杂一点：其中包含函数的局部变量和调用其它函数时的参数和返回值空间。局部变量也是从低地址向高地址顺序排列的，因此它们栈增长方向是相反的。
 
 在最下面灰色的部分是调用函数后的返回地址。当执行CALL指令时，会自动将SP向下移动，并将返回地址和SP寄存器存入栈中。然后被调用的函数执行RET返回指令时，先从栈恢复BP和SP寄存器，并根取出的返回地址跳转到对应的指令执行。
+
+## MOV指令
+
+MOV指令是最重要的机器指令，它不仅仅用于在寄存器和内存之间传输数据，而且还可以用于处理数据的扩展和截断操作。
+
+最简单是忽略符号位的数据传输操作，不同的1、2、4和8字节宽度有不同的指令：
+
+
+| Data Type | 386     | AMD64   | Comment       |
+| --------- | ------- | ------- | ------------- |
+| [1]byte   | MOVB    | MOVB    | B => Byte     |
+| [2]byte   | MOVW    | MOVW    | W => Word     |
+| [4]byte   | MOVL    | MOVL    | L => Long     |
+| [8]byte   | MOVQ    | MOVQ    | Q => Quadword |
+
+但是当数据宽度和寄存器的宽度不同又需要处理符号位时，则需要特殊的指令：
+
+| Data Type | 386     | AMD64   | Comment       |
+| --------- | ------- | ------- | ------------- |
+| int8      | MOVBLSX | MOVBQSX | sign extend   |
+| uint8     | MOVBLZX | MOVBQZX | zero extend   |
+| int16     | MOVWLSX | MOVWQSX | sign extend   |
+| uint16    | MOVWLZX | MOVWQZX | zero extend   |
+
+比如当需要将一个int64类型的数据转为bool类型时，则需要使用MOVBQZX指令处理。
