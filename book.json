@@ -5,7 +5,7 @@
 	"language": "zh-cn",
 
 	"structure": {
-		"readme": "README.md"
+		"readme": "preface.md"
 	},
 	"plugins": [
 		"-search"
