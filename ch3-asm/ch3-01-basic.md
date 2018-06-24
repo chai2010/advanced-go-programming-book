@@ -36,7 +36,7 @@ Go汇编语言提供了DATA命令用于初始化变量，DATA命令的语法如�
 DATA symbol+offset(SB)/width, value
 ```
 
-其中symbol为变量在汇编语言中对应的符号，offset是符号开始地址的偏移量，width是要初始化内存的宽度大小，value是要初始化的那天。其中当前包中Go语言定义的符号symbol，在汇编代码中对应`·symbol`，其中·为一个特殊的unicode符号。
+其中symbol为变量在汇编语言中对应的符号，offset是符号开始地址的偏移量，width是要初始化内存的宽度大小，value是要初始化的值。其中当前包中Go语言定义的符号symbol，在汇编代码中对应`·symbol`，其中·为一个特殊的unicode符号。
 
 采用以下命令可以给Id变量初始化为十六进制的0x2537，对应十进制的9527，常量需要以美元符号$开头表示：
 
@@ -45,7 +45,7 @@ DATA ·Id+0(SB)/1,$0x37
 DATA ·Id+1(SB)/1,$0x25
 ```
 
-变量定义好之后需要导出以共其它代码引用。Go汇编语言提供了GLOBL命令用于将符号导出：
+变量定义好之后需要导出以供其它代码引用。Go汇编语言提供了GLOBL命令用于将符号导出：
 
 ```
 GLOBL symbol(SB), width
