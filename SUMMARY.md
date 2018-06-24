@@ -68,5 +68,5 @@
 * [第八章 Go和那些生产力工具](ch8-tools/readme.md)
 * [附录](appendix/readme.md)
    * [附录A: Go语言常见坑](appendix/appendix-a-trap.md)
-   * [附录B: 参考资料](appendix/appendix-b-ref.md)
+   * [附录B: 有趣的代码片段](appendix/appendix-b-gems.md)
    * [附录C: 作者简介](appendix/appendix-c-author.md)
