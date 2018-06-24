@@ -63,7 +63,7 @@ max := If(a > b, a, b).(int)
 println(max)
 ```
 
-### 禁止 main 函数退出的方法
+## 禁止 main 函数退出的方法
 
 ```go
 func main() {
