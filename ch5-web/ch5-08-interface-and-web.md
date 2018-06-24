@@ -202,27 +202,39 @@ func init() {
 
 但这种“正交”性也会给我们带来一些麻烦。当我们接手了一个几十万行的系统时，如果看到定义了很多 interface，例如订单流程的 interface，我们希望能直接找到这些 interface 都被哪些对象实现了。但直到现在，这个简单的需求也就只有 goland 实现了，并且体验尚可。Visual Studio Code 则需要对项目进行全局扫描，来看到底有哪些 struct 实现了该 interface 的全部函数。那些显式实现 interface 的语言，对于 IDE 的 interface 查找来说就友好多了。另一方面，我们看到一个 struct，也希望能够立刻知道这个 struct 实现了哪些 interface，但也有着和前面提到的相同的问题。
 
-虽有不便，interface 带给我们的好处也是不言而喻的：一是依赖反转，这是 interface 在大多数语言中对软件项目所能产生的影响，在 Go 的正交 interface 的设计场景下甚至可以去除依赖；二是由编译器来帮助我们在编译期就能检查到类似“未完全实现接口”这样的错误，如果业务未实现某个流程，但又将其实例作为 interface 强行传给我们的初始化函数，就会报出下面的错误：
+虽有不便，interface 带给我们的好处也是不言而喻的：一是依赖反转，这是 interface 在大多数语言中对软件项目所能产生的影响，在 Go 的正交 interface 的设计场景下甚至可以去除依赖；二是由编译器来帮助我们在编译期就能检查到类似“未完全实现接口”这样的错误，如果业务未实现某个流程，但又将其实例作为 interface 强行来使用的话：
 
 ```go
-TODO
+package main
+
+type OrderCreator interface {
+    ValidateUser()
+    CreateOrder()
+}
+
+type BookOrderCreator struct{}
+
+func (boc BookOrderCreator) ValidateUser() {}
+
+func createOrder(oc OrderCreator) {
+    oc.ValidateUser()
+    oc.CreateOrder()
+}
+
+func main() {
+    createOrder(BookOrderCreator{})
+}
 ```
 
-我们也可以通过类似 C 中函数指针的方式来实现类似 interface 的效果，比如：
+会报出下述错误。
 
-```go
-TODO
+```shell
+# command-line-arguments
+./a.go:18:30: cannot use BookOrderCreator literal (type BookOrderCreator) as type OrderCreator in argument to createOrder:
+    BookOrderCreator does not implement OrderCreator (missing CreateOrder method)
 ```
 
-可以看到，虽然功能上差不多，但没有办法像 interface 那样做到省心的函数调用了。
-
-## 要不要用继承？
-
-既然谈到了 interface，那就免不了要提到继承的问题。有很多 java 和 C# 来的程序员对于 Go 没有继承非常的不习惯。继承也是为了实现抽象，把复杂模块中的公共逻辑向上抽离至抽象类，以达到代码共用的目的。所以说到面向对象，大多数程序员脑子里第一反应就是："封装、继承、多态"。封装和多态自不用说，而继承在 Go 里与传统的 OOP 语言里差别非常之大，甚至有人觉得已经差异到了令人发指的程度，比如下面的例子：
-
-TODO，继承是正确的设计模式么？
-
-TODO，java 之父的观点
+所以 interface 也可以认为是一种编译期进行检查的保证类型安全的手段。
 
 ## table-driven 开发
 
@@ -254,3 +266,5 @@ func entry() {
     bi := businessInstanceMap[businessType]
 }
 ```
+
+table driven 的设计方式，很多设计模式相关的书籍并没有把它作为一种设计模式来讲，但我认为这依然是一种非常重要的帮助我们来简化代码的手段。在日常的开发工作中可以多多思考，哪些不必要的 switch case 可以用一个字典和一行代码就可以轻松搞定。
