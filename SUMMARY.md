@@ -48,6 +48,7 @@
    * [5.5. Database和数据库打交道](ch5-web/ch5-05-database.md)
    * [5.6. Ratelimit 服务流量限制](ch5-web/ch5-06-ratelimit.md)
    * [5.7. Layout大型web项目分层](ch5-web/ch5-07-layout-of-web-project.md)
+   * [5.8. interface 和 table-driven 开发](ch5-web/ch5-08-interface-and-web.md)
    * [5.9. 灰度发布和 A/B test](ch5-web/ch5-09-gated-launch.md)
    * [5.11. Load-balance负载均衡](ch5-web/ch5-11-load-balance.md)
 * [第六章 分布式系统](ch6-cloud/readme.md)
