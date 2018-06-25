@@ -106,3 +106,37 @@ func random(n int) <-chan int {
 ```
 
 基于select语言特性构造的随机数生成器。
+
+## Assert测试断言
+
+```go
+type testing_TBHelper interface {
+	Helper()
+}
+
+func Assert(tb testing.TB, condition bool, args ...interface{}) {
+	if x, ok := tb.(testing_TBHelper); ok {
+		x.Helper() // Go1.9+
+	}
+	if !condition {
+		if msg := fmt.Sprint(args...); msg != "" {
+			tb.Fatalf("Assert failed, %s", msg)
+		} else {
+			tb.Fatalf("Assert failed")
+		}
+	}
+}
+
+func Assertf(tb testing.TB, condition bool, format string, a ...interface{}) {
+	if x, ok := tb.(testing_TBHelper); ok {
+		x.Helper() // Go1.9+
+	}
+	if !condition {
+		if msg := fmt.Sprintf(format, a...); msg != "" {
+			tb.Fatalf("tAssert failed, %s", msg)
+		} else {
+			tb.Fatalf("tAssert failed")
+		}
+	}
+}
+```
