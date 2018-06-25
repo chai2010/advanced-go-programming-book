@@ -64,8 +64,6 @@
    * [6.10. 延时任务系统(TODO)](ch6-cloud/ch6-10-delay-job.md)
    * [6.11. Kubernetes(TODO)](ch6-cloud/ch6-11-k8s.md)
    * [6.12. 补充说明(TODO)](ch6-cloud/ch6-12-faq.md)
-* [第七章 Go和AST](ch7-ast/readme.md)
-* [第八章 Go和那些生产力工具](ch8-tools/readme.md)
 * [附录](appendix/readme.md)
    * [附录A: Go语言常见坑](appendix/appendix-a-trap.md)
    * [附录B: 有趣的代码片段](appendix/appendix-b-gems.md)
