@@ -139,4 +139,13 @@ func Assertf(tb testing.TB, condition bool, format string, a ...interface{}) {
 		}
 	}
 }
+
+func AssertFunc(tb testing.TB, fn func() error) {
+	if x, ok := tb.(testing_TBHelper); ok {
+		x.Helper() // Go1.9+
+	}
+	if err := fn(); err != nil {
+		tb.Fatalf("AssertFunc failed, %v", err)
+	}
+}
 ```
