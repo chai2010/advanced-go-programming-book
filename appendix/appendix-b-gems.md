@@ -133,9 +133,9 @@ func Assertf(tb testing.TB, condition bool, format string, a ...interface{}) {
 	}
 	if !condition {
 		if msg := fmt.Sprintf(format, a...); msg != "" {
-			tb.Fatalf("tAssert failed, %s", msg)
+			tb.Fatalf("Assertf failed, %s", msg)
 		} else {
-			tb.Fatalf("tAssert failed")
+			tb.Fatalf("Assertf failed")
 		}
 	}
 }
