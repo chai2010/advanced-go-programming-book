@@ -178,35 +178,80 @@ func main() {
 在新的RPC服务端实现中，我们用RegisterHelloService函数来注册函数，这样不仅可以避免服务名称的工作，同时也保证了传入的服务对象满足了RPC接口定义的定义。最后我们支持多个TCP链接，然后为每个TCP链接建立RPC服务。
 
 
-## RPC不应该绑定到某个语言
+## 跨语言的RPC
 
-TODO
+标准库的RPC默认采用Go语言特有的gob规范编码，因此从其它语言调用Go语言实现的RPC服务将比较困难。在互联网的微服务时代，每个RPC以及服务的使用者都可能采用不同的编程语言，因此跨语言是互联网时代RPC的一个首要条件。得益于RPC的框架设计，Go语言的RPC其实也是很容易实现跨语言支持的。
 
-<!--
+Go语言的RPC框架有两个比较有特色的设计：一个是RPC数据打包时可以通过插件实现自定义的编码和解码；另一个是RPC建立在抽象的io.ReadWriteCloser接口之上的，我们可以将RPC架设在不同的通讯协议之上。我们这里将尝试通过官方自带的net/rpc/jsonrpc扩展实现一个跨语言的PPC。
 
-不过上面的例子依然比较简陋：首选是RPC服务只能接受一次请求，其次客户端要通过字符串标识符来区分调用RPC服务不够友好。
+首先是基于json实现RPC服务：
 
-同时改进，支持多个链接
+```go
+func main() {
+	rpc.RegisterName("HelloService", new(HelloService))
 
-netrpc简单例子
-通过接口给服务端和客户端增加类型约束，缺点是繁琐
-http模式，但是只能gob，无法跨语言
+	listener, err := net.Listen("tcp", ":1234")
+	if err != nil {
+		log.Fatal("ListenTCP error:", err)
+	}
 
-简单的例子
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Fatal("Accept error:", err)
+		}
 
-http 例子
-jsonrpc 例子
+		go rpc.ServeCodec(jsonrpc.NewServerCodec(conn))
+	}
+}
+```
 
-jsonrpc on http？标准库不支持
+其中最大的变化是用rpc.ServeCodec函数替代了rpc.ServeConn函数，传入的参数是针对服务端的json编解码器。
 
-手工 json on http
-nodejs 调用（跨语言）
+然后是实现json版本的客户端：
 
-缺点，函数名时字符串，容易出错（可编译）。
-手工摸索一个基于接口的规范，手工遵循
+```go
+func main() {
+	conn, err := net.Dial("tcp", "localhost:1234")
+	if err != nil {
+		log.Fatal("net.Dial:", err)
+	}
 
-同步/异步
+	client := rpc.NewClientWithCodec(jsonrpc.NewClientCodec(conn))
 
-名字空间
+	var reply string
+	err = client.Call("HelloService.Hello", "hello", &reply)
+	if err != nil {
+		log.Fatal(err)
+	}
 
--->
+	fmt.Println(reply)
+}
+```
+
+先手工调用net.Dial函数建立TCP链接，然后基于TCP信道建立针对客户端的json编解码器。
+
+在确保客户端可以正常调用RPC服务的方法之后，我们用一个普通的TCP服务代替Go语言版本的RPC服务。比如通过nc命令`nc -l 1234`在同样的端口启动一个TCP服务。然后再次执行一次RPC调用将会发现nc输出了以下的信息：
+
+```json
+{"method":"HelloService.Hello","params":["hello"],"id":0}
+```
+
+这是一个json编码的数据，其中method部分对应要调用的rpc服务和方法组合成的名字，params部分的第一个元素为参数部分，id是由调用端维护的一个唯一的调用编号。
+
+在获取到RPC调用对应的json数据后，我们可以通过直接向假设了RPC服务的TCP服务器发送json数据模拟RPC方法调用：
+
+```
+$ echo -e '{"method":"HelloService.Hello","params":["hello"],"id":1}' | nc localhost 1234
+```
+
+返回的结果也是一个json格式的数据：
+
+```json
+{"id":1,"result":"hello:hello","error":null}
+```
+
+其中id对应输入的id参数，result为返回的结果，error部分在出问题时表示错误信息。对于顺序调用来说，id不是必须的。但是Go语言的RPC框架支持异步调用，当返回结果的顺序和调用的顺序不一致时，可以通过id来识别对应的调用。
+
+这样我们就实现了跨语言的RPC。
+
