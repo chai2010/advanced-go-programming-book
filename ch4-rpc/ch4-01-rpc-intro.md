@@ -239,6 +239,22 @@ func main() {
 
 这是一个json编码的数据，其中method部分对应要调用的rpc服务和方法组合成的名字，params部分的第一个元素为参数部分，id是由调用端维护的一个唯一的调用编号。
 
+请求的json数据对应在内部对应两个结构体：客户端是clientRequest，服务端是serverRequest。clientRequest和serverRequest结构体的内容基本是一致的：
+
+```go
+type clientRequest struct {
+	Method string         `json:"method"`
+	Params [1]interface{} `json:"params"`
+	Id     uint64         `json:"id"`
+}
+
+type serverRequest struct {
+	Method string           `json:"method"`
+	Params *json.RawMessage `json:"params"`
+	Id     *json.RawMessage `json:"id"`
+}
+```
+
 在获取到RPC调用对应的json数据后，我们可以通过直接向假设了RPC服务的TCP服务器发送json数据模拟RPC方法调用：
 
 ```
@@ -253,5 +269,20 @@ $ echo -e '{"method":"HelloService.Hello","params":["hello"],"id":1}' | nc local
 
 其中id对应输入的id参数，result为返回的结果，error部分在出问题时表示错误信息。对于顺序调用来说，id不是必须的。但是Go语言的RPC框架支持异步调用，当返回结果的顺序和调用的顺序不一致时，可以通过id来识别对应的调用。
 
-这样我们就实现了跨语言的RPC。
+返回的json数据也是对应内部的两个结构体：客户端是clientResponse，服务端是serverResponse。两个结构体的内容同样也是类似的：
 
+```go
+type clientResponse struct {
+	Id     uint64           `json:"id"`
+	Result *json.RawMessage `json:"result"`
+	Error  interface{}      `json:"error"`
+}
+
+type serverResponse struct {
+	Id     *json.RawMessage `json:"id"`
+	Result interface{}      `json:"result"`
+	Error  interface{}      `json:"error"`
+}
+```
+
+因此无论是采用任何语言，只要遵循同样的json结构，以同样的流程就可以和Go语言编写的RPC服务进行通信。这样我们就实现了跨语言的RPC。
