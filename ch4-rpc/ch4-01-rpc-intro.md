@@ -78,7 +78,7 @@ type HelloServiceInterface = interface {
 }
 
 func RegisterHelloService(svc HelloServiceInterface) error {
-	rpc.RegisterName(HelloServiceName, svc)
+	return rpc.RegisterName(HelloServiceName, svc)
 }
 ```
 
@@ -117,11 +117,11 @@ func DialHelloService(network, address string) (*HelloServiceClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &HelloServiceClient{Client: c}
+	return &HelloServiceClient{Client: c}, nil
 }
 
 func (p *HelloServiceClient) Hello(request string, reply *string) error {
-	return client.Call(HelloServiceName+".Hello", request, reply)
+	return p.Client.Call(HelloServiceName+".Hello", request, reply)
 }
 ```
 
