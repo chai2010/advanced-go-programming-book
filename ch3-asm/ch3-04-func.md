@@ -80,7 +80,7 @@ TEXT ·Foo(SB), $0
 如果是参数和返回值类型比较复杂的情况该如何处理呢？下面我们再尝试一个更复杂的函数参数和返回值的计算。比如有以下一个函数：
 
 ```go
-func SomeFunc(a, b int, c bool) (d float64, err error) int
+func SomeFunc(a, b int, c bool) (d float64, err error)
 ```
 
 函数的参数有不同的类型，同时含有多个返回值，而且返回值中含有更复杂的接口类型。我们该如何计算每个参数的位置和总的大小呢？
