@@ -33,7 +33,7 @@
    * [3.8. 补充说明](ch3-asm/ch3-08-faq.md)
 * [第四章 RPC和Protobuf](ch4-rpc/readme.md)
    * [4.1. RPC入门](ch4-rpc/ch4-01-rpc-intro.md)
-   * [4.2. Protobuf简介(TODO)](ch4-rpc/ch4-02-pb-intro.md)
+   * [4.2. Protobuf](ch4-rpc/ch4-02-pb-intro.md)
    * [4.3. protorpc(TODO)](ch4-rpc/ch4-03-protorpc.md)
    * [4.4. grpc(TODO)](ch4-rpc/ch4-04-grpc.md)
    * [4.5. 反向rpc(TODO)](ch4-rpc/ch4-05-reverse-rpc.md)
