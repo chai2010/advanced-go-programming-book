@@ -286,3 +286,46 @@ type serverResponse struct {
 ```
 
 因此无论是采用任何语言，只要遵循同样的json结构，以同样的流程就可以和Go语言编写的RPC服务进行通信。这样我们就实现了跨语言的RPC。
+
+## Http上的RPC
+
+Go语言内在的RPC框架已经支持在Http协议上提供RPC服务。但是框架的http服务同样采用了内置的gob协议，并且没有提供采用其它协议的接口，因此从其它语言依然无法访问的。在前面的例子中，我们已经实现了在纯的TCP协议之上运行jsonrpc服务，并且可以通过nc命令行工具成功实现了RPC方法调用。现在我们尝试在http协议上提供jsonrpc服务。
+
+心的RPC服务其实是一个类似REST规范的接口，采用请求和相应处理流程：
+
+```go
+func main() {
+	rpc.RegisterName("HelloService", new(HelloService))
+
+	http.HandleFunc("/jsonrpc", func(w http.ResponseWriter, r *http.Request) {
+		var conn io.ReadWriteCloser = struct {
+			io.Writer
+			io.ReadCloser
+		}{
+			ReadCloser: r.Body,
+			Writer:     w,
+		}
+
+		rpc.ServeRequest(jsonrpc.NewServerCodec(conn))
+	})
+
+	http.ListenAndServe(":1234", nil)
+}
+```
+
+RPC的服务假设在“/jsonrpc”路径，在处理函数中基于http.ResponseWriter和http.Request类型的参数构造一个io.ReadWriteCloser类型的conn通道。然后基于conn构建针对服务端的json编码解码器。最后通过rpc.ServeRequest处理一次RPC方法调用。
+
+模拟一次RPC调用的过程就是向该链接发生一个json字符串：
+
+```
+$ curl localhost:1234/jsonrpc -X POST --data '{"method":"HelloService.Hello","params":["hello"],"id":0}'
+```
+
+返回的结果依然是json字符串：
+
+```json
+{"id":0,"result":"hello:hello","error":null}
+```
+
+这样就可以很方便地从不同语言中访问RPC服务了。
+
