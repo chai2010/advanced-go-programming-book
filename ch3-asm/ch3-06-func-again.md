@@ -177,7 +177,7 @@ Go语言作为一终静态编译型语言，在执行时每个函数的地址都
 
 GO_RESULTS_INITIALIZED记录的也是PC表格的信息，表示PC指针越过某个地址之后返回值才完成被初始化的状态。
 
-Go语言二进制文件中除了有PC表格，还有FUNC表格用于记录函数的参数、局部变量的指针信息。FUNCDATA指令和PCDATA的格式类似：`FUNCDATA tableid, tableoffset`，第一个参数为表格的类型，第二个是表格的地址。目前的实现中定义了三种FUNC表格类型：FUNCDATA_ArgsPointerMaps表示函数参数的指针信息表，FUNCDATA_LocalsPointerMaps表示局部指针信息表，FUNCDATA_InlTree表示被内联展开的指针信息表。通过FUNC表格，Go语言的垃圾回收器可以跟踪全部指针的生命周期，同时根据指针指向的地址在是否被移动的栈范围来确定是否要进行指针移动。
+Go语言二进制文件中除了有PC表格，还有FUNC表格用于记录函数的参数、局部变量的指针信息。FUNCDATA指令和PCDATA的格式类似：`FUNCDATA tableid, tableoffset`，第一个参数为表格的类型，第二个是表格的地址。目前的实现中定义了三种FUNC表格类型：FUNCDATA_ArgsPointerMaps表示函数参数的指针信息表，FUNCDATA_LocalsPointerMaps表示局部指针信息表，FUNCDATA_InlTree表示被内联展开的指针信息表。通过FUNC表格，Go语言的垃圾回收器可以跟踪全部指针的生命周期，同时根据指针指向的地址是否在被移动的栈范围来确定是否要进行指针移动。
 
 在前面递归函数的例子中，我们遇到一个NO_LOCAL_POINTERS宏。它的定义如下：
 
@@ -193,7 +193,7 @@ Go语言二进制文件中除了有PC表格，还有FUNC表格用于记录函数
 
 PCDATA和FUNCDATA的数据一般是由编译器自动生成的，手工编写并不现实。如果函数已经有Go语言声明，那么编译器可以自动输出参数和返回值的指针表格。同时所有的函数调用一般是对应CALL指令，编译器也是可以辅助生成PCDATA表格的。编译器唯一无法自动生成是函数局部变量的表格，因此我们一般要在汇编函数的局部变量中谨慎使用指针类型。
 
-对于PCDATA和FUNCDATA细节敢兴趣的同学可以尝试从debug/gosym包入手，参考包的实现和测试代码。
+对于PCDATA和FUNCDATA细节感兴趣的同学可以尝试从debug/gosym包入手，参考包的实现和测试代码。
 
 
 ## 方法函数
@@ -225,7 +225,7 @@ TEXT ·MyInt·Twice(SB), NOSPLIT, $0-16
 	RET
 ```
 
-不过这只是最多非指针类型的解释函数。现在增加一个接收参数是指针类型的Ptr方法，指针返回传入的指针：
+不过这只是接收非指针类型的方法函数。现在增加一个接收参数是指针类型的Ptr方法，函数返回传入的指针：
 
 ```go
 func (p *MyInt) Ptr() *MyInt {
