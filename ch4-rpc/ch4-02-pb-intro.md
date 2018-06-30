@@ -64,13 +64,13 @@ func (m *String) GetValue() string {
 ```go
 type HelloService struct{}
 
-func (p *HelloService) Hello(request String, reply *String) error {
+func (p *HelloService) Hello(request *String, reply *String) error {
 	reply.Value = "hello:" + request.GetValue()
 	return nil
 }
 ```
 
-其中Hello方法的输入参数和返回的参数均该用Protobuf定义的String类型表示，函数的内部代码同时也做了相应的调整。
+其中Hello方法的输入参数和返回的参数均该用Protobuf定义的String类型表示。因为新的输入参数为结构体类型，因此该用指针类型作为输入参数，函数的内部代码同时也做了相应的调整。
 
 至此，我们初步实现了Protobuf和RPC组合工作。在启动RPC服务时，我们依然可以选择默认的gob或手工指定json编码，甚至可以重新基于protobuf编码实现一个插件。虽然做了这么多工作，但是似乎并没有看到什么收益！
 
@@ -237,7 +237,7 @@ $ protoc --go-netrpc_out=plugins=netrpc:. hello.proto
 
 在前面的例子中我们已经构件了最小化的netrpcPlugin插件，并且通过克隆protoc-gen-go的主程序创建了新的protoc-gen-go-netrpc的插件程序。我们现在开始继续完善netrpcPlugin插件，最终目标是生成RPC安全接口。
 
-以下是完善后的GenerateImports和Generate方法：
+首先是GenerateImports方法中生成导入包的代码：
 
 ```go
 func (p *netrpcPlugin) GenerateImports(file *generator.FileDescriptor) {
@@ -245,153 +245,65 @@ func (p *netrpcPlugin) GenerateImports(file *generator.FileDescriptor) {
 		p.P(`import "net/rpc"`)
 	}
 }
+```
 
+然后要在Generate中为每个服务生成相关的代码。分析可以发现每个服务最重要的是服务的名字，然后每个服务有一组方法。而对于服务定义的方法，最重要的是方法的名字，还有输入参数和输出参数类型的名字。为此我们定义了一个ServiceSpec类型，用于描述服务的元信息：
+
+```go
+type ServiceSpec struct {
+	ServiceName string
+	MethodList  []ServiceMethodSpec
+}
+
+type ServiceMethodSpec struct {
+	MethodName     string
+	InputTypeName  string
+	OutputTypeName string
+}
+```
+
+然后我们新建一个buildServiceSpec方法用来构造每个服务的ServiceSpec元信息：
+
+```go
+func (p *generator.Generator) buildServiceSpec(svc *descriptor.ServiceDescriptorProto) *ServiceSpec {
+	spec := &ServiceSpec{
+		ServiceName: generator.CamelCase(svc.GetName()),
+	}
+
+	for _, m := range svc.Method {
+		spec.MethodList = append(spec.MethodList, ServiceMethodSpec{
+			MethodName:     generator.CamelCase(m.GetName()),
+			InputTypeName:  p.TypeName(p.ObjectNamed(m.GetInputType())),
+			OutputTypeName: p.TypeName(p.ObjectNamed(m.GetOutputType())),
+		})
+	}
+
+	return spec
+}
+```
+
+然后我们就可以基于buildServiceSpec方法构造的服务的元信息生成服务的代码：
+
+```go
 func (p *netrpcPlugin) Generate(file *generator.FileDescriptor) {
 	for _, svc := range file.Service {
-		p.genServiceInterface(file, svc)
-		p.genServiceServer(file, svc)
-		p.genServiceClient(file, svc)
+		spec := p.buildServiceSpec(svc)
+
+		var buf bytes.Buffer
+		t := template.Must(template.New("").Parse(tmplService))
+		err := t.Execute(&buf, spec)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		p.P(buf.String())
 	}
 }
 ```
 
-在导入部分我们增加了导入net/rpc包的语句。而在每个服务部分则通过genServiceInterface方法生成服务的接口，通过genServiceServer方法生成服务的注册函数，通过genServiceClient方法生成客户端包装代码。
+为了便于维护，我们基于Go语言的模板来生成服务代码，其中tmplService是服务的模板。
 
-首先看看genServiceInterface如何生成服务器接口：
-
-```go
-func (p *netrpcPlugin) genServiceInterface(
-	file *generator.FileDescriptor,
-	svc *descriptor.ServiceDescriptorProto,
-) {
-	const serviceInterfaceTmpl = `
-type {{.ServiceName}}Interface interface {
-	{{.CallMethodList}}
-}
-`
-	const callMethodTmpl = `
-{{.MethodName}}(in {{.ArgsType}}, out *{{.ReplyType}}) error`
-
-	// gen call method list
-	var callMethodList string
-	for _, m := range svc.Method {
-		out := bytes.NewBuffer([]byte{})
-		t := template.Must(template.New("").Parse(callMethodTmpl))
-		t.Execute(out, &struct{ ServiceName, MethodName, ArgsType, ReplyType string }{
-			ServiceName: generator.CamelCase(svc.GetName()),
-			MethodName:  generator.CamelCase(m.GetName()),
-			ArgsType:    p.TypeName(p.ObjectNamed(m.GetInputType())),
-			ReplyType:   p.TypeName(p.ObjectNamed(m.GetOutputType())),
-		})
-		callMethodList += out.String()
-
-		p.RecordTypeUse(m.GetInputType())
-		p.RecordTypeUse(m.GetOutputType())
-	}
-
-	// gen all interface code
-	out := bytes.NewBuffer([]byte{})
-	t := template.Must(template.New("").Parse(serviceInterfaceTmpl))
-	t.Execute(out, &struct{ ServiceName, CallMethodList string }{
-		ServiceName:    generator.CamelCase(svc.GetName()),
-		CallMethodList: callMethodList,
-	})
-	p.P(out.String())
-}
-```
-
-生成服务接口时首先需要服务的名字，可以通过`svc.GetName()`获取服务在Proto文件中的名字，然后通过generator.CamelCase函数转为Go语言中修饰后的名字。
-
-服务中svc.Method是一个表示方法信息的切片。要生成每个方法，需要知道每个方法的名字、输入参数类型、输出参数类型。其中m.GetName()是获取原始的方法名字，同样需要通过generator.CamelCase转化为Go语言中修饰后的名字。而`p.TypeName(p.ObjectNamed(m.GetInputType()))`和`p.TypeName(p.ObjectNamed(m.GetOutputType()))`分别用户获取输入参数和输出参数的类型名字。
-
-然后是生成RPC注册方法的genServiceServer函数：
-
-```go
-func (p *netrpcPlugin) genServiceServer(
-	file *generator.FileDescriptor,
-	svc *descriptor.ServiceDescriptorProto,
-) {
-	const serviceHelperFunTmpl = `
-func Register{{.ServiceName}}(srv *rpc.Server, x {{.ServiceName}}) error {
-	if err := srv.RegisterName("{{.ServiceName}}", x); err != nil {
-		return err
-	}
-	return nil
-}
-`
-	out := bytes.NewBuffer([]byte{})
-	t := template.Must(template.New("").Parse(serviceHelperFunTmpl))
-	t.Execute(out, &struct{ PackageName, ServiceName, ServiceRegisterName string }{
-		PackageName: file.GetPackage(),
-		ServiceName: generator.CamelCase(svc.GetName()),
-	})
-	p.P(out.String())
-}
-```
-
-genServiceServer函数的实现和生成接口的代码类似，依然是才有Go语言的模板生成目标代码。
-
-最后是genServiceClient函数生成客户端包装代码：
-
-```go
-
-func (p *netrpcPlugin) genServiceClient(
-	file *generator.FileDescriptor,
-	svc *descriptor.ServiceDescriptorProto,
-) {
-	const clientHelperFuncTmpl = `
-type {{.ServiceName}}Client struct {
-	*rpc.Client
-}
-
-var _ {{.ServiceName}}Interface = (*{{.ServiceName}}Client)(nil)
-
-func Dial{{.ServiceName}}(network, address string) (*{{.ServiceName}}Client, error) {
-	c, err := rpc.Dial(network, address)
-	if err != nil {
-		return nil, err
-	}
-	return &{{.ServiceName}}Client{Client: c}, nil
-}
-
-{{.MethodList}}
-`
-	const clientMethodTmpl = `
-func (p *{{.ServiceName}}Client) {{.MethodName}}(in {{.ArgsType}}, out *{{.ReplyType}}) error {
-	return p.Client.Call("{{.ServiceName}}.{{.MethodName}}", in, out)
-}
-`
-
-	// gen client method list
-	var methodList string
-	for _, m := range svc.Method {
-		out := bytes.NewBuffer([]byte{})
-		t := template.Must(template.New("").Parse(clientMethodTmpl))
-		t.Execute(out, &struct{ ServiceName, ServiceRegisterName, MethodName, ArgsType, ReplyType string }{
-			ServiceName:         generator.CamelCase(svc.GetName()),
-			ServiceRegisterName: file.GetPackage() + "." + generator.CamelCase(svc.GetName()),
-			MethodName:          generator.CamelCase(m.GetName()),
-			ArgsType:            p.TypeName(p.ObjectNamed(m.GetInputType())),
-			ReplyType:           p.TypeName(p.ObjectNamed(m.GetOutputType())),
-		})
-		methodList += out.String()
-	}
-
-	// gen all client code
-	out := bytes.NewBuffer([]byte{})
-	t := template.Must(template.New("").Parse(clientHelperFuncTmpl))
-	t.Execute(out, &struct{ PackageName, ServiceName, MethodList string }{
-		PackageName: file.GetPackage(),
-		ServiceName: generator.CamelCase(svc.GetName()),
-		MethodList:  methodList,
-	})
-	p.P(out.String())
-}
-```
-
-除了模板不同，客户端的生成代码逻辑服务接口的生成函数也是类似的。
-
-最后我们可以查看下netrpcPlugin插件生成的RPC代码：
+在编写模板之前，我们先查看下我们期望生成的最终代码大概是什么样子：
 
 ```go
 type HelloServiceInterface interface {
@@ -422,6 +334,49 @@ func DialHelloService(network, address string) (*HelloServiceClient, error) {
 func (p *HelloServiceClient) Hello(in String, out *String) error {
 	return p.Client.Call("HelloService.Hello", in, out)
 }
+```
+
+其中HelloService是服务名字，同时还有一系列的方法相关的名字。
+
+参考最终要生成的代码可以构建如下模板：
+
+```go
+const tmplService = `
+{{$root := .}}
+
+type {{.ServiceName}}Interface interface {
+	{{- range $_, $m := .MethodList}}
+		{{$m.MethodName}}(in *{{$m.InputTypeName}}, out *{{$m.OutputTypeName}}) error
+	{{- end}}
+}
+
+func Register{{.ServiceName}}(srv *rpc.Server, x {{.ServiceName}}) error {
+	if err := srv.RegisterName("{{.ServiceName}}", x); err != nil {
+		return err
+	}
+	return nil
+}
+
+type {{.ServiceName}}Client struct {
+	*rpc.Client
+}
+
+var _ {{.ServiceName}}Interface = (*{{.ServiceName}}Client)(nil)
+
+func Dial{{.ServiceName}}(network, address string) (*{{.ServiceName}}Client, error) {
+	c, err := rpc.Dial(network, address)
+	if err != nil {
+		return nil, err
+	}
+	return &{{.ServiceName}}Client{Client: c}, nil
+}
+
+{{range $_, $m := .MethodList}}
+func (p *{{$root.ServiceName}}Client) {{$m.MethodName}}(in *{{$m.InputTypeName}}, out *{{$m.OutputTypeName}}) error {
+	return p.Client.Call("{{$root.ServiceName}}.{{$m.MethodName}}", in, out)
+}
+{{end}}
+`
 ```
 
 当Protobuf的插件定制工作完成后，每次hello.proto文件中RPC服务的变化都可以自动生成代码。同时，才有类似的技术也可以为其它语言编写代码生成插件。

@@ -63,7 +63,7 @@ func init() {
 }
 
 type HelloServiceInterface interface {
-	Hello(in String, out *String) error
+	Hello(in *String, out *String) error
 }
 
 func RegisterHelloService(srv *rpc.Server, x HelloService) error {
@@ -87,7 +87,7 @@ func DialHelloService(network, address string) (*HelloServiceClient, error) {
 	return &HelloServiceClient{Client: c}, nil
 }
 
-func (p *HelloServiceClient) Hello(in String, out *String) error {
+func (p *HelloServiceClient) Hello(in *String, out *String) error {
 	return p.Client.Call("HelloService.Hello", in, out)
 }
 
