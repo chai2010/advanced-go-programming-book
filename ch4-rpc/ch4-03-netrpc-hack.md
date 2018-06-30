@@ -1,8 +1,12 @@
-# 4.3. protorpc
+# 4.3. 玩转RPC
 
 TODO
 
 <!--
+
+认证/反向/gls？，能够拿到req吗，基于req的gls
+
+--
 
 pb 和 json 是类似的，
 
