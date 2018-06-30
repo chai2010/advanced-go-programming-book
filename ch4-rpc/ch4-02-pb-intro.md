@@ -137,19 +137,30 @@ func (p *netrpcPlugin) Init(g *generator.Generator) { p.Generator = g }
 
 func (p *netrpcPlugin) GenerateImports(file *generator.FileDescriptor) {
 	if len(file.Service) > 0 {
-		p.P("// TODO: import code")
+		p.genImportCode(file)
 	}
 }
 
 func (p *netrpcPlugin) Generate(file *generator.FileDescriptor) {
 	for _, svc := range file.Service {
-		p.P("// TODO: service code, Name = " + svc.GetName())
-		_ = svc
+		p.genServiceCode(svc)
 	}
 }
 ```
 
-首先Name方法返回插件的名字。netrpcPlugin插件内置了一个匿名的`*generator.Generator`成员，然后在Init初始化的时候用参数g进行初始化，因此插件是从g参数对象继承了全部的公有方法。在GenerateImports方法中，当判断表示服务数列的`file.Service`切片非空时输出一个注释信息。在Generate方法也是才有类似的测试，但是遍历每个服务输出一个注释，并且输出服务的名字。至此一个最简陋的自定义的protoc-gen-go静态插件已经成型了。
+首先Name方法返回插件的名字。netrpcPlugin插件内置了一个匿名的`*generator.Generator`成员，然后在Init初始化的时候用参数g进行初始化，因此插件是从g参数对象继承了全部的公有方法。其中GenerateImports方法调用自定义的genImportCode函数生成导入代码。Generate方法调用自定义的genServiceCode方法生成每个服务的代码。
+
+目前，自定义的genImportCode和genServiceCode方法只是输出一行简单的注释：
+
+```go
+func (p *netrpcPlugin) genImportCode(file *generator.FileDescriptor) {
+	p.P("// TODO: import code")
+}
+
+func (p *netrpcPlugin) genServiceCode(svc *descriptor.ServiceDescriptorProto) {
+	p.P("// TODO: service code, Name = " + svc.GetName())
+}
+```
 
 要使用该插件需要先通过generator.RegisterPlugin函数注册插件，可以在init函数完成：
 
@@ -224,30 +235,23 @@ $ protoc --go-netrpc_out=plugins=netrpc:. hello.proto
 
 其中`--go-netrpc_out`参数高中protoc编译器加载名为protoc-gen-go-netrpc的插件，插件中的`plugins=netrpc`指示启用内部名为netrpc的netrpcPlugin插件。
 
-在新生成的hello.pb.go文件中将包含以下的代码：
-
-```go
-// TODO: import code
-// TODO: service code, Name = HelloService
-```
-
-至此，手工定制的Protobuf代码生成插件终于可以工作了。
+在新生成的hello.pb.go文件中将包含增加的注释代码。至此，手工定制的Protobuf代码生成插件终于可以工作了。
 
 ## 自动生成完整的RPC代码
 
 在前面的例子中我们已经构件了最小化的netrpcPlugin插件，并且通过克隆protoc-gen-go的主程序创建了新的protoc-gen-go-netrpc的插件程序。我们现在开始继续完善netrpcPlugin插件，最终目标是生成RPC安全接口。
 
-首先是GenerateImports方法中生成导入包的代码：
+首先是自定义的genImportCode方法中生成导入包的代码：
 
 ```go
-func (p *netrpcPlugin) GenerateImports(file *generator.FileDescriptor) {
-	if len(file.Service) > 0 {
-		p.P(`import "net/rpc"`)
-	}
+func (p *netrpcPlugin) genImportCode(file *generator.FileDescriptor) {
+	p.P(`import "net/rpc"`)
 }
 ```
 
-然后要在Generate中为每个服务生成相关的代码。分析可以发现每个服务最重要的是服务的名字，然后每个服务有一组方法。而对于服务定义的方法，最重要的是方法的名字，还有输入参数和输出参数类型的名字。为此我们定义了一个ServiceSpec类型，用于描述服务的元信息：
+然后要在自定义的genServiceCode方法中为每个服务生成相关的代码。分析可以发现每个服务最重要的是服务的名字，然后每个服务有一组方法。而对于服务定义的方法，最重要的是方法的名字，还有输入参数和输出参数类型的名字。
+
+为此我们定义了一个ServiceSpec类型，用于描述服务的元信息：
 
 ```go
 type ServiceSpec struct {
@@ -265,7 +269,7 @@ type ServiceMethodSpec struct {
 然后我们新建一个buildServiceSpec方法用来构造每个服务的ServiceSpec元信息：
 
 ```go
-func (p *generator.Generator) buildServiceSpec(svc *descriptor.ServiceDescriptorProto) *ServiceSpec {
+func (p *netrpcPlugin) buildServiceSpec(svc *descriptor.ServiceDescriptorProto) *ServiceSpec {
 	spec := &ServiceSpec{
 		ServiceName: generator.CamelCase(svc.GetName()),
 	}
@@ -285,7 +289,7 @@ func (p *generator.Generator) buildServiceSpec(svc *descriptor.ServiceDescriptor
 然后我们就可以基于buildServiceSpec方法构造的服务的元信息生成服务的代码：
 
 ```go
-func (p *netrpcPlugin) Generate(file *generator.FileDescriptor) {
+func (p *netrpcPlugin) genServiceCode(svc *descriptor.ServiceDescriptorProto) {
 	for _, svc := range file.Service {
 		spec := p.buildServiceSpec(svc)
 
