@@ -316,7 +316,7 @@ func Delete(key interface{}) {
 }
 ```
 
-最后我们再提供一个Clean函数，用于是否Goroutine对应的map资源：
+最后我们再提供一个Clean函数，用于释放Goroutine对应的map资源：
 
 ```go
 func Clean() {
@@ -350,5 +350,5 @@ func main() {
 }
 ```
 
-通过Goroutine局部存储，不同层次函数之间可以共享存储资源。同时未来避免资源泄露，需要再Goroutine的根函数中，通过defer语句调用gls.Clean()函数释放资源。
+通过Goroutine局部存储，不同层次函数之间可以共享存储资源。同时为了避免资源泄漏，需要在Goroutine的根函数中，通过defer语句调用gls.Clean()函数释放资源。
 
