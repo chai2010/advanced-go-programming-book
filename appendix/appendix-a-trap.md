@@ -7,7 +7,7 @@
 在函数调用参数中, 数组是值传递, 无法通过修改数组类型的参数返回结果.
 
 ```go
-func main() {  
+func main() {
 	x := [3]int{1, 2, 3}
 
 	func(arr [3]int) {
@@ -57,7 +57,7 @@ func Foo() (err error) {
 recover捕获的是祖父级调用时的异常, 直接调用时无效:
 
 ```go
-func main() {  
+func main() {
 	recover()
 	panic(1)
 }
@@ -66,7 +66,7 @@ func main() {
 直接defer调用也是无效:
 
 ```go
-func main() {  
+func main() {
 	defer recover()
 	panic(1)
 }
@@ -75,7 +75,7 @@ func main() {
 defer调用时多层嵌套依然无效:
 
 ```go
-func main() {  
+func main() {
 	defer func() {
 		func() { recover() }()
 	}()
@@ -86,7 +86,7 @@ func main() {
 必须在defer函数中直接调用才有效:
 
 ```go
-func main() {  
+func main() {
 	defer func() {
 		recover()
 	}()
@@ -350,10 +350,10 @@ Go语言中对象的地址可能发生变化, 因此指针不能从其它非指�
 ```go
 func main() {
 	var x int = 42
-	var p uintptr = uintptr(unsafe.Poiner(&x))
+	var p uintptr = uintptr(unsafe.Pointer(&x))
 
 	runtime.GC()
-	var px *int = (*int)(unsafe.Poiner(p))
+	var px *int = (*int)(unsafe.Pointer(p))
 	println(*px)
 }
 ```
@@ -377,7 +377,7 @@ func main() {
 		} ()
 		return ch
 	}()
-	
+
 	for v := range ch {
 		fmt.Println(v)
 		if v == 5 {
@@ -395,7 +395,7 @@ func main() {
 ```go
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	ch := func(ctx context.Context) <-chan int {
 		ch := make(chan int)
 		go func() {
@@ -409,7 +409,7 @@ func main() {
 		} ()
 		return ch
 	}(ctx)
-	
+
 	for v := range ch {
 		fmt.Println(v)
 		if v == 5 {
