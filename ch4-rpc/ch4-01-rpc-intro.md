@@ -125,7 +125,7 @@ func (p *HelloServiceClient) Hello(request string, reply *string) error {
 }
 ```
 
-我们在接口规范中针对客户端新增加了HelloServiceClient类型，改类型也必须满足HelloServiceInterface接口，这样客户端用户就可以直接通过接口对应的方法调用RPC函数。同时提供了一个DialHelloService方法，直接拨号HelloService服务。
+我们在接口规范中针对客户端新增加了HelloServiceClient类型，该类型也必须满足HelloServiceInterface接口，这样客户端用户就可以直接通过接口对应的方法调用RPC函数。同时提供了一个DialHelloService方法，直接拨号HelloService服务。
 
 基于新的客户端接口，我们可以简化客户端用户的代码：
 
@@ -175,7 +175,7 @@ func main() {
 }
 ```
 
-在新的RPC服务端实现中，我们用RegisterHelloService函数来注册函数，这样不仅可以避免服务名称的工作，同时也保证了传入的服务对象满足了RPC接口定义的定义。最后我们支持多个TCP链接，然后为每个TCP链接建立RPC服务。
+在新的RPC服务端实现中，我们用RegisterHelloService函数来注册函数，这样不仅可以避免命名服务名称的工作，同时也保证了传入的服务对象满足了RPC接口的定义。最后我们支持多个TCP链接，然后为每个TCP链接建立RPC服务。
 
 
 ## 跨语言的RPC
