@@ -315,7 +315,7 @@ func main() {
 
 RPC的服务假设在“/jsonrpc”路径，在处理函数中基于http.ResponseWriter和http.Request类型的参数构造一个io.ReadWriteCloser类型的conn通道。然后基于conn构建针对服务端的json编码解码器。最后通过rpc.ServeRequest处理一次RPC方法调用。
 
-模拟一次RPC调用的过程就是向该链接发生一个json字符串：
+模拟一次RPC调用的过程就是向该链接发送一个json字符串：
 
 ```
 $ curl localhost:1234/jsonrpc -X POST --data '{"method":"HelloService.Hello","params":["hello"],"id":0}'
