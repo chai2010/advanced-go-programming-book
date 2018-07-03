@@ -239,7 +239,7 @@ func main() {
 
 这是一个json编码的数据，其中method部分对应要调用的rpc服务和方法组合成的名字，params部分的第一个元素为参数部分，id是由调用端维护的一个唯一的调用编号。
 
-请求的json数据对应在内部对应两个结构体：客户端是clientRequest，服务端是serverRequest。clientRequest和serverRequest结构体的内容基本是一致的：
+请求的json数据对象在内部对应两个结构体：客户端是clientRequest，服务端是serverRequest。clientRequest和serverRequest结构体的内容基本是一致的：
 
 ```go
 type clientRequest struct {
