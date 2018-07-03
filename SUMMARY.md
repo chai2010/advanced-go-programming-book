@@ -36,7 +36,7 @@
    * [4.2. Protobuf](ch4-rpc/ch4-02-pb-intro.md)
    * [4.3. 玩转RPC](ch4-rpc/ch4-03-netrpc-hack.md)
    * [4.4. GRPC入门](ch4-rpc/ch4-04-grpc.md)
-   * [4.5. 补充说明(TODO)](ch4-rpc/ch4-05-faq.md)
+   * [4.5. 补充说明](ch4-rpc/ch4-05-faq.md)
 * [第五章 Go和Web](ch5-web/readme.md)
    * [5.1. Web开发简介](ch5-web/ch5-01-introduction.md)
    * [5.2. Router请求路由](ch5-web/ch5-02-router.md)
