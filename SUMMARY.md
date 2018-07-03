@@ -35,7 +35,7 @@
    * [4.1. RPC入门](ch4-rpc/ch4-01-rpc-intro.md)
    * [4.2. Protobuf](ch4-rpc/ch4-02-pb-intro.md)
    * [4.3. 玩转RPC](ch4-rpc/ch4-03-netrpc-hack.md)
-   * [4.4. GRPC入门(TODO)](ch4-rpc/ch4-04-grpc.md)
+   * [4.4. GRPC入门](ch4-rpc/ch4-04-grpc.md)
    * [4.5. GRPC进阶(TODO)](ch4-rpc/ch4-05-grpc-hack.md)
    * [4.6. Protobuf扩展语法和插件(TODO)](ch4-rpc/ch4-06-pb-option.md)
    * [4.7. 其它RPC系统(TODO)](ch4-rpc/ch4-07-other-rpc.md)
