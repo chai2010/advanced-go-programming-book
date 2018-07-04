@@ -1,10 +1,10 @@
 # 4.2. Protobuf
 
-Protobuf是Protocol Buffers的简称，它是Google公司开发的一种数据描述语言，并于2008年对外开源。Protobuf刚开源时的定位类似于XML、JSON等数据描述语言，通过附带工具生成等代码提实现将结构化数据序列化的功能。但是我们更关注的是Protobuf作为接口规范的描述语言，可以作为设计安全的跨语言PRC接口的基础工具。
+Protobuf是Protocol Buffers的简称，它是Google公司开发的一种数据描述语言，并于2008年对外开源。Protobuf刚开源时的定位类似于XML、JSON等数据描述语言，通过附带工具生成代码并实现将结构化数据序列化的功能。但是我们更关注的是Protobuf作为接口规范的描述语言，可以作为设计安全的跨语言PRC接口的基础工具。
 
 ## Protobuf入门
 
-对于没有用过Protobuf读者，建议先从官网了解下基本用法。这里我们尝试如何将Protobuf和RPC结合在一起使用，通过Protobuf来最终保证RPC的接口规范和完全。Protobuf中最基本的数据单元是message，是类似Go语言中结构体的存在。在message中可以嵌套message或其它的基础数据类型的成员。
+对于没有用过Protobuf读者，建议先从官网了解下基本用法。这里我们尝试如何将Protobuf和RPC结合在一起使用，通过Protobuf来最终保证RPC的接口规范和安全。Protobuf中最基本的数据单元是message，是类似Go语言中结构体的存在。在message中可以嵌套message或其它的基础数据类型的成员。
 
 首先创建hello.proto文件，其中包装HelloService服务中用到的字符串类型：
 
@@ -92,7 +92,7 @@ service HelloService {
 $ protoc --go_out=plugins=grpc:. hello.proto
 ```
 
-在生成的代码中多了一些类似HelloServiceServer、HelloServiceClient的新类型。这些类似是为grpc服务的，并不符合我们的RPC要求。
+在生成的代码中多了一些类似HelloServiceServer、HelloServiceClient的新类型。这些类型是为grpc服务的，并不符合我们的RPC要求。
 
 grpc插件为我们提供了改进思路，下面我们将探索如何为我们的RPC生成安全的代码。
 
@@ -233,7 +233,7 @@ func main() {
 $ protoc --go-netrpc_out=plugins=netrpc:. hello.proto
 ```
 
-其中`--go-netrpc_out`参数高中protoc编译器加载名为protoc-gen-go-netrpc的插件，插件中的`plugins=netrpc`指示启用内部名为netrpc的netrpcPlugin插件。
+其中`--go-netrpc_out`参数告知protoc编译器加载名为protoc-gen-go-netrpc的插件，插件中的`plugins=netrpc`指示启用内部名为netrpc的netrpcPlugin插件。
 
 在新生成的hello.pb.go文件中将包含增加的注释代码。至此，手工定制的Protobuf代码生成插件终于可以工作了。
 
