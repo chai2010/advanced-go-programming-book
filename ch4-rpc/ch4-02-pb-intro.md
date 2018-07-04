@@ -57,7 +57,7 @@ func (m *String) GetValue() string {
 }
 ```
 
-生成的结构体中有一些以`XXX_`为前缀名字的成员，目前可以忽略这些成员。同时String类型还自动生成了一组方法，其中ProtoMessage方法表示这是一个实现了proto.Message接口的方法。此外Protobuf还为每个成员生成了一个Get方法，Get方法不仅可以处理空指针类型，而且可以和Protobuf第三版的方法保持一致（第二版的自定义默认值特性依赖这类方法）。
+生成的结构体中有一些以`XXX_`为前缀名字的成员，目前可以忽略这些成员。同时String类型还自动生成了一组方法，其中ProtoMessage方法表示这是一个实现了proto.Message接口的方法。此外Protobuf还为每个成员生成了一个Get方法，Get方法不仅可以处理空指针类型，而且可以和Protobuf第二版的方法保持一致（第二版的自定义默认值特性依赖这类方法）。
 
 基于新的String类型，我们可以重新实现HelloService：
 
