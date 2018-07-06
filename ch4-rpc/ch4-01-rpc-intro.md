@@ -82,7 +82,7 @@ func RegisterHelloService(svc HelloServiceInterface) error {
 }
 ```
 
-我们将RPC服务的接口规范分为三个部分：首选是服务的名字，然后是服务要实现的详细方法列表，最后是注册该类型服务的函数。为了避免名字冲突，我们在RPC服务的名字中增加了包路径前缀（这个是RPC服务抽象的包路径，并非完全等价Go语言的包路径）。RegisterHelloService注册服务时，编译器会要求传入的对象满足HelloServiceInterface接口。
+我们将RPC服务的接口规范分为三个部分：首先是服务的名字，然后是服务要实现的详细方法列表，最后是注册该类型服务的函数。为了避免名字冲突，我们在RPC服务的名字中增加了包路径前缀（这个是RPC服务抽象的包路径，并非完全等价Go语言的包路径）。RegisterHelloService注册服务时，编译器会要求传入的对象满足HelloServiceInterface接口。
 
 在定义了RPC服务接口规范之后，客户端就可以根据规范编写RPC调用的代码了：
 
@@ -101,7 +101,7 @@ func main() {
 }
 ```
 
-其中唯一的变化是client.Call的第一个参数用`HelloServiceName+".Hello"`代理了"HelloService.Hello"。然后通过client.Call函数调用RPC方法依然比较繁琐，同时参数的类型依然无法得到编译器提供的安全保障。
+其中唯一的变化是client.Call的第一个参数用`HelloServiceName+".Hello"代替了"HelloService.Hello"。然而通过client.Call函数调用RPC方法依然比较繁琐，同时参数的类型依然无法得到编译器提供的安全保障。
 
 为了简化客户端用户调用RPC函数，我们在可以在接口规范部分增加对客户端的简单包装：
 
@@ -182,7 +182,7 @@ func main() {
 
 标准库的RPC默认采用Go语言特有的gob规范编码，因此从其它语言调用Go语言实现的RPC服务将比较困难。在互联网的微服务时代，每个RPC以及服务的使用者都可能采用不同的编程语言，因此跨语言是互联网时代RPC的一个首要条件。得益于RPC的框架设计，Go语言的RPC其实也是很容易实现跨语言支持的。
 
-Go语言的RPC框架有两个比较有特色的设计：一个是RPC数据打包时可以通过插件实现自定义的编码和解码；另一个是RPC建立在抽象的io.ReadWriteCloser接口之上的，我们可以将RPC架设在不同的通讯协议之上。我们这里将尝试通过官方自带的net/rpc/jsonrpc扩展实现一个跨语言的PPC。
+Go语言的RPC框架有两个比较有特色的设计：一个是RPC数据打包时可以通过插件实现自定义的编码和解码；另一个是RPC建立在抽象的io.ReadWriteCloser接口之上的，我们可以将RPC架设在不同的通讯协议之上。这里我们将尝试通过官方自带的net/rpc/jsonrpc扩展实现一个跨语言的PPC。
 
 首先是基于json实现RPC服务：
 
