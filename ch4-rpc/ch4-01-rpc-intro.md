@@ -82,7 +82,7 @@ func RegisterHelloService(svc HelloServiceInterface) error {
 }
 ```
 
-我们将RPC服务的接口规范分为三个部分：首选是服务的名字，然后是服务要实现的详细方法列表，最后是注册该类型服务的函数。为了避免名字冲突，我们在RPC服务的名字中增加了包路径前缀（这个是RPC服务抽象的包路径，并非完全等价Go语言的包路径）。RegisterHelloService注册服务时，编译器会要求传入的对象满足HelloServiceInterface接口。
+我们将RPC服务的接口规范分为三个部分：首先是服务的名字，然后是服务要实现的详细方法列表，最后是注册该类型服务的函数。为了避免名字冲突，我们在RPC服务的名字中增加了包路径前缀（这个是RPC服务抽象的包路径，并非完全等价Go语言的包路径）。RegisterHelloService注册服务时，编译器会要求传入的对象满足HelloServiceInterface接口。
 
 在定义了RPC服务接口规范之后，客户端就可以根据规范编写RPC调用的代码了：
 
@@ -101,7 +101,7 @@ func main() {
 }
 ```
 
-其中唯一的变化是client.Call的第一个参数用`HelloServiceName+".Hello"`代理了"HelloService.Hello"。然后通过client.Call函数调用RPC方法依然比较繁琐，同时参数的类型依然无法得到编译器提供的安全保障。
+其中唯一的变化是client.Call的第一个参数用`HelloServiceName+".Hello"代替了"HelloService.Hello"。然而通过client.Call函数调用RPC方法依然比较繁琐，同时参数的类型依然无法得到编译器提供的安全保障。
 
 为了简化客户端用户调用RPC函数，我们在可以在接口规范部分增加对客户端的简单包装：
 
