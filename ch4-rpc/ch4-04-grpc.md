@@ -4,7 +4,7 @@ GRPC是Google公司基于Protobuf开发的跨语言的开源RPC框架。GRPC基�
 
 ## GRPC入门
 
-如果从Protobuf的角度看，GRPC只不过是针对service接口一个生成代码生成器。我们在本章的第二节中一节手工实现了一个简单的Protobuf代码生成器插件，只不过当时生成的代码是适配标准库的RPC框架的。
+如果从Protobuf的角度看，GRPC只不过是一个针对service接口生成代码的生成器。我们在本章的第二节中手工实现了一个简单的Protobuf代码生成器插件，只不过当时生成的代码是适配标准库的RPC框架的。
 
 创建hello.proto文件，定义HelloService接口：
 
