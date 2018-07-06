@@ -244,14 +244,14 @@ func main() {
 	mu.Lock()
 	go func(){
 		println("你好, 世界")
-		mu.Unock()
+		mu.Unlock()
 	}()
 
 	mu.Lock()
 }
 ```
 
-可以确定后台线程的`mu.Unock()`必然在`println("你好, 世界")`完成后发生（同一个线程满足顺序一致性），`main`函数的第二个`mu.Lock()`必然在后台线程的`mu.Unock()`之后发生（`sync.Mutex`保证），此时后台线程的打印工作已经顺利完成了。
+可以确定后台线程的`mu.Unlock()`必然在`println("你好, 世界")`完成后发生（同一个线程满足顺序一致性），`main`函数的第二个`mu.Lock()`必然在后台线程的`mu.Unlock()`之后发生（`sync.Mutex`保证），此时后台线程的打印工作已经顺利完成了。
 
 ## 初始化顺序
 
