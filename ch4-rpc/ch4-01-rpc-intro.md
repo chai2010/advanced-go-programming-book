@@ -237,7 +237,7 @@ func main() {
 {"method":"HelloService.Hello","params":["hello"],"id":0}
 ```
 
-这是一个json编码的数据，其中method部分对应要调用的rpc服务和方法组合成的名字，params部分的第一个元素为参数部分，id是由调用端维护的一个唯一的调用编号。
+这是一个json编码的数据，其中method部分对应要调用的rpc服务和方法组合成的名字，params部分的第一个元素为参数，id是由调用端维护的一个唯一的调用编号。
 
 请求的json数据对象在内部对应两个结构体：客户端是clientRequest，服务端是serverRequest。clientRequest和serverRequest结构体的内容基本是一致的：
 
@@ -255,7 +255,7 @@ type serverRequest struct {
 }
 ```
 
-在获取到RPC调用对应的json数据后，我们可以通过直接向假设了RPC服务的TCP服务器发送json数据模拟RPC方法调用：
+在获取到RPC调用对应的json数据后，我们可以通过直接向架设了RPC服务的TCP服务器发送json数据模拟RPC方法调用：
 
 ```
 $ echo -e '{"method":"HelloService.Hello","params":["hello"],"id":1}' | nc localhost 1234
@@ -285,7 +285,7 @@ type serverResponse struct {
 }
 ```
 
-因此无论是采用任何语言，只要遵循同样的json结构，以同样的流程就可以和Go语言编写的RPC服务进行通信。这样我们就实现了跨语言的RPC。
+因此无论采用何种语言，只要遵循同样的json结构，以同样的流程就可以和Go语言编写的RPC服务进行通信。这样我们就实现了跨语言的RPC。
 
 ## Http上的RPC
 
