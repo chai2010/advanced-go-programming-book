@@ -177,7 +177,7 @@ s1 := "hello, world"[:5]
 s2 := "hello, world"[7:]
 ```
 
-和数组一样，内置的`len`和`cap`函数返回相同的结果，都对应字符串的长度。也可以通过`reflect.StringHeader`结构访问字符串的长度（这里只是为了演示字符串的结构，并不是推荐的做法）：
+字符串和数组类似，内置的`len`函数返回字符串的长度。也可以通过`reflect.StringHeader`结构访问字符串的长度（这里只是为了演示字符串的结构，并不是推荐的做法）：
 
 ```go
 fmt.Println("len(s):", (*reflect.StringHeader)(unsafe.Pointer(&s)).Len)   // 12

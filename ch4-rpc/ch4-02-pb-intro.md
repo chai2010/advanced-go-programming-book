@@ -1,10 +1,10 @@
 # 4.2. Protobuf
 
-Protobuf是Protocol Buffers的简称，它是Google公司开发的一种数据描述语言，并于2008年对外开源。Protobuf刚开源时的定位类似于XML、JSON等数据描述语言，通过附带工具生成等代码提实现将结构化数据序列化的功能。但是我们更关注的是Protobuf作为接口规范的描述语言，可以作为设计安全的跨语言PRC接口的基础工具。
+Protobuf是Protocol Buffers的简称，它是Google公司开发的一种数据描述语言，并于2008年对外开源。Protobuf刚开源时的定位类似于XML、JSON等数据描述语言，通过附带工具生成代码并实现将结构化数据序列化的功能。但是我们更关注的是Protobuf作为接口规范的描述语言，可以作为设计安全的跨语言PRC接口的基础工具。
 
 ## Protobuf入门
 
-对于没有用过Protobuf读者，建议先从官网了解下基本用法。这里我们尝试如何将Protobuf和RPC结合在一起使用，通过Protobuf来最终保证RPC的接口规范和完全。Protobuf中最基本的数据单元是message，是类似Go语言中结构体的存在。在message中可以嵌套message或其它的基础数据类型的成员。
+对于没有用过Protobuf读者，建议先从官网了解下基本用法。这里我们尝试如何将Protobuf和RPC结合在一起使用，通过Protobuf来最终保证RPC的接口规范和安全。Protobuf中最基本的数据单元是message，是类似Go语言中结构体的存在。在message中可以嵌套message或其它的基础数据类型的成员。
 
 首先创建hello.proto文件，其中包装HelloService服务中用到的字符串类型：
 
@@ -18,11 +18,11 @@ message String {
 }
 ```
 
-开头的syntax语句表示采用Protobuf第三版本的语法。第三版的Protobuf对语言进行的提炼简化，所有成员均采用类似Go语言中的零值初始化（不在支持自定义默认值），同时消息成员也不再支持required特性。然后package指令指明当前是main包（这样可以和Go的包明保持一致），当然用户也可以针对不同的语言定制对应的包路径和名称。最后message关键字定义一个新的String类型，在最终生成的Go语言代码中对应一个String结构体。String类型中只有一个字符串类型的value成员，该成员的Protobuf编码时的成员编号为1。
+开头的syntax语句表示采用Protobuf第三版本的语法。第三版的Protobuf对语言进行了提炼简化，所有成员均采用类似Go语言中的零值初始化（不再支持自定义默认值），同时消息成员也不再支持required特性。然后package指令指明当前是main包（这样可以和Go的包明保持一致），当然用户也可以针对不同的语言定制对应的包路径和名称。最后message关键字定义一个新的String类型，在最终生成的Go语言代码中对应一个String结构体。String类型中只有一个字符串类型的value成员，该成员的Protobuf编码时的成员编号为1。
 
-在XML或JSON成数据描述语言中，一遍通过成员的名字来绑定对应的数据。但是Protobuf编码却是通过成员的唯一编号来绑定对应的数据，因此Protobuf编码后数据的体积会比较小，但是也非常不便于人类查阅。我们目前并不关注Protobuf的编码技术，最终生成的Go结构体可以自由采用JSON或gob等编码格式，因此大家可以暂时忽略Protobuf的成员编号部分。
+在XML或JSON等数据描述语言中，一般通过成员的名字来绑定对应的数据。但是Protobuf编码却是通过成员的唯一编号来绑定对应的数据，因此Protobuf编码后数据的体积会比较小，但是也非常不便于人类查阅。我们目前并不关注Protobuf的编码技术，最终生成的Go结构体可以自由采用JSON或gob等编码格式，因此大家可以暂时忽略Protobuf的成员编码部分。
 
-Protobuf核心的工具集是C++语言开发的，在官方的protoc编译器中并不支持Go语言。要想基于上面的hello.proto文件生成相应的Go代码，需要安装相应的工具。首先是安装官方的protoc工具，可以从 https://github.com/google/protobuf/releases 下载。然后是安装针对Go语言的代码生成插件，可以通过`go get github.com/golang/protobuf/protoc-gen-go`命令按安装。
+Protobuf核心的工具集是C++语言开发的，在官方的protoc编译器中并不支持Go语言。要想基于上面的hello.proto文件生成相应的Go代码，需要安装相应的工具。首先是安装官方的protoc工具，可以从 https://github.com/google/protobuf/releases 下载。然后是安装针对Go语言的代码生成插件，可以通过`go get github.com/golang/protobuf/protoc-gen-go`命令安装。
 
 然后通过以下命令生成相应的Go代码：
 
@@ -30,7 +30,7 @@ Protobuf核心的工具集是C++语言开发的，在官方的protoc编译器中
 $ protoc --go_out=. hello.proto
 ```
 
-其中`go_out`参数告知protoc编译器取加载对应的protoc-gen-go工具，然后通过该工具生成代码，生成代码放到当前目录。最后是一系列要处理的protobuf文件的列表。
+其中`go_out`参数告知protoc编译器去加载对应的protoc-gen-go工具，然后通过该工具生成代码，生成代码放到当前目录。最后是一系列要处理的protobuf文件的列表。
 
 这里只生成了一个hello.pb.go文件，其中String结构体内容如下：
 
@@ -57,7 +57,7 @@ func (m *String) GetValue() string {
 }
 ```
 
-生成的结构体中有一些以`XXX_`为前缀名字的成员，目前可以忽略这些成员。同时String类型还自动生成了一组方法，其中ProtoMessage方法表示这是一个实现了proto.Message接口的方法。此外Protobuf还为每个成员生成了一个Get方法，Get方法不仅可以处理空指针类型，而且可以和Protobuf第三版的方法保持一致（第二版的自定义默认值特性依赖这类方法）。
+生成的结构体中有一些以`XXX_`为名字前缀的成员，目前可以忽略这些成员。同时String类型还自动生成了一组方法，其中ProtoMessage方法表示这是一个实现了proto.Message接口的方法。此外Protobuf还为每个成员生成了一个Get方法，Get方法不仅可以处理空指针类型，而且可以和Protobuf第二版的方法保持一致（第二版的自定义默认值特性依赖这类方法）。
 
 基于新的String类型，我们可以重新实现HelloService：
 
@@ -74,7 +74,7 @@ func (p *HelloService) Hello(request *String, reply *String) error {
 
 至此，我们初步实现了Protobuf和RPC组合工作。在启动RPC服务时，我们依然可以选择默认的gob或手工指定json编码，甚至可以重新基于protobuf编码实现一个插件。虽然做了这么多工作，但是似乎并没有看到什么收益！
 
-回顾第一章中更安全的PRC接口部分的内容，当时我们花费了极大的力气去给RPC服务增加安全的保障。最终得到的更安全的PRC接口的代码本书就非常繁琐比利于手工维护，同时全部安全相关的代码只适用于Go语言环境！既然使用了Protobuf定义的输入和输出参数，那么RPC服务接口是否也可以通过Protobuf定义呢？其实用Protobuf定义语言无关的PRC服务接口才是它真正的价值所在！
+回顾第一章中更安全的PRC接口部分的内容，当时我们花费了极大的力气去给RPC服务增加安全的保障。最终得到的更安全的PRC接口的代码本书就非常繁琐的使用手工维护，同时全部安全相关的代码只适用于Go语言环境！既然使用了Protobuf定义的输入和输出参数，那么RPC服务接口是否也可以通过Protobuf定义呢？其实用Protobuf定义语言无关的PRC服务接口才是它真正的价值所在！
 
 下面更新hello.proto文件，通过Protobuf来定义HelloService服务：
 
@@ -92,7 +92,7 @@ service HelloService {
 $ protoc --go_out=plugins=grpc:. hello.proto
 ```
 
-在生成的代码中多了一些类似HelloServiceServer、HelloServiceClient的新类型。这些类似是为grpc服务的，并不符合我们的RPC要求。
+在生成的代码中多了一些类似HelloServiceServer、HelloServiceClient的新类型。这些类型是为grpc服务的，并不符合我们的RPC要求。
 
 grpc插件为我们提供了改进思路，下面我们将探索如何为我们的RPC生成安全的代码。
 
@@ -233,7 +233,7 @@ func main() {
 $ protoc --go-netrpc_out=plugins=netrpc:. hello.proto
 ```
 
-其中`--go-netrpc_out`参数高中protoc编译器加载名为protoc-gen-go-netrpc的插件，插件中的`plugins=netrpc`指示启用内部名为netrpc的netrpcPlugin插件。
+其中`--go-netrpc_out`参数告知protoc编译器加载名为protoc-gen-go-netrpc的插件，插件中的`plugins=netrpc`指示启用内部名为netrpc的netrpcPlugin插件。
 
 在新生成的hello.pb.go文件中将包含增加的注释代码。至此，手工定制的Protobuf代码生成插件终于可以工作了。
 
