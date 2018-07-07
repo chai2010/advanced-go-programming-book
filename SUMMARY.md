@@ -58,7 +58,7 @@
    * [6.7. confd(TODO)](ch6-cloud/ch6-07-confd.md)
    * [6.8. 分布式锁(TODO)](ch6-cloud/ch6-08-lock.md)
    * [6.9. 分布式任务调度系统(TODO)](ch6-cloud/ch6-09-sched.md)
-   * [6.10. 延时任务系统(TODO)](ch6-cloud/ch6-10-delay-job.md)
+   * [6.10. 延时任务系统](ch6-cloud/ch6-10-delay-job.md)
    * [6.11. Kubernetes(TODO)](ch6-cloud/ch6-11-k8s.md)
    * [6.12. 补充说明(TODO)](ch6-cloud/ch6-12-faq.md)
 * [附录](appendix/readme.md)
