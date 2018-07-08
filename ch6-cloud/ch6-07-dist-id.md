@@ -42,3 +42,7 @@ Twitter 的 snowflake 算法是这种场景下的一个典型解法。先来看�
 ## worker id　分配
 
 ## 开源实例
+
+gosnowflake
+
+sonyflake
