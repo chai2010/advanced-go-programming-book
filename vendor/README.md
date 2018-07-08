@@ -8,4 +8,6 @@ TODO
 - [Protobuf](https://github.com/golang/protobuf): [v1.1.0](https://github.com/golang/protobuf/releases/tag/v1.1.0)
 - [gRPC](https://github.com/grpc/grpc-go): [v1.13.0](https://github.com/grpc/grpc-go/releases/tag/v1.13.0)
 - [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway): [v1.4.1](https://github.com/grpc-ecosystem/grpc-gateway/releases/tag/v1.4.1)
+- [grpc-middleware](https://github.com/grpc-ecosystem/go-grpc-middleware): [v1.0.0](https://github.com/grpc-ecosystem/go-grpc-middleware/releases/tag/v1.0.0)
+
 
