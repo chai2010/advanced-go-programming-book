@@ -1,0 +1,25 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+package(default_visibility = ["//visibility:public"])
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "a_bit_of_everything_nested.go",
+        "a_bit_of_everything_service_api.go",
+        "api_client.go",
+        "api_response.go",
+        "camel_case_service_name_api.go",
+        "configuration.go",
+        "echo_rpc_api.go",
+        "echo_service_api.go",
+        "examplepb_a_bit_of_everything.go",
+        "examplepb_body.go",
+        "examplepb_numeric_enum.go",
+        "nested_deep_enum.go",
+        "protobuf_empty.go",
+        "sub_string_message.go",
+    ],
+    importpath = "github.com/grpc-ecosystem/grpc-gateway/examples/clients/abe",
+    deps = ["@com_github_go_resty_resty//:go_default_library"],
+)

@@ -1,0 +1,75 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "examples/proto/examplepb/wrappers.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/example/wrappers": {
+      "post": {
+        "operationId": "Create",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/examplepbWrappers"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/examplepbWrappers"
+            }
+          }
+        ],
+        "tags": [
+          "WrappersService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "examplepbWrappers": {
+      "type": "object",
+      "properties": {
+        "string_value": {
+          "type": "string"
+        },
+        "int32_value": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "int64_value": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "float_value": {
+          "type": "number",
+          "format": "float"
+        },
+        "double_value": {
+          "type": "number",
+          "format": "double"
+        },
+        "bool_value": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    }
+  }
+}
