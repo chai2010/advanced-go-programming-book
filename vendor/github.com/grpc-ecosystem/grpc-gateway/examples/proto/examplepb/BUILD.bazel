@@ -1,0 +1,64 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+load("@grpc_ecosystem_grpc_gateway//protoc-gen-swagger:defs.bzl", "protoc_gen_swagger")
+
+package(default_visibility = ["//visibility:public"])
+
+# gazelle:exclude a_bit_of_everything.pb.gw.go
+# gazelle:exclude echo_service.pb.gw.go
+# gazelle:exclude flow_combination.pb.gw.go
+# gazelle:exclude stream.pb.gw.go
+# gazelle:exclude wrappers.pb.gw.go
+
+proto_library(
+    name = "examplepb_proto",
+    srcs = [
+        "a_bit_of_everything.proto",
+        "echo_service.proto",
+        "flow_combination.proto",
+        "stream.proto",
+        "unannotated_echo_service.proto",
+        "wrappers.proto",
+    ],
+    deps = [
+        "//examples/proto/sub:sub_proto",
+        "//examples/proto/sub2:sub2_proto",
+        "//protoc-gen-swagger/options:options_proto",
+        "@com_github_googleapis_googleapis//google/api:api_proto",
+        "@com_google_protobuf//:duration_proto",
+        "@com_google_protobuf//:empty_proto",
+        "@com_google_protobuf//:timestamp_proto",
+        "@com_google_protobuf//:wrappers_proto",
+    ],
+)
+
+go_proto_library(
+    name = "examplepb_go_proto",
+    compilers = [
+        "@io_bazel_rules_go//proto:go_grpc",
+        "//protoc-gen-grpc-gateway:go_gen_grpc_gateway",
+    ],
+    importpath = "github.com/grpc-ecosystem/grpc-gateway/examples/proto/examplepb",
+    proto = ":examplepb_proto",
+    deps = [
+        "//examples/proto/sub:go_default_library",
+        "//examples/proto/sub2:go_default_library",
+        "//protoc-gen-swagger/options:go_default_library",
+        "@com_github_golang_protobuf//ptypes/duration:go_default_library",
+        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
+        "@com_github_golang_protobuf//ptypes/timestamp:go_default_library",
+        "@com_github_golang_protobuf//ptypes/wrappers:go_default_library",
+        "@com_github_googleapis_googleapis//google/api:go_default_library",
+    ],
+)
+
+go_library(
+    name = "go_default_library",
+    embed = [":examplepb_go_proto"],
+    importpath = "github.com/grpc-ecosystem/grpc-gateway/examples/proto/examplepb",
+)
+
+protoc_gen_swagger(
+    name = "expamplepb_protoc_gen_swagger",
+    proto = ":examplepb_proto",
+)

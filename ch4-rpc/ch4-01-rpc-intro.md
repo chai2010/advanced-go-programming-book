@@ -289,9 +289,9 @@ type serverResponse struct {
 
 ## Http上的RPC
 
-Go语言内在的RPC框架已经支持在Http协议上提供RPC服务。但是框架的http服务同样采用了内置的gob协议，并且没有提供采用其它协议的接口，因此从其它语言依然无法访问的。在前面的例子中，我们已经实现了在纯的TCP协议之上运行jsonrpc服务，并且可以通过nc命令行工具成功实现了RPC方法调用。现在我们尝试在http协议上提供jsonrpc服务。
+Go语言内在的RPC框架已经支持在Http协议上提供RPC服务。但是框架的http服务同样采用了内置的gob协议，并且没有提供采用其它协议的接口，因此从其它语言依然无法访问的。在前面的例子中，我们已经实现了在TCP协议之上运行jsonrpc服务，并且通过nc命令行工具成功实现了RPC方法调用。现在我们尝试在http协议上提供jsonrpc服务。
 
-新的RPC服务其实是一个类似REST规范的接口，接收请求和采用相应处理流程：
+新的RPC服务其实是一个类似REST规范的接口，接收请求并采用相应处理流程：
 
 ```go
 func main() {
@@ -313,7 +313,7 @@ func main() {
 }
 ```
 
-RPC的服务假设在“/jsonrpc”路径，在处理函数中基于http.ResponseWriter和http.Request类型的参数构造一个io.ReadWriteCloser类型的conn通道。然后基于conn构建针对服务端的json编码解码器。最后通过rpc.ServeRequest处理一次RPC方法调用。
+RPC的服务架设在“/jsonrpc”路径，在处理函数中基于http.ResponseWriter和http.Request类型的参数构造一个io.ReadWriteCloser类型的conn通道。然后基于conn构建针对服务端的json编码解码器。最后通过rpc.ServeRequest处理一次RPC方法调用。
 
 模拟一次RPC调用的过程就是向该链接发送一个json字符串：
 

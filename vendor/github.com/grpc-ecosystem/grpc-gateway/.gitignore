@@ -1,0 +1,9 @@
+_output/
+.idea
+
+# Bazel.
+bazel-bin
+bazel-genfiles
+bazel-grpc-gateway
+bazel-out
+bazel-testlogs

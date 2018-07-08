@@ -1,0 +1,81 @@
+language: go
+sudo: false
+go:
+  - 1.9.x
+  - 1.10.x
+  - master
+go_import_path: github.com/grpc-ecosystem/grpc-gateway
+cache:
+  directories:
+    - $HOME/local
+    - ${TRAVIS_BUILD_DIR}/examples/browser/node_modules
+    - $HOME/.cache/_grpc_gateway_bazel
+before_install:
+  - if [ "${USE_BAZEL}" = true ]; then ./.travis/install-bazel.sh $BAZEL_VERSION; fi
+  - test "${USE_BAZEL}" = true ||  ./.travis/install-protoc.sh $PROTOC_VERSION
+  - test "${USE_BAZEL}" = true || ./.travis/install-swagger-codegen.sh $SWAGGER_CODEGEN_VERSION
+  - test "${USE_BAZEL}" = true || (nvm install $NODE_VERSION && nvm use $NODE_VERSION && node --version)
+  - test "${USE_BAZEL}" = true || go get github.com/golang/lint/golint
+  - test "${USE_BAZEL}" = true || go get github.com/dghubble/sling
+  - test "${USE_BAZEL}" = true || go get github.com/go-resty/resty
+install:
+  # Make sure externally referenced packages are go-gettable.
+  - test "${USE_BAZEL}" = true ||
+    go get github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+  - test "${USE_BAZEL}" = true ||
+    go get github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+  - test "${USE_BAZEL}" = true ||
+    go get github.com/grpc-ecosystem/grpc-gateway/runtime
+  - test "${USE_BAZEL}" = true ||
+    go get github.com/grpc-ecosystem/grpc-gateway/examples/cmd/example-grpc-server
+  - test "${USE_BAZEL}" = true ||
+    go get github.com/grpc-ecosystem/grpc-gateway/examples/cmd/example-gateway-server
+
+  # Just build if USE_BAZEL
+  - if [ "${USE_BAZEL}" = true ]; then ./.travis/bazel-build.sh; fi
+before_script:
+  - test "${USE_BAZEL}" = true ||
+    (cd examples/browser && npm install)
+script:
+  # Make sure examples of generated files are up-to-date
+  - test "${USE_BAZEL}" = true ||
+    (make realclean && make examples SWAGGER_CODEGEN="java -jar $HOME/local/swagger-codegen-cli.jar")
+  - if [ -z "${USE_BAZEL}" ] &&
+    (go version | grep -q "${GO_VERSION_TO_DIFF_TEST}") &&
+    [ -z "${GATEWAY_PLUGIN_FLAGS}" ]; then
+      test -z "$(git status --porcelain)" || (git status; git diff; exit 1);
+    fi
+
+  # Unit tests, integration tests and code health checks
+  - test "${USE_BAZEL}" = true ||
+    env GLOG_logtostderr=1 go test -race -v github.com/grpc-ecosystem/grpc-gateway/...
+  - test "${USE_BAZEL}" = true ||
+    make lint
+  - test "${USE_BAZEL}" = true ||
+    sh -c 'cd examples/browser && node ./node_modules/gulp/bin/gulp'
+
+  - if [ "${USE_BAZEL}" = true ]; then ./.travis/bazel-test.sh; fi
+
+  # test coverage
+  - if (go version | grep -q "${GO_VERSION_TO_DIFF_TEST}") &&
+      [ -z "${GATEWAY_PLUGIN_FLAGS}" ]; then
+      env GLOG_logtostderr=1 ./bin/coverage;
+    fi
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+env:
+  global:
+    - "PATH=$PATH:$HOME/local/bin"
+    - GO_VERSION_TO_DIFF_TEST="go version go1\.10\.[0-9]\+ linux/amd64"
+    - BAZEL_VERSION=0.12.0
+    - NODE_VERSION=v6.1
+    - PROTOC_VERSION=3.1.0
+    - SWAGGER_CODEGEN_VERSION=2.2.2
+  matrix:
+    - GATEWAY_PLUGIN_FLAGS=
+    - GATEWAY_PLUGIN_FLAGS=request_context=false
+matrix:
+  include:
+    - go: master
+      env: USE_BAZEL=true

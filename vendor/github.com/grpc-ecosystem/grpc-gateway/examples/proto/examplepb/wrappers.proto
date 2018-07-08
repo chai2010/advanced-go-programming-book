@@ -1,0 +1,24 @@
+syntax = "proto3";
+option go_package = "examplepb";
+package grpc.gateway.examples.examplepb;
+
+import "google/api/annotations.proto";
+import "google/protobuf/wrappers.proto";
+
+message Wrappers {
+	google.protobuf.StringValue string_value = 1;
+	google.protobuf.Int32Value int32_value = 2;
+	google.protobuf.Int64Value int64_value = 3;
+	google.protobuf.FloatValue float_value = 4;
+	google.protobuf.DoubleValue double_value = 5;
+	google.protobuf.BoolValue bool_value = 6;
+}
+
+service WrappersService {
+	rpc Create(Wrappers) returns (Wrappers) {
+		option (google.api.http) = {
+			post: "/v1/example/wrappers"
+			body: "*"
+		};
+	}
+}
