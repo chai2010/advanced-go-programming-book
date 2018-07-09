@@ -41,6 +41,13 @@ Twitter 的 snowflake 算法是这种场景下的一个典型解法。先来看�
 
 ## worker id　分配
 
+timestamp，datacenter_id，worker_id 和 sequence_id 这四个字段中，timestamp 和 sequence_id 是由程序在运行期生成的。但 datacenter_id 和 worker_id 需要我们在部署阶段就能够获取得到，并且一旦程序启动之后，就是不可更改的了(想想，如果可以随意更改，可能被不慎修改，造成最终生成的 id 有冲突)。
+
+一般不同数据中心的机器，会提供对应的获取数据中心 id 的 api，所以 datacenter_id 我们是可以在部署阶段简单地获取到的。而 worker_id 是我们逻辑上给机器分配的一个 id，这个要怎么办呢？比较简单的想法是由能够提供这种自增 id 功能的工具来支持，比如 MySQL:
+
+```
+```
+
 ## 开源实例
 
 gosnowflake
