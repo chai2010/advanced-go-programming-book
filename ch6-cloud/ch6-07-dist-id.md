@@ -48,6 +48,10 @@ timestamp，datacenter_id，worker_id 和 sequence_id 这四个字段中，times
 ```
 ```
 
+当然，使用 MySQL 相当于给我们简单的 id 生成服务增加了一个外部依赖。依赖越多，我们的服务的可运维性就越差。
+
+考虑到集群中即使有单个 id 生成服务的实例挂了，也就是损失一段时间的一部分 id，所以我们也可以更简单暴力一些，把 worker_id 直接写在 worker 的配置中，上线时，由部署脚本完成 worker_id 字段替换。
+
 ## 开源实例
 
 gosnowflake
