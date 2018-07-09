@@ -66,6 +66,40 @@ mysql> select last_insert_id();
 
 ## 开源实例
 
-gosnowflake
+`github.com/bwmarrin/snowflake` 是一个相当轻量化的 snowflake 的 Go 实现。其文档指出：
+
+```
++--------------------------------------------------------------------------+
+| 1 Bit Unused | 41 Bit Timestamp |  10 Bit NodeID  |   12 Bit Sequence ID |
++--------------------------------------------------------------------------+
+```
+
+和标准的 snowflake 完全一致。使用上比较简单：
+
+```go
+package main
+
+import (
+    "fmt"
+    "os"
+
+    "github.com/bwmarrin/snowflake"
+)
+
+func main() {
+    n, err := snowflake.NewNode(1)
+    if err != nil {
+        println(err)
+        os.Exit(1)
+    }
+
+    for i := 0; i < 3; i++ {
+        id := n.Generate()
+        fmt.Println("id", id)
+        fmt.Println("node: ", id.Node(), "step: ", id.Step(), "time: ", id.Time(), "\n")
+    }
+}
+
+```
 
 sonyflake
