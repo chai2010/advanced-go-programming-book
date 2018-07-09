@@ -55,7 +55,7 @@
    * [6.4. 分布式队列(TODO)](ch6-cloud/ch6-04-queue.md)
    * [6.5. 分布式缓存(TODO)](ch6-cloud/ch6-05-cache.md)
    * [6.6. etcd(TODO)](ch6-cloud/ch6-06-etcd.md)
-   * [6.7. 分布式 id 生成器(DOING)](ch6-cloud/ch6-07-dist-id.md)
+   * [6.7. 分布式 id 生成器](ch6-cloud/ch6-07-dist-id.md)
    * [6.8. 分布式锁(TODO)](ch6-cloud/ch6-08-lock.md)
    * [6.9. 分布式任务调度系统(TODO)](ch6-cloud/ch6-09-sched.md)
    * [6.10. 延时任务系统](ch6-cloud/ch6-10-delay-job.md)

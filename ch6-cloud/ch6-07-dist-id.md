@@ -66,6 +66,8 @@ mysql> select last_insert_id();
 
 ## 开源实例
 
+### 标准 snowflake 实现
+
 `github.com/bwmarrin/snowflake` 是一个相当轻量化的 snowflake 的 Go 实现。其文档指出：
 
 ```
@@ -120,4 +122,43 @@ func main() {
 
 Epoch 就是本节开头讲的起始时间，NodeBits 指的是机器编号的位长，StepBits 指的是自增序列的位长。
 
-sonyflake
+### sonyflake
+
+sonyflake 是 Sony 公司的一个开源项目，基本思路和 snowflake 差不多，不过位分配上稍有不同：
+
+```
++--------------------------------------------------------------------------+
+| 1 Bit Unused | 39 Bit Timestamp |  8 Bit Sequence ID  |   16 Bit Machine ID |
++--------------------------------------------------------------------------+
+```
+
+这里的时间只用了 39 个 bit，但时间的单位变成了 10ms，所以理论上比 41 位表示的时间还要久(174 years)。
+
+Sequence ID 和之前的定义一致，Machine ID 其实就是节点 id。sonyflake 与众不同的地方在于其在启动阶段的 setting 配置：
+
+```go
+func NewSonyflake(st Settings) *Sonyflake
+```
+
+Settings 数据结构如下：
+
+```go
+type Settings struct {
+    StartTime      time.Time
+    MachineID      func() (uint16, error)
+    CheckMachineID func(uint16) bool
+}
+```
+
+StartTime 选项和我们之前的 Epoch 差不多，如果不设置的话，默认是从 `2014-09-01 00:00:00 +0000 UTC` 开始。
+
+MachineID 可以由用户自定义的函数，如果用户不定义的话，会默认将本机 ip 的低 16 位作为 machine id。
+
+CheckMachineID 是由用户提供的检查 MachineID 是否冲突的函数。这里的设计还是比较巧妙的，如果有另外的中心化存储并支持检查重复的存储，那我们就可以按照自己的想法随意定制这个检查 MachineID 是否冲突的逻辑。如果公司有现成的 Redis 集群，那么我们可以很轻松地用 Redis 的 set 来检查冲突。
+
+```shell
+redis 127.0.0.1:6379> SADD base64_encoding_of_last16bits MzI0Mgo=
+(integer) 1
+redis 127.0.0.1:6379> SADD base64_encoding_of_last16bits MzI0Mgo=
+(integer) 0
+```
