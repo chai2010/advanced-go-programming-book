@@ -207,8 +207,9 @@ func checkMachineID(machineID uint16) bool {
 func main() {
     t, _ := time.Parse("2006-01-02", "2018-01-01")
     settings := sonyflake.Settings{
-        StartTime: t,
-        MachineID: getMachineID,
+        StartTime:      t,
+        MachineID:      getMachineID,
+        CheckMachineID: checkMachineID,
     }
 
     sf := sonyflake.NewSonyflake(settings)
@@ -220,4 +221,5 @@ func main() {
 
     fmt.Println(id)
 }
+
 ```
