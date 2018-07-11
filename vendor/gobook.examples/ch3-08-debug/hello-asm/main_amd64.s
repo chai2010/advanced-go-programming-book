@@ -6,8 +6,8 @@ DATA  text<>+0(SB)/8,$"Hello Wo"
 DATA  text<>+8(SB)/8,$"rld!\n"
 GLOBL text<>(SB),NOPTR,$16
 
-// func main()
-TEXT ·main(SB), $16-0
+// func asmSayHello()
+TEXT ·asmSayHello(SB), $16-0
 	NO_LOCAL_POINTERS
 	MOVQ $text<>+0(SB), AX
 	MOVQ AX, (SP)

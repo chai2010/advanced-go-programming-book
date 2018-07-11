@@ -239,7 +239,19 @@ Goroutine 1:
 
 用Delve调试Go汇编程序的过程比调试Go语言程序更加简单。调试汇编程序时，我们需要时刻关注寄存器的状态，如果涉及函数调用或局部变量或参数还需要重点关注栈寄存器SP的状态。
 
-为了编译演示，我们用汇编重新实现main函数，简单打印一个字符串：
+为了编译演示，我们重新实现一个更简单的main函数：
+
+```go
+package main
+
+func main() { asmSayHello() }
+
+func asmSayHello()
+```
+
+在main函数中调用汇编语言实现的asmSayHello函数输出一个字符串。
+
+asmSayHello函数在main_amd64.s文件中实现：
 
 ```
 #include "textflag.h"
@@ -250,8 +262,8 @@ DATA  text<>+0(SB)/8,$"Hello Wo"
 DATA  text<>+8(SB)/8,$"rld!\n"
 GLOBL text<>(SB),NOPTR,$16
 
-// func main()
-TEXT ·main(SB), $16-0
+// func asmSayHello()
+TEXT ·asmSayHello(SB), $16-0
 	NO_LOCAL_POINTERS
 	MOVQ $text<>+0(SB), AX
 	MOVQ AX, (SP)
@@ -260,19 +272,50 @@ TEXT ·main(SB), $16-0
 	RET
 ```
 
-然后依然用break命令在main函数设置断点，并且输入continue命令让调试器执行到断点位置停下：
+参考前面的调试流程，在执行到main函数断点时，可以disassemble反汇编命令查看main函数对应的汇编代码：
 
 ```
 (dlv) break main.main
-Breakpoint 1 set at 0x105018f for main.main() ./main_amd64.s:10
+Breakpoint 1 set at 0x105011f for main.main() ./main.go:3
 (dlv) continue
-> main.main() ./main_amd64.s:10 (hits goroutine(1):1 total:1) (PC: 0x105018f)
+> main.main() ./main.go:3 (hits goroutine(1):1 total:1) (PC: 0x105011f)
+     1: package main
+     2:
+=>   3: func main() { asmSayHello() }
+     4:
+     5: func asmSayHello()
+(dlv) disassemble
+TEXT main.main(SB) /Users/chai/go/src/github.com/chai2010/advanced-go-programming-book/vendor/gobook.examples/ch3-08-debug/hello-asm/main.go
+        main.go:3       0x1050110       65488b0c25a0080000      mov rcx, qword ptr gs:[0x8a0]
+        main.go:3       0x1050119       483b6110                cmp rsp, qword ptr [rcx+0x10]
+        main.go:3       0x105011d       761a                    jbe 0x1050139
+=>      main.go:3       0x105011f*      4883ec08                sub rsp, 0x8
+        main.go:3       0x1050123       48892c24                mov qword ptr [rsp], rbp
+        main.go:3       0x1050127       488d2c24                lea rbp, ptr [rsp]
+        main.go:3       0x105012b       e880000000              call $main.asmSayHello
+        main.go:3       0x1050130       488b2c24                mov rbp, qword ptr [rsp]
+        main.go:3       0x1050134       4883c408                add rsp, 0x8
+        main.go:3       0x1050138       c3                      ret
+        main.go:3       0x1050139       e87288ffff              call $runtime.morestack_noctxt
+        main.go:3       0x105013e       ebd0                    jmp $main.main
+(dlv)
+```
+
+虽然main函数内部只有一行函数调用语句，但是却生成了很多汇编指令。在函数的开头通过比较rsp寄存器判断栈空间是否不足，如果不足则跳转到0x1050139地址调用runtime.morestack函数进行栈扩容，然后跳回到main函数开始位置重新进行栈空间测试。而在asmSayHello函数调用之前，先扩展rsp空间用于临时存储rbp寄存器的状态，在函数返回后通过栈恢复rbp的值并回收临时栈空间。通过对比Go语言代码和对应的汇编代码，我们可以加深对Go汇编语言的理解。
+
+从汇编语言角度深刻Go语言各种特性的工作机制对调试工作也是一个很大的帮助。现在我们依然用break命令在asmSayHello函数设置断点，并且输入continue命令让调试器执行到断点位置停下：
+
+```
+(dlv) break main.asmSayHello
+Breakpoint 2 set at 0x10501bf for main.asmSayHello() ./main_amd64.s:10
+(dlv) continue
+> main.asmSayHello() ./main_amd64.s:10 (hits goroutine(1):1 total:1) (PC: 0x10501bf)
      5: DATA  text<>+0(SB)/8,$"Hello Wo"
      6: DATA  text<>+8(SB)/8,$"rld!\n"
      7: GLOBL text<>(SB),NOPTR,$16
      8:
-     9: // func main()
-=>  10: TEXT ·main(SB), $16-0
+     9: // func asmSayHello()
+=>  10: TEXT ·asmSayHello(SB), $16-0
     11:         NO_LOCAL_POINTERS
     12:         MOVQ $text<>+0(SB), AX
     13:         MOVQ AX, (SP)
@@ -285,14 +328,14 @@ Breakpoint 1 set at 0x105018f for main.main() ./main_amd64.s:10
 
 ```
 (dlv) regs
-       rax = 0x0000000001050180
+       rax = 0x0000000001050110
        rbx = 0x0000000000000000
        rcx = 0x000000c420000300
-       rdx = 0x0000000001070bc0
+       rdx = 0x0000000001070be0
        rdi = 0x000000c42007c020
        rsi = 0x0000000000000001
-       rbp = 0x00007fffffe00000
-       rsp = 0x000000c420049f80
+       rbp = 0x000000c420049f78
+       rsp = 0x000000c420049f70
         r8 = 0x7fffffffffffffff
         r9 = 0xffffffffffffffff
        r10 = 0x0000000000000100
@@ -301,8 +344,8 @@ Breakpoint 1 set at 0x105018f for main.main() ./main_amd64.s:10
        r13 = 0x0000000000000000
        r14 = 0x0000000000000178
        r15 = 0x0000000000000004
-       rip = 0x000000000105018f
-    rflags = 0x0000000000000202
+       rip = 0x00000000010501bf
+    rflags = 0x0000000000000206
 ...
 (dlv)
 ```
