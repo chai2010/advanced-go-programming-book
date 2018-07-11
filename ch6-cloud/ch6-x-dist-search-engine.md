@@ -91,7 +91,7 @@ func equal() {
 
 ### 查询 DSL
 
-es 定义了一套查询 DSL，当我们把 es 当数据库使用时，需要用到其 bool 逻辑。举个例子：
+es 定义了一套查询 DSL，当我们把 es 当数据库使用时，需要用到其 bool 查询。举个例子：
 
 ```json
 {
@@ -137,3 +137,62 @@ es 定义了一套查询 DSL，当我们把 es 当数据库使用时，需要用
   "size": 1
 }
 ```
+
+看起来比较麻烦，但表达的意思很简单：
+
+```go
+if field_1 == 1 && field_2 == 2 && field_3 == 3 && field_4 == 4 {
+    return true
+}
+```
+
+用 bool should query 可以表示 or 的逻辑：
+
+```json
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "field_1": {
+              "query": "1",
+              "type": "phrase"
+            }
+          }
+        },
+        {
+          "match": {
+            "field_2": {
+              "query": "3",
+              "type": "phrase"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "from": 0,
+  "size": 1
+}
+```
+
+这里表示的是类似：
+
+```go
+if field_1 == 1 || field_2 == 2 {
+    return true
+}
+```
+
+这些 Go 代码里 if 后面跟着的表达式在编程语言中有专有名词来表达 Boolean Expression：
+
+```go
+4 > 1
+5 == 2
+3 < i && x > 10
+```
+
+es 的 Bool Query 方案，实际上就是用 json 来表达了这种程序语言中的 Boolean Expression，为什么可以这么做呢？因为 json 本身是可以表达树形结构的，我们的程序代码在被编译器 parse 之后，也会变成 AST，而 AST 抽象语法树，顾名思义，就是树形结构。理论上 json 能够完备地表达一段程序代码被 parse 之后的结果。这里的 Boolean Expression 被编译器 Parse 之后也会生成差不多的树形结构，而且只是整个编译器实现的一个很小的子集。
+
+TODO，ast 和 bool query 结构对比图
