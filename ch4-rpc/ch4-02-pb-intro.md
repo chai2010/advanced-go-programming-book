@@ -70,7 +70,7 @@ func (p *HelloService) Hello(request *String, reply *String) error {
 }
 ```
 
-其中Hello方法的输入参数和返回的参数均该用Protobuf定义的String类型表示。因为新的输入参数为结构体类型，因此该用指针类型作为输入参数，函数的内部代码同时也做了相应的调整。
+其中Hello方法的输入参数和输出的参数均该用Protobuf定义的String类型表示。因为新的输入参数为结构体类型，因此该用指针类型作为输入参数，函数的内部代码同时也做了相应的调整。
 
 至此，我们初步实现了Protobuf和RPC组合工作。在启动RPC服务时，我们依然可以选择默认的gob或手工指定json编码，甚至可以重新基于protobuf编码实现一个插件。虽然做了这么多工作，但是似乎并没有看到什么收益！
 
@@ -383,7 +383,7 @@ func (p *{{$root.ServiceName}}Client) {{$m.MethodName}}(in *{{$m.InputTypeName}}
 `
 ```
 
-当Protobuf的插件定制工作完成后，每次hello.proto文件中RPC服务的变化都可以自动生成代码。同时，才有类似的技术也可以为其它语言编写代码生成插件。
+当Protobuf的插件定制工作完成后，每次hello.proto文件中RPC服务的变化都可以自动生成代码。同时，采用类似的技术也可以为其它语言编写代码生成插件。
 
 在掌握了定制Protobuf插件技术后，你将彻底拥有这个技术。
 
