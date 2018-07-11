@@ -94,7 +94,17 @@ Breakpoint unrecovered-panic at 0x102a380 for runtime.startpanic() /usr/local/go
 Breakpoint 1 at 0x10ae9b8 for main.main() ./main.go:7 (0)
 ```
 
-我们发现除了我们自己设置的main.main邯郸断点外，Delve内部已经为panic异常函数设置了一个断点。
+我们发现除了我们自己设置的main.main函数断点外，Delve内部已经为panic异常函数设置了一个断点。
+
+通过vars命令可以查看全部包级的变量。因为最终的目标程序可能含有大量的全局变量，我们可以通过一个正则参数选择想查看的全局变量：
+
+```
+(dlv) vars main
+main.initdone· = 2
+runtime.main_init_done = chan bool 0/0
+runtime.mainStarted = true
+(dlv)
+```
 
 然后就可以通过continue命令让程序运行到下一个断点处：
 
@@ -303,7 +313,9 @@ TEXT main.main(SB) /Users/chai/go/src/github.com/chai2010/advanced-go-programmin
 
 虽然main函数内部只有一行函数调用语句，但是却生成了很多汇编指令。在函数的开头通过比较rsp寄存器判断栈空间是否不足，如果不足则跳转到0x1050139地址调用runtime.morestack函数进行栈扩容，然后跳回到main函数开始位置重新进行栈空间测试。而在asmSayHello函数调用之前，先扩展rsp空间用于临时存储rbp寄存器的状态，在函数返回后通过栈恢复rbp的值并回收临时栈空间。通过对比Go语言代码和对应的汇编代码，我们可以加深对Go汇编语言的理解。
 
-从汇编语言角度深刻Go语言各种特性的工作机制对调试工作也是一个很大的帮助。现在我们依然用break命令在asmSayHello函数设置断点，并且输入continue命令让调试器执行到断点位置停下：
+从汇编语言角度深刻Go语言各种特性的工作机制对调试工作也是一个很大的帮助。如果希望在汇编指令层面调试Go代码，Delve还提供了一个step-instruction单步执行汇编指令的命令。
+
+现在我们依然用break命令在asmSayHello函数设置断点，并且输入continue命令让调试器执行到断点位置停下：
 
 ```
 (dlv) break main.asmSayHello
