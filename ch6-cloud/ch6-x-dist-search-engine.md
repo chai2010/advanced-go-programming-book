@@ -97,35 +97,40 @@ es 定义了一套查询 DSL，当我们把 es 当数据库使用时，需要用
 {
   "query": {
     "bool": {
-      "must": [{
-        "match": {
-          "field_1": {
-            "query": "1",
-            "type": "phrase"
+      "must": [
+        {
+          "match": {
+            "a": {
+              "query": "1",
+              "type": "phrase"
+            }
+          }
+        },
+        {
+          "match": {
+            "b": {
+              "query": "2",
+              "type": "phrase"
+            }
+          }
+        },
+        {
+          "match": {
+            "c": {
+              "query": "3",
+              "type": "phrase"
+            }
+          }
+        },
+        {
+          "match": {
+            "d": {
+              "query": "4",
+              "type": "phrase"
+            }
           }
         }
-      }, {
-        "match": {
-          "field_2": {
-            "query": "2",
-            "type": "phrase"
-          }
-        }
-      }, {
-        "match": {
-          "field_3": {
-            "query": "3",
-            "type": "phrase"
-          }
-        }
-      }, {
-        "match": {
-          "field_4": {
-            "query": "4",
-            "type": "phrase"
-          }
-        }
-      }]
+      ]
     }
   },
   "from": 0,
