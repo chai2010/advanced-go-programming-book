@@ -100,7 +100,7 @@ es 定义了一套查询 DSL，当我们把 es 当数据库使用时，需要用
       "must": [
         {
           "match": {
-            "a": {
+            "field_1": {
               "query": "1",
               "type": "phrase"
             }
@@ -108,7 +108,7 @@ es 定义了一套查询 DSL，当我们把 es 当数据库使用时，需要用
         },
         {
           "match": {
-            "b": {
+            "field_2": {
               "query": "2",
               "type": "phrase"
             }
