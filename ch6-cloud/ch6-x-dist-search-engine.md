@@ -22,6 +22,8 @@
 
 elasticsearch 是开源分布式搜索引擎的霸主，其依赖于 Lucene 实现，在部署和运维方面做了很多优化。当今搭建一个分布式搜索引擎比起 Sphinx 的时代已经是容易很多很多了。只要简单配置客户端 ip 和端口就可以了。
 
+### 倒排列表
+
 虽然 es 是针对搜索场景来订制的，但如前文所言，实际应用中常常用 es 来作为 database 来使用，就是因为倒排列表的特性。可以用比较朴素的观点来理解倒排索引：
 
 ```
@@ -56,3 +58,31 @@ elasticsearch 是开源分布式搜索引擎的霸主，其依赖于 Lucene 实�
 |  今天    |    天天     |     天气       |   气很     |     很好       |
 +--------|-----------|--------------|----------|--------------+
 ```
+
+即将所有 Ti 和 T(i+1) 组成一个词(在 es 中叫 term)，然后再编排其倒排列表，这样我们的倒排列表大概就是这样的：
+
+TODO omnigraffle 的图
+
+当用户搜索 '天气很好' 时，其实就是求：天气、气很、很好三组倒排列表的交集，但这里的相等判断逻辑有些特殊，用伪代码表示一下：
+
+```go
+func equal() {
+    if postEntry.docID of '天气' == postEntry.docID of '气很' && postEntry.offset + 1 of '天气' == postEntry.offset of '气很' {
+        return true
+    }
+
+    if postEntry.docID of '气很' == postEntry.docID of '很好' && postEntry.offset + 1 of '气很' == postEntry.offset of '很好' {
+        return true
+    }
+
+    if postEntry.docID of '天气' == postEntry.docID of '很好' && postEntry.offset + 2 of '天气' == postEntry.offset of '很好' {
+        return true
+    }
+
+    return false
+}
+```
+
+就算文档总数很多，但我们的搜索词的倒排列表不长时，搜索速度也是很快的。如果用关系型数据库，那就需要按照索引(如果有的话)来慢慢扫描了。
+
+### 查询 DSL
