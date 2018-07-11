@@ -196,3 +196,8 @@ if field_1 == 1 || field_2 == 2 {
 es 的 Bool Query 方案，实际上就是用 json 来表达了这种程序语言中的 Boolean Expression，为什么可以这么做呢？因为 json 本身是可以表达树形结构的，我们的程序代码在被编译器 parse 之后，也会变成 AST，而 AST 抽象语法树，顾名思义，就是树形结构。理论上 json 能够完备地表达一段程序代码被 parse 之后的结果。这里的 Boolean Expression 被编译器 Parse 之后也会生成差不多的树形结构，而且只是整个编译器实现的一个很小的子集。
 
 TODO，ast 和 bool query 结构对比图
+
+### 基于 client sdk 做开发
+
+### 将 sql 转换为 DSL
+
