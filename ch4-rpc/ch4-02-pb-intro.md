@@ -383,7 +383,7 @@ func (p *{{$root.ServiceName}}Client) {{$m.MethodName}}(in *{{$m.InputTypeName}}
 `
 ```
 
-当Protobuf的插件定制工作完成后，每次hello.proto文件中RPC服务的变化都可以自动生成代码。同时，才有类似的技术也可以为其它语言编写代码生成插件。
+当Protobuf的插件定制工作完成后，每次hello.proto文件中RPC服务的变化都可以自动生成代码。同时，采用类似的技术也可以为其它语言编写代码生成插件。
 
 在掌握了定制Protobuf插件技术后，你将彻底拥有这个技术。
 
