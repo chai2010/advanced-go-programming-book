@@ -116,7 +116,7 @@ es 定义了一套查询 DSL，当我们把 es 当数据库使用时，需要用
         },
         {
           "match": {
-            "c": {
+            "field_3": {
               "query": "3",
               "type": "phrase"
             }
@@ -124,7 +124,7 @@ es 定义了一套查询 DSL，当我们把 es 当数据库使用时，需要用
         },
         {
           "match": {
-            "d": {
+            "field_4": {
               "query": "4",
               "type": "phrase"
             }
