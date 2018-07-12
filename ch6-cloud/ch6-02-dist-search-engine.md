@@ -273,3 +273,9 @@ SQL 的 where 部分就是 boolean expression。我们之前提到过，这种 b
 当然可以，我们把 SQL 的 where 被 Parse 之后的结构和 es 的 DSL 的结构做个对比：
 
 TODO 这里有图
+
+既然结构上完全一致，逻辑上我们就可以相互转换。我们以广度优先对 AST 树进行遍历，然后将二元表达式转换成 json 字符串，再拼装起来就可以了，限于篇幅，本文中就不给出示例了，读者朋友可以查看：
+
+> github.com/cch123/elasticsql
+
+来学习具体的实现。
