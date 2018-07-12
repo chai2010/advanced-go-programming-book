@@ -195,9 +195,81 @@ if field_1 == 1 || field_2 == 2 {
 
 es 的 Bool Query 方案，实际上就是用 json 来表达了这种程序语言中的 Boolean Expression，为什么可以这么做呢？因为 json 本身是可以表达树形结构的，我们的程序代码在被编译器 parse 之后，也会变成 AST，而 AST 抽象语法树，顾名思义，就是树形结构。理论上 json 能够完备地表达一段程序代码被 parse 之后的结果。这里的 Boolean Expression 被编译器 Parse 之后也会生成差不多的树形结构，而且只是整个编译器实现的一个很小的子集。
 
-TODO，ast 和 bool query 结构对比图
-
 ### 基于 client sdk 做开发
 
 ### 将 sql 转换为 DSL
 
+比如我们有一段 bool 表达式，user_id = 1 and (product_id = 1 and (star_num = 4 or star_num = 5) and banned = 1)，写成 SQL 是如下形式：
+
+```sql
+select * from xxx where user_id = 1 and (product_id = 1 and (star_num = 4 or star_num = 5) and banned = 1)
+```
+
+写成 es 的 DSL 是如下形式：
+
+```json
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "user_id": {
+              "query": "1",
+              "type": "phrase"
+            }
+          }
+        },
+        {
+          "match": {
+            "product_id": {
+              "query": "1",
+              "type": "phrase"
+            }
+          }
+        },
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "star_num": {
+                    "query": "4",
+                    "type": "phrase"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "star_num": {
+                    "query": "5",
+                    "type": "phrase"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "match": {
+            "banned": {
+              "query": "1",
+              "type": "phrase"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "from": 0,
+  "size": 1
+}
+```
+
+es 的 DSL 虽然很好理解，但是手写起来非常费劲。前面提供了基于 SDK 的方式来写，但也不足够灵活。
+
+SQL 的 where 部分就是 boolean expression。我们之前提到过，这种 bool 表达式在被 parse 之后，和 es 的 DSL 的结构长得差不多，我们能不能直接通过这种“差不多”的猜测来直接帮我们把 SQL 转换成 DSL 呢？
+
+当然可以，我们把 SQL 的 where 被 Parse 之后的结构和 es 的 DSL 的结构做个对比：
+
+TODO 这里有图
