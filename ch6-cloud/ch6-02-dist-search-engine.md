@@ -272,3 +272,7 @@ SQL 的 where 部分就是 boolean expression。我们之前提到过，这种 b
 > github.com/cch123/elasticsql
 
 来学习具体的实现。
+
+## 异构数据同步
+
+TODO

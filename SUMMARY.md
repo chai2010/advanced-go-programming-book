@@ -51,7 +51,7 @@
    * [5.11. Load-balance负载均衡](ch5-web/ch5-11-load-balance.md)
 * [第六章 分布式系统](ch6-cloud/readme.md)
    * [6.1. 云上地鼠(TODO)](ch6-cloud/ch6-01-cloud.md)
-   * [6.2. 分布式搜索引擎](ch6-cloud/ch6-02-dist-search-engine.md)
+   * [6.2. 分布式搜索引擎(Doing)](ch6-cloud/ch6-02-dist-search-engine.md)
    * [6.2. Raft协议(TODO)](ch6-cloud/ch6-02-raft.md)
    * [6.3. 分布式哈希(TODO)](ch6-cloud/ch6-03-hash.md)
    * [6.4. 分布式队列(TODO)](ch6-cloud/ch6-04-queue.md)
