@@ -187,6 +187,8 @@ es 的 Bool Query 方案，实际上就是用 json 来表达了这种程序语�
 
 ### 基于 client sdk 做开发
 
+TODO
+
 ### 将 sql 转换为 DSL
 
 比如我们有一段 bool 表达式，user_id = 1 and (product_id = 1 and (star_num = 4 or star_num = 5) and banned = 1)，写成 SQL 是如下形式：
