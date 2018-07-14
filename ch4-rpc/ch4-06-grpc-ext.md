@@ -1,4 +1,4 @@
-# 4.6. GRPC扩展
+# 4.6. GRPC和Protobuf扩展
 
 目前开源社区已经围绕Protobuf和GRPC开发出众多扩展，形成了庞大的生态。本节我们将简单介绍验证器、REST接口和Nginx代理等几个比较流行的扩展。
 
@@ -148,6 +148,8 @@ func (this *Message) Validate() error {
 
 通过生成的验证函数，并结合GRPC的截取器，我们可以很容易为每个方法的输入参数和返回值进行验证。
 
+<!--
+
 ## REST接口
 
 TODO
@@ -155,3 +157,5 @@ TODO
 ## Nginx代理
 
 TODO
+
+-->
