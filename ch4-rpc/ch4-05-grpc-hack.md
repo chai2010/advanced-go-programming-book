@@ -314,7 +314,24 @@ func filter(
 }
 ```
 
-不够GRPC框架中只能为每个服务设置一个截取器，因此所有对截取工作只能在一个函数中完成。不过开源的grpc-ecosystem项目中的go-grpc-middleware包已经基于GRPC对截取器实现了链式截取器的支持，感兴趣的同学可以参考。
+不够GRPC框架中只能为每个服务设置一个截取器，因此所有对截取工作只能在一个函数中完成。开源的grpc-ecosystem项目中的go-grpc-middleware包已经基于GRPC对截取器实现了链式截取器的支持。
+
+以下是go-grpc-middleware包中链式截取器的简单用法
+
+```go
+import "github.com/grpc-ecosystem/go-grpc-middleware"
+
+myServer := grpc.NewServer(
+	grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+		filter1, filter2, ...
+	)),
+	grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
+		filter1, filter2, ...
+    )),
+)
+```
+
+感兴趣的同学可以参考go-grpc-middleware包的代码。
 
 ## 和Web服务共存
 
