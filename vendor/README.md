@@ -10,4 +10,4 @@ TODO
 - [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway): [v1.4.1](https://github.com/grpc-ecosystem/grpc-gateway/releases/tag/v1.4.1)
 - [grpc-middleware](https://github.com/grpc-ecosystem/go-grpc-middleware): [v1.0.0](https://github.com/grpc-ecosystem/go-grpc-middleware/releases/tag/v1.0.0)
 - [pubsub](https://godoc.org/github.com/docker/docker/pkg/pubsub): [v17.03.2-ce](https://github.com/moby/moby/releases/tag/v17.03.2-ce)
-
+- [go-proto-validators](https://github.com/mwitkow/go-proto-validators): [0950a7](https://github.com/mwitkow/go-proto-validators/tree/0950a79900071e9f3f5979b78078c599376422fd)
