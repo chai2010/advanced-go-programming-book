@@ -316,11 +316,74 @@ func filter(
 
 不够GRPC框架中只能为每个服务设置一个截取器，因此所有对截取工作只能在一个函数中完成。不过开源的grpc-ecosystem项目中的go-grpc-middleware包已经基于GRPC对截取器实现了链式截取器的支持，感兴趣的同学可以参考。
 
-<!--
-
 ## 和Web服务共存
 
-TODO
+GRPC是构建在HTTP/2协议之上的，因此我们可以将GRPC服务和普通的Web服务架设在同一个端口之上。因为目前Go语言版本的GRPC实现还不够完善，只有启用了TLS协议之后才能将GRPC和Web服务运行在同一个端口。
+
+服务器证书的生成过程前文已经讲过，这么不再赘述。启用https的服务器非常简单：
+
+```go
+func main() {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprintln(w, "hello")
+	})
+
+	http.ListenAndServeTLS(port, "server.crt", "server.key",
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			mux.ServeHTTP(w, r)
+			return
+		}),
+	)
+}
+```
+
+而单独启用带证书的GRPC服务也是同样的简单：
+
+```go
+func main() {
+	creds, err := credentials.NewServerTLSFromFile("server.crt", "server.key")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	grpcServer := grpc.NewServer(grpc.Creds(creds))
+
+	...
+}
+```
+
+因为GRPC服务已经实现了ServeHTTP方法，可以直接作为Web路由处理对象。如果将Grpc和Web服务放在一起，会导致GRPC和Web路径的冲突，在处理时我们需要取分两个服务。
+
+首先GRPC是建立在HTTP/2版本之上，如果HTTP不是HTTP/2协议则必然无法提供GRPC支持。同时，如果每个GRPC调用请求的Content-Type类型会被标注为"application/grpc"类型。
+
+因此我们可以通过以下方式生成同时支持Web和Grpc协议的路由处理函数：
+
+```go
+func main() {
+	...
+
+	http.ListenAndServeTLS(port, "server.crt", "server.key",
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.ProtoMajor != 2 {
+				mux.ServeHTTP(w, r)
+				return
+			}
+			if strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
+				grpcServer.ServeHTTP(w, r) // GRPC Server
+				return
+			}
+
+			mux.ServeHTTP(w, r)
+			return
+		}),
+	)
+}
+```
+
+这样我们就可以在GRPC端口上同时提供Web服务了。
+
+<!--
 
 ## 导出Rest服务
 
