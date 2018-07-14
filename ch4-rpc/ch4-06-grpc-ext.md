@@ -148,11 +148,122 @@ func (this *Message) Validate() error {
 
 通过生成的验证函数，并结合GRPC的截取器，我们可以很容易为每个方法的输入参数和返回值进行验证。
 
-<!--
-
 ## REST接口
 
-TODO
+GRPC服务一般用于集群内部通信，如果需要对外暴露服务一般会提供等价的REST接口。通过REST接口比较方便前端JavaScript和后端交互。开源社区中的grac-gateway项目就实现了将GRPC服务转为REST服务的能力。
+
+grpc-gateway的工作原理如下图：
+
+![](../images/ch4-06-grpc-gateway.png)
+
+通过在Protobuf文件中添加路由相关的元信息，通过自定义的代码插件生成路由相关的处理代码，最终将Rest请求转给更后端的Grpc服务处理。
+
+路由扩展元信息也是通过Protobuf的元数据扩展用法提供：
+
+```protobuf
+syntax = "proto3";
+
+package main;
+
+import "google/api/annotations.proto";
+
+message StringMessage {
+  string value = 1;
+}
+
+service RestService {
+	rpc Get(StringMessage) returns (StringMessage) {
+		option (google.api.http) = {
+			get: "/get/{value}"
+		};
+	}
+	rpc Post(StringMessage) returns (StringMessage) {
+		option (google.api.http) = {
+			post: "/post"
+			body: "*"
+		};
+	}
+}
+```
+
+我们首先为GRPC定义了Get和Post方法，然后通过元扩展语法在对应的方法后添加路由信息。其中“/get/{value}”路径对应的是Get方法，`{value}`部分对应参数中的value成员，结果通过json格式返回。Post方法对应“/post”路径，body中包含json格式的请求信息。
+
+然后通过以下命令安装protoc-gen-grpc-gateway插件：
+
+```
+go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+```
+
+再通过插件生成grpc-gateway必须的路由处理代码：
+
+```
+$ protoc -I/usr/local/include -I. \
+	-I$GOPATH/src \
+	-I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+	--grpc-gateway_out=. \
+	hello.proto
+```
+
+插件会为RestService服务生成对应的RegisterRestServiceHandlerFromEndpoint函数：
+
+```go
+func RegisterRestServiceHandlerFromEndpoint(
+	ctx context.Context, mux *runtime.ServeMux, endpoint string,
+	opts []grpc.DialOption,
+) (err error) {
+	...
+}
+```
+
+RegisterRestServiceHandlerFromEndpoint函数用于将定义了Rest接口的请求转发到真正的GRPC服务。注册路由处理函数之后就可以启动Web服务了：
+
+```go
+func main() {
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	mux := runtime.NewServeMux()
+
+	err := RegisterRestServiceHandlerFromEndpoint(
+		ctx, mux, "localhost:5000",
+		grpc.WithInsecure(),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.ListenAndServe(":8080", mux)
+}
+```
+
+首先通过runtime.NewServeMux()函数创建路由处理器，然后通过RegisterRestServiceHandlerFromEndpoint函数将RestService服务相关的REST接口导到后面的GRPC服务。grpc-gateway提供runtime.ServeMux类似同时也实现了http.Handler接口，因此可以标准库中的相关函数配置使用。
+
+档GRPC和REST服务全部启动之后，就可以用curl请求REST服务了：
+
+```
+$ curl localhost:8080/get/gopher
+{"value":"Get: gopher"}
+
+$ curl localhost:8080/post -X POST --data '{"value":"grpc"}'
+{"value":"Post: grpc"}
+```
+
+在对外公布REST接口时，我们一般还会提供一个Swagger格式的文件用于描述这个接口规范。
+
+```
+$ go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+
+$ protoc \
+	-I=. -I=../../../github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+	--swagger_out=. \
+	hello.proto
+```
+
+然后会生成一个hello.swagger.json文件。这样的话就可以通过swagger-ui这个项目，在网页中提供REST接口的文档和测试等功能。
+
+<!--
+
 
 ## Nginx代理
 
