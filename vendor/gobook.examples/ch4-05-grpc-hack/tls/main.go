@@ -18,13 +18,13 @@ var (
 	port = ":5000"
 
 	tlsDir        = "./tls-config"
-	tlsServerName = "server"
+	tlsServerName = "server.io"
 
-	ca         = tlsDir + "/ca.cer"
-	server_crt = tlsDir + "/server.cer"
-	server_key = tlsDir + "/server_pri.key"
-	client_crt = tlsDir + "/client.cer"
-	client_key = tlsDir + "/client_pri.key"
+	ca         = tlsDir + "/ca.crt"
+	server_crt = tlsDir + "/server.crt"
+	server_key = tlsDir + "/server.key"
+	client_crt = tlsDir + "/client.crt"
+	client_key = tlsDir + "/client.key"
 )
 
 type myGrpcServer struct{}
