@@ -9,7 +9,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -53,7 +52,7 @@ func (a *Authentication) GetRequestMetadata(context.Context, ...string) (map[str
 	return map[string]string{"login": a.Login, "password": a.Password}, nil
 }
 func (a *Authentication) RequireTransportSecurity() bool {
-	return true
+	return false
 }
 
 func main() {
@@ -64,12 +63,7 @@ func main() {
 }
 
 func startServer() {
-	creds, err := credentials.NewServerTLSFromFile("tls-config/server.crt", "tls-config/server.key")
-	if err != nil {
-		log.Fatalf("could not load tls cert: %s", err)
-	}
-
-	server := grpc.NewServer(grpc.Creds(creds))
+	server := grpc.NewServer()
 	RegisterGreeterServer(server, new(myGrpcServer))
 
 	lis, err := net.Listen("tcp", port)
@@ -83,17 +77,12 @@ func startServer() {
 }
 
 func doClientWork() {
-	creds, err := credentials.NewClientTLSFromFile("tls-config/server.crt", "server.grpc.io")
-	if err != nil {
-		log.Fatalf("could not load tls cert: %s", err)
-	}
-
 	auth := Authentication{
 		Login:    "gopher",
 		Password: "password",
 	}
 
-	conn, err := grpc.Dial("localhost"+port, grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(&auth))
+	conn, err := grpc.Dial("localhost"+port, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
 	if err != nil {
 		log.Fatal(err)
 	}
