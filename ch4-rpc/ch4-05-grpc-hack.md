@@ -266,15 +266,57 @@ func (a *Authentication) Auth(ctx context.Context) error {
 
 首先通过metadata.FromIncomingContext从ctx上下文中获取元信息，然后取出相应的认证信息进行认证。
 
-
-<!--
 ## 截取器
 
-流的截取器简单提下，重点是普通函数的截取
+GRPC中的grpc.UnaryInterceptor和grpc.StreamInterceptor分别对普通方法和流方法提供了截取器的支持。我们这里简单介绍普通方法的截取器用法。
 
-登陆，日志跟踪，panic捕获
+要实现普通方法的截取器，需要为grpc.UnaryInterceptor的参数实现一个函数：
 
-TODO
+```go
+func filter(ctx context.Context,
+	req interface{}, info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler,
+) (resp interface{}, err error) {
+	log.Println("fileter:", info)
+	return handler(ctx, req)
+}
+```
+
+函数的ctx和req参数就是每个普通的RPC方法的前两个参数。第三个info参数表示当前是对应的那个GRPC方法，第四个handler参数对应当前的GRPC方法函数。上面的函数中首先是日志输出info参数，然后调用handler对应的GRPC方法函数。
+
+要使用filter截取器函数，只需要在启动GRPC服务时作为参数输入即可：
+
+```go
+server := grpc.NewServer(grpc.UnaryInterceptor(filter))
+```
+
+然后服务器在收到每个GRPC方法调用之前，会首先输出一行日志，然后再调用对方的方法。
+
+如果截取器函数返回了错误，那么该次GRPC方法调用将被视作失败处理。因此，我们可以在截取器中对输入的参数做一些简单的验证工作。同样，也可以对handler返回的结果做一些验证工作。截取器也非常适合前面对Token认证工作。
+
+下面是截取器增加了对GRPC方法异常对捕获：
+
+```go
+func filter(
+	ctx context.Context, req interface{},
+	info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler,
+) (resp interface{}, err error) {
+	log.Println("fileter:", info)
+
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic: %v", r)
+		}
+	}()
+
+	return handler(ctx, req)
+}
+```
+
+不够GRPC框架中只能为每个服务设置一个截取器，因此所有对截取工作只能在一个函数中完成。不过开源的grpc-ecosystem项目中的go-grpc-middleware包已经基于GRPC对截取器实现了链式截取器的支持，感兴趣的同学可以参考。
+
+<!--
 
 ## 和Web服务共存
 
