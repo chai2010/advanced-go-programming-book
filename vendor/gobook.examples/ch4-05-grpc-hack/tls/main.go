@@ -59,7 +59,7 @@ func startServer() {
 
 	// Create the TLS credentials
 	creds := credentials.NewTLS(&tls.Config{
-		ClientAuth:   tls.RequireAndVerifyClientCert,
+		ClientAuth:   tls.RequireAndVerifyClientCert, // NOTE: this is optional!
 		Certificates: []tls.Certificate{certificate},
 		ClientCAs:    certPool,
 	})
@@ -93,9 +93,10 @@ func doClientWork() {
 	}
 
 	creds := credentials.NewTLS(&tls.Config{
-		ServerName:   tlsServerName, // NOTE: this is required!
-		Certificates: []tls.Certificate{certificate},
-		RootCAs:      certPool,
+		InsecureSkipVerify: false,         // NOTE: this is required!
+		ServerName:         tlsServerName, // NOTE: this is required!
+		Certificates:       []tls.Certificate{certificate},
+		RootCAs:            certPool,
 	})
 
 	conn, err := grpc.Dial("localhost"+port, grpc.WithTransportCredentials(creds))
