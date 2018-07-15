@@ -6,10 +6,19 @@ TODO
 
 基于pb扩展，打造一个自定义的rest生成
 
-url中参数先简单处理，不支持子结构体内的映射
+支持 url 和 url.Values
 
-参考 gopl 的 unpark 实现
+通过 grpc-gateway/runtime.PopulateFieldFromPath 和 PopulateQueryParameters 天才 protoMsg 成员
 
-重点是自动生成路由映射，甚至自动关联到 grpc 等服务接口（避免新开一个服务代理）
+路由通过 httprouter 处理
+
+- https://github.com/julienschmidt/httprouter
+- https://github.com/grpc-ecosystem/grpc-gateway/blob/master/runtime/query.go#L20
+
+先生成 net/rpc 接口，然后同时增加 Rest 接口
+
+扩展的元信息需要一个独立的文件，因为在插件中需要访问。
+
+可以新开一个github项目，便于引用
 
 -->
