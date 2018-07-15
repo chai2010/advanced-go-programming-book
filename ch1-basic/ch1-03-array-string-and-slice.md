@@ -298,7 +298,7 @@ func str2bytes(s string) []byte {
 ```go
 func bytes2str(s []byte) (p string) {
 	data := make([]byte, len(s))
-	for i, c := s {
+	for i, c := range s {
 		data[i] = c
 	}
 
