@@ -87,7 +87,7 @@ type {{.ServiceName}}Interface interface {
 	{{- end}}
 }
 
-func Register{{.ServiceName}}(srv *rpc.Server, x {{.ServiceName}}) error {
+func Register{{.ServiceName}}(srv *rpc.Server, x {{.ServiceName}}Interface) error {
 	if err := srv.RegisterName("{{.ServiceName}}", x); err != nil {
 		return err
 	}
