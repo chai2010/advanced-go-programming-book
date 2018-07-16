@@ -67,7 +67,7 @@ func (call *Call) done() {
 }
 ```
 
-从`Call.done`方法的实现可以得知`call.Done`管道会将输入的call原样返回。
+从`Call.done`方法的实现可以得知`call.Done`管道会将处理后的的call返回。
 
 ## 基于RPC实现Watch功能
 
