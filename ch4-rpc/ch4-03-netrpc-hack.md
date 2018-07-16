@@ -51,7 +51,7 @@ func (client *Client) Go(serviceMethod string, args interface{}, reply interface
 }
 ```
 
-首先是构造一个表示当前调用的call变量，然后通过`client.send`将call的完整参数发送到RPC框架。`client.send`方法调用是线程安全的，因此可以从多个Goroutine同时向同一个RPC链接发生调用指令。
+首先是构造一个表示当前调用的call变量，然后通过`client.send`将call的完整参数发送到RPC框架。`client.send`方法调用是线程安全的，因此可以从多个Goroutine同时向同一个RPC链接发送调用指令。
 
 当调用完成或者发生错误时，将调用`call.done`方法通知完成：
 
