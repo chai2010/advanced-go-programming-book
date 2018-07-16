@@ -124,7 +124,7 @@ func (p *KVStoreService) Set(kv [2]string, *struct{}) error {
 }
 ```
 
-在Set方法中，输入参数是key和value组成的数组，用一个匿名的空结构体表示忽略到返回值。当修改某个key对应的值时会调用每一个过滤器函数。
+在Set方法中，输入参数是key和value组成的数组，用一个匿名的空结构体表示忽略了返回值。当修改某个key对应的值时会调用每一个过滤器函数。
 
 而过滤器列表在Watch方法中提供：
 
@@ -173,7 +173,7 @@ func doClientWork(client *rpc.Client) {
 }
 ```
 
-首先启动一个独立的Goroutine监控key的变化。同步的watch调用会阻塞，直到有可以发生变化或者超时。然后在通过Set方法修改KV值时，服务器会将变化的key通过Watch方法返回。这样我们就可以实现对某些状态的监控。
+首先启动一个独立的Goroutine监控key的变化。同步的watch调用会阻塞，直到有key发生变化或者超时。然后在通过Set方法修改KV值时，服务器会将变化的key通过Watch方法返回。这样我们就可以实现对某些状态的监控。
 
 ## 反向RPC
 
