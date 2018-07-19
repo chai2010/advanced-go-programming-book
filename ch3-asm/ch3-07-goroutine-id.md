@@ -71,7 +71,7 @@ func GetGoid() int64 {
 }
 ```
 
-GetGoid函数的细节我们不在赘述。需要补充说明的是`runtime.Stack`函数不仅仅可以获取当前Goroutine的栈信息，还可以获取全部Goroutine的栈信息（通过第二个参数控制）。同时在Go语言内部的 [net/http2.curGoroutineID](https://github.com/golang/net/blob/master/http2/gotrack.go) 函数正是采用类似方式获取的goid。
+GetGoid函数的细节我们不再赘述。需要补充说明的是`runtime.Stack`函数不仅仅可以获取当前Goroutine的栈信息，还可以获取全部Goroutine的栈信息（通过第二个参数控制）。同时在Go语言内部的 [net/http2.curGoroutineID](https://github.com/golang/net/blob/master/http2/gotrack.go) 函数正是采用类似方式获取的goid。
 
 
 ## 从g结构体获取goid
