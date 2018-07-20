@@ -63,7 +63,8 @@ func Print(a ...interface{}) {
 
 ```go
 func Find(m map[int]int, key int) (value int, ok bool) {
-	return m[key]
+	value, ok = m[key]
+	return
 }
 ```
 
