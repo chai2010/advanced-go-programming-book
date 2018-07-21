@@ -48,7 +48,7 @@ The following commands are available:
     disassemble (alias: disass) - Disassembler.
     down ------------------------ Move the current frame down.
     exit (alias: quit | q) ------ Exit the debugger.
-    frame ----------------------- Set the current frame, or execute command on a different frame.
+    frame ----------------------- Set the current frame, or execute command...
     funcs ----------------------- Print list of functions.
     goroutine ------------------- Shows or changes current goroutine
     goroutines ------------------ List program goroutines.
@@ -61,7 +61,7 @@ The following commands are available:
     regs ------------------------ Print contents of CPU registers.
     restart (alias: r) ---------- Restart process.
     set ------------------------- Changes the value of a variable.
-    source ---------------------- Executes a file containing a list of delve commands
+    source ---------------------- Executes a file containing a list of delve...
     sources --------------------- Print list of source files.
     stack (alias: bt) ----------- Print stack trace.
     step (alias: s) ------------- Single step through program.
@@ -89,7 +89,8 @@ Breakpoint 1 set at 0x10ae9b8 for main.main() ./main.go:7
 
 ```
 (dlv) breakpoints
-Breakpoint unrecovered-panic at 0x102a380 for runtime.startpanic() /usr/local/go/src/runtime/panic.go:588 (0)
+Breakpoint unrecovered-panic at 0x102a380 for runtime.startpanic()
+    /usr/local/go/src/runtime/panic.go:588 (0)
         print runtime.curg._panic.arg
 Breakpoint 1 at 0x10ae9b8 for main.main() ./main.go:7 (0)
 ```
@@ -295,19 +296,19 @@ Breakpoint 1 set at 0x105011f for main.main() ./main.go:3
      4:
      5: func asmSayHello()
 (dlv) disassemble
-TEXT main.main(SB) /Users/chai/go/src/github.com/chai2010/advanced-go-programming-book/vendor/gobook.examples/ch3-08-debug/hello-asm/main.go
-        main.go:3       0x1050110       65488b0c25a0080000      mov rcx, qword ptr gs:[0x8a0]
-        main.go:3       0x1050119       483b6110                cmp rsp, qword ptr [rcx+0x10]
-        main.go:3       0x105011d       761a                    jbe 0x1050139
-=>      main.go:3       0x105011f*      4883ec08                sub rsp, 0x8
-        main.go:3       0x1050123       48892c24                mov qword ptr [rsp], rbp
-        main.go:3       0x1050127       488d2c24                lea rbp, ptr [rsp]
-        main.go:3       0x105012b       e880000000              call $main.asmSayHello
-        main.go:3       0x1050130       488b2c24                mov rbp, qword ptr [rsp]
-        main.go:3       0x1050134       4883c408                add rsp, 0x8
-        main.go:3       0x1050138       c3                      ret
-        main.go:3       0x1050139       e87288ffff              call $runtime.morestack_noctxt
-        main.go:3       0x105013e       ebd0                    jmp $main.main
+TEXT main.main(SB) /path/to/pkg/main.go
+        main.go:3       0x1050110       65488b0c25a0080000 mov rcx, qword ptr gs:[0x8a0]
+        main.go:3       0x1050119       483b6110           cmp rsp, qword ptr [rcx+0x10]
+        main.go:3       0x105011d       761a               jbe 0x1050139
+=>      main.go:3       0x105011f*      4883ec08           sub rsp, 0x8
+        main.go:3       0x1050123       48892c24           mov qword ptr [rsp], rbp
+        main.go:3       0x1050127       488d2c24           lea rbp, ptr [rsp]
+        main.go:3       0x105012b       e880000000         call $main.asmSayHello
+        main.go:3       0x1050130       488b2c24           mov rbp, qword ptr [rsp]
+        main.go:3       0x1050134       4883c408           add rsp, 0x8
+        main.go:3       0x1050138       c3                 ret
+        main.go:3       0x1050139       e87288ffff         call $runtime.morestack_noctxt
+        main.go:3       0x105013e       ebd0               jmp $main.main
 (dlv)
 ```
 
