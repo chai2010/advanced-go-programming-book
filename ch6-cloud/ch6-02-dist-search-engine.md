@@ -206,7 +206,7 @@ func initElasticsearchClient(host string, port string) {
     )
 
     if err != nil {
-        logrus.Errorf("connect to es error, host: %s, port: %s, err: %v", host, port, err)
+        // log error
     }
 }
 ```
