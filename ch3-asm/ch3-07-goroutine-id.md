@@ -4,15 +4,15 @@
 
 ## 故意设计没有goid
 
-根据官方的相关资料显示，Go语言刻意没有提供goid的原因是为了避免被滥用。因为大部分用户在轻松拿到goid之后，在之后的编程中会不自觉地编写出强依赖goid的代码。强依赖goid将导致这些代码不好移植，同时也会导致并发模型复杂化。同时，Go语言中可能同时存在海量的Goroutine，但是每个Goroutine何时被销毁并不好实时监控，这也会导致依赖goid的资源无法很好地自动回收（需要手工回收）。如果你是Go汇编语言用户，完全可以忽略这些借口。
+根据官方的相关资料显示，Go语言刻意没有提供goid的原因是为了避免被滥用。因为大部分用户在轻松拿到goid之后，在之后的编程中会不自觉地编写出强依赖goid的代码。强依赖goid将导致这些代码不好移植，同时也会导致并发模型复杂化。同时，Go语言中可能同时存在海量的Goroutine，但是每个Goroutine何时被销毁并不好实时监控，这也会导致依赖goid的资源无法很好地自动回收（需要手工回收）。不过如果你是Go汇编语言用户，则完全可以忽略这些借口。
 
 ## 纯Go方式获取goid
 
-为了便于理解，我们先尝试用纯Go的方式获取goid。使用纯Go的方式获取goid的方式虽然性能较低，但是代码有着很好的移植性，同时也可以用于测试其它方式获取的goid是否正确。
+为了便于理解，我们先尝试用纯Go的方式获取goid。使用纯Go的方式获取goid的方式虽然性能较低，但是代码有着很好的移植性，同时也可以用于测试验证其它方式获取的goid是否正确。
 
-每个Go语言用户应该都知道panic函数。panic函数将导致Goroutine异常，如果panic在传递到Goroutine的根函数还没有被recover函数处理，那么将打印相关的信息并退出进程。
+每个Go语言用户应该都知道panic函数。调用panic函数将导致Goroutine异常，如果panic在传递到Goroutine的根函数还没有被recover函数处理掉，那么运行时将打印相关的异常和栈信息并退出Goroutine。
 
-下面是我们构造的panic例子：
+下面我们构造一个简单的例子，通过panic来输出goid：
 
 ```go
 package main
@@ -34,7 +34,7 @@ main.main()
 
 我们可以猜测Panic输出信息`goroutine 1 [running]`中的1就是goid。但是如何才能在程序中获取panic的输出信息呢？其实上述信息只是当前函数调用栈帧的文字化描述，runtime.Stack函数提供了获取该信息的功能。
 
-我们基于runtime.Stack函数重新构造一个例子，输出当前栈帧的信息：
+我们基于runtime.Stack函数重新构造一个例子，通过输出当前栈帧的信息来输出goid：
 
 ```go
 package main
@@ -56,17 +56,22 @@ main.main()
 	/path/to/main.g
 ```
 
-因此通过runtime.Stack获取的字符串中就可以解析出goid信息：
+因此从runtime.Stack获取的字符串中就可以很容易解析出goid信息：
 
 ```go
 func GetGoid() int64 {
-	var buf [64]byte
-	n := runtime.Stack(buf[:], false)
-	idField := strings.Fields(strings.TrimPrefix(string(buf[:n]), "goroutine "))[0]
+	var (
+		buf [64]byte
+		n = runtime.Stack(buf[:], false)
+		stk = strings.TrimPrefix(string(buf[:n])
+	)
+
+	idField := strings.Fields(stk, "goroutine "))[0]
 	id, err := strconv.Atoi(idField)
 	if err != nil {
 		panic(fmt.Errorf("can not get goroutine id: %v", err))
 	}
+
 	return int64(id)
 }
 ```
@@ -76,7 +81,7 @@ GetGoid函数的细节我们不再赘述。需要补充说明的是`runtime.Stac
 
 ## 从g结构体获取goid
 
-根据官方的Go汇编语言文档，每个运行的Goroutine结构的g指针保存在当前运行Goroutine的系统线程的局部存储TLS中。可以先获取TLS线程局部存储，然后再从TLS中获取g结构的指针。
+根据官方的Go汇编语言文档，每个运行的Goroutine结构的g指针保存在当前运行Goroutine的系统线程的局部存储TLS中。可以先获取TLS线程局部存储，然后再从TLS中获取g结构的指针，最后从g结构中取出goid。
 
 下面是参考runtime包中定义的get_tls宏获取g指针：
 
@@ -103,7 +108,7 @@ MOVQ TLS, CX
 MOVQ 0(CX)(TLS*1), AX
 ```
 
-其实TLS类似线程局部存储的地址，地址对应的内存里的数据才是g指针。我们可以更直接一点:
+其实TLS类似线程局部存储的地址，地址对应的内存里的数据才是g指针。我们还可以更直接一点:
 
 ```
 MOVQ (TLS), AX
@@ -133,9 +138,7 @@ func GetGroutineId() int64 {
 
 其中 `g_goid_offset` 是 goid 成员的偏移量，g 结构参考 [runtime/runtime2.go](https://github.com/golang/go/blob/master/src/runtime/runtime2.go)。
 
-在Go1.10版本，goid的偏移量是152字节。因此上述代码只能正确运行在goid偏移量也是152字节的Go版本中。
-
-根据汤普森大神的神谕，枚举和暴力穷举是解决一切疑难杂症的万金油。我们也可以将goid的偏移保存到表格中，然后根据Go版本号查询goid的偏移量。
+在Go1.10版本，goid的偏移量是152字节。因此上述代码只能正确运行在goid偏移量也是152字节的Go版本中。根据汤普森大神的神谕，枚举和暴力穷举是解决一切疑难杂症的万金油。我们也可以将goid的偏移保存到表格中，然后根据Go版本号查询goid的偏移量。
 
 下面是改进后的代码：
 
@@ -203,7 +206,7 @@ func GetGoid() int64 {
 }
 ```
 
-上述代码通过反射直接获取goid，理论上只要反射的接口和goid成员的名字不发生变化，代码都可以正常运行。经过实际测试，以上的代码可以在Go1.8+版本中正确运行。
+上述代码通过反射直接获取goid，理论上只要反射的接口和goid成员的名字不发生变化，代码都可以正常运行。经过实际测试，以上的代码可以在Go1.8、Go1.9和Go1.10版本中正确运行。乐观推测，如果g结构体类型的名字不发生变化，Go语言反射的机制也不发生变化，那么未来Go语言版本应该也是可以运行的。
 
 反射虽然具备一定的灵活性，但是反射的性能一直是被大家诟病的地方。一个改进的思路是通过反射获取goid的偏移量，然后通过g指针和偏移量获取goid，这样反射只需要在初始化阶段执行一次。
 
@@ -269,9 +272,11 @@ TEXT ·getg(SB), NOSPLIT, $32-16
 
 ## goid的应用: 局部存储
 
-有了goid之后，构造Goroutine局部存储就非常容易了：
+有了goid之后，构造Goroutine局部存储就非常容易了。我们可以定义一个gls包提供goid的特性：
 
 ```go
+package gls
+
 var gls struct {
 	m map[int64]map[interface{}]interface{}
 	sync.Mutex
@@ -332,6 +337,10 @@ func Clean() {
 下面是使用局部存储简单的例子：
 
 ```go
+import (
+	gls "path/to/gls"
+)
+
 func main() {
 	var wg sync.WaitGroup
 	for i := 0; i < 5; i++ {
