@@ -187,7 +187,81 @@ es 的 Bool Query 方案，实际上就是用 json 来表达了这种程序语�
 
 ### 基于 client sdk 做开发
 
+初始化：
+
+```go
+// 选用 elastic 版本时
+// 注意与自己使用的 elasticsearch 要对应
+import (
+    elastic "gopkg.in/olivere/elastic.v3"
+)
+
+var esClient *elastic.Client
+
+func initElasticsearchClient(host string, port string) {
+    var err error
+    esClient, err = elastic.NewClient(
+        elastic.SetURL(fmt.Sprintf("http://%s:%s", host, port)),
+        elastic.SetMaxRetries(3),
+    )
+
+    if err != nil {
+        logrus.Errorf("connect to es error, host: %s, port: %s, err: %v", host, port, err)
+    }
+}
+```
+
+插入：
+
+```go
+func insertDocument(db string, table string, obj map[string]interface{}) {
+
+    id := obj["id"]
+
+    var indexName, typeName string
+    // 数据库中的 database/table 概念，可以简单映射到 es 的 index 和 type
+    // 不过需要注意，因为 es 中的 _type 本质上只是 document 的一个字段
+    // 所以单个 index 内容过多会导致性能问题
+    // 在新版本中 type 已经废弃
+    // 为了让不同表的数据落入不同的 index，这里我们用 table+name 作为 index 的名字
+    indexName = fmt.Sprintf("%v_%v", db, table)
+    typeName = table
+
+    //正常情况
+    res, err := esClient.Index().Index(indexName).Type(typeName).Id(id).BodyJson(obj).Do()
+    if err != nil {
+      // handle error
+    } else {
+      // insert success
+    }
+}
+
+```
+
+获取：
+
+```go
 TODO
+```
+
+删除：
+
+```go
+func deleteDocument(indexName string, typeName string, obj map[string]interface{}) {
+    id := obj["id"]
+
+    res, err := esClient.Delete().Index(indexName).Type(typeName).Id(id).Do()
+    if err != nil {
+      // handle error
+    } else {
+      // delete success
+    }
+}
+```
+
+因为 lucene 的性质，本质上搜索引擎内的数据是不可变的，所以如果要对 document 进行更新，实际上是按照 id 进行完全覆盖的操作，所以与插入的情况是一样的。
+
+使用 es 作为数据库使用时，需要注意，因为 es 有索引合并的操作，所以数据插入到 es 中到可以查询得到有一段时间(由 es 的 refresh_interval 决定)。所以千万不要把 es 当成强一致的关系型数据库来使用。
 
 ### 将 sql 转换为 DSL
 
@@ -263,7 +337,6 @@ es 的 DSL 虽然很好理解，但是手写起来非常费劲。前面提供了
 SQL 的 where 部分就是 boolean expression。我们之前提到过，这种 bool 表达式在被 parse 之后，和 es 的 DSL 的结构长得差不多，我们能不能直接通过这种“差不多”的猜测来直接帮我们把 SQL 转换成 DSL 呢？
 
 当然可以，我们把 SQL 的 where 被 Parse 之后的结构和 es 的 DSL 的结构做个对比：
-
 
 ![ast](../images/ch6-ast-dsl.png)
 
