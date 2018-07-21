@@ -170,5 +170,5 @@ MOV指令它不仅仅用于在寄存器和内存之间传输数据，而且还�
 
 当需要通过间接索引的方式访问数组或结构体等某些成员对应的内存时，可以用LEA指令先对目前内存取地址，然后在操作对应内存的数据。而栈指令则可以用于函数调整自己的栈空间大小。
 
-为了简单我们省略了位运算指令，很多高级指令。完整的X86指令在 https://github.com/golang/arch/blob/master/x86/x86.csv 文件定义。同时Go汇编还正对一些指令定义了别名，具体可以参考这里 https://golang.org/src/cmd/internal/obj/x86/anames.go 。
+最后需要说明的是，Go汇编语言可能并没有支持全部的CPU指令。如果遇到没有支持的CPU指令，可以通过Go汇编语言提供的BYTE命令将真实的CPU指令对应的机器码填充到对应的位置。完整的X86指令在 https://github.com/golang/arch/blob/master/x86/x86.csv 文件定义。同时Go汇编还正对一些指令定义了别名，具体可以参考这里 https://golang.org/src/cmd/internal/obj/x86/anames.go 。
 
