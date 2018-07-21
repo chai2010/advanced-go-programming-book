@@ -33,14 +33,14 @@ func Swap(a, b int) (int, int)
 TEXT ·Swap(SB), NOSPLIT, $0-32
 
 // func Swap(a, b int) (int, int)
-TEXT ·Swap(SB), $0
+TEXT ·Swap(SB), NOSPLIT, $0
 ```
 
 下图是Swap函数几种不同写法的对比关系图：
 
 ![](../images/ch3-func-decl-01.ditaa.png)
 
-第一种是最完整的写法：函数名部分包含了当前包的路径，同时指明了函数的参数大小为32个字节（对应参数和返回值的4个int类型）。第二种写法则比较简洁，省略了当前包的路径和参数的大小。需要注意的是，标志参数中的NOSPLIT如果在Go语言函数声明中通过注释指明了标志也是可以省略的。如果没有NOSPLIT标注，Go汇编器和汇编器会分别为Go函数和汇编函数插入栈分裂的代码。
+第一种是最完整的写法：函数名部分包含了当前包的路径，同时指明了函数的参数大小为32个字节（对应参数和返回值的4个int类型）。第二种写法则比较简洁，省略了当前包的路径和参数的大小。如果有NOSPLIT标注，会禁止汇编器为汇编函数插入栈分裂的代码。NOSPLIT对应Go语言中的`//go:nosplit`注释。
 
 目前可能遇到的函数标志有NOSPLIT、WRAPPER和NEEDCTXT几个。其中NOSPLIT不会生成或包含栈分裂代码，这一般用于没有任何其它函数调用的叶子函数，这样可以适当提高性能。WRAPPER标志则表示这个是一个包装函数，在panic或runtime.caller等某些处理函数帧的地方不会增加函数帧计数。最后的NEEDCTXT表示需要一个上下文参数，一般用于闭包函数。
 
