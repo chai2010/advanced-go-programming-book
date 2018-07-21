@@ -241,7 +241,19 @@ func insertDocument(db string, table string, obj map[string]interface{}) {
 获取：
 
 ```go
-TODO
+func query(indexName string, typeName string) (*elastic.SearchResult, error) {
+    // 通过 bool must 和 bool shoud 添加 bool 查询条件
+    query := elastic.NewBoolQuery().Must(elastic.NewMatchPhraseQuery("id", 1))
+
+    searchService := esClient.Search(indexName).Type(typeName)
+    res, err := searchService.Query(q).Do()
+    if err != nil {
+        // log error
+        return nil, err
+    }
+
+    return res, nil
+}
 ```
 
 删除：
