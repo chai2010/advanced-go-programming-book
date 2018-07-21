@@ -351,7 +351,7 @@ type UpperWriter struct {
 }
 
 func (p *UpperWriter) Write(data []byte) (n int, err error) {
-	return p.Writer(bytes.ToUpper(data))
+	return p.Writer.Write(bytes.ToUpper(data))
 }
 
 func main() {
@@ -365,7 +365,7 @@ func main() {
 type UpperString string
 
 func (s UpperString) String() string {
-	return strings.ToUpper(s)
+	return strings.ToUpper(string(s))
 }
 
 type fmt.Stringer interface {
@@ -412,7 +412,7 @@ type proto.Message interface {
 }
 ```
 
-不过这种做法只是君子协定，如果有人刻意伪造一个`proto.Message`接口也是很容易的。再严格一点的做法是给接口定义一个私有方法。只有满足了这个私有方法的对象才可能满足这个接口，而私有方法的名字是包含包的绝对路径名的，因此只能在包内部实现这个私有方法才能满足这个接口。测试包中的`testing.PB`接口就是采用类似的技术：
+不过这种做法只是君子协定，如果有人刻意伪造一个`proto.Message`接口也是很容易的。再严格一点的做法是给接口定义一个私有方法。只有满足了这个私有方法的对象才可能满足这个接口，而私有方法的名字是包含包的绝对路径名的，因此只能在包内部实现这个私有方法才能满足这个接口。测试包中的`testing.TB`接口就是采用类似的技术：
 
 ```go
 type testing.TB interface {
@@ -429,7 +429,7 @@ type testing.TB interface {
 
 不过这种通过私有方法禁止外部对象实现接口的做法也是有代价的：首先是这个接口只能包内部使用，外部包正常情况下是无法直接创建满足该接口对象的；其次，这种防护措施也不是绝对的，恶意的用户依然可以绕过这种保护机制。
 
-在前面的方法一节中我们讲到，通过在结构体中嵌入匿名类型成员，可以继承匿名类型的方法。其实这个被嵌入的匿名成员不一定是普通类型，也可以是接口类型。我们可以通过嵌入匿名的`testing.PB`接口来伪造私有的`private`方法，因为接口方法是延迟绑定，编译时`private`方法是否真的存在并不重要。
+在前面的方法一节中我们讲到，通过在结构体中嵌入匿名类型成员，可以继承匿名类型的方法。其实这个被嵌入的匿名成员不一定是普通类型，也可以是接口类型。我们可以通过嵌入匿名的`testing.TB`接口来伪造私有的`private`方法，因为接口方法是延迟绑定，编译时`private`方法是否真的存在并不重要。
 
 ```go
 package main
@@ -453,7 +453,7 @@ func main() {
 }
 ```
 
-我们在自己的`PB`结构体类型中重新实现了`Fatal`方法，然后通过将对象隐式转换为`testing.TB`接口类型（因为内嵌了匿名的`testing.TB`对象，因此是满足`testing.TB`接口的），然后通过`testing.TB`接口来调用我们自己的`Fatal`方法。
+我们在自己的`TB`结构体类型中重新实现了`Fatal`方法，然后通过将对象隐式转换为`testing.TB`接口类型（因为内嵌了匿名的`testing.TB`对象，因此是满足`testing.TB`接口的），然后通过`testing.TB`接口来调用我们自己的`Fatal`方法。
 
 这种通过嵌入匿名接口或嵌入匿名指针对象来实现继承的做法其实是一种纯虚继承，我们继承的只是接口指定的规范，真正的实现在运行的时候才被注入。比如，我们可以模拟实现一个grpc的插件：
 
