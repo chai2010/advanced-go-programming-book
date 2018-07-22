@@ -1,10 +1,10 @@
 # 4.5. GRPC进阶
 
-作为一个基础的RPC框架，安全和扩展是经常遇到的问题。本节将简单介绍如何对GRPC进行安全认证。然后介绍通过GRPC等截取器特性以及如何通过截取器优雅低实现Token认证、调用跟踪以及Panic捕获等特性。最后介绍了GRPC服务如何和其他Web服务共存。
+作为一个基础的RPC框架，安全和扩展是经常遇到的问题。本节将简单介绍如何对GRPC进行安全认证。然后介绍通过GRPC的截取器特性，以及如何通过截取器优雅地实现Token认证、调用跟踪以及Panic捕获等特性。最后介绍了GRPC服务如何和其他Web服务共存。
 
 ## 证书认证
 
-GRPC建立在HTTP2协议之上，对TLS提供了很好的支持。我们前面章节中GRPC的服务都没有提供证书支持，因此客户端在链接服务器中通过`grpc.WithInsecure()`选项跳过了对服务器证书的验证。没有启用证书的GRPC服务在和客户端进行的是明文通讯，信息面临被任何第三方监听的风险。为了保障GRPC通信不被第三方监听，我们可以对服务器期待TLS加密特性。
+GRPC建立在HTTP/2协议之上，对TLS提供了很好的支持。我们前面章节中GRPC的服务都没有提供证书支持，因此客户端在链接服务器中通过`grpc.WithInsecure()`选项跳过了对服务器证书的验证。没有启用证书的GRPC服务在和客户端进行的是明文通讯，信息面临被任何第三方监听的风险。为了保障GRPC通信不被第三方监听串改或伪造，我们可以对服务器期待TLS加密特性。
 
 可以用以下命令为服务器和客户端分别生成私钥和证书：
 
@@ -43,12 +43,16 @@ func main() {
 
 ```go
 func main() {
-	creds, err := credentials.NewClientTLSFromFile("server.crt", "server.grpc.io")
+	creds, err := credentials.NewClientTLSFromFile(
+		"server.crt", "server.grpc.io",
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	conn, err := grpc.Dial("localhost:5000", grpc.WithTransportCredentials(creds))
+	conn, err := grpc.Dial("localhost:5000",
+		grpc.WithTransportCredentials(creds),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,7 +64,7 @@ func main() {
 
 其中redentials.NewClientTLSFromFile是构造客户端用的证书对象，第一个参数时服务器的证书文件，第二个参数是签发服务器证书时的名字。然后通过grpc.WithTransportCredentials(creds)将证书对象转为参数选项传人grpc.Dial函数。
 
-以上这种方式，需要提前将服务器的证书告知客户端，这样客户端在链接服务器时才能进行对服务器证书认证。在复杂的网络环境中，服务器证书的传输本身也是一个非常危险的问题。如果在中间某个环节，服务器证书被替换那么对服务器的认证也将不再可靠。
+以上这种方式，需要提前将服务器的证书告知客户端，这样客户端在链接服务器时才能进行对服务器证书认证。在复杂的网络环境中，服务器证书的传输本身也是一个非常危险的问题。如果在中间某个环节，服务器证书被监听或替换那么对服务器的认证也将不再可靠。
 
 为了避免证书的传递过程中被串改，可以通过一个安全可靠的根证书分别对服务器和客户端的证书进行签名。这样客户端或服务器在收到对方的证书后可以通过根证书进行验证证书的有效性。
 
@@ -92,13 +96,13 @@ $ openssl x509 -req -sha256 \
 
 ```go
 func main() {
-	certificate, err := tls.LoadX509KeyPair(client_crt, client_key)
+	certificate, err := tls.LoadX509KeyPair("client.crt", "client.key")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	certPool := x509.NewCertPool()
-	ca, err := ioutil.ReadFile(ca)
+	ca, err := ioutil.ReadFile("ca.crt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -172,27 +176,31 @@ func main() {
 
 ## Token认证
 
-前面讲述的基于证书的认证是针对每个GRPC链接的认证。GRPC还为每个GRPC方法调用提供了认证支持，这样就可以基于不同的用户对不同对方法访问进行权限管理。
+前面讲述的基于证书的认证是针对每个GRPC链接的认证。GRPC还为每个GRPC方法调用提供了认证支持，这样就基于基于用户Token对不同对方法访问进行权限管理。
 
 要实现对每个GRPC方法进行认证，需要实现grpc.PerRPCCredentials接口：
 
 ```go
 type PerRPCCredentials interface {
-    // GetRequestMetadata gets the current request metadata, refreshing
-    // tokens if required. This should be called by the transport layer on
-    // each request, and the data should be populated in headers or other
-    // context. If a status code is returned, it will be used as the status
-    // for the RPC. uri is the URI of the entry point for the request.
-    // When supported by the underlying implementation, ctx can be used for
-    // timeout and cancellation.
-    // TODO(zhaoq): Define the set of the qualified keys instead of leaving
-    // it as an arbitrary string.
-    GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error)
-    // RequireTransportSecurity indicates whether the credentials requires
-    // transport security.
+	// GetRequestMetadata gets the current request metadata, refreshing
+	// tokens if required. This should be called by the transport layer on
+	// each request, and the data should be populated in headers or other
+	// context. If a status code is returned, it will be used as the status
+	// for the RPC. uri is the URI of the entry point for the request.
+	// When supported by the underlying implementation, ctx can be used for
+	// timeout and cancellation.
+	// TODO(zhaoq): Define the set of the qualified keys instead of leaving
+	// it as an arbitrary string.
+	GetRequestMetadata(ctx context.Context, uri ...string) (
+		map[string]string,	error,
+	)
+	// RequireTransportSecurity indicates whether the credentials requires
+	// transport security.
     RequireTransportSecurity() bool
 }
 ```
+
+在GetRequestMetadata方法中返回认证需要对必要信息。RequireTransportSecurity方法表示是否求底层使用安全链接。在真实对环境中建议底层必须要求启用安全对链接，否则认证信息有泄露和被串改的风险。
 
 我们可以创建一个Authentication类型，用于实现用户名和密码对认证：
 
@@ -210,7 +218,9 @@ func (a *Authentication) RequireTransportSecurity() bool {
 }
 ```
 
-在GetRequestMetadata方法中返回认证需要对必要信息。为了演示代码简单，RequireTransportSecurity方法表示不要求底层使用安全链接。在真实对环境中建议底层必须要求启用安全对链接，否则认证信息有泄露和被串改的风险。
+在GetRequestMetadata方法中，我们返回地认证信息包装login和password两个信息。为了演示代码简单，RequireTransportSecurity方法表示不要求底层使用安全链接。
+
+然后在每次请求GRPC服务时就可以将Token信息作为参数选项传人：
 
 ```go
 func main() {
@@ -236,7 +246,9 @@ func main() {
 ```go
 type grpcServer struct { auth *Authentication }
 
-func (p *grpcServer) SomeMethod(ctx context.Context, in *HelloRequest) (*HelloReply, error) {
+func (p *grpcServer) SomeMethod(
+	ctx context.Context, in *HelloRequest,
+) (*HelloReply, error) {
 	if err := p.auth.Auth(ctx); err != nil {
 		return nil, err
 	}
@@ -264,7 +276,7 @@ func (a *Authentication) Auth(ctx context.Context) error {
 }
 ```
 
-首先通过metadata.FromIncomingContext从ctx上下文中获取元信息，然后取出相应的认证信息进行认证。
+详细地认证工作主要在Authentication.Auth方法中完成。首先通过metadata.FromIncomingContext从ctx上下文中获取元信息，然后取出相应的认证信息进行认证。如果认证失败，则返回一个codes.Unauthenticated类型地错误。
 
 ## 截取器
 
@@ -314,7 +326,7 @@ func filter(
 }
 ```
 
-不够GRPC框架中只能为每个服务设置一个截取器，因此所有对截取工作只能在一个函数中完成。开源的grpc-ecosystem项目中的go-grpc-middleware包已经基于GRPC对截取器实现了链式截取器的支持。
+不过GRPC框架中只能为每个服务设置一个截取器，因此所有对截取工作只能在一个函数中完成。开源的grpc-ecosystem项目中的go-grpc-middleware包已经基于GRPC对截取器实现了链式截取器的支持。
 
 以下是go-grpc-middleware包中链式截取器的简单用法
 
@@ -335,9 +347,9 @@ myServer := grpc.NewServer(
 
 ## 和Web服务共存
 
-GRPC是构建在HTTP/2协议之上的，因此我们可以将GRPC服务和普通的Web服务架设在同一个端口之上。因为目前Go语言版本的GRPC实现还不够完善，只有启用了TLS协议之后才能将GRPC和Web服务运行在同一个端口。
+GRPC构建在HTTP/2协议之上，因此我们可以将GRPC服务和普通的Web服务架设在同一个端口之上。因为目前Go语言版本的GRPC实现还不够完善，只有启用了TLS协议之后才能将GRPC和Web服务运行在同一个端口。
 
-服务器证书的生成过程前文已经讲过，这么不再赘述。启用https的服务器非常简单：
+服务器证书的生成过程前文已经讲过，这么不再赘述。启用普通的https服务器非常简单：
 
 ```go
 func main() {
@@ -370,11 +382,9 @@ func main() {
 }
 ```
 
-因为GRPC服务已经实现了ServeHTTP方法，可以直接作为Web路由处理对象。如果将Grpc和Web服务放在一起，会导致GRPC和Web路径的冲突，在处理时我们需要取分两个服务。
+因为GRPC服务已经实现了ServeHTTP方法，可以直接作为Web路由处理对象。如果将Grpc和Web服务放在一起，会导致GRPC和Web路径的冲突，在处理时我们需要区分两类服务。
 
-首先GRPC是建立在HTTP/2版本之上，如果HTTP不是HTTP/2协议则必然无法提供GRPC支持。同时，如果每个GRPC调用请求的Content-Type类型会被标注为"application/grpc"类型。
-
-因此我们可以通过以下方式生成同时支持Web和Grpc协议的路由处理函数：
+我们可以通过以下方式生成同时支持Web和Grpc协议的路由处理函数：
 
 ```go
 func main() {
@@ -397,6 +407,8 @@ func main() {
 	)
 }
 ```
+
+首先GRPC是建立在HTTP/2版本之上，如果HTTP不是HTTP/2协议则必然无法提供GRPC支持。同时，如果每个GRPC调用请求的Content-Type类型会被标注为"application/grpc"类型。
 
 这样我们就可以在GRPC端口上同时提供Web服务了。
 
