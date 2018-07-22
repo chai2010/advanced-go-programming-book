@@ -90,7 +90,7 @@ func NewKVStoreService() *KVStoreService {
 }
 ```
 
-其中`m`成员用于存储KV数据。`filter`成员对应每个Watch调用时定义的过滤器函数列表。而`mu`成员为互斥锁，用于在多个Goroutine访问或修改时对其它成员提供保护。
+其中`m`成员是一个map类型，用于存储KV数据。`filter`成员对应每个Watch调用时定义的过滤器函数列表。而`mu`成员为互斥锁，用于在多个Goroutine访问或修改时对其它成员提供保护。
 
 然后就是Get和Set方法：
 
@@ -107,7 +107,7 @@ func (p *KVStoreService) Get(key string, value *string) error {
 	return fmt.Errorf("not found")
 }
 
-func (p *KVStoreService) Set(kv [2]string, *struct{}) error {
+func (p *KVStoreService) Set(kv [2]string, reply *struct{}) error {
 	p.Lock()
 	defer p.Unlock()
 
@@ -250,7 +250,7 @@ func doClientWork(clientChan <-chan *rpc.Client) {
 
 ## 上下文信息
 
-首先是上下文信息，基于上下文我们可以针对不同客户端提供定制化的RPC服务。我们可以通过为每个信道提供独立的RPC服务来实现对上下文特性的支持。
+基于上下文我们可以针对不同客户端提供定制化的RPC服务。我们可以通过为每个信道提供独立的RPC服务来实现对上下文特性的支持。
 
 首先改造HelloService，里面增加了对应链接的conn成员：
 
