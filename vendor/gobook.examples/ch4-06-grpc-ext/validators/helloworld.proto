@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package main;
+
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+
+message Message {
+	string important_string = 1 [(validator.field) = {regex: "^[a-z]{2,5}$"}];
+	int32 age = 2 [(validator.field) = {int_gt: 0, int_lt: 100}];
+}

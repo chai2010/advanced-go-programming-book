@@ -298,7 +298,7 @@ func str2bytes(s string) []byte {
 ```go
 func bytes2str(s []byte) (p string) {
 	data := make([]byte, len(s))
-	for i, c := s {
+	for i, c := range s {
 		data[i] = c
 	}
 
@@ -557,7 +557,7 @@ func FindPhoneNumber(filename string) []byte {
 
 ```go
 var a []*int{ ... }
-a = a[:len(a)-1]    // 本删除的最后一个元素依然被引用, 可能导致GC操作被阻碍
+a = a[:len(a)-1]    // 被删除的最后一个元素依然被引用, 可能导致GC操作被阻碍
 ```
 
 保险的方式是先将需要自动内存回收的元素设置为`nil`，保证自动回收器可以发现需要回收的对象，然后再进行切片的删除操作：

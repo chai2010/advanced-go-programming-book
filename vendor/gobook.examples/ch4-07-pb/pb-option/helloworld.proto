@@ -1,0 +1,55 @@
+syntax = "proto2";
+
+package main;
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.FileOptions {
+	optional String file_option = 50000;
+}
+
+extend google.protobuf.MessageOptions {
+	optional String message_option = 50000;
+}
+extend google.protobuf.FieldOptions {
+	optional String filed_option = 50000;
+}
+
+extend google.protobuf.ServiceOptions {
+	optional String service_option = 50000;
+}
+extend google.protobuf.MethodOptions {
+	optional String method_option = 50000;
+}
+
+option (file_option) = {
+	value: "this is a file option"
+};
+
+message Message {
+	option (message_option) = {
+		value: "message option"
+	};
+
+	optional string name = 1 [
+		(filed_option) = {
+			value: ""
+		}
+	];
+}
+
+service HelloService {
+	option (service_option) = {
+		value: "message option"
+	};
+
+	rpc Hello(String) returns(String) {
+		option (method_option) = {
+			value: ""
+		};
+	}
+}
+
+message String {
+	optional string value = 1;
+}

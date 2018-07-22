@@ -127,7 +127,7 @@ for _, endpoint := range endpointList {
 ```shell
 ls /platform/order-system/create-order-service-http
 
-[]
+['10.1.23.1:1023', '10.11.23.1:1023']
 ```
 
 当与 zk 断开连接时，注册在该节点下的临时节点也会消失，即实现了服务节点故障时的被动摘除。
@@ -136,16 +136,51 @@ ls /platform/order-system/create-order-service-http
 
 ## 基于 zk 的完整服务发现流程
 
-节点故障断开 zk 连接时，zk 会负责将该消息通知所有监听方。
-
 用代码来实现一下上面的几个逻辑。
 
 ### 临时节点注册
 
 ```go
+package main
+
+import (
+    "fmt"
+    "time"
+
+    "github.com/samuel/go-zookeeper/zk"
+)
+
+func main() {
+    c, _, err := zk.Connect([]string{"127.0.0.1"}, time.Second)
+    if err != nil {
+        panic(err)
+    }
+
+    res, err := c.Create("/platform/order-system/create-order-service-http/10.1.13.3:1043", []byte("1"),
+        zk.FlagEphemeral, zk.WorldACL(zk.PermAll))
+    if err != nil {
+        panic(err)
+    }
+    println(res)
+    time.Sleep(time.Second * 50)
+}
 ```
 
-### 服务节点获取
+在 sleep 的时候我们在 cli 中查看写入的临时节点数据：
+
+```shell
+ls /platform/order-system/create-order-service-http
+['10.1.13.3:1043']
+```
+
+在程序结束之后，很快这条数据也消失了：
+
+```shell
+ls /platform/order-system/create-order-service-http
+[]
+```
+
+### watch 数据变化
 
 ### 消息通知
 

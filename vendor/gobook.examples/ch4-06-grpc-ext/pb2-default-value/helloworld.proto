@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package main;
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.FieldOptions {
+	string default_string = 50000;
+	int32 default_int = 50001;
+}
+
+message Message {
+	string name = 1 [(default_string) = "gopher"];
+	int32 age = 2[(default_int) = 10];
+}

@@ -1,0 +1,30 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+package(default_visibility = ["//visibility:public"])
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "a_bit_of_everything.go",
+        "echo.go",
+        "flow_combination.go",
+        "main.go",
+        "unannotatedecho.go",
+    ],
+    importpath = "github.com/grpc-ecosystem/grpc-gateway/examples/server",
+    deps = [
+        "//examples/proto/examplepb:go_default_library",
+        "//examples/proto/sub:go_default_library",
+        "//examples/proto/sub2:go_default_library",
+        "@com_github_golang_glog//:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
+        "@com_github_golang_protobuf//ptypes/duration:go_default_library",
+        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
+        "@com_github_rogpeppe_fastuuid//:go_default_library",
+        "@org_golang_google_genproto//googleapis/rpc/errdetails:go_default_library",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes:go_default_library",
+        "@org_golang_google_grpc//metadata:go_default_library",
+        "@org_golang_google_grpc//status:go_default_library",
+    ],
+)
