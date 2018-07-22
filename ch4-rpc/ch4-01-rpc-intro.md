@@ -1,10 +1,10 @@
 # 4.1. RPC入门
 
-RPC是远程过程调用的简称，是分布式系统中不同节点间流行的交互方式。在互联网时代，RPC已经是一个不可或缺的基础构件。因此Go语言的标准库提供了一个简单的RPC实现，我们将以此为入口学习RPC的各种用法。
+RPC是远程过程调用的简称，是分布式系统中不同节点间流行的通信方式。在互联网时代，RPC已经和IPC一样成为一个不可或缺的基础构件。因此Go语言的标准库也提供了一个简单的RPC实现，我们将以此为入口学习RPC的各种用法。
 
 ## RPC版"Hello, World"
 
-Go语言的RPC包的路径为net/rpc，也就是放在了net包目录下面。因此我们可以猜测GoRPC包是建立在net包基础之上的。在第一章“Hello, World”革命一节最后，我们基于http实现了一个打印例子。下面我们尝试基于rpc实现一个类似的例子。
+Go语言的RPC包的路径为net/rpc，也就是放在了net包目录下面。因此我们可以猜测该RPC包是建立在net包基础之上的。在第一章“Hello, World”革命一节最后，我们基于http实现了一个打印例子。下面我们尝试基于rpc实现一个类似的例子。
 
 我们先构造一个HelloService类型，其中的Hello方法用于实现打印功能：
 
@@ -17,7 +17,7 @@ func (p *HelloService) Hello(request string, reply *string) error {
 }
 ```
 
-其中Hello方法必须满足Go语言的RPC规则：方法只能有两个可序列化的参数，其中第二个参数是指针类型，并且返回一个error类型。
+其中Hello方法必须满足Go语言的RPC规则：方法只能有两个可序列化的参数，其中第二个参数是指针类型，并且返回一个error类型，同时必须是公开的方法。
 
 然后就可以将HelloService类型的对象注册为一个RPC服务：
 
@@ -39,7 +39,7 @@ func main() {
 }
 ```
 
-其中rpc.Register会将对象类型中所有满足RPC规则的对象方法注册为RPC函数。然后我们建立一个唯一的TCP链接，并且通过rpc.ServeConn方法在该TCP链接上建立RPC服务。
+其中rpc.Register函数调用会将对象类型中所有满足RPC规则的对象方法注册为RPC函数，所有注册的方法会放在“HelloService”服务空间之下。然后我们建立一个唯一的TCP链接，并且通过rpc.ServeConn函数在该TCP链接上为对方提供RPC服务。
 
 下面是客户端请求HelloService服务的代码：
 
@@ -146,7 +146,7 @@ func main() {
 
 现在客户端用户不用再担心RPC方法名字或参数类型不匹配等低级错误的发生。
 
-最后是基于RPC接口规范编写真实的代码：
+最后是基于RPC接口规范编写真实的服务端代码：
 
 ```go
 type HelloService struct {}
@@ -175,16 +175,16 @@ func main() {
 }
 ```
 
-在新的RPC服务端实现中，我们用RegisterHelloService函数来注册函数，这样不仅可以避免命名服务名称的工作，同时也保证了传入的服务对象满足了RPC接口的定义。最后我们支持多个TCP链接，然后为每个TCP链接建立RPC服务。
+在新的RPC服务端实现中，我们用RegisterHelloService函数来注册函数，这样不仅可以避免命名服务名称的工作，同时也保证了传入的服务对象满足了RPC接口的定义。最后我们新的服务改为支持多个TCP链接，然后为每个TCP链接提供RPC服务。
 
 
 ## 跨语言的RPC
 
-标准库的RPC默认采用Go语言特有的gob规范编码，因此从其它语言调用Go语言实现的RPC服务将比较困难。在互联网的微服务时代，每个RPC以及服务的使用者都可能采用不同的编程语言，因此跨语言是互联网时代RPC的一个首要条件。得益于RPC的框架设计，Go语言的RPC其实也是很容易实现跨语言支持的。
+标准库的RPC默认采用Go语言特有的gob编码，因此从其它语言调用Go语言实现的RPC服务将比较困难。在互联网的微服务时代，每个RPC以及服务的使用者都可能采用不同的编程语言，因此跨语言是互联网时代RPC的一个首要条件。得益于RPC的框架设计，Go语言的RPC其实也是很容易实现跨语言支持的。
 
 Go语言的RPC框架有两个比较有特色的设计：一个是RPC数据打包时可以通过插件实现自定义的编码和解码；另一个是RPC建立在抽象的io.ReadWriteCloser接口之上的，我们可以将RPC架设在不同的通讯协议之上。这里我们将尝试通过官方自带的net/rpc/jsonrpc扩展实现一个跨语言的PPC。
 
-首先是基于json实现RPC服务：
+首先是基于json编码重新实现RPC服务：
 
 ```go
 func main() {
@@ -206,7 +206,7 @@ func main() {
 }
 ```
 
-其中最大的变化是用rpc.ServeCodec函数替代了rpc.ServeConn函数，传入的参数是针对服务端的json编解码器。
+代码中最大的变化是用rpc.ServeCodec函数替代了rpc.ServeConn函数，传入的参数是针对服务端的json编解码器。
 
 然后是实现json版本的客户端：
 
@@ -231,7 +231,7 @@ func main() {
 
 先手工调用net.Dial函数建立TCP链接，然后基于TCP信道建立针对客户端的json编解码器。
 
-在确保客户端可以正常调用RPC服务的方法之后，我们用一个普通的TCP服务代替Go语言版本的RPC服务。比如通过nc命令`nc -l 1234`在同样的端口启动一个TCP服务。然后再次执行一次RPC调用将会发现nc输出了以下的信息：
+在确保客户端可以正常调用RPC服务的方法之后，我们用一个普通的TCP服务代替Go语言版本的RPC服务，这样可以查看客户端调用时发送的数据格式。比如通过nc命令`nc -l 1234`在同样的端口启动一个TCP服务。然后再次执行一次RPC调用将会发现nc输出了以下的信息：
 
 ```json
 {"method":"HelloService.Hello","params":["hello"],"id":0}
@@ -313,7 +313,7 @@ func main() {
 }
 ```
 
-RPC的服务架设在“/jsonrpc”路径，在处理函数中基于http.ResponseWriter和http.Request类型的参数构造一个io.ReadWriteCloser类型的conn通道。然后基于conn构建针对服务端的json编码解码器。最后通过rpc.ServeRequest处理一次RPC方法调用。
+RPC的服务架设在“/jsonrpc”路径，在处理函数中基于http.ResponseWriter和http.Request类型的参数构造一个io.ReadWriteCloser类型的conn通道。然后基于conn构建针对服务端的json编码解码器。最后通过rpc.ServeRequest函数为每次请求处理一次RPC方法调用。
 
 模拟一次RPC调用的过程就是向该链接发送一个json字符串：
 
