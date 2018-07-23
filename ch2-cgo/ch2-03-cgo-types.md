@@ -244,7 +244,7 @@ func main() {
 enum C {
 	ONE,
 	TWO,
-}
+};
 */
 import "C"
 import "fmt"
