@@ -112,3 +112,42 @@ TEXT ·CallCAdd_Win64_ABI(SB), NOSPLIT, $0
 	CALL AX
 	MOVQ AX, ret+24(FP)
 	RET
+
+// func SyscallWrite_Darwin(fd int, msg string) int
+TEXT ·SyscallWrite_Darwin(SB), NOSPLIT, $0
+	MOVQ $(0x2000000+4), AX // #define SYS_write 4
+	MOVQ fd+0(FP),       DI
+	MOVQ msg_data+8(FP), SI
+	MOVQ msg_len+16(FP), DX
+	SYSCALL
+	MOVQ AX, ret+0(FP)
+	RET
+
+// func SyscallWrite_Linux(fd int, msg string) int
+TEXT ·SyscallWrite_Linux(SB), NOSPLIT, $0
+	MOVQ $1,             AX // #define SYS_write 1
+	MOVQ fd+0(FP),       DI
+	MOVQ msg_data+8(FP), SI
+	MOVQ msg_len+16(FP), DX
+	SYSCALL
+	MOVQ AX, ret+0(FP)
+	RET
+
+// func SyscallWrite_Windows(fd int, msg string) int
+TEXT ·SyscallWrite_Windows(SB), NOSPLIT, $0
+	RET // TODO
+
+// func CopySlice_AVX2(dst, src []byte, len int)
+TEXT ·CopySlice_AVX2(SB), NOSPLIT, $0
+	MOVQ dst_data+0(FP),  DI
+	MOVQ src_data+24(FP), SI
+	MOVQ len+32(FP),      BX
+	MOVQ $0,              AX
+
+LOOP:
+	VMOVDQU 0(SI)(AX*1), Y0
+	VMOVDQU Y0, 0(DI)(AX*1)
+	ADDQ $32, AX
+	CMPQ AX, BX
+	JL   LOOP
+	RET

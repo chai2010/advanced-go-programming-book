@@ -1,4 +1,4 @@
-# 3.7. 例子：Goroutine ID
+# 3.8. 例子：Goroutine ID
 
 在操作系统中，每个进程都会有一个唯一的进程编号，每个线程也有自己唯一的线程编号。同样在Go语言中，每个Goroutine也有自己唯一的Go程编号，这个编号在panic等场景下经常遇到。虽然Goroutine有内在的编号，但是Go语言却刻意没有提供获取该编号的接口。本节我们尝试通过Go汇编语言获取Goroutine ID。
 
