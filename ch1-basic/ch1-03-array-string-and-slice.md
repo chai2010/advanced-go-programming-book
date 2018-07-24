@@ -158,7 +158,7 @@ type StringHeader struct {
 
 我们可以看看字符串“Hello, world”本身对应的内存结构：
 
-![](../images/ch1-03-string-1.png)
+![](../images/ch1-03-string-1.ditaa.png)
 
 分析可以发现，“Hello, world”字符串底层数据和以下数组是完全一致的：
 
@@ -208,7 +208,7 @@ fmt.Println("\xe7\x95\x8c") // 打印: 界
 
 下图展示了“Hello, 世界”字符串的内存结构布局:
 
-![](../images/ch1-03-string-2.png)
+![](../images/ch1-03-string-2.ditaa.png)
 
 Go语言的字符串中可以存放任意的二进制字节序列，而且即使是UTF8字符序列也可能会遇到坏的编码。如果遇到一个错误的UTF8编码输入，将生成一个特别的Unicode字符‘\uFFFD’，这个字符在不同的软件中的显示效果可能不太一样，在印刷中这个符号通常是一个黑色六角形或钻石形状，里面包含一个白色的问号‘�’。
 
