@@ -7,7 +7,7 @@
 真实的CGO程序一般都比较复杂。不过我们可以反其道而行之，一个最简的CGO程序该是什么样的呢？要构造一个最简CGO程序，首先要去掉一些复杂的CGO特性，同时要展示CGO程序和纯Go程序的差别来。下面是我们构建的最简CGO程序：
 
 ```go
-import "C"
+import _ "C"
 
 func main() {
 	println("hello cgo")
@@ -49,7 +49,7 @@ package main
 
 static void SayHello(const char* s) {
 	puts(s);
-}
+};
 */
 import "C"
 
