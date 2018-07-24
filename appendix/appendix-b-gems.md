@@ -4,15 +4,15 @@
 
 ## 自重写程序
 
-UNIX/Go语言之父 Ken Thompson 在1983年的图灵奖演讲 Reflections on Trusting Trust 就给出了一个C语言的自重写程序.
+UNIX/Go语言之父 Ken Thompson 在1983年的图灵奖演讲 Reflections on Trusting Trust 就给出了一个C语言的自重写程序。
 
-最短的C语言自重写程序是 Vlad Taeerov 和 Rashit Fakhreyev 的版本:
+最短的C语言自重写程序是 Vlad Taeerov 和 Rashit Fakhreyev 的版本：
 
 ```c
 main(a){printf(a="main(a){printf(a=%c%s%c,34,a,34);}",34,a,34);}
 ```
 
-下面的Go语言版本自重写程序是 [rsc](https://research.swtch.com/zip) 提供的:
+下面的Go语言版本自重写程序是 [rsc](https://research.swtch.com/zip) 提供的：
 
 ```go
 /* Go quine */
