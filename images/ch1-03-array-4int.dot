@@ -1,4 +1,0 @@
-digraph structs {
-	arr_memory [shape=record,label="<f0> 2|<f1> 3|<f2> 5|<f3> 7"];
-	arr_name [shape=none;label="[4]int"];
-}
