@@ -28,8 +28,6 @@ $ go tool compile -S pkg.go
 
 其中`go tool compile`命令用于调用Go语言提供的底层命令工具，其中`-S`参数表示输出汇编格式。输出的汇编比较简单，其中`"".Id`对应Id变量符号，变量的内存大小为8个字节。变量的初始化内容为`37 25 00 00 00 00 00 00`，对应十六进制格式的0x2537，对应十进制为9527。SNOPTRDATA是相关的标志，其中NOPTR表示数据中不包含指针数据。
 
-暂时可以忽略。
-
 以上的内容只是目标文件对应的汇编，和Go汇编语言虽然相似当并不完全等价。Go语言官网自带了一个Go汇编语言的入门教程，地址在：https://golang.org/doc/asm 。
 
 Go汇编语言提供了DATA命令用于初始化包变量，DATA命令的语法如下：
@@ -156,7 +154,7 @@ DATA  ·Name+8(SB)/8,$6
 ```go
 package main
 
-import pkg "pkg包的路径"
+import pkg "path/to/pkg"
 
 func main() {
 	println(pkg.Name)
