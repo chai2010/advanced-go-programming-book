@@ -19,7 +19,6 @@ void printint(int v) {
 }
 */
 import "C"
-import "unsafe"
 
 func main() {
     v := 42
@@ -47,7 +46,7 @@ func (p *CChar) GoString() string {
 }
 
 func PrintCString(cs *C.char) {
-    print(cs.GoString())
+    print(((*CChar)(cs.GoString()))
 }
 ```
 
@@ -56,7 +55,7 @@ func PrintCString(cs *C.char) {
 ```go
 package main
 
-// static char* cs = "hello"
+// extern char* cs = "hello"
 import "C"
 import "./cgo_helper"
 
@@ -121,11 +120,11 @@ package main
 #cgo linux CFLAGS: -DCGO_OS_LINUX=1
 
 #if defined(CGO_OS_WINDOWS)
-	static char* os = "windows";
+	extern char* os = "windows";
 #elif defined(CGO_OS_DARWIN)
-	static char* os = "darwin";
+	extern char* os = "darwin";
 #elif defined(CGO_OS_LINUX)
-	static char* os = "linux";
+	extern char* os = "linux";
 #else
 #	error(unknown os)
 #endif
