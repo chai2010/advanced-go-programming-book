@@ -232,7 +232,7 @@ $ protoc --go-netrpc_out=plugins=netrpc:. hello.proto
 
 ## 自动生成完整的RPC代码
 
-在前面的例子中我们已经构件了最小化的netrpcPlugin插件，并且通过克隆protoc-gen-go的主程序创建了新的protoc-gen-go-netrpc的插件程序。现在开始继续完善netrpcPlugin插件，最终目标是生成RPC安全接口。
+在前面的例子中我们已经构建了最小化的netrpcPlugin插件，并且通过克隆protoc-gen-go的主程序创建了新的protoc-gen-go-netrpc的插件程序。现在开始继续完善netrpcPlugin插件，最终目标是生成RPC安全接口。
 
 首先是自定义的genImportCode方法中生成导入包的代码：
 
