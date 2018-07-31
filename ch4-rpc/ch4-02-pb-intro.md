@@ -232,7 +232,7 @@ $ protoc --go-netrpc_out=plugins=netrpc:. hello.proto
 
 ## 自动生成完整的RPC代码
 
-在前面的例子中我们已经构件了最小化的netrpcPlugin插件，并且通过克隆protoc-gen-go的主程序创建了新的protoc-gen-go-netrpc的插件程序。现在开始继续完善netrpcPlugin插件，最终目标是生成RPC安全接口。
+在前面的例子中我们已经构建了最小化的netrpcPlugin插件，并且通过克隆protoc-gen-go的主程序创建了新的protoc-gen-go-netrpc的插件程序。现在开始继续完善netrpcPlugin插件，最终目标是生成RPC安全接口。
 
 首先是自定义的genImportCode方法中生成导入包的代码：
 
@@ -279,7 +279,7 @@ func (p *netrpcPlugin) buildServiceSpec(svc *descriptor.ServiceDescriptorProto) 
 }
 ```
 
-其中输入参数是`*descriptor.ServiceDescriptorProto`类型，完整描述了一个服务的所有信息。然后通过`svc.GetName()`就可以获取Protobuf文件中定义的服务的名字。Protobuf文件中的名字转为Go语言对名字后，需要通过`generator.CamelCase`函数进行一次转换。类似的，在for循环中我们通过`m.GetName()`获取方法的名字，然后再转为Go语言中对应的名字。比较复杂的是对输入和输出参数名字的解析：首先需要通过`m.GetInputType()`获取输入参数的类型，然后通过`p.ObjectNamed`类型对应的类对象信息，最后获取类对象的名字。
+其中输入参数是`*descriptor.ServiceDescriptorProto`类型，完整描述了一个服务的所有信息。然后通过`svc.GetName()`就可以获取Protobuf文件中定义的服务的名字。Protobuf文件中的名字转为Go语言对名字后，需要通过`generator.CamelCase`函数进行一次转换。类似的，在for循环中我们通过`m.GetName()`获取方法的名字，然后再转为Go语言中对应的名字。比较复杂的是对输入和输出参数名字的解析：首先需要通过`m.GetInputType()`获取输入参数的类型，然后通过`p.ObjectNamed`获取类型对应的类对象信息，最后获取类对象的名字。
 
 然后我们就可以基于buildServiceSpec方法构造的服务的元信息生成服务的代码：
 
