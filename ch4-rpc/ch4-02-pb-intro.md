@@ -285,18 +285,16 @@ func (p *netrpcPlugin) buildServiceSpec(svc *descriptor.ServiceDescriptorProto) 
 
 ```go
 func (p *netrpcPlugin) genServiceCode(svc *descriptor.ServiceDescriptorProto) {
-	for _, svc := range file.Service {
-		spec := p.buildServiceSpec(svc)
+	spec := p.buildServiceSpec(svc)
 
-		var buf bytes.Buffer
-		t := template.Must(template.New("").Parse(tmplService))
-		err := t.Execute(&buf, spec)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		p.P(buf.String())
+	var buf bytes.Buffer
+	t := template.Must(template.New("").Parse(tmplService))
+	err := t.Execute(&buf, spec)
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	p.P(buf.String())
 }
 ```
 
