@@ -4,7 +4,7 @@
 
 ## 客户端RPC的实现原理
 
-Go语言的RPC库最简单的方式是通过`Client.Call`方法进行同步阻塞调用，该方法的实现如下：
+Go语言的RPC库最简单的使用方式是通过`Client.Call`方法进行同步阻塞调用，该方法的实现如下：
 
 ```go
 func (client *Client) Call(serviceMethod string, args interface{}, reply interface{}) error {
