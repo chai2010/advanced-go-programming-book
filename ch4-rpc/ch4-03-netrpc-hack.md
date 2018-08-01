@@ -124,7 +124,7 @@ func (p *KVStoreService) Set(kv [2]string, reply *struct{}) error {
 }
 ```
 
-在Set方法中，输入参数是key和value组成的数组，用一个匿名的空结构体表示忽略了返回值。当修改某个key对应的值时会调用每一个过滤器函数。
+在Set方法中，输入参数是key和value组成的数组，用一个匿名的空结构体表示忽略了输出参数。当修改某个key对应的值时会调用每一个过滤器函数。
 
 而过滤器列表在Watch方法中提供：
 
