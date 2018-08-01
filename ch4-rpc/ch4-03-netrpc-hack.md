@@ -67,7 +67,7 @@ func (call *Call) done() {
 }
 ```
 
-从`Call.done`方法的实现可以得知`call.Done`管道会将处理后的的call返回。
+从`Call.done`方法的实现可以得知`call.Done`管道会将处理后的call返回。
 
 ## 基于RPC实现Watch功能
 
@@ -151,7 +151,7 @@ func (p *KVStoreService) Watch(timeoutSecond int, keyChanged *string) error {
 
 Watch方法的输入参数是超时的秒数。当有key变化时将key作为返回值返回。如果超过时间后依然没有key被修改，则返回超时的错误。Watch的实现中，用唯一的id表示每个Watch调用，然后根据id将自身对应的过滤器函数注册到`p.filter`列表。
 
-KVStoreService服务到注册和启动过程我们不再赘述。下面我们看看如何从客户端使用Watch方法：
+KVStoreService服务的注册和启动过程我们不再赘述。下面我们看看如何从客户端使用Watch方法：
 
 ```go
 func doClientWork(client *rpc.Client) {
