@@ -4,7 +4,7 @@
 
 ## 证书认证
 
-GRPC建立在HTTP/2协议之上，对TLS提供了很好的支持。我们前面章节中GRPC的服务都没有提供证书支持，因此客户端在链接服务器中通过`grpc.WithInsecure()`选项跳过了对服务器证书的验证。没有启用证书的GRPC服务在和客户端进行的是明文通讯，信息面临被任何第三方监听的风险。为了保障GRPC通信不被第三方监听串改或伪造，我们可以对服务器期待TLS加密特性。
+GRPC建立在HTTP/2协议之上，对TLS提供了很好的支持。我们前面章节中GRPC的服务都没有提供证书支持，因此客户端在链接服务器中通过`grpc.WithInsecure()`选项跳过了对服务器证书的验证。没有启用证书的GRPC服务在和客户端进行的是明文通讯，信息面临被任何第三方监听的风险。为了保障GRPC通信不被第三方监听串改或伪造，我们可以对服务器启动TLS加密特性。
 
 可以用以下命令为服务器和客户端分别生成私钥和证书：
 
@@ -20,7 +20,7 @@ $ openssl req -new -x509 -days 3650 \
 	-key client.key -out client.crt
 ```
 
-以上命令将生成server.key、server.crt、client.key和client.crt四个文件。其中以.key后缀名的时私钥文件，需要妥善保管。其以.crt为后缀名是证书文件，也可以简单理解为公钥文件，并不需要秘密保存。在subj参数中的`/CN=server.grpc.io`表示服务的名字为`server.grpc.io`，在验证服务器的证书时需要用到该信息。
+以上命令将生成server.key、server.crt、client.key和client.crt四个文件。其中以.key为后缀名的是私钥文件，需要妥善保管。以.crt为后缀名是证书文件，也可以简单理解为公钥文件，并不需要秘密保存。在subj参数中的`/CN=server.grpc.io`表示服务的名字为`server.grpc.io`，在验证服务器的证书时需要用到该信息。
 
 有了证书之后，我们就可以在启动GRPC服务时传入证书选项参数：
 
@@ -37,7 +37,7 @@ func main() {
 }
 ```
 
-其中credentials.NewServerTLSFromFile函数是从文件为服务器构造证书对象，然后通过grpc.Creds(creds)函数将证书包装为选项后作为参数输入grpc.NewServer函数。
+其中credentials.NewServerTLSFromFile函数是从文件为服务器构造证书对象，然后通过grpc.Creds(creds)函数将证书包装为选项后作为参数传入grpc.NewServer函数。
 
 在客户端基于服务器的证书和服务器名字就可以对服务器进行验证：
 
@@ -62,7 +62,7 @@ func main() {
 }
 ```
 
-其中redentials.NewClientTLSFromFile是构造客户端用的证书对象，第一个参数时服务器的证书文件，第二个参数是签发服务器证书时的名字。然后通过grpc.WithTransportCredentials(creds)将证书对象转为参数选项传人grpc.Dial函数。
+其中redentials.NewClientTLSFromFile是构造客户端用的证书对象，第一个参数是服务器的证书文件，第二个参数是签发服务器证书时的名字。然后通过grpc.WithTransportCredentials(creds)将证书对象转为参数选项传人grpc.Dial函数。
 
 以上这种方式，需要提前将服务器的证书告知客户端，这样客户端在链接服务器时才能进行对服务器证书认证。在复杂的网络环境中，服务器证书的传输本身也是一个非常危险的问题。如果在中间某个环节，服务器证书被监听或替换那么对服务器的认证也将不再可靠。
 
@@ -126,7 +126,7 @@ func main() {
 }
 ```
 
-在新的客户端代码中，我们不再直接依赖服务器端证书文件。在credentials.NewTLS函数调用中，客户端通过引入一个CA根证书和服务器的名字来实现对服务器进行验证。客户端在链接服务器时会首先请求服务器的证书，然后使用CA根证书对收到服务器端证书进行验证。
+在新的客户端代码中，我们不再直接依赖服务器端证书文件。在credentials.NewTLS函数调用中，客户端通过引入一个CA根证书和服务器的名字来实现对服务器进行验证。客户端在链接服务器时会首先请求服务器的证书，然后使用CA根证书对收到的服务器端证书进行验证。
 
 如果客户端的证书也采用CA根证书签名的话，服务器端也可以对客户端进行证书认证。我们用CA根证书对客户端证书签名：
 
