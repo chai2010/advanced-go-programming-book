@@ -1,3 +1,3 @@
-# 6.6. etcd
+# 6.6 etcd
 
 TODO

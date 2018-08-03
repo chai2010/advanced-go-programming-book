@@ -1,4 +1,4 @@
-# 4.4. GRPC入门
+# 4.4 GRPC入门
 
 GRPC是Google公司基于Protobuf开发的跨语言的开源RPC框架。GRPC基于HTTP/2协议设计，可以基于一个HTTP/2链接提供多个服务，对于移动设备更加友好。本节将讲述GRPC的简单用法。
 

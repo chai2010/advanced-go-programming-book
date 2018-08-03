@@ -1,4 +1,4 @@
-# 4.7. pbgo: 基于Protobuf的框架
+# 4.7 pbgo: 基于Protobuf的框架
 
 pbgo是我们专门针对本节内容设计的较为完整的迷你框架，它基于Protobuf的扩展语法，通过插件自动生成rpc和rest相关代码。在本章第二节我们已经展示过如何定制一个Protobuf代码生成插件，并生成了rpc部分的代码。在本节我们将重点讲述pbgo中和Protobuf扩展语法相关的rest部分的工作原理。
 

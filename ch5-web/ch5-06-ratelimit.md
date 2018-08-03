@@ -1,4 +1,4 @@
-# 5.6. Ratelimit 服务流量限制
+# 5.6 Ratelimit 服务流量限制
 
 计算机程序可依据其瓶颈分为 Disk IO-bound，CPU-bound，Network-bound，分布式场景下有时候也会外部系统而导致自身瓶颈。
 

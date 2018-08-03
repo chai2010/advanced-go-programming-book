@@ -1,4 +1,4 @@
-# 4.6. GRPC和Protobuf扩展
+# 4.6 GRPC和Protobuf扩展
 
 目前开源社区已经围绕Protobuf和GRPC开发出众多扩展，形成了庞大的生态。本节我们将简单介绍验证器和REST接口扩展。
 

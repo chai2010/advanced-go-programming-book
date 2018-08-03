@@ -1,4 +1,4 @@
-# 1.7. 错误和异常
+# 1.7 错误和异常
 
 错误处理是每个编程语言都要考虑的一个重要话题。在Go语言的错误处理中，错误是软件包API和应用程序用户界面的一个重要组成部分。
 
@@ -151,7 +151,7 @@ func Wrap(err error, msg string) error
 func WrapWithCode(code int, err error, msg string) error
 
 func FromJson(json string) (Error, error)
-func ToJson(err error) string 
+func ToJson(err error) string
 ```
 
 `New`用于构建新的错误类型，和标准库中`errors.New`功能类似，但是增加了出错误时的函数调用栈信息。`FromJson`用于从JSON字符串编码的错误中恢复错误对象。`NewWithCode`则是构造一个带错误码的错误，同时也包含出错误时的函数调用栈信息。`Wrap`和`WrapWithCode`则是错误二次包装函数，用于将底层的错误包装为新的错误，但是保留的原始的底层错误信息。这里返回的错误对象都可以直接调用`json.Marshal`将错误编码为JSON字符串。
@@ -211,7 +211,7 @@ func main() {
 ```go
 // 以JSON字符串方式发送错误
 func sendError(ch chan<- string, err error) {
-	ch <- errors.ToJson(err)	
+	ch <- errors.ToJson(err)
 }
 
 // 接收JSON字符串格式的错误
@@ -375,7 +375,7 @@ func main() {
 ```go
 func main() {
 	defer func() {
-		if r := recover(); r != nil { ... } 
+		if r := recover(); r != nil { ... }
 		// 虽然总是返回nil, 但是可以恢复异常状态
 	}()
 

@@ -1,4 +1,4 @@
-# 5.2. router 请求路由
+# 5.2 router 请求路由
 
 在常见的 web 框架中，router 是必备的组件。golang 圈子里 router 也时常被称为 http 的 multiplexer。在上一节中我们通过对 Burrow 代码的简单学习，已经知道如何用 http 标准库中内置的 mux 来完成简单的路由功能了。如果开发 web 系统对路径中带参数没什么兴趣的话，用 http 标准库中的 mux 就可以。
 
