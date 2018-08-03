@@ -102,14 +102,8 @@ func (l Lock) Lock() bool {
 }
 
 // Unlock , Unlock the try lock
-func (l Lock) Unlock() bool {
-    unlockResult := false
-    select {
-    case l.c <- struct{}{}:
-        unlockResult = true
-    default:
-    }
-    return unlockResult
+func (l Lock) Unlock() {
+    l.c <- struct{}{}
 }
 
 var counter int
