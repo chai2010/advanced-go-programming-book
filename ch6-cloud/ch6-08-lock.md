@@ -222,11 +222,106 @@ unlock success!
 
 ## 基于 zk
 
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+	"time"
+
+	"github.com/nladuo/go-zk-lock"
+)
+
+var (
+	hosts         []string      = []string{"127.0.0.1:2181"} // the zookeeper hosts
+	basePath      string        = "/locker"                  //the application znode path
+	lockerTimeout time.Duration = 5 * time.Second            // the maximum time for a locker waiting
+	zkTimeOut     time.Duration = 20 * time.Second           // the zk connection timeout
+)
+
+func main() {
+	end := make(chan byte)
+	err := DLocker.EstablishZkConn(hosts, zkTimeOut)
+	defer DLocker.CloseZkConn()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	//concurrent test lock and unlock
+	for i := 0; i < 100; i++ {
+		go run(i)
+	}
+	<-end
+}
+
+func run(i int) {
+	locker := DLocker.NewLocker(basePath, lockerTimeout)
+	for {
+		locker.Lock() // like mutex.Lock()
+		fmt.Println("gorountine", i, ": get lock")
+		//do something of which time not excceed lockerTimeout
+		fmt.Println("gorountine", i, ": unlock")
+		if !locker.Unlock() { // like mutex.Unlock(), return false when zookeeper connection error or locker timeout
+			log.Println("gorountine", i, ": unlock failed")
+		}
+	}
+}
+
+```
+
 ## 基于 etcd
+
+```go
+package main
+
+import (
+    "log"
+
+    "github.com/zieckey/etcdsync"
+)
+
+func main() {
+    m, err := etcdsync.New("/mylock", 10, []string{"http://127.0.0.1:2379"})
+    if m == nil || err != nil {
+        log.Printf("etcdsync.New failed")
+        return
+    }
+    err = m.Lock()
+    if err != nil {
+        log.Printf("etcdsync.Lock failed")
+        return
+    }
+
+    log.Printf("etcdsync.Lock OK")
+    log.Printf("Get the lock. Do something here.")
+
+    err = m.Unlock()
+    if err != nil {
+        log.Printf("etcdsync.Unlock failed")
+    } else {
+        log.Printf("etcdsync.Unlock OK")
+    }
+}
+
+```
 
 ## redlock
 
 ```go
+import "github.com/amyangfei/redlock-go"
+
+lock_mgr, err := redlock.NewRedLock([]string{
+        "tcp://127.0.0.1:6379",
+        "tcp://127.0.0.1:6380",
+        "tcp://127.0.0.1:6381",
+})
+
+expirity, err := lock_mgr.Lock("resource_name", 200)
+
+err := lock_mgr.UnLock()
 ```
 
 ## how to choose
