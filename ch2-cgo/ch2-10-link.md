@@ -3,19 +3,19 @@
 编译和链接参数是每一个C/C++程序员需要经常面对的问题。构建每一个C/C++应用均需要经过编译和链接两个步骤，CGO也是如此。
 本节我们将简要讨论CGO中经常用到的编译和链接参数的用法。
 
-## 编译参数：CFLAGS/CPPFLAGS/CXXFLAGS
+## 2.10.1 编译参数：CFLAGS/CPPFLAGS/CXXFLAGS
 
 编译参数主要是头文件的检索路径，预定义的宏等参数。理论上来说C和C++是完全独立的两个编程语言，它们可以有着自己独立的编译参数。
 但是因为C++语言对C语言做了深度兼容，甚至可以将C++理解为C语言的超集，因此C和C++语言之间又会共享很多编译参数。
 因此CGO提供了CFLAGS/CPPFLAGS/CXXFLAGS三种参数，其中CFLAGS对应C语言编译参数(以`.c`后缀名)、
 CPPFLAGS对应C/C++ 代码编译参数(*.c,*.cc,*.cpp,*.cxx)、CXXFLAGS对应纯C++编译参数(*.cc,*.cpp,*.cxx)。
 
-## 链接参数：LDFLAGS
+## 2.10.2 链接参数：LDFLAGS
 
 链接参数主要包含要链接库的检索目录和要链接库的名字。因为历史遗留问题，链接库不支持相对路径，我们必须为链接库指定绝对路径。
 cgo 中的 ${SRCDIR} 为当前目录的绝对路径。经过编译后的C和C++目标文件格式是一样的，因此LDFLAGS对应C/C++共同的链接参数。
 
-## pkg-config
+## 2.10.3 pkg-config
 
 为不同C/C++库提供编译和链接参数是一项非常繁琐的工作，因此cgo提供了对应`pkg-config`工具的支持。
 我们可以通过`#cgo pkg-config xxx`命令来生成xxx库需要的编译和链接参数，其底层通过调用
@@ -71,7 +71,7 @@ $ PKG_CONFIG=./py3-config go build -buildmode=c-shared -o gopkg.so main.go
 
 具体的细节可以参考Go实现Python模块章节。
 
-## go get 链
+## 2.10.4 go get 链
 
 在使用`go get`获取Go语言包的同时会获取包依赖的包。比如A包依赖B包，B包依赖C包，C包依赖D包：
 `pkgA -> pkgB -> pkgC -> pkgD -> ...`。再go get获取A包之后会依次线获取BCD包。
@@ -103,7 +103,7 @@ $ PKG_CONFIG=./py3-config go build -buildmode=c-shared -o gopkg.so main.go
 因此在编译`z_libwebp_src_dec_alpha.c`文件时，会编译libweb原生的代码。
 其中的依赖是相对目录，对于不同的平台支持可以保持最大的一致性。
 
-## 多个非main包中导出C函数
+## 2.10.5 多个非main包中导出C函数
 
 官方文档说明导出的Go函数要放main包，但是真实情况是其它包的Go导出函数也是有效的。
 因为导出后的Go函数就可以当作C函数使用，所以必须有效。但是不同包导出的Go函数将在同一个全局的名字空间，因此需要小心避免重名的问题。
