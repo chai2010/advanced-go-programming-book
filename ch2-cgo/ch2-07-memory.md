@@ -90,7 +90,7 @@ void printString(const char* s) {
 import "C"
 
 func printString(s string) {
-	C.printString((*C.char)(unsafe.Pointer(&s[0])))
+	C.printString((*C.char)(C.CString(s)))
 }
 
 func main() {
