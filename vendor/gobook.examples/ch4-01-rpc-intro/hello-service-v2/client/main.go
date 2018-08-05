@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/chai2010/advanced-go-programming-book/examples/ch4-01-rpc-inro/hello-service-v2/api"
+	"gobook.examples/ch4-01-rpc-intro/hello-service-v2/api"
 )
 
 type HelloService struct{}
