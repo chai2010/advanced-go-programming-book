@@ -186,19 +186,6 @@ func (id *ObjectId) Free() interface{} {
 ```go
 package main
 
-/*
-export char* NewGoString(char* );
-export void FreeGoString(char* );
-export void PrintGoString(char* );
-
-void printString(const char* s) {
-	char* gs = NewGoString(s);
-	PrintGoString(gs);
-	FreeGoString(gs);
-}
-*/
-import "C"
-
 //export NewGoString
 func NewGoString(s *C.char) *C.char {
 	gs := C.GoString(s)
@@ -218,6 +205,20 @@ func PrintGoString(s *C.char) {
 	gs := id.Get().(string)
 	print(gs)
 }
+
+package main
+/*
+extern char* NewGoString(char* );
+extern void FreeGoString(char* );
+extern void PrintGoString(char* );
+
+void printString(const char* s) {
+	char* gs = NewGoString(s);
+	PrintGoString(gs);
+	FreeGoString(gs);
+}
+*/
+import "C"
 
 func main() {
 	C.printString("hello")
