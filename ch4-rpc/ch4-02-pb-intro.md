@@ -2,7 +2,7 @@
 
 Protobuf是Protocol Buffers的简称，它是Google公司开发的一种数据描述语言，并于2008年对外开源。Protobuf刚开源时的定位类似于XML、JSON等数据描述语言，通过附带工具生成代码并实现将结构化数据序列化的功能。但是我们更关注的是Protobuf作为接口规范的描述语言，可以作为设计安全的跨语言PRC接口的基础工具。
 
-## Protobuf入门
+## 4.2.1 Protobuf入门
 
 对于没有用过Protobuf的读者，建议先从官网了解下基本用法。这里我们尝试将Protobuf和RPC结合在一起使用，通过Protobuf来最终保证RPC的接口规范和安全。Protobuf中最基本的数据单元是message，是类似Go语言中结构体的存在。在message中可以嵌套message或其它的基础数据类型的成员。
 
@@ -94,7 +94,7 @@ $ protoc --go_out=plugins=grpc:. hello.proto
 不过grpc插件为我们提供了改进的思路，下面我们将探索如何为我们的RPC生成安全的代码。
 
 
-## 定制代码生成插件
+## 4.2.2 定制代码生成插件
 
 Protobuf的protoc编译器是通过插件机制实现对不同语言的支持。比如protoc命令出现`--xxx_out`格式的参数，那么protoc将首先查询是否有内置的xxx插件，如果没有内置的xxx插件那么将继续查询当前系统中是否存在protoc-gen-xxx命名的可执行程序，最终通过查询到的插件生成代码。对于Go语言的protoc-gen-go插件来说，里面又实现了一层静态插件系统。比如protoc-gen-go内置了一个grpc插件，用户可以通过`--go_out=plugins=grpc`参数来生成grpc相关代码，否则只会针对message生成相关代码。
 
@@ -230,7 +230,7 @@ $ protoc --go-netrpc_out=plugins=netrpc:. hello.proto
 
 至此，手工定制的Protobuf代码生成插件终于可以工作了。
 
-## 自动生成完整的RPC代码
+## 4.2.3 自动生成完整的RPC代码
 
 在前面的例子中我们已经构建了最小化的netrpcPlugin插件，并且通过克隆protoc-gen-go的主程序创建了新的protoc-gen-go-netrpc的插件程序。现在开始继续完善netrpcPlugin插件，最终目标是生成RPC安全接口。
 

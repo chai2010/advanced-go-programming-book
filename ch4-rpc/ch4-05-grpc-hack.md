@@ -2,7 +2,7 @@
 
 作为一个基础的RPC框架，安全和扩展是经常遇到的问题。本节将简单介绍如何对GRPC进行安全认证。然后介绍通过GRPC的截取器特性，以及如何通过截取器优雅地实现Token认证、调用跟踪以及Panic捕获等特性。最后介绍了GRPC服务如何和其他Web服务共存。
 
-## 证书认证
+## 4.5.1 证书认证
 
 GRPC建立在HTTP/2协议之上，对TLS提供了很好的支持。我们前面章节中GRPC的服务都没有提供证书支持，因此客户端在链接服务器中通过`grpc.WithInsecure()`选项跳过了对服务器证书的验证。没有启用证书的GRPC服务在和客户端进行的是明文通讯，信息面临被任何第三方监听的风险。为了保障GRPC通信不被第三方监听串改或伪造，我们可以对服务器启动TLS加密特性。
 
@@ -174,7 +174,7 @@ func main() {
 
 到此我们就实现了一个服务器和客户端进行双向证书验证的通信可靠的GRPC系统。
 
-## Token认证
+## 4.5.2 Token认证
 
 前面讲述的基于证书的认证是针对每个GRPC链接的认证。GRPC还为每个GRPC方法调用提供了认证支持，这样就基于基于用户Token对不同对方法访问进行权限管理。
 
@@ -278,7 +278,7 @@ func (a *Authentication) Auth(ctx context.Context) error {
 
 详细地认证工作主要在Authentication.Auth方法中完成。首先通过metadata.FromIncomingContext从ctx上下文中获取元信息，然后取出相应的认证信息进行认证。如果认证失败，则返回一个codes.Unauthenticated类型地错误。
 
-## 截取器
+## 4.5.3 截取器
 
 GRPC中的grpc.UnaryInterceptor和grpc.StreamInterceptor分别对普通方法和流方法提供了截取器的支持。我们这里简单介绍普通方法的截取器用法。
 
@@ -345,7 +345,7 @@ myServer := grpc.NewServer(
 
 感兴趣的同学可以参考go-grpc-middleware包的代码。
 
-## 和Web服务共存
+## 4.5.4 和Web服务共存
 
 GRPC构建在HTTP/2协议之上，因此我们可以将GRPC服务和普通的Web服务架设在同一个端口之上。因为目前Go语言版本的GRPC实现还不够完善，只有启用了TLS协议之后才能将GRPC和Web服务运行在同一个端口。
 

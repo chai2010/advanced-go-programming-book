@@ -2,7 +2,7 @@
 
 pbgo是我们专门针对本节内容设计的较为完整的迷你框架，它基于Protobuf的扩展语法，通过插件自动生成rpc和rest相关代码。在本章第二节我们已经展示过如何定制一个Protobuf代码生成插件，并生成了rpc部分的代码。在本节我们将重点讲述pbgo中和Protobuf扩展语法相关的rest部分的工作原理。
 
-## Protobuf扩展语法
+## 4.7.1 Protobuf扩展语法
 
 目前Protobuf相关的很多开源项目都使用到了Protobuf的扩展语法。在前一节中提到的验证器就是通过给结构体成员增加扩展元信息实现验证。在grpc-gateway项目中，则是通过为服务的每个方法增加Http相关的映射规则实现对Rest接口的支持。pbgo也是通过Protobuf的扩展语法来为rest接口增加元信息。
 
@@ -56,7 +56,7 @@ service HelloService {
 
 首先我们通过导入`github.com/chai2010/pbgo/pbgo.proto`文件引入扩展定义，然后在HelloService的Hello方法中使用了pbgo定义的扩展。Hello方法扩展的信息表示该方法对应一个REST接口，只有一个GET方法对应"/hello/:value"路径。在REST方法的路径中采用了httprouter路由包的语法规则，":value"表示路径中的该字段对应的是参数中同名的成员。
 
-## 插件中读取扩展信息
+## 4.7.2 插件中读取扩展信息
 
 在本章的第二节我们已经简单讲述过Protobuf插件的工作原理，并且展示了如何生成RPC必要的代码。插件是一个generator.Plugin接口：
 
@@ -124,7 +124,7 @@ func (p *pbgoPlugin) getServiceMethodOption(
 
 有了扩展信息之后，我们就可以参考第二节中生成RPC代码的方式生成REST相关的代码。
 
-## 生成REST代码
+## 4.7.3 生成REST代码
 
 pbgo框架同时也提供了一个插件用于生成REST代码。不过我们的目的是学习pbgo框架的设计过程，因此我们先尝试手写Hello方法对应的REST代码，然后插件再根据手写的代码构造模板自动生成代码。
 
@@ -192,7 +192,7 @@ func _handle_HelloService_Hello_get(
 
 在手工构造完成最终代码的结构之后，就可以在此基础上构造插件生成代码的模板。完整的插件代码和模板在`protoc-gen-pbgo/pbgo.go`文件，读者可以自行参考。
 
-## 启动REST服务
+## 4.7.4 启动REST服务
 
 虽然从头构造pbgo框架的过程比较繁琐，但是使用pbgo构造REST服务却是异常简单。首先要构造一个满足HelloServiceInterface接口的服务对象：
 
