@@ -55,7 +55,7 @@
 * [第6章 分布式系统](ch6-cloud/readme.md)
    * [6.1 云上地鼠(TODO)](ch6-cloud/ch6-01-cloud.md)
    * [6.2 分布式搜索引擎](ch6-cloud/ch6-02-search-engine.md)
-   * [6.2 Raft协议(TODO)](ch6-cloud/ch6-03-raft.md)
+   * [6.2 分布式配置管理(Doing)](ch6-cloud/ch6-03-config.md)
    * [6.4 分布式队列(TODO)](ch6-cloud/ch6-04-queue.md)
    * [6.5 分布式缓存(TODO)](ch6-cloud/ch6-05-cache.md)
    * [6.6 etcd(TODO)](ch6-cloud/ch6-06-etcd.md)
