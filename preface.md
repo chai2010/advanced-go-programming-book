@@ -11,7 +11,7 @@
 
 - https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
 
-## 关注微信公众号
+## 关注微信公众号(golang-china)
 
 ![](weixin-golang-china.jpg)
 
