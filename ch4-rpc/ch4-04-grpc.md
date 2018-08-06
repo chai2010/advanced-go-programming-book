@@ -346,11 +346,11 @@ func main() {
 
 	client := NewPubsubServiceClient(conn)
 
-	reply, err := client.Publish(context.Background(), &String{Value: "golang: hello Go"})
+	_, err = client.Publish(context.Background(), &String{Value: "golang: hello Go"})
 	if err != nil {
 		log.Fatal(err)
 	}
-	reply, err := client.Publish(context.Background(), &String{Value: "docker: hello Docker"})
+	_, err = client.Publish(context.Background(), &String{Value: "docker: hello Docker"})
 	if err != nil {
 		log.Fatal(err)
 	}
