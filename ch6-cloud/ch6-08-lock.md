@@ -30,11 +30,11 @@ func main() {
 多次运行会得到不同的结果：
 
 ```shell
-❯❯❯ go run local_lock.go                                ✭
+❯❯❯ go run local_lock.go
 945
-❯❯❯ go run local_lock.go                                ✭
+❯❯❯ go run local_lock.go
 937
-❯❯❯ go run local_lock.go                                ✭
+❯❯❯ go run local_lock.go
 959
 ```
 
@@ -64,7 +64,7 @@ println(counter)
 这样就可以稳定地得到计算结果了：
 
 ```shell
-❯❯❯ go run local_lock.go                              ✭ ✱
+❯❯❯ go run local_lock.go
 1000
 ```
 
@@ -204,6 +204,8 @@ func main() {
 
 ```
 
+看看运行结果：
+
 ```shell
 ❯❯❯ go run redis_setnx.go
 <nil> lock result:  false
@@ -308,18 +310,65 @@ etcd 中没有像 zookeeper 那样的 sequence 节点。所以其锁实现和基
 ## redlock
 
 ```go
-import "github.com/amyangfei/redlock-go"
+package main
 
-lock_mgr, err := redlock.NewRedLock([]string{
-        "tcp://127.0.0.1:6379",
-        "tcp://127.0.0.1:6380",
-        "tcp://127.0.0.1:6381",
-})
+import (
+    "fmt"
+    "time"
 
-expirity, err := lock_mgr.Lock("resource_name", 200)
+    "github.com/garyburd/redigo/redis"
+    "gopkg.in/redsync.v1"
+)
 
-err := lock_mgr.UnLock()
+func newPool(server string) *redis.Pool {
+    return &redis.Pool{
+        MaxIdle:     3,
+        IdleTimeout: 240 * time.Second,
+
+        Dial: func() (redis.Conn, error) {
+            c, err := redis.Dial("tcp", server)
+            if err != nil {
+                return nil, err
+            }
+            return c, err
+        },
+
+        TestOnBorrow: func(c redis.Conn, t time.Time) error {
+            _, err := c.Do("PING")
+            return err
+        },
+    }
+}
+
+func newPools(servers []string) []redsync.Pool {
+    pools := []redsync.Pool{}
+    for _, server := range servers {
+        pool := newPool(server)
+        pools = append(pools, pool)
+    }
+
+    return pools
+}
+
+func main() {
+    pools := newPools([]string{"127.0.0.1:6379", "127.0.0.1:6378", "127.0.0.1:6377"})
+    rs := redsync.New(pools)
+    m := rs.NewMutex("/lock")
+
+    err := m.Lock()
+    if err != nil {
+        panic(err)
+    }
+    fmt.Println("lock success")
+    unlockRes := m.Unlock()
+    fmt.Println("unlock result: ", unlockRes)
+
+}
 ```
+
+redlock 也是一种阻塞锁，单个节点操作对应的是 `set nx px` 命令，超过半数节点返回成功时，就认为加锁成功。
+
+关于 redlock 的设计曾经在社区引起一场口水战，分布式专家各抒己见。不过这个不是我们要讨论的内容，相关链接在参考资料中给出。
 
 ## 如何选择
 
