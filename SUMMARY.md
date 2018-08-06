@@ -51,7 +51,6 @@
    * [5.7 Layout大型web项目分层](ch5-web/ch5-07-layout-of-web-project.md)
    * [5.8 interface 和 table-driven 开发](ch5-web/ch5-08-interface-and-web.md)
    * [5.9 灰度发布和 A/B test](ch5-web/ch5-09-gated-launch.md)
-   * [5.10 Load-balance负载均衡](ch5-web/ch5-10-load-balance.md)
    * [5.10 补充说明](ch5-web/ch5-10-ext.md)
 * [第6章 分布式系统](ch6-cloud/readme.md)
    * [6.1 分布式锁](ch6-cloud/ch6-01-lock.md)
