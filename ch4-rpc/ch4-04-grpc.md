@@ -262,11 +262,11 @@ func main() {
 ```protobuf
 service PubsubService {
 	rpc Publish (String) returns (String);
-	rpc SubscribeTopic (String) returns (stream String);
+	rpc Subscribe (String) returns (stream String);
 }
 ```
 
-其中Publish是普通的RPC方法，SubscribeTopic则是一个单向的流服务。然后grpc插件会为服务端和客户端生成对应的接口：
+其中Publish是普通的RPC方法，Subscribe则是一个单向的流服务。然后grpc插件会为服务端和客户端生成对应的接口：
 
 ```go
 type PubsubServiceServer interface {
@@ -286,7 +286,7 @@ type HelloService_SubscribeServer interface {
 }
 ```
 
-因为SubscribeTopic是服务端的单向流，因此生成的HelloService_SubscribeServer接口中只有Send方法。
+因为Subscribe是服务端的单向流，因此生成的HelloService_SubscribeServer接口中只有Send方法。
 
 然后就可以实现发布和订阅服务了：
 
@@ -315,7 +315,7 @@ func (p *PubsubService) Publish(
 func (p *PubsubService) Subscribe(
 	arg *String, stream PubsubService_SubscribeServer,
 ) error {
-	ch := p.SubscribeTopic(func(v interface{}) bool {
+	ch := p.Subscribe(func(v interface{}) bool {
 		if key, ok := v.(string); ok {
 			if strings.Hasprefix(arg.GetValue()) {
 				return true
