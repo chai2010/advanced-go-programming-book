@@ -129,7 +129,7 @@ func main() {
 }
 ```
 
-因为我们的逻辑限定每个 goroutine 只要成功执行了 Lock 才会继续执行后续逻辑，因此在 Unlock 时可以保证 Lock struct 中的一定是空，从而不会阻塞，也不会失败。
+因为我们的逻辑限定每个 goroutine 只要成功执行了 Lock 才会继续执行后续逻辑，因此在 Unlock 时可以保证 Lock struct 中的 channel 一定是空，从而不会阻塞，也不会失败。
 
 在单机系统中，trylock 并不是一个好选择。因为大量的 goroutine 抢锁可能会导致 cpu 无意义的资源浪费。有一个专有名词用来描述这种抢锁的场景：活锁。
 
@@ -231,51 +231,36 @@ setnx 很适合在高并发场景下，用来争抢一些“唯一”的资源�
 package main
 
 import (
-    "fmt"
-    "log"
-    "os"
     "time"
 
-    "github.com/nladuo/go-zk-lock"
-)
-
-var (
-    hosts         []string      = []string{"127.0.0.1:2181"} // the zookeeper hosts
-    basePath      string        = "/locker"                  //the application znode path
-    lockerTimeout time.Duration = 5 * time.Second            // the maximum time for a locker waiting
-    zkTimeOut     time.Duration = 20 * time.Second           // the zk connection timeout
+    "github.com/samuel/go-zookeeper/zk"
 )
 
 func main() {
-    end := make(chan byte)
-    err := DLocker.EstablishZkConn(hosts, zkTimeOut)
-    defer DLocker.CloseZkConn()
+    c, _, err := zk.Connect([]string{"127.0.0.1"}, time.Second) //*10)
     if err != nil {
-        fmt.Println(err)
-        os.Exit(1)
+        panic(err)
     }
+    l := zk.NewLock(c, "/lock", zk.WorldACL(zk.PermAll))
+    err = l.Lock()
+    if err != nil {
+        panic(err)
+    }
+    println("lock succ, do your business logic")
 
-    //concurrent test lock and unlock
-    for i := 0; i < 100; i++ {
-        go run(i)
-    }
-    <-end
+    time.Sleep(time.Second * 10)
+
+    // do some thing
+    l.Unlock()
+    println("unlock succ, finish business logic")
 }
-
-func run(i int) {
-    locker := DLocker.NewLocker(basePath, lockerTimeout)
-    for {
-        locker.Lock() // like mutex.Lock()
-        fmt.Println("gorountine", i, ": get lock")
-        //do something of which time not excceed lockerTimeout
-        fmt.Println("gorountine", i, ": unlock")
-        if !locker.Unlock() { // like mutex.Unlock(), return false when zookeeper connection error or locker timeout
-            log.Println("gorountine", i, ": unlock failed")
-        }
-    }
-}
-
 ```
+
+基于 zk 的锁与基于 redis 的锁的不同之处在于 Lock 成功之前会一直阻塞，这与我们单机场景中的 mutex.Lock 很相似。
+
+其原理也是基于临时 sequence 节点和 watch api，例如我们这里使用的是 `/lock` 节点。Lock 会在该节点下的节点列表中插入自己的值，只要节点下的子节点发生变化，就会通知所有 watch 该节点的程序。这时候程序会检查当前节点下最小的子节点的 id 是否与自己的一致。如果一致，说明加锁成功了。
+
+这种分布式的阻塞锁比较适合分布式任务调度场景，但不适合高频次持锁时间短的抢锁场景。按照 Google 的 chubby 论文里的阐述，基于强一致协议的锁适用于 `粗粒度` 的加锁操作。这里的粗粒度指锁占用时间较长。我们在使用时也应思考在自己的业务场景中使用是否合适。
 
 ## 基于 etcd
 
