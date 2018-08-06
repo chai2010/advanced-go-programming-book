@@ -315,9 +315,9 @@ func (p *PubsubService) Publish(
 func (p *PubsubService) Subscribe(
 	arg *String, stream PubsubService_SubscribeServer,
 ) error {
-	ch := p.Subscribe(func(v interface{}) bool {
+	ch := p.pub.SubscribeTopic(func(v interface{}) bool {
 		if key, ok := v.(string); ok {
-			if strings.Hasprefix(arg.GetValue()) {
+			if strings.HasPrefix(key,arg.GetValue()) {
 				return true
 			}
 		}
