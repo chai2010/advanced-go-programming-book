@@ -11,6 +11,10 @@
 
 - https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
 
+## 关注微信公众号
+
+![](weixin-golang-china.jpg)
+
 ## 版权声明
 
 [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/)。
