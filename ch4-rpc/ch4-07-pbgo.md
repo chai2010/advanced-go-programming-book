@@ -31,7 +31,7 @@ message HttpRule {
 
 pbgo.proto文件是pbgo框架的一个部分，需要被其他的proto文件导入。Protobuf本身自有一套完整的包体系，在这里包的路径就是pbgo。Go语言也有自己的一套包体系，我们需要通过go_package的扩展语法定义Protobuf和Go语言之间包的映射关系。定义Protobuf和Go语言之间包的映射关系之后，其他导入pbgo.ptoto包的Protobuf文件在生成Go语言时，会生成pbgo.proto映射的Go语言包路径。
 
-Protobuf扩展语法有五种类型，分别是针对文件的扩展信息、针对message的扩展信息、正对message成员的扩展信息、针对service的扩展信息和针对service方法的扩展信息。在使用扩展前首先需要通过extend关键字定义扩展的类型和可以用于扩展的成员。扩展成员也可以基础类型，也可以是一个结构体类型。pbgo中只定义了service的方法的扩展，只定义了一个名为rest_api的扩展成员，类型是HttpRule结构体。
+Protobuf扩展语法有五种类型，分别是针对文件的扩展信息、针对message的扩展信息、针对message成员的扩展信息、针对service的扩展信息和针对service方法的扩展信息。在使用扩展前首先需要通过extend关键字定义扩展的类型和可以用于扩展的成员。扩展成员可以是基础类型，也可以是一个结构体类型。pbgo中只定义了service的方法的扩展，只定义了一个名为rest_api的扩展成员，类型是HttpRule结构体。
 
 定义好扩展之后，我们就可以从其他的Protobuf文件中使用pbgo的扩展。创建一个hello.proto文件：
 
@@ -79,7 +79,7 @@ type Plugin interface {
 
 我们需要在Generate和GenerateImports函数中分别生成相关的代码。而Protobuf文件的全部信息都在*generator.FileDescriptor类型函数参数中描述，因此我们需要从函数参数中提前扩展定义的元数据。
 
-pbgo框架中的插件对象是pbgoPlugin，在Generate方法中首先需要遍历Protobuf文件中定义的全部服务对应，然后再遍历每个服务对的的每个方法。在得到方法结构之后再通过自定义的getServiceMethodOption方法提取rest扩展信息：
+pbgo框架中的插件对象是pbgoPlugin，在Generate方法中首先需要遍历Protobuf文件中定义的全部服务，然后再遍历每个服务的每个方法。在得到方法结构之后再通过自定义的getServiceMethodOption方法提取rest扩展信息：
 
 ```go
 func (p *pbgoPlugin) Generate(file *generator.FileDescriptor) {
