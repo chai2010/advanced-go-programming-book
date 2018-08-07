@@ -1,10 +1,10 @@
-# 4.3. 玩转RPC
+# 4.3 玩转RPC
 
 在不同的场景中RPC有着不同的需求，因此开源的社区就诞生了各种RPC框架。本节我们将尝试Go内置RPC框架在一些比较特殊场景的用法。
 
-## 客户端RPC的实现原理
+## 4.3.1 客户端RPC的实现原理
 
-Go语言的RPC库最简单的方式是通过`Client.Call`方法进行同步阻塞调用，该方法的实现如下：
+Go语言的RPC库最简单的使用方式是通过`Client.Call`方法进行同步阻塞调用，该方法的实现如下：
 
 ```go
 func (client *Client) Call(serviceMethod string, args interface{}, reply interface{}) error {
@@ -67,9 +67,9 @@ func (call *Call) done() {
 }
 ```
 
-从`Call.done`方法的实现可以得知`call.Done`管道会将处理后的的call返回。
+从`Call.done`方法的实现可以得知`call.Done`管道会将处理后的call返回。
 
-## 基于RPC实现Watch功能
+## 4.3.2 基于RPC实现Watch功能
 
 在很多系统中都提供了Watch监视功能的接口，当系统满足某种条件时Watch方法返回监控的结果。在这里我们可以尝试通过RPC框架实现一个基本的Watch功能。如前文所描述，因为`client.send`是线程安全的，我们也可以通过在不同的Goroutine中同时并发阻塞调用RPC方法。通过在一个独立的Goroutine中调用Watch函数进行监控。
 
@@ -90,7 +90,7 @@ func NewKVStoreService() *KVStoreService {
 }
 ```
 
-其中`m`成员用于存储KV数据。`filter`成员对应每个Watch调用时定义的过滤器函数列表。而`mu`成员为互斥锁，用于在多个Goroutine访问或修改时对其它成员提供保护。
+其中`m`成员是一个map类型，用于存储KV数据。`filter`成员对应每个Watch调用时定义的过滤器函数列表。而`mu`成员为互斥锁，用于在多个Goroutine访问或修改时对其它成员提供保护。
 
 然后就是Get和Set方法：
 
@@ -107,7 +107,7 @@ func (p *KVStoreService) Get(key string, value *string) error {
 	return fmt.Errorf("not found")
 }
 
-func (p *KVStoreService) Set(kv [2]string, *struct{}) error {
+func (p *KVStoreService) Set(kv [2]string, reply *struct{}) error {
 	p.Lock()
 	defer p.Unlock()
 
@@ -124,7 +124,7 @@ func (p *KVStoreService) Set(kv [2]string, *struct{}) error {
 }
 ```
 
-在Set方法中，输入参数是key和value组成的数组，用一个匿名的空结构体表示忽略了返回值。当修改某个key对应的值时会调用每一个过滤器函数。
+在Set方法中，输入参数是key和value组成的数组，用一个匿名的空结构体表示忽略了输出参数。当修改某个key对应的值时会调用每一个过滤器函数。
 
 而过滤器列表在Watch方法中提供：
 
@@ -151,7 +151,7 @@ func (p *KVStoreService) Watch(timeoutSecond int, keyChanged *string) error {
 
 Watch方法的输入参数是超时的秒数。当有key变化时将key作为返回值返回。如果超过时间后依然没有key被修改，则返回超时的错误。Watch的实现中，用唯一的id表示每个Watch调用，然后根据id将自身对应的过滤器函数注册到`p.filter`列表。
 
-KVStoreService服务到注册和启动过程我们不再赘述。下面我们看看如何从客户端使用Watch方法：
+KVStoreService服务的注册和启动过程我们不再赘述。下面我们看看如何从客户端使用Watch方法：
 
 ```go
 func doClientWork(client *rpc.Client) {
@@ -175,7 +175,7 @@ func doClientWork(client *rpc.Client) {
 
 首先启动一个独立的Goroutine监控key的变化。同步的watch调用会阻塞，直到有key发生变化或者超时。然后在通过Set方法修改KV值时，服务器会将变化的key通过Watch方法返回。这样我们就可以实现对某些状态的监控。
 
-## 反向RPC
+## 4.3.3 反向RPC
 
 通常的RPC是基于C/S结构，RPC的服务端对应网络的服务器，RPC的客户端也对应网络客户端。但是对于一些特殊场景，比如在公司内网提供一个RPC服务，但是在外网无法链接到内网的服务器。这种时候我们可以参考类似反向代理的技术，首先从内网主动链接到外网的TCP服务器，然后基于TCP链接向外网提供RPC服务。
 
@@ -248,9 +248,9 @@ func doClientWork(clientChan <-chan *rpc.Client) {
 首先从管道去取一个RPC客户端对象，并且通过defer语句指定在函数退出前关闭客户端。然后是执行正常的RPC调用。
 
 
-## 上下文信息
+## 4.3.4 上下文信息
 
-首先是上下文信息，基于上下文我们可以针对不同客户端提供定制化的RPC服务。我们可以通过为每个信道提供独立的RPC服务来实现对上下文特性的支持。
+基于上下文我们可以针对不同客户端提供定制化的RPC服务。我们可以通过为每个信道提供独立的RPC服务来实现对上下文特性的支持。
 
 首先改造HelloService，里面增加了对应链接的conn成员：
 

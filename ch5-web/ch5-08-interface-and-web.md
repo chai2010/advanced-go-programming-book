@@ -1,4 +1,4 @@
-# 5.8. interface 和 table-driven 开发
+# 5.8 interface 和 table-driven 开发
 
 在 web 项目中经常会遇到外部依赖环境的变化，比如：
 
@@ -78,7 +78,7 @@ type OrderCreator interface {
 
 如果我们正在做的是平台系统，需要由平台来定义统一的业务流程和业务规范，那么基于 interface 的抽象就是有意义的。举个例子：
 
-![interface-impl](../images/ch6-interface-impl.png)
+![interface-impl](../images/ch6-interface-impl.uml.png)
 
 平台需要服务多条业务线，但数据定义需要统一，所以希望都能走平台定义的流程。作为平台方，我们可以定义一套类似上文的 interface，然后要求接入方的业务必须将这些 interface 都实现。如果 interface 中有其不需要的步骤，那么只要返回 nil，或者忽略就好。
 

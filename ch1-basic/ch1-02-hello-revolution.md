@@ -1,10 +1,10 @@
-# 1.2. Hello, World 的革命
+# 1.2 Hello, World 的革命
 
 在创世纪章节中我们简单介绍了Go语言的演化基因族谱，对其中来自于贝尔实验室的特有并发编程基因做了重点介绍，最后引出了Go语言版的“Hello, World”程序。其实“Hello, World”程序是展示各种语言特性的最好的例子，是通向该语言的一个窗口。这一节我们将沿着各个编程语言演化的时间轴，简单回顾下“Hello, World”程序是如何逐步演化到目前的Go语言形式、最终完成它的革命使命的。
 
 ![](../images/ch1-01-go-history.png)
 
-## B语言 - Ken Thompson, 1972
+## 1.2.1 B语言 - Ken Thompson, 1972
 
 首先是B语言，B语言是Go语言之父贝尔实验室的Ken Thompson早年间开发的一种通用的程序设计语言，设计目的是为了用于辅助UNIX系统的开发。但是因为B语言缺乏灵活的类型系统导致使用比较困难。后来，Ken Thompson的同事Dennis Ritchie以B语言为基础开发出了C语言，C语言提供了丰富的类型，极大地增加了语言的表达能力。到目前为止它依然是世界上最常用的程序语言之一。而B语言自从被它取代之后，则就只存在于各种文献之中，成为了历史。
 
@@ -25,7 +25,7 @@ c 'orld';
 
 总体来说，B语言简单，功能也比较简陋。
 
-## C语言 - Dennis Ritchie, 1974 ~ 1989
+## 1.2.2 C语言 - Dennis Ritchie, 1974 ~ 1989
 
 C语言是由Dennis Ritchie在B语言的基础上改进而来，它增加了丰富的数据类型，并最终实现了用它重写UNIX的伟大目标。C语言可以说是现代IT行业最重要的软件基石，目前主流的操作系统几乎全部是由C语言开发的，许多基础系统软件也是C语言开发的。C系家族的编程语言占据统治地位达几十年之久，半个多世纪以来依然充满活力。
 
@@ -76,7 +76,7 @@ main(void)
 至此，C语言本身的进化基本完成。后面的C92/C99/C11都只是针对一些语言细节做了完善。因为各种历史因素，C89依然是使用最广泛的标准。
 
 
-## Newsqueak - Rob Pike, 1989
+## 1.2.3 Newsqueak - Rob Pike, 1989
 
 Newsqueak是Rob Pike发明的老鼠语言的第二代，是他用于实践CSP并发编程模型的战场。Newsqueak是新的squeak语言的意思，其中squeak是老鼠吱吱吱的叫声，也可以看作是类似鼠标点击的声音。Squeak是一个提供鼠标和键盘事件处理的编程语言，Squeak语言的管道是静态创建的。改进版的Newsqueak语言则提供了类似C语言语句和表达式的语法和类似Pascal语言的推导语法。Newsqueak是一个带自动垃圾回收的纯函数式语言，它再次针对键盘、鼠标和窗口事件管理。但是在Newsqueak语言中管道是动态创建的，属于第一类值，因此可以保存到变量中。
 
@@ -140,7 +140,7 @@ prime := sieve();
 
 Newsqueak语言中并发体和管道的语法和Go语言已经比较接近了，后置的类型声明和Go语言的语法也很相似。
 
-## Alef - Phil Winterbottom, 1993
+## 1.2.4 Alef - Phil Winterbottom, 1993
 
 在Go语言出现之前，Alef语言是作者心中比较完美的并发语言，Alef语法和运行时基本是无缝兼容C语言。Alef语言中的对线程和进程的并发体都提供了支持，其中`proc receive(c)`用于启动一个进程，`task receive(c)`用于启动一个线程，它们之间通过管道`c`进行通讯。不过由于Alef缺乏内存自动回收机制，导致并发体的内存资源管理异常复杂。而且Alef语言只在Plan9系统中提供过短暂的支持，其它操作系统并没有实际可以运行的Alef开发环境。而且Alef语言只有《Alef语言规范》和《Alef编程向导》两个公开的文档，因此在贝尔实验室之外关于Alef语言的讨论并不多。
 
@@ -176,7 +176,7 @@ void main(void) {
 
 Alef的语法和C语言基本保持一致，可以认为它是在C语言的语法基础上增加了并发编程相关的特性，可以看作是另一个维度的C++语言。
 
-## Limbo - Sean Dorward, Phil Winterbottom, Rob Pike, 1995
+## 1.2.5 Limbo - Sean Dorward, Phil Winterbottom, Rob Pike, 1995
 
 Limbo（地狱）是用于开发运行在小型计算机上的分布式应用的编程语言，它支持模块化编程，编译期和运行时的强类型检查，进程内基于具有类型的通信管道，原子性垃圾收集和简单的抽象数据类型。Limbo被设计为：即便是在没有硬件内存保护的小型设备上，也能安全运行。Limbo语言主要运行在Inferno系统之上。
 
@@ -202,11 +202,11 @@ init(ctxt: ref Draw->Context, args: list of string)
 
 从这个版本的“Hello World”程序中，我们已经可以发现很多Go语言特性的雏形。第一句`implement Hello;`基本对应Go语言的`package Hello`包声明语句。然后是`include "sys.m"; sys: Sys;`和`include "draw.m";`语句用于导入其它的模块，类似Go语言的`import "sys"`和`import "draw"`语句。然后Hello包模块还提供了模块初始化函数`init`，并且函数的参数的类型也是后置的，不过Go语言的初始化函数是没有参数的。
 
-## Go语言 - 2007~2009
+## 1.2.6 Go语言 - 2007~2009
 
 贝尔实验室后来经历了多次动荡，包括Ken Thompson在内的Plan9项目原班人马最终加入了Google公司。在发明Limbo等前辈语言诞生10多年之后，在2007年底，Go语言三个最初的作者因为偶然的因素聚集到一起批斗C++（传说是C++语言的布道师在Google公司到处鼓吹的C++11各种牛逼特性彻底惹恼了他们），他们终于抽出了20%的自由时间创造了Go语言。最初的Go语言规范从2008年3月开始编写，最初的Go程序也是直接编译到C语言然后再二次编译为机器码。到了2008年5月，Google公司的领导们终于发现了Go语言的巨大潜力，从而开始全力支持这个项目（Google的创始人甚至还贡献了`func`关键字），让他们可以将全部工作时间投入到Go语言的设计和开发中。在Go语言规范初版完成之后，Go语言的编译器终于可以直接生成机器码了。
 
-### hello.go - 2008年6月
+### 1.2.6.1 hello.go - 2008年6月
 
 ```go
 package main
@@ -219,7 +219,7 @@ func main() int {
 
 这是初期Go语言程序正式开始测试的版本。其中内置的用于调试的`print`语句已经存在，不过是以命令的方式使用。入口`main`函数还和C语言中的`main`函数一样返回`int`类型的值，而且需要`return`显式地返回值。每个语句末尾的分号也还存在。
 
-### hello.go - 2008年6月27日
+### 1.2.6.2 hello.go - 2008年6月27日
 
 ```go
 package main
@@ -231,7 +231,7 @@ func main() {
 
 入口函数`main`已经去掉了返回值，程序默认通过隐式调用`exit(0)`来返回。Go语言朝着简单的方向逐步进化。
 
-### hello.go - 2008年8月11日
+### 1.2.6.3 hello.go - 2008年8月11日
 
 ```go
 package main
@@ -243,7 +243,7 @@ func main() {
 
 用于调试的内置的`print`由开始的命令改为普通的内置函数，使得语法更加简单一致。
 
-### hello.go - 2008年10月24日
+### 1.2.6.4 hello.go - 2008年10月24日
 
 ```go
 package main
@@ -257,7 +257,7 @@ func main() {
 
 作为C语言中招牌的`printf`格式化函数已经移植了到了Go语言中，函数放在`fmt`包中（`fmt`是格式化单词`format`的缩写）。不过`printf`函数名的开头字母依然是小写字母，采用大写字母表示导出的特性还没有出现。
 
-### hello.go - 2009年1月15日
+### 1.2.6.5 hello.go - 2009年1月15日
 
 ```go
 package main
@@ -271,7 +271,7 @@ func main() {
 
 Go语言开始采用是否大小写首字母来区分符号是否可以被导出。大写字母开头表示导出的公共符号，小写字母开头表示包内部的私有符号。国内用户需要注意的是，汉字中没有大小写字母的概念，因此以汉字开头的符号目前是无法导出的（针对问题中国用户已经给出相关建议，等Go2之后或许会调整对汉字的导出规则）。
 
-### hello.go - 2009年12月11日
+### 1.2.6.7 hello.go - 2009年12月11日
 
 ```go
 package main
@@ -285,111 +285,8 @@ func main() {
 
 Go语言终于移除了语句末尾的分号。这是Go语言在2009年11月10号正式开源之后第一个比较重要的语法改进。从1978年C语言教程第一版引入的分号分割的规则到现在，Go语言的作者们花了整整32年终于移除了语句末尾的分号。在这32年的演化的过程中必然充满了各种八卦故事，我想这一定是Go语言设计者深思熟虑的结果（现在Swift等新的语言也是默认忽略分号的，可见分号确实并不是那么的重要）。
 
-## CGO版本
 
-Go语言开源初期就支持通过CGO和C语言保持交互。CGO通过导入一个虚拟的`"C"`包来访问C语言中的函数。下面是CGO版本的“Hello World”程序：
-
-```go
-package main
-
-// #include <stdio.h>
-// #include <stdlib.h>
-import "C"
-import "unsafe"
-
-func main() {
-	msg := C.CString("Hello, World!\n")
-	defer C.free(unsafe.Pointer(msg))
-
-	C.fputs(msg, C.stdout)
-}
-```
-
-先通过`C.CString`函数将Go语言字符串转为C语言字符串，然后调用C语言的`C.fputs`函数向标准输出窗口打印转换后的C字符串。`defer`延迟语句保证程序返回前通过`C.free`释放分配的C字符串。需要注意的是, CGO不支持C语言中的可变参数函数（因为Go语言每次函数调用的栈帧大小是固定的，而且Go语言中可变参数语法只是切片的一个语法糖而已），因此在Go语言中是无法通过CGO访问C语言的`printf`等可变参数函数的。同时，CGO只能访问C语言的函数、变量和简单的宏定义常量，CGO并不支持访问C++语言的符号（C++和C语言符号的名字修饰规则不同，CGO采用C语言的名字修饰规则）。
-
-其实CGO不仅仅用于在Go语言中调用C语言函数，还可以用于导出Go语言函数给C语言函数调用。在用Go语言编写生成C语言的静、动态库时，也可以用CGO导出对应的接口函数。正是CGO的存在，才保证了Go语言和C语言资源的双向互通，同时保证了Go语言可以继承C语言已有的庞大的软件资产。
-
-## SWIG版本
-
-Go语言开源初期除了支持通过CGO访问C语言资源外，还支持通过SWIG访问C/C++接口。SWIG是从2010年10月04日发布的SWIG-2.0.1版本开始正式支持Go语言的。可以将SWIG看作一个高级的CGO代码自动生成器，同时通过生成C语言桥接代码增加了对C++类的支持。下面是SWIG版本的"Hello World"程序：
-
-首先是创建一个`hello.cc`文件，里面有`SayHello`函数用于打印（这里的`SayHello`函数采用C++的名字修饰规则）:
-
-```c++
-#include <iostream>
-
-void SayHello() {
-	std::cout << "Hello, World!" << std::endl;
-}
-```
-
-然后创建一个`hello.swigcxx`文件，以SWIG语法导出上面的C++函数`SayHello`:
-
-```swig
-%module main
-
-%inline %{
-extern void SayHello();
-%}
-```
-
-然后在Go语言中直接访问`SayHello`函数（首字母自动转为大写字母）：
-
-```go
-package main
-
-import (
-	hello "."
-)
-
-func main() {
-	hello.SayHello()
-}
-```
-
-需要将上述3个文件放到同一个目录中，并且`hello.swigcxx`和Go文件对应同一个包。系统除了需要安装Go语言环境外，还需要安装对应版本的SWIG工具。最后运行`go build`就可以构建了。
-
-*注: 在Windows系统下, 路径最长为260个字符. 这个程序生成的中间cgo文件可能导致某些文件的绝对路径长度超出Windows系统限制, 可能导致程序构建失败. 这是由于`go build`调用swig和cgo等命令生成中间文件时生成的不合适的超长文件名导致（作者提交ISSUE3358，Go1.8已经修复）。*
-
-## Go汇编语言版本
-
-Go语言底层使用了自己独有的跨操作系统汇编语言，该汇编语言是从Plan9系统的汇编语言演化而来。Go汇编语言并不能独立使用，它是属于Go语言的一个组成部分，必须以Go语言包的方式被组织。下面是Go汇编语言版本的“Hello World”程序：
-
-先创建一个`main.go`文件，以Go语言的语法声明包和声明汇编语言对应的函数签名，函数签名不能有函数体：
-
-```go
-package main
-
-func main()
-```
-
-然后创建`main_amd64.s`文件，对应Go汇编语言实现AMD64架构的`main`函数：
-
-```asm
-#include "textflag.h"
-#include "funcdata.h"
-
-// "Hello World!\n"
-DATA  text<>+0(SB)/8,$"Hello Wo"
-DATA  text<>+8(SB)/8,$"rld!\n"
-GLOBL text<>(SB),NOPTR,$16
-
-// func main()
-TEXT ·main(SB), $16-0
-	NO_LOCAL_POINTERS
-	MOVQ $text<>+0(SB), AX
-	MOVQ AX, (SP)
-	MOVQ $16, 8(SP)
-	CALL runtime·printstring(SB)
-	RET
-```
-
-代码中`#include "textflag.h"`语句包含运行时库定义的头文件, 里面含有`NOPTR`/`NO_LOCAL_POINTERS`等基本的宏的定义。`DATA`汇编指令用于定义数据，每个数据的宽度必须是1/2/4/8，然后`GLOBL`汇编命令在当前文件内导出`text`变量符号。`TEXT ·main(SB), $16-0`用于定义`main`函数，其中`$16-0`表示`main`函数的帧大小是16个字节（对应string头的大小，用于给`runtime·printstring`函数传递参数），`0`表示`main`函数没有参数和返回值。`main`函数内部通过调用运行时内部的`runtime·printstring(SB)`函数来打印字符串。
-
-Go汇编语言虽然针对每种CPU架构（主要有386/AMD64/ARM／ARM64等）有对应的指令和寄存器，但是汇编语言的基本语法和函数调用规范是一致的，不同操作系统之间用法是一致的。在Go语言标准库中，`runtime`运行时库、`math`数学库和`crypto`密码相关的函数很多是采用汇编语言实现的。其中`runtime`运行时库中采用部分汇编语言并不完全是为了性能，而是运行时的某些特性功能（比如goroutine上下文的切换等）无法用纯Go实现，因此需要汇编代码实现某些辅助功能。对于普通用户而言，Go汇编语言的最大价值在于性能的优化，对于性能比较关键的地方，可以尝试用Go汇编语言实现终极优化。
-
-
-## 你好, 世界! - V2.0
+## 1.2.7 你好, 世界! - V2.0
 
 在经过半个世纪的涅槃重生之后，Go语言不仅仅打印出了Unicode版本的“Hello, World”，而且可以方便地向全球用户提供打印服务。下面版本通过`http`服务向每个访问的客户端打印中文的“你好, 世界!”和当前的时间信息。
 

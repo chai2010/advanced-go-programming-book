@@ -1,10 +1,10 @@
-# 4.4. GRPC入门
+# 4.4 GRPC入门
 
 GRPC是Google公司基于Protobuf开发的跨语言的开源RPC框架。GRPC基于HTTP/2协议设计，可以基于一个HTTP/2链接提供多个服务，对于移动设备更加友好。本节将讲述GRPC的简单用法。
 
-## GRPC入门
+## 4.4.1 GRPC入门
 
-如果从Protobuf的角度看，GRPC只不过是一个针对service接口生成代码的生成器。我们在本章的第二节中手工实现了一个简单的Protobuf代码生成器插件，只不过当时生成的代码是适配标准库的RPC框架的。
+如果从Protobuf的角度看，GRPC只不过是一个针对service接口生成代码的生成器。我们在本章的第二节中手工实现了一个简单的Protobuf代码生成器插件，只不过当时生成的代码是适配标准库的RPC框架的。现在我们将学习GRPC的用法。
 
 创建hello.proto文件，定义HelloService接口：
 
@@ -36,7 +36,7 @@ type HelloServiceServer interface {
 }
 
 type HelloServiceClient interface {
-	Hello(ctx context.Context, in *String, opts ...grpc.CallOption) (*String, error)
+	Hello(context.Context, *String, ...grpc.CallOption) (*String, error)
 }
 ```
 
@@ -47,7 +47,9 @@ GRPC通过context.Context参数，为每个方法调用提供了上下文支持�
 ```go
 type HelloServiceImpl struct{}
 
-func (p *HelloServiceImpl) Hello(ctx context.Context, args *String) (*String, error) {
+func (p *HelloServiceImpl) Hello(
+	ctx context.Context, args *String,
+) (*String, error) {
 	reply := &String{Value: "hello:" + args.GetValue()}
 	return reply, nil
 }
@@ -58,7 +60,7 @@ GRPC服务的启动流程和标准库的RPC服务启动流程类似：
 ```go
 func main() {
 	grpcServer := grpc.NewServer()
-	RegisterHelloServiceServer(grpcServer, &HelloServiceImpl{})
+	RegisterHelloServiceServer(grpcServer, new(HelloServiceImpl))
 
 	lis, err := net.Listen("tcp", ":1234")
 	if err != nil {
@@ -91,11 +93,11 @@ func main() {
 
 其中grpc.Dial负责和GRPC服务建立链接，然后NewHelloServiceClient函数基于已经建立的链接构造HelloServiceClient对象。返回的client其实是一个HelloServiceClient接口对象，通过接口定义的方法就可以调用服务端对应的GRPC服务提供的方法。
 
-GRPC和标准库的RPC框架还有一个区别，GRPC生成的接口并不支持异步调用。
+GRPC和标准库的RPC框架有一个区别，GRPC生成的接口并不支持异步调用。不过我们可以在多个Goroutine之间安全地共享GRPC底层的HTTP/2链接，因此可以通过在另一个Goroutine阻塞调用的方式模拟异步调用。
 
-## GRPC流
+## 4.4.2 GRPC流
 
-RPC是远程函数调用，因此每次调用的函数参数和返回值不能太大，否则将严重影响每次调用的性能。因此传统的RPC方法调用对于上传和下载较大数据量场景并不适合。同时传统RPC模式也不适用于对时间不确定的订阅和发布模式。为此，GRPC框架分别提供了服务器端和客户端的流特性。
+RPC是远程函数调用，因此每次调用的函数参数和返回值不能太大，否则将严重影响每次调用的响应时间。因此传统的RPC方法调用对于上传和下载较大数据量场景并不适合。同时传统RPC模式也不适用于对时间不确定的订阅和发布模式。为此，GRPC框架针对服务器端和客户端分别提供了流特性。
 
 服务端或客户端的单向流是双向流的特例，我们在HelloService增加一个支持双向流的Channel方法：
 
@@ -165,7 +167,7 @@ func (p *HelloServiceImpl) Channel(stream HelloService_ChannelServer) error {
 }
 ```
 
-服务端在循环中接收客户端发来的数据，如果遇到io.EOF表示客户端流被关闭，如果函数退出表示服务端流关闭。然后生成返回的数据通过流发送给客户端。需要注意的是，发送和接收的操作并不需要一一对应，用户可以根据真实场景进行组织代码。
+服务端在循环中接收客户端发来的数据，如果遇到io.EOF表示客户端流被关闭，如果函数退出表示服务端流关闭。生成返回的数据通过流发送给客户端，双向流数据的发送和接收都是完全独立的行为。需要注意的是，发送和接收的操作并不需要一一对应，用户可以根据真实场景进行组织代码。
 
 客户端需要先调用Channel方法获取返回的流对象：
 
@@ -206,7 +208,7 @@ for {
 
 这样就完成了完整的流接收和发送支持。
 
-## 发布和订阅模式
+## 4.4.3 发布和订阅模式
 
 在前一节中，我们基于Go内置的RPC库实现了一个简化版的Watch方法。基于Watch的思路虽然也可以构造发布和订阅系统，但是因为RPC缺乏流机制导致每次只能返回一个结果。在发布和订阅模式中，由调用者主动发起的发布行为类似一个普通函数调用，而被动的订阅者则类似GRPC客户端单向流中的接收者。现在我们可以尝试基于GRPC的流特性构造一个发布和订阅系统。
 
@@ -260,11 +262,11 @@ func main() {
 ```protobuf
 service PubsubService {
 	rpc Publish (String) returns (String);
-	rpc SubscribeTopic (String) returns (stream String);
+	rpc Subscribe (String) returns (stream String);
 }
 ```
 
-其中Publish是普通的RPC方法，SubscribeTopic则是一个单向的流服务。然后grpc插件会为服务端和客户端生成对应的接口：
+其中Publish是普通的RPC方法，Subscribe则是一个单向的流服务。然后grpc插件会为服务端和客户端生成对应的接口：
 
 ```go
 type PubsubServiceServer interface {
@@ -272,8 +274,10 @@ type PubsubServiceServer interface {
 	Subscribe(*String, PubsubService_SubscribeServer) error
 }
 type PubsubServiceClient interface {
-	Publish(ctx context.Context, in *String, opts ...grpc.CallOption) (*String, error)
-	Subscribe(ctx context.Context, in *String, opts ...grpc.CallOption) (PubsubService_SubscribeClient, error)
+	Publish(context.Context, *String, ...grpc.CallOption) (*String, error)
+	Subscribe(context.Context, *String, ...grpc.CallOption) (
+		PubsubService_SubscribeClient, error,
+	)
 }
 
 type HelloService_SubscribeServer interface {
@@ -281,6 +285,8 @@ type HelloService_SubscribeServer interface {
 	grpc.ServerStream
 }
 ```
+
+因为Subscribe是服务端的单向流，因此生成的HelloService_SubscribeServer接口中只有Send方法。
 
 然后就可以实现发布和订阅服务了：
 
@@ -299,15 +305,19 @@ func NewPubsubService() *PubsubService {
 然后是实现发布方法和订阅方法：
 
 ```go
-func (p *PubsubService) Publish(ctx context.Context, arg *String) (*String, error) {
+func (p *PubsubService) Publish(
+	ctx context.Context, arg *String,
+) (*String, error) {
 	p.pub.Publish(arg.GetValue())
 	return &String{}, nil
 }
 
-func (p *PubsubService) Subscribe(arg *String, stream PubsubService_SubscribeServer) error {
-	ch := p.SubscribeTopic(func(v interface{}) bool {
+func (p *PubsubService) Subscribe(
+	arg *String, stream PubsubService_SubscribeServer,
+) error {
+	ch := p.pub.SubscribeTopic(func(v interface{}) bool {
 		if key, ok := v.(string); ok {
-			if strings.Hasprefix(arg.GetValue()) {
+			if strings.HasPrefix(key,arg.GetValue()) {
 				return true
 			}
 		}
@@ -336,18 +346,18 @@ func main() {
 
 	client := NewPubsubServiceClient(conn)
 
-	reply, err := client.Publish(context.Background(), &String{Value: "golang: hello Go"})
+	_, err = client.Publish(context.Background(), &String{Value: "golang: hello Go"})
 	if err != nil {
 		log.Fatal(err)
 	}
-	reply, err := client.Publish(context.Background(), &String{Value: "docker: hello Docker"})
+	_, err = client.Publish(context.Background(), &String{Value: "docker: hello Docker"})
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 ```
 
-然后就可以在新的客户端进行订阅信息了：
+然后就可以在另一个客户端进行订阅信息了：
 
 ```go
 func main() {
@@ -358,7 +368,7 @@ func main() {
 	defer conn.Close()
 
 	client := NewPubsubServiceClient(conn)
-	stream, err := client.Channel(context.Background(), &String{Value: "golang:"})
+	stream, err := client.SubscribeTopic(context.Background(), &String{Value: "golang:"})
 	if err != nil {
 		log.Fatal(err)
 	}

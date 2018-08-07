@@ -1,4 +1,4 @@
-# 1.7. 错误和异常
+# 1.7 错误和异常
 
 错误处理是每个编程语言都要考虑的一个重要话题。在Go语言的错误处理中，错误是软件包API和应用程序用户界面的一个重要组成部分。
 
@@ -43,7 +43,7 @@ func main() {
 
 捕获异常不是最终的目的。如果异常不可预测，直接输出异常信息是最好的处理方式。
 
-## 错误处理策略
+## 1.7.1 错误处理策略
 
 让我们演示一个文件复制的例子：函数需要打开两个文件，然后将其中一个文件的内容复制到另一个文件：
 
@@ -107,7 +107,7 @@ func ParseJSON(input string) (s *Syntax, err error) {
 
 Go语言库的实现习惯: 即使在包内部使用了`panic`，但是在导出函数时会被转化为明确的错误值。
 
-# 获取错误的上下文
+## 1.7.2 获取错误的上下文
 
 有时候为了方便上层用户理解；很多时候底层实现者会将底层的错误重新包装为新的错误类型返回给用户：
 
@@ -151,7 +151,7 @@ func Wrap(err error, msg string) error
 func WrapWithCode(code int, err error, msg string) error
 
 func FromJson(json string) (Error, error)
-func ToJson(err error) string 
+func ToJson(err error) string
 ```
 
 `New`用于构建新的错误类型，和标准库中`errors.New`功能类似，但是增加了出错误时的函数调用栈信息。`FromJson`用于从JSON字符串编码的错误中恢复错误对象。`NewWithCode`则是构造一个带错误码的错误，同时也包含出错误时的函数调用栈信息。`Wrap`和`WrapWithCode`则是错误二次包装函数，用于将底层的错误包装为新的错误，但是保留的原始的底层错误信息。这里返回的错误对象都可以直接调用`json.Marshal`将错误编码为JSON字符串。
@@ -211,7 +211,7 @@ func main() {
 ```go
 // 以JSON字符串方式发送错误
 func sendError(ch chan<- string, err error) {
-	ch <- errors.ToJson(err)	
+	ch <- errors.ToJson(err)
 }
 
 // 接收JSON字符串格式的错误
@@ -247,7 +247,7 @@ if err != nil {
 Go语言中大部分函数的代码结构几乎相同，首先是一系列的初始检查，用于防止错误发生，之后是函数的实际逻辑。
 
 
-# 错误的错误返回
+## 1.7.3 错误的错误返回
 
 Go语言中的错误是一种接口类型。接口信息中包含了原始类型和原始的值。只有当接口的类型和原始的值都为空的时候，接口的值才对应`nil`。其实当接口中类型为空的时候，原始值必然也是空的；反之，当接口对应的原始值为空的时候，接口对应的原始类型并不一定为空的。
 
@@ -278,7 +278,7 @@ func returnsError() error {
 
 Go语言作为一个强类型语言，不同类型之间必须要显式的转换（而且必须有相同的基础类型）。但是，Go语言中`interface`是一个例外：非接口类型到接口类型，或者是接口类型之间的转换都是隐式的。这是为了支持方便的鸭子面向对象编程，当然会牺牲一定的安全特性。
 
-# 剖析异常
+## 1.7.4 剖析异常
 
 `panic`支持抛出任意类型的异常（而不仅仅是`error`类型的错误），`recover`函数调用的返回值和`panic`函数的输入参数类型一致，它们的函数签名如下：
 
@@ -375,7 +375,7 @@ func main() {
 ```go
 func main() {
 	defer func() {
-		if r := recover(); r != nil { ... } 
+		if r := recover(); r != nil { ... }
 		// 虽然总是返回nil, 但是可以恢复异常状态
 	}()
 

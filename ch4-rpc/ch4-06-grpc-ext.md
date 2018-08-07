@@ -1,8 +1,8 @@
-# 4.6. GRPC和Protobuf扩展
+# 4.6 GRPC和Protobuf扩展
 
 目前开源社区已经围绕Protobuf和GRPC开发出众多扩展，形成了庞大的生态。本节我们将简单介绍验证器和REST接口扩展。
 
-## 验证器
+## 4.6.1 验证器
 
 到目前位置，我们接触的全部是第三版的Protobuf语法。第二版的Protobuf有个默认值特性，可以为字符串或数值类型的成员定义默认值。
 
@@ -19,7 +19,7 @@ message Message {
 }
 ```
 
-默认值语法内置其实是通过Protobuf的扩展选项特性实现。在第三版的Protobuf中不再支持默认值特性，但是我们可以通过扩展选项自己定制默认值。
+内置的默认值语法其实是通过Protobuf的扩展选项特性实现。在第三版的Protobuf中不再支持默认值特性，但是我们可以通过扩展选项自己模拟默认值特性。
 
 下面是用proto3语法的扩展特性重新改写上述的proto文件：
 
@@ -65,13 +65,13 @@ var E_DefaultInt = &proto.ExtensionDesc{
 
 我们可以在运行时通过类似反射的技术解析出Message每个成员定义的扩展选项，然后从每个扩展的相关联的信息中解析出我们定义的默认值。
 
-在开源社区中，github.com/mwitkow/go-proto-validators 基于Protobuf的扩展特性实现了功能较为强大的验证器功能。要使用该验证器首先需要下载其提供的代码生成插件：
+在开源社区中，github.com/mwitkow/go-proto-validators 已经基于Protobuf的扩展特性实现了功能较为强大的验证器功能。要使用该验证器首先需要下载其提供的代码生成插件：
 
 ```
 $ go get github.com/mwitkow/go-proto-validators/protoc-gen-govalidators
 ```
 
-然后基于go-proto-validators验证器重新定义上述的Message成员的验证规则：
+然后基于go-proto-validators验证器的规则为Message成员增加验证规则：
 
 ```protobuf
 syntax = "proto3";
@@ -81,14 +81,18 @@ package main;
 import "github.com/mwitkow/go-proto-validators/validator.proto";
 
 message Message {
-	string important_string = 1 [(validator.field) = {regex: "^[a-z]{2,5}$"}];
-	int32 age = 2 [(validator.field) = {int_gt: 0, int_lt: 100}];
+	string important_string = 1 [
+		(validator.field) = {regex: "^[a-z]{2,5}$"}
+	];
+	int32 age = 2 [
+		(validator.field) = {int_gt: 0, int_lt: 100}
+	];
 }
 ```
 
 在方括弧表示的成员扩展中，validator.field表示扩展是validator包中定义的名为field扩展选项。validator.field的类型是FieldValidator结构体，在导入的validator.proto文件中定义。
 
-validator.proto文件的内容如下：
+所有的验证规则都由validator.proto文件中的FieldValidator定义：
 
 ```protobuf
 syntax = "proto2";
@@ -112,9 +116,9 @@ message FieldValidator {
 }
 ```
 
-从FieldValidator定义的注释中我们可以知道验证器扩展的一些语法：其中regex表示用于字符串验证的正则表达式，int_gt和int_lt表示数值的范围。
+从FieldValidator定义的注释中我们可以看到验证器扩展的一些语法：其中regex表示用于字符串验证的正则表达式，int_gt和int_lt表示数值的范围。
 
-采用以下的命令生成验证函数代码：
+然后采用以下的命令生成验证函数代码：
 
 ```
 protoc  \
@@ -125,30 +129,37 @@ protoc  \
 	hello.proto
 ```
 
-以上的命令会调用protoc-gen-govalidators程序，生成一个名为hello.validator.pb.go的代码：
+以上的命令会调用protoc-gen-govalidators程序，生成一个独立的名为hello.validator.pb.go的文件：
 
 ```go
 var _regex_Message_ImportantString = regexp.MustCompile("^[a-z]{2,5}$")
 
 func (this *Message) Validate() error {
 	if !_regex_Message_ImportantString.MatchString(this.ImportantString) {
-		return go_proto_validators.FieldError("ImportantString", fmt.Errorf(`value '%v' must be a string conforming to regex "^[a-z]{2,5}$"`, this.ImportantString))
+		return go_proto_validators.FieldError("ImportantString", fmt.Errorf(
+			`value '%v' must be a string conforming to regex "^[a-z]{2,5}$"`,
+			this.ImportantString,
+		))
 	}
 	if !(this.Age > 0) {
-		return go_proto_validators.FieldError("Age", fmt.Errorf(`value '%v' must be greater than '0'`, this.Age))
+		return go_proto_validators.FieldError("Age", fmt.Errorf(
+			`value '%v' must be greater than '0'`, this.Age,
+		))
 	}
 	if !(this.Age < 100) {
-		return go_proto_validators.FieldError("Age", fmt.Errorf(`value '%v' must be less than '100'`, this.Age))
+		return go_proto_validators.FieldError("Age", fmt.Errorf(
+			`value '%v' must be less than '100'`, this.Age,
+		))
 	}
 	return nil
 }
 ```
 
-也就是为Message结构体增加了一个Validate方法，用于验证该成员是否满足Protobuf中定义的条件约束。
+生成的代码为Message结构体增加了一个Validate方法，用于验证该成员是否满足Protobuf中定义的条件约束。无论采用何种类型，所有的Validate方法都用相同的签名，因此可以满足相同的验证接口。
 
 通过生成的验证函数，并结合GRPC的截取器，我们可以很容易为每个方法的输入参数和返回值进行验证。
 
-## REST接口
+## 4.6.2 REST接口
 
 GRPC服务一般用于集群内部通信，如果需要对外暴露服务一般会提供等价的REST接口。通过REST接口比较方便前端JavaScript和后端交互。开源社区中的grac-gateway项目就实现了将GRPC服务转为REST服务的能力。
 
@@ -237,7 +248,7 @@ func main() {
 }
 ```
 
-首先通过runtime.NewServeMux()函数创建路由处理器，然后通过RegisterRestServiceHandlerFromEndpoint函数将RestService服务相关的REST接口导到后面的GRPC服务。grpc-gateway提供runtime.ServeMux类似同时也实现了http.Handler接口，因此可以标准库中的相关函数配置使用。
+首先通过runtime.NewServeMux()函数创建路由处理器，然后通过RegisterRestServiceHandlerFromEndpoint函数将RestService服务相关的REST接口中转到后面的GRPC服务。grpc-gateway提供runtime.ServeMux类似同时也实现了http.Handler接口，因此可以标准库中的相关函数配置使用。
 
 档GRPC和REST服务全部启动之后，就可以用curl请求REST服务了：
 
@@ -254,8 +265,8 @@ $ curl localhost:8080/post -X POST --data '{"value":"grpc"}'
 ```
 $ go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
 
-$ protoc \
-	-I=. -I=../../../github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+$ protoc -I. \
+	-I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 	--swagger_out=. \
 	hello.proto
 ```

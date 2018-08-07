@@ -1,6 +1,6 @@
 # Go语言高级编程(Advanced Go Programming)
 
-本书针对Go语言有一定经验，想深入了解Go语言各种高级用法的开发人员。
+本书涵盖CGO、Go汇编语言、RPC实现、Web框架实现、分布式系统等高阶主题，针对Go语言有一定经验想深入了解Go语言各种高级用法的开发人员。
 
 ![](cover.png)
 
@@ -16,6 +16,9 @@
 
 - 深入CGO编程: https://github.com/chai2010/gopherchina2018-cgo-talk
 
+## 关注微信公众号(golang-china)
+
+![](weixin-golang-china.jpg)
 
 ## 版权声明
 
