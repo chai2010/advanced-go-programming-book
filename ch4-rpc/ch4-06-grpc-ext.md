@@ -248,7 +248,7 @@ func main() {
 }
 ```
 
-首先通过runtime.NewServeMux()函数创建路由处理器，然后通过RegisterRestServiceHandlerFromEndpoint函数将RestService服务相关的REST接口中转到后面的GRPC服务。grpc-gateway提供的runtime.ServeMux类也实现了http.Handler接口，因此可以标准库中的相关函数配合使用。
+首先通过runtime.NewServeMux()函数创建路由处理器，然后通过RegisterRestServiceHandlerFromEndpoint函数将RestService服务相关的REST接口中转到后面的GRPC服务。grpc-gateway提供的runtime.ServeMux类也实现了http.Handler接口，因此可以和标准库中的相关函数配合使用。
 
 档GRPC和REST服务全部启动之后，就可以用curl请求REST服务了：
 
