@@ -170,13 +170,13 @@ func main() {
 }
 ```
 
-服务器端同样改用credentials.NewTLS函数生成证书，通过ClientCAs选项CA根证书，并通过ClientAuth选项启用对客户端进行验证。
+服务器端同样改用credentials.NewTLS函数生成证书，通过ClientCAs选择CA根证书，并通过ClientAuth选项启用对客户端进行验证。
 
 到此我们就实现了一个服务器和客户端进行双向证书验证的通信可靠的GRPC系统。
 
 ## 4.5.2 Token认证
 
-前面讲述的基于证书的认证是针对每个GRPC链接的认证。GRPC还为每个GRPC方法调用提供了认证支持，这样就基于基于用户Token对不同对方法访问进行权限管理。
+前面讲述的基于证书的认证是针对每个GRPC链接的认证。GRPC还为每个GRPC方法调用提供了认证支持，这样就基于用户Token对不同的方法访问进行权限管理。
 
 要实现对每个GRPC方法进行认证，需要实现grpc.PerRPCCredentials接口：
 
@@ -196,13 +196,13 @@ type PerRPCCredentials interface {
 	)
 	// RequireTransportSecurity indicates whether the credentials requires
 	// transport security.
-    RequireTransportSecurity() bool
+	RequireTransportSecurity() bool
 }
 ```
 
-在GetRequestMetadata方法中返回认证需要对必要信息。RequireTransportSecurity方法表示是否求底层使用安全链接。在真实对环境中建议底层必须要求启用安全对链接，否则认证信息有泄露和被篡改的风险。
+在GetRequestMetadata方法中返回认证需要的必要信息。RequireTransportSecurity方法表示是否要求底层使用安全链接。在真实的环境中建议必须要求底层启用安全的链接，否则认证信息有泄露和被篡改的风险。
 
-我们可以创建一个Authentication类型，用于实现用户名和密码对认证：
+我们可以创建一个Authentication类型，用于实现用户名和密码的认证：
 
 ```go
 type Authentication struct {
