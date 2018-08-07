@@ -306,7 +306,7 @@ server := grpc.NewServer(grpc.UnaryInterceptor(filter))
 
 如果截取器函数返回了错误，那么该次GRPC方法调用将被视作失败处理。因此，我们可以在截取器中对输入的参数做一些简单的验证工作。同样，也可以对handler返回的结果做一些验证工作。截取器也非常适合前面对Token认证工作。
 
-下面是截取器增加了对GRPC方法异常对捕获：
+下面是截取器增加了对GRPC方法异常的捕获：
 
 ```go
 func filter(
@@ -349,7 +349,7 @@ myServer := grpc.NewServer(
 
 GRPC构建在HTTP/2协议之上，因此我们可以将GRPC服务和普通的Web服务架设在同一个端口之上。因为目前Go语言版本的GRPC实现还不够完善，只有启用了TLS协议之后才能将GRPC和Web服务运行在同一个端口。
 
-服务器证书的生成过程前文已经讲过，这么不再赘述。启用普通的https服务器非常简单：
+服务器证书的生成过程前文已经讲过，这里不再赘述。启用普通的https服务器非常简单：
 
 ```go
 func main() {
@@ -382,9 +382,9 @@ func main() {
 }
 ```
 
-因为GRPC服务已经实现了ServeHTTP方法，可以直接作为Web路由处理对象。如果将Grpc和Web服务放在一起，会导致GRPC和Web路径的冲突，在处理时我们需要区分两类服务。
+因为GRPC服务已经实现了ServeHTTP方法，可以直接作为Web路由处理对象。如果将GRPC和Web服务放在一起，会导致GRPC和Web路径的冲突，在处理时我们需要区分两类服务。
 
-我们可以通过以下方式生成同时支持Web和Grpc协议的路由处理函数：
+我们可以通过以下方式生成同时支持Web和GRPC协议的路由处理函数：
 
 ```go
 func main() {
@@ -408,7 +408,7 @@ func main() {
 }
 ```
 
-首先GRPC是建立在HTTP/2版本之上，如果HTTP不是HTTP/2协议则必然无法提供GRPC支持。同时，如果每个GRPC调用请求的Content-Type类型会被标注为"application/grpc"类型。
+首先GRPC是建立在HTTP/2版本之上，如果HTTP不是HTTP/2协议则必然无法提供GRPC支持。同时，每个GRPC调用请求的Content-Type类型会被标注为"application/grpc"类型。
 
 这样我们就可以在GRPC端口上同时提供Web服务了。
 
