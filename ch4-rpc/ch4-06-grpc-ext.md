@@ -4,7 +4,7 @@
 
 ## 4.6.1 验证器
 
-到目前位置，我们接触的全部是第三版的Protobuf语法。第二版的Protobuf有个默认值特性，可以为字符串或数值类型的成员定义默认值。
+到目前为止，我们接触的全部是第三版的Protobuf语法。第二版的Protobuf有个默认值特性，可以为字符串或数值类型的成员定义默认值。
 
 我们采用第二版的Protobuf语法创建文件：
 
@@ -167,7 +167,7 @@ grpc-gateway的工作原理如下图：
 
 ![](../images/ch4-06-grpc-gateway.png)
 
-通过在Protobuf文件中添加路由相关的元信息，通过自定义的代码插件生成路由相关的处理代码，最终将Rest请求转给更后端的Grpc服务处理。
+通过在Protobuf文件中添加路由相关的元信息，通过自定义的代码插件生成路由相关的处理代码，最终将REST请求转给更后端的GRPC服务处理。
 
 路由扩展元信息也是通过Protobuf的元数据扩展用法提供：
 
@@ -248,7 +248,7 @@ func main() {
 }
 ```
 
-首先通过runtime.NewServeMux()函数创建路由处理器，然后通过RegisterRestServiceHandlerFromEndpoint函数将RestService服务相关的REST接口中转到后面的GRPC服务。grpc-gateway提供runtime.ServeMux类似同时也实现了http.Handler接口，因此可以标准库中的相关函数配置使用。
+首先通过runtime.NewServeMux()函数创建路由处理器，然后通过RegisterRestServiceHandlerFromEndpoint函数将RestService服务相关的REST接口中转到后面的GRPC服务。grpc-gateway提供的runtime.ServeMux类也实现了http.Handler接口，因此可以标准库中的相关函数配合使用。
 
 档GRPC和REST服务全部启动之后，就可以用curl请求REST服务了：
 
