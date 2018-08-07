@@ -149,7 +149,7 @@ func main() {
 
 cgo中的pkg-config只需要两个参数`--cflags`和`--libs`。其中`--libs`选项的输出我们采用的是`python3-config --ldflags`的输出，因为`--libs`选项没有包含库的检索路径，而`--ldflags`选项则是在指定链接库参数的基础上增加了库的检索路径。
 
-基于py3-config.go可以创建一个py3-config命令。然后通过PKG_CONFIG环境变量将cgo使用的pkg-config命令指定为我们订制的命令：
+基于py3-config.go可以创建一个py3-config命令。然后通过PKG_CONFIG环境变量将cgo使用的pkg-config命令指定为我们定制的命令：
 
 ```
 PKG_CONFIG=./py3-config go build -buildmode=c-shared -o gopkg.so main.go
