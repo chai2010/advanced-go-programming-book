@@ -20,7 +20,7 @@ $ openssl req -new -x509 -days 3650 \
 	-key client.key -out client.crt
 ```
 
-以上命令将生成server.key、server.crt、client.key和client.crt四个文件。其中以.key为后缀名的是私钥文件，需要妥善保管。以.crt为后缀名是证书文件，也可以简单理解为公钥文件，并不需要秘密保存。在subj参数中的`/CN=server.grpc.io`表示服务的名字为`server.grpc.io`，在验证服务器的证书时需要用到该信息。
+以上命令将生成server.key、server.crt、client.key和client.crt四个文件。其中以.key为后缀名的是私钥文件，需要妥善保管。以.crt为后缀名是证书文件，也可以简单理解为公钥文件，并不需要秘密保存。在subj参数中的`/CN=server.grpc.io`表示服务器的名字为`server.grpc.io`，在验证服务器的证书时需要用到该信息。
 
 有了证书之后，我们就可以在启动GRPC服务时传入证书选项参数：
 
@@ -62,11 +62,11 @@ func main() {
 }
 ```
 
-其中redentials.NewClientTLSFromFile是构造客户端用的证书对象，第一个参数是服务器的证书文件，第二个参数是签发服务器证书时的名字。然后通过grpc.WithTransportCredentials(creds)将证书对象转为参数选项传人grpc.Dial函数。
+其中redentials.NewClientTLSFromFile是构造客户端用的证书对象，第一个参数是服务器的证书文件，第二个参数是签发证书的服务器的名字。然后通过grpc.WithTransportCredentials(creds)将证书对象转为参数选项传人grpc.Dial函数。
 
 以上这种方式，需要提前将服务器的证书告知客户端，这样客户端在链接服务器时才能进行对服务器证书认证。在复杂的网络环境中，服务器证书的传输本身也是一个非常危险的问题。如果在中间某个环节，服务器证书被监听或替换那么对服务器的认证也将不再可靠。
 
-为了避免证书的传递过程中被串改，可以通过一个安全可靠的根证书分别对服务器和客户端的证书进行签名。这样客户端或服务器在收到对方的证书后可以通过根证书进行验证证书的有效性。
+为了避免证书的传递过程中被篡改，可以通过一个安全可靠的根证书分别对服务器和客户端的证书进行签名。这样客户端或服务器在收到对方的证书后可以通过根证书进行验证证书的有效性。
 
 根证书的生成方式和签名的自签名证书的生成方式类似：
 
@@ -170,13 +170,13 @@ func main() {
 }
 ```
 
-服务器端同样改用credentials.NewTLS函数生成证书，通过ClientCAs选项CA根证书，并通过ClientAuth选项启用对客户端进行验证。
+服务器端同样改用credentials.NewTLS函数生成证书，通过ClientCAs选择CA根证书，并通过ClientAuth选项启用对客户端进行验证。
 
 到此我们就实现了一个服务器和客户端进行双向证书验证的通信可靠的GRPC系统。
 
 ## 4.5.2 Token认证
 
-前面讲述的基于证书的认证是针对每个GRPC链接的认证。GRPC还为每个GRPC方法调用提供了认证支持，这样就基于基于用户Token对不同对方法访问进行权限管理。
+前面讲述的基于证书的认证是针对每个GRPC链接的认证。GRPC还为每个GRPC方法调用提供了认证支持，这样就基于用户Token对不同的方法访问进行权限管理。
 
 要实现对每个GRPC方法进行认证，需要实现grpc.PerRPCCredentials接口：
 
@@ -196,13 +196,13 @@ type PerRPCCredentials interface {
 	)
 	// RequireTransportSecurity indicates whether the credentials requires
 	// transport security.
-    RequireTransportSecurity() bool
+	RequireTransportSecurity() bool
 }
 ```
 
-在GetRequestMetadata方法中返回认证需要对必要信息。RequireTransportSecurity方法表示是否求底层使用安全链接。在真实对环境中建议底层必须要求启用安全对链接，否则认证信息有泄露和被串改的风险。
+在GetRequestMetadata方法中返回认证需要的必要信息。RequireTransportSecurity方法表示是否要求底层使用安全链接。在真实的环境中建议必须要求底层启用安全的链接，否则认证信息有泄露和被篡改的风险。
 
-我们可以创建一个Authentication类型，用于实现用户名和密码对认证：
+我们可以创建一个Authentication类型，用于实现用户名和密码的认证：
 
 ```go
 type Authentication struct {
@@ -306,7 +306,7 @@ server := grpc.NewServer(grpc.UnaryInterceptor(filter))
 
 如果截取器函数返回了错误，那么该次GRPC方法调用将被视作失败处理。因此，我们可以在截取器中对输入的参数做一些简单的验证工作。同样，也可以对handler返回的结果做一些验证工作。截取器也非常适合前面对Token认证工作。
 
-下面是截取器增加了对GRPC方法异常对捕获：
+下面是截取器增加了对GRPC方法异常的捕获：
 
 ```go
 func filter(
@@ -349,7 +349,7 @@ myServer := grpc.NewServer(
 
 GRPC构建在HTTP/2协议之上，因此我们可以将GRPC服务和普通的Web服务架设在同一个端口之上。因为目前Go语言版本的GRPC实现还不够完善，只有启用了TLS协议之后才能将GRPC和Web服务运行在同一个端口。
 
-服务器证书的生成过程前文已经讲过，这么不再赘述。启用普通的https服务器非常简单：
+服务器证书的生成过程前文已经讲过，这里不再赘述。启用普通的https服务器非常简单：
 
 ```go
 func main() {
@@ -382,9 +382,9 @@ func main() {
 }
 ```
 
-因为GRPC服务已经实现了ServeHTTP方法，可以直接作为Web路由处理对象。如果将Grpc和Web服务放在一起，会导致GRPC和Web路径的冲突，在处理时我们需要区分两类服务。
+因为GRPC服务已经实现了ServeHTTP方法，可以直接作为Web路由处理对象。如果将GRPC和Web服务放在一起，会导致GRPC和Web路径的冲突，在处理时我们需要区分两类服务。
 
-我们可以通过以下方式生成同时支持Web和Grpc协议的路由处理函数：
+我们可以通过以下方式生成同时支持Web和GRPC协议的路由处理函数：
 
 ```go
 func main() {
@@ -408,7 +408,7 @@ func main() {
 }
 ```
 
-首先GRPC是建立在HTTP/2版本之上，如果HTTP不是HTTP/2协议则必然无法提供GRPC支持。同时，如果每个GRPC调用请求的Content-Type类型会被标注为"application/grpc"类型。
+首先GRPC是建立在HTTP/2版本之上，如果HTTP不是HTTP/2协议则必然无法提供GRPC支持。同时，每个GRPC调用请求的Content-Type类型会被标注为"application/grpc"类型。
 
 这样我们就可以在GRPC端口上同时提供Web服务了。
 
