@@ -119,7 +119,7 @@ func timeMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
-    http.HandleFunc("/", timeMiddleware(hello))
+    http.Handle("/", timeMiddleware(http.HandlerFunc(hello)))
     err := http.ListenAndServe(":8080", nil)
     ...
 }
