@@ -253,7 +253,7 @@ for i := 0; i < len(s); i++ {
 Go语言除了`for range`语法对UTF8字符串提供了特殊支持外，还对字符串和`[]rune`类型的相互转换提供了特殊的支持。
 
 ```go
-fmt.Printf("%#v\n", []rune("Hello, 世界"))      // []int32{19990, 30028}
+fmt.Printf("%#v\n", []rune("世界"))      		// []int32{19990, 30028}
 fmt.Printf("%#v\n", string([]rune{'世', '界'})) // 世界
 ```
 
