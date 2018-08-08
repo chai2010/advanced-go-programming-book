@@ -326,7 +326,7 @@ func filter(
 }
 ```
 
-不过GRPC框架中只能为每个服务设置一个截取器，因此所有对截取工作只能在一个函数中完成。开源的grpc-ecosystem项目中的go-grpc-middleware包已经基于GRPC对截取器实现了链式截取器的支持。
+不过GRPC框架中只能为每个服务设置一个截取器，因此所有的截取工作只能在一个函数中完成。开源的grpc-ecosystem项目中的go-grpc-middleware包已经基于GRPC对截取器实现了链式截取器的支持。
 
 以下是go-grpc-middleware包中链式截取器的简单用法
 
