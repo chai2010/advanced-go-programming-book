@@ -318,9 +318,9 @@ func bytes2str(s []byte) (p string) {
 func str2runes(s []byte) []rune {
 	var p []int32
 	for len(s) > 0 {
-    	r, size := utf8.DecodeRuneInString(s)
+		r, size := utf8.DecodeRuneInString(s)
 		p = append(p, r)
-    	s = s[size:]
+		s = s[size:]
 	}
 	return []rune(p)
 }
