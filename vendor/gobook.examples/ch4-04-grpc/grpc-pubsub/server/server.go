@@ -2,13 +2,15 @@ package main
 
 import (
 	"time"
-	"google.golang.org/grpc"
 	"net"
 	"log"
-	."gobook.examples/ch4-04-grpc/grpc-pubsub/helloservice"
-	"github.com/docker/docker/pkg/pubsub"
 	"context"
 	"strings"
+	
+	"google.golang.org/grpc"
+	"github.com/docker/docker/pkg/pubsub"
+	
+	."gobook.examples/ch4-04-grpc/grpc-pubsub/helloservice"
 )
 
 
