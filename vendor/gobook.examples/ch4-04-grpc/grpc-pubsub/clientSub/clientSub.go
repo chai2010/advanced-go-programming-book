@@ -1,12 +1,14 @@
 package main
 
 import (
-	"google.golang.org/grpc"
 	"log"
-	."gobook.examples/ch4-04-grpc/grpc-pubsub/helloservice"
 	"context"
 	"io"
 	"fmt"
+	
+	"google.golang.org/grpc"
+	
+	."gobook.examples/ch4-04-grpc/grpc-pubsub/helloservice"
 )
 
 func main() {
