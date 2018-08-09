@@ -308,7 +308,7 @@ func main() {
 
 可保证打印出“hello, world”。该程序首先对`msg`进行写入，然后在`done`管道上发送同步信号，随后从`done`接收对应的同步信号，最后执行`println`函数。
 
-若在关闭信道后继续从中接收数据，接收者就会收到该信道返回的零值。因此在这个例子中，用`close(c)`关闭管道代替`done <- false`依然能保证该程序产生相同的行为。
+若在关闭Channel后继续从中接收数据，接收者就会收到该Channel返回的零值。因此在这个例子中，用`close(c)`关闭管道代替`done <- false`依然能保证该程序产生相同的行为。
 
 ```go
 var done = make(chan bool)
@@ -326,7 +326,7 @@ func main() {
 }
 ```
 
-**对于从无缓冲信道进行的接收，发生在对该信道进行的发送完成之前。**
+**对于从无缓冲Channel进行的接收，发生在对该Channel进行的发送完成之前。**
 
 基于上面这个规则可知，交换两个Goroutine中的接收和发送操作也是可以的（但是很危险）：
 
@@ -345,9 +345,9 @@ func main() {
 }
 ```
 
-也可保证打印出“hello, world”。因为`main`线程中`done <- true`发送完成前，后台线程`<-done`接收已经开始，这保证`msg = "hello, world"`被执行了，所以之后`println(msg)`的msg已经被赋值过了。简而言之，后台线程首先对`msg`进行写入，然后从`done`中接收信号，随后`main`线程向`done`发送对应的信号，最后执行`println`函数完成。但是，若该信道为带缓冲的（例如，`done = make(chan bool, 1)`），`main`线程的`done <- true`接收操作将不会被后台线程的`<-done`接收操作阻塞，该程序将无法保证打印出“hello, world”。
+也可保证打印出“hello, world”。因为`main`线程中`done <- true`发送完成前，后台线程`<-done`接收已经开始，这保证`msg = "hello, world"`被执行了，所以之后`println(msg)`的msg已经被赋值过了。简而言之，后台线程首先对`msg`进行写入，然后从`done`中接收信号，随后`main`线程向`done`发送对应的信号，最后执行`println`函数完成。但是，若该Channel为带缓冲的（例如，`done = make(chan bool, 1)`），`main`线程的`done <- true`接收操作将不会被后台线程的`<-done`接收操作阻塞，该程序将无法保证打印出“hello, world”。
 
-对于带缓冲的Channel，**对于Channel的第`K`个接收完成操作发生在第`K+C`个发送操作完成之前，其中`C`是Channel的缓存大小。** 如果将`C`设置为0自然就对应无缓存的Channel，也即使第K个接收完成在第K个发送完成之前。因为无缓存的Channel只能同步发1个，也就简化为前面无缓存Channel的规则：**对于从无缓冲信道进行的接收，发生在对该信道进行的发送完成之前。**
+对于带缓冲的Channel，**对于Channel的第`K`个接收完成操作发生在第`K+C`个发送操作完成之前，其中`C`是Channel的缓存大小。** 如果将`C`设置为0自然就对应无缓存的Channel，也即使第K个接收完成在第K个发送完成之前。因为无缓存的Channel只能同步发1个，也就简化为前面无缓存Channel的规则：**对于从无缓冲Channel进行的接收，发生在对该Channel进行的发送完成之前。**
 
 我们可以根据控制Channel的缓存大小来控制并发执行的Goroutine的最大数目, 例如:
 
