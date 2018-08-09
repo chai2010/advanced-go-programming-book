@@ -4,7 +4,7 @@
 
 ![](cover.png)
 
-- 作者：柴树杉 (chai2010, chaishushan@gmail.com), 曹春晖 (cch123, https://github.com/cch123)
+- 作者：柴树杉 (chai2010, https://github.com/chai2010), 曹春晖 (cch123, https://github.com/cch123)
 - 网址：https://github.com/chai2010/advanced-go-programming-book
 
 ## 在线阅读
