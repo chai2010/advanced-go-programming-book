@@ -1,10 +1,12 @@
 package main
 
 import (
-	"google.golang.org/grpc"
-	"log"
-	."gobook.examples/ch4-04-grpc/grpc-pubsub/helloservice"
 	"context"
+	"log"
+
+	"google.golang.org/grpc"
+
+	pb "gobook.examples/ch4-04-grpc/grpc-pubsub/pubsubservice"
 )
 
 func main() {
@@ -14,13 +16,13 @@ func main() {
 	}
 	defer conn.Close()
 
-	client := NewPubsubServiceClient(conn)
+	client := pb.NewPubsubServiceClient(conn)
 
-	_, err = client.Publish(context.Background(), &String{Value: "golang: hello Go"})
+	_, err = client.Publish(context.Background(), &pb.String{Value: "golang: hello Go"})
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = client.Publish(context.Background(), &String{Value: "docker: hello Docker"})
+	_, err = client.Publish(context.Background(), &pb.String{Value: "docker: hello Docker"})
 	if err != nil {
 		log.Fatal(err)
 	}

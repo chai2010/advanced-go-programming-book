@@ -1,12 +1,14 @@
 package main
 
 import (
-	"google.golang.org/grpc"
-	"log"
-	."gobook.examples/ch4-04-grpc/grpc-pubsub/helloservice"
 	"context"
-	"io"
 	"fmt"
+	"io"
+	"log"
+
+	"google.golang.org/grpc"
+
+	pb "gobook.examples/ch4-04-grpc/grpc-pubsub/pubsubservice"
 )
 
 func main() {
@@ -16,8 +18,8 @@ func main() {
 	}
 	defer conn.Close()
 
-	client := NewPubsubServiceClient(conn)
-	stream, err := client.Subscribe(context.Background(), &String{Value: "golang:"})
+	client := pb.NewPubsubServiceClient(conn)
+	stream, err := client.Subscribe(context.Background(), &pb.String{Value: "golang:"})
 	if err != nil {
 		log.Fatal(err)
 	}

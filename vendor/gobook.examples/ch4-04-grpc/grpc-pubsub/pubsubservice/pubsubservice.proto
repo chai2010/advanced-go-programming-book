@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package helloservice;
+package pubsubservice;
 
 message String {
 	string value = 1;
@@ -11,4 +11,4 @@ service PubsubService {
 	rpc Subscribe (String) returns (stream String);
 }
 
-//protoc --go_out=plugins=grpc:. hello.proto
+//protoc --go_out=plugins=grpc:. pubsubservice.proto

@@ -1,16 +1,17 @@
 package main
 
 import (
-	"time"
-	"google.golang.org/grpc"
-	"net"
-	"log"
-	."gobook.examples/ch4-04-grpc/grpc-pubsub/helloservice"
-	"github.com/docker/docker/pkg/pubsub"
 	"context"
+	"log"
+	"net"
 	"strings"
-)
+	"time"
 
+	"github.com/docker/docker/pkg/pubsub"
+	"google.golang.org/grpc"
+
+	pb "gobook.examples/ch4-04-grpc/grpc-pubsub/pubsubservice"
+)
 
 type PubsubService struct {
 	pub *pubsub.Publisher
@@ -23,25 +24,24 @@ func NewPubsubService() *PubsubService {
 }
 
 func (p *PubsubService) Publish(
-	ctx context.Context, arg *String,
-) (*String, error) {
+	ctx context.Context, arg *pb.String,
+) (*pb.String, error) {
 	p.pub.Publish(arg.GetValue())
 	//debug
 	//reply := &String{Value: "<Publish>  " + arg.GetValue()}
 	//fmt.Println(reply.GetValue())
-	return &String{}, nil
+	return &pb.String{}, nil
 }
 
-
 func (p *PubsubService) Subscribe(
-	arg *String, stream PubsubService_SubscribeServer,
+	arg *pb.String, stream pb.PubsubService_SubscribeServer,
 ) error {
 	ch := p.pub.SubscribeTopic(func(v interface{}) bool {
 		if key, ok := v.(string); ok {
 			//debug
 			//fmt.Printf("<debug> %t %s %s %t\n",
 			//	ok,arg.GetValue(),key,strings.HasPrefix(key,arg.GetValue()))
-			if strings.HasPrefix(key,arg.GetValue()) {
+			if strings.HasPrefix(key, arg.GetValue()) {
 				return true
 			}
 		}
@@ -49,7 +49,7 @@ func (p *PubsubService) Subscribe(
 	})
 
 	for v := range ch {
-		if err := stream.Send(&String{Value: v.(string)}); err != nil {
+		if err := stream.Send(&pb.String{Value: v.(string)}); err != nil {
 			return err
 		}
 	}
@@ -59,7 +59,7 @@ func (p *PubsubService) Subscribe(
 
 func main() {
 	grpcServer := grpc.NewServer()
-	RegisterPubsubServiceServer(grpcServer,NewPubsubService())
+	pb.RegisterPubsubServiceServer(grpcServer, NewPubsubService())
 
 	lis, err := net.Listen("tcp", ":1234")
 	if err != nil {
@@ -67,5 +67,4 @@ func main() {
 	}
 
 	grpcServer.Serve(lis)
-
 }
