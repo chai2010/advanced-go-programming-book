@@ -6,6 +6,7 @@
 
 - 作者：柴树杉 (chai2010, https://github.com/chai2010), 曹春晖 (cch123, https://github.com/cch123)
 - 网址：https://github.com/chai2010/advanced-go-programming-book
+- Star历史：https://starcharts.herokuapp.com/chai2010/advanced-go-programming-book.svg
 
 ## 在线阅读
 
@@ -15,6 +16,7 @@
 ## 相关报告
 
 - 深入CGO编程: https://github.com/chai2010/gopherchina2018-cgo-talk
+
 
 ## 关注微信公众号 (golang-china)
 
