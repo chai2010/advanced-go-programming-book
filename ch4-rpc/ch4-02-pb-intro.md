@@ -71,7 +71,7 @@ func (p *HelloService) Hello(request *String, reply *String) error {
 
 至此，我们初步实现了Protobuf和RPC组合工作。在启动RPC服务时，我们依然可以选择默认的gob或手工指定json编码，甚至可以重新基于protobuf编码实现一个插件。虽然做了这么多工作，但是似乎并没有看到什么收益！
 
-回顾第一章中更安全的PRC接口部分的内容，当时我们花费了极大的力气去给RPC服务增加安全的保障。最终得到的更安全的PRC接口的代码本书就非常繁琐的使用手工维护，同时全部安全相关的代码只适用于Go语言环境！既然使用了Protobuf定义的输入和输出参数，那么RPC服务接口是否也可以通过Protobuf定义呢？其实用Protobuf定义语言无关的PRC服务接口才是它真正的价值所在！
+回顾第一章中更安全的RPC接口部分的内容，当时我们花费了极大的力气去给RPC服务增加安全的保障。最终得到的更安全的RPC接口的代码本身就非常繁琐的使用手工维护，同时全部安全相关的代码只适用于Go语言环境！既然使用了Protobuf定义的输入和输出参数，那么RPC服务接口是否也可以通过Protobuf定义呢？其实用Protobuf定义语言无关的RPC服务接口才是它真正的价值所在！
 
 下面更新hello.proto文件，通过Protobuf来定义HelloService服务：
 
