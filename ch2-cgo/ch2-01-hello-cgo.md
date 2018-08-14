@@ -152,6 +152,7 @@ void SayHello(/*const*/ char* s);
 package main
 
 import "C"
+
 import "fmt"
 
 //export SayHello
