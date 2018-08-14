@@ -150,6 +150,8 @@ void SayHello(/*const*/ char* s);
 ```go
 // hello.go
 package main
+import "C"
+import "fmt"
 
 //export SayHello
 func SayHello(s *C.char) {
