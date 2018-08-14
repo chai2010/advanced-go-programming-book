@@ -378,7 +378,7 @@ p = (*X)(unsafe.Pointer(q)) // *Y => *X
 
 下面是指针间的转换流程的示意图：
 
-![](../images/ch2-x-ptr-to-y-ptr.uml.png)
+![](../images/ch2.3-1-x-ptr-to-y-ptr.uml.png)
 
 任何类型的指针都可以通过强制转换为`unsafe.Pointer`指针类型去掉原有的类型信息，然后再重新赋予新的指针类型而达到指针间的转换的目的。
 
@@ -390,7 +390,7 @@ p = (*X)(unsafe.Pointer(q)) // *Y => *X
 
 下面流程图演示了如何实现int32类型到C语言的`char*`字符串指针类型的相互转换：
 
-![](../images/ch2-int32-to-char-ptr.uml.png)
+![](../images/ch2.3-2-int32-to-char-ptr.uml.png)
 
 转换分为几个阶段，在每个阶段实现一个小目标：首先是int32到uintptr类型，然后是uintptr到`unsafe.Pointr`指针类型，最后是`unsafe.Pointr`指针类型到`*C.char`类型。
 
@@ -416,6 +416,6 @@ pHdr.Cap = qHdr.Cap * unsafe.Sizeof(q[0]) / unsafe.Sizeof(p[0])
 
 下面演示了切片间的转换的具体流程：
 
-![](../images/ch2-x-slice-to-y-slice.uml.png)
+![](../images/ch2.3-3-x-slice-to-y-slice.uml.png)
 
 针对CGO中常用的功能，作者封装了 "github.com/chai2010/cgo" 包，提供基本的转换功能，具体的细节可以参考实现代码。
