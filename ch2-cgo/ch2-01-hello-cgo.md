@@ -103,8 +103,8 @@ void SayHello(const char* s);
 ```c
 // hello.c
 
-#include <stdio.h>
 #include "hello.h"
+#include <stdio.h>
 
 void SayHello(const char* s) {
 	puts(s);
