@@ -104,11 +104,23 @@ void SayHello(const char* s);
 
 ```c
 // hello.c
-
+#include <stdio.h>
 #include "hello.h"
 
 void SayHello(const char* s) {
 	puts(s);
+}
+```
+还有main.go文件：
+
+```go
+package main
+
+//#include "hello.h"
+import "C"
+
+func main() {
+	C.SayHello(C.CString("Hello, World\n"))
 }
 ```
 
