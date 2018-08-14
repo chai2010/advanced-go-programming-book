@@ -215,7 +215,7 @@ const (
 // @param driver_id
 // @param rate_date
 // @return []Order, error
-func GetAllByProductIDsAndCustomerID(ctx context.Context, productIDs []uint64, customerID uint64) ([]Order, error) {
+func GetAllByProductIDAndCustomerID(ctx context.Context, productIDs []uint64, customerID uint64) ([]Order, error) {
     var orderList []Order
 
     params := map[string]interface{}{
@@ -223,8 +223,8 @@ func GetAllByProductIDsAndCustomerID(ctx context.Context, productIDs []uint64, c
         "customer_id": customerID,
     }
 
-    // getAllByProductIdsAndCustomerID 是 const 类型的 sql 字符串
-    sql, args, err := sqlutil.Named(getAllByProductIDsAndCustomerID, params)
+    // getAllByProductIDAndCustomerID 是 const 类型的 sql 字符串
+    sql, args, err := sqlutil.Named(getAllByProductIDAndCustomerID, params)
     if err != nil {
         return nil, err
     }
