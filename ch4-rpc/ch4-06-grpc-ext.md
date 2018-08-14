@@ -167,6 +167,9 @@ grpc-gateway的工作原理如下图：
 
 ![](../images/ch4.6-1-grpc-gateway.png)
 
+*图 4.6-1 Grpc-Gateway工作流程*
+
+
 通过在Protobuf文件中添加路由相关的元信息，通过自定义的代码插件生成路由相关的处理代码，最终将REST请求转给更后端的GRPC服务处理。
 
 路由扩展元信息也是通过Protobuf的元数据扩展用法提供：
