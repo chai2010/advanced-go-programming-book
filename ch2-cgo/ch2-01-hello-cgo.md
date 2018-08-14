@@ -150,6 +150,7 @@ void SayHello(/*const*/ char* s);
 ```go
 // hello.go
 package main
+
 import "C"
 import "fmt"
 
