@@ -4,4 +4,52 @@
 
 所以我们的目标还是能尽量避免或者绕过上线的情况下，对线上程序做一些修改。比较典型的修改内容就是程序的配置项。
 
-## 使用 viper 和 etcd 实现配置更新
+## 使用 etcd 实现配置更新
+
+### 配置定义
+
+简单的配置，可以将内容完全存储在 etcd 中。比如：
+
+```shell
+etcdctl get /configs/remote_config.json
+{
+    "addr" : "127.0.0.1:1080",
+    "aes_key" : "01B345B7A9ABC00F0123456789ABCDAF",
+    "https" : false,
+    "secret" : "",
+    "private_key_path" : "",
+    "cert_file_path" : ""
+}
+```
+
+### 配置获取
+
+```go
+resp, err = kapi.Get(context.Background(), "/name", nil)
+if err != nil {
+    log.Fatal(err)
+} else {
+    log.Printf("Get is done. Metadata is %q\n", resp)
+    log.Printf("%q key has %q value\n", resp.Node.Key, resp.Node.Value)
+}
+```
+
+### 配置更新订阅
+
+```go
+kapi := client.NewKeysAPI(c)
+w := kapi.Watcher("/name", nil)
+go func() {
+    for {
+        resp, err := w.Next(context.Background())
+        fmt.Println(resp, err)
+        fmt.Println("new values is ", resp.Node.Value)
+    }
+}()
+```
+
+### 配置膨胀之后
+
+如果系统是重量级的配置系统，配置文件可能成千上万。且客户端同样上万时，将配置内容存储在 etcd 内部便不再合适了。随着配置文件、信息数量的膨胀，除了存储系统本身的吞吐量问题，还有配置信息的管理问题。我们可能需要对相应的配置进行权限管理，需要根据业务量进行配置存储的集群划分。如果客户端太多，导致了配置存储系统无法承受瞬时大量的 QPS，那可能还需要在客户端侧进行缓存优化，等等。
+
+这也就是为什么大公司都会针对自己的业务额外开发一套复杂配置系统的原因。
