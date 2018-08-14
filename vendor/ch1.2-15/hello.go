@@ -1,9 +1,9 @@
-// ch1.1-1
+// ch1.2-15
 
 package main
 
 import "fmt"
 
 func main() {
-	fmt.Println("你好, 世界!")
+	fmt.Printf("hello, world\n")
 }
