@@ -38,6 +38,16 @@ etcdctl get /configs/remote_config.json
 }
 ```
 
+### 新建 etcd client
+
+```go
+cfg := client.Config{
+    Endpoints:               []string{"http://127.0.0.1:2379"},
+    Transport:               client.DefaultTransport,
+    HeaderTimeoutPerRequest: time.Second,
+}
+```
+
 ### 配置获取
 
 ```go
