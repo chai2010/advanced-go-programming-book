@@ -242,7 +242,7 @@ func insertDocument(db string, table string, obj map[string]interface{}) {
 
 ```go
 func query(indexName string, typeName string) (*elastic.SearchResult, error) {
-    // 通过 bool must 和 bool shoud 添加 bool 查询条件
+    // 通过 bool must 和 bool should 添加 bool 查询条件
     q := elastic.NewBoolQuery().Must(elastic.NewMatchPhraseQuery("id", 1),
         elastic.NewBoolQuery().Must(elastic.NewMatchPhraseQuery("male", "m")))
 
