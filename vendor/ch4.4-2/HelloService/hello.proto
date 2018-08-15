@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package HelloService;
+
+message String {
+	string value = 1;
+}
+
+service HelloService {
+	rpc Hello (String) returns (String);
+	rpc Channel (stream String) returns (stream String);
+}
+
+//protoc --go_out=plugins=grpc:. hello.proto
