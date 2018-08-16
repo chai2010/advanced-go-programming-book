@@ -56,7 +56,7 @@ func PrintCString(cs *C.char) {
 ```go
 package main
 
-//char* cs = "hello";
+//static const char* cs = "hello";
 import "C"
 import "./cgo_helper"
 
@@ -108,7 +108,7 @@ import "C"
 // #cgo !windows LDFLAGS: -lm
 ```
 
-其中在windows平台下，编译前会预定义X86宏为1；再非widnows平台下，在链接阶段会要求链接math数学库。这种用法对于在不同平台下只有少数编译选项差异的场景比较适用。
+其中在windows平台下，编译前会预定义X86宏为1；在非widnows平台下，在链接阶段会要求链接math数学库。这种用法对于在不同平台下只有少数编译选项差异的场景比较适用。
 
 如果在不同的系统下cgo对应着不同的c代码，我们可以先使用`#cgo`指令定义不同的C语言的宏，然后通过宏来区分不同的代码：
 
@@ -121,11 +121,11 @@ package main
 #cgo linux CFLAGS: -DCGO_OS_LINUX=1
 
 #if defined(CGO_OS_WINDOWS)
-	extern char* os = "windows";
+	static const char* os = "windows";
 #elif defined(CGO_OS_DARWIN)
-	extern char* os = "darwin";
+	static const char* os = "darwin";
 #elif defined(CGO_OS_LINUX)
-	extern char* os = "linux";
+	static const char* os = "linux";
 #else
 #	error(unknown os)
 #endif
@@ -162,7 +162,7 @@ go build -tags="windows,debug"
 
 我们可以通过`-tags`命令行参数同时指定多个build标志，它们之间用逗号分割。
 
-当有多个build tag时，我们将多个标志通过逻辑操作的规则来组合使用。比如以下的构建标志表示只有在linux/386或非cgo环境的darwin平台下才进行构建。
+当有多个build tag时，我们将多个标志通过逻辑操作的规则来组合使用。比如以下的构建标志表示只有在”linux/386“或”darwin平台下非cgo环境“才进行构建。
 
 ```go
 // +build linux,386 darwin,!cgo
