@@ -56,7 +56,7 @@ func PrintCString(cs *C.char) {
 ```go
 package main
 
-//char* cs = "hello";
+//static const char* cs = "hello";
 import "C"
 import "./cgo_helper"
 
@@ -121,11 +121,11 @@ package main
 #cgo linux CFLAGS: -DCGO_OS_LINUX=1
 
 #if defined(CGO_OS_WINDOWS)
-	char* os = "windows";
+	static const char* os = "windows";
 #elif defined(CGO_OS_DARWIN)
-	char* os = "darwin";
+	static const char* os = "darwin";
 #elif defined(CGO_OS_LINUX)
-	char* os = "linux";
+	static const char* os = "linux";
 #else
 #	error(unknown os)
 #endif
