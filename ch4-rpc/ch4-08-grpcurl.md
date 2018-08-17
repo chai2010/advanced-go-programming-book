@@ -3,6 +3,8 @@
 
 grpc子包中还提供了一个名为reflection的反射包，用于为grpc服务提供查询。reflection包中只有一个Register函数，用于将grpc.Server注册到反射服务中。
 
+## 4.8.1 服务列表
+
 reflection包文档给出了简单的使用方法：
 
 ```go
@@ -34,6 +36,8 @@ grpc.reflection.v1alpha.ServerReflection
 ```
 
 其中`-plaintext`参数表示跳过TLS证书验证流程，list子命令表示列出所有的服务。从输出可以发现出了我们实现的HelloService服务外，还有一个ServerReflection服务。ServerReflection服务就是reflection包注册的反射服务。
+
+## 4.8.2 服务的方法列表
 
 继续使用list子命令还可以查看HelloService服务的方法列表：
 
@@ -78,6 +82,9 @@ HelloService.HelloService is a service:
 
 可以查看每个方法输入参数和返回值对应的类型。
 
+
+## 4.8.3 类型信息
+
 describe子命令也可以查看参数HelloService.String类型的信息：
 
 ```shell
@@ -110,6 +117,8 @@ message String {
 	string value = 1;
 }
 ```
+
+## 4.8.4 调用方法
 
 在获取GRPC服务的详细信息之后就可以json调用GRPC方法了：
 
