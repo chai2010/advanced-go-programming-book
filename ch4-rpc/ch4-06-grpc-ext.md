@@ -275,3 +275,7 @@ $ protoc -I. \
 ```
 
 然后会生成一个hello.swagger.json文件。这样的话就可以通过swagger-ui这个项目，在网页中提供REST接口的文档和测试等功能。
+
+## 4.6.3 NGINX
+
+最新的NGINX对GRPC提供了深度支持。我们可以通过NGINX将后端多个GRPC服务聚合到一个NGINX服务。同时NGINX也提供了为同一种GRPC服务注册多个后端的给你，这样可以轻松实现GRPC负载均衡的支持。NGINX的GRPC扩展是一个较大的主题，感兴趣的读者可以自行参考相关文档。
