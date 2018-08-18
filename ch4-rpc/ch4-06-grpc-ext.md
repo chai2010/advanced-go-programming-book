@@ -278,4 +278,5 @@ $ protoc -I. \
 
 ## 4.6.3 Nginx
 
-最新的Nginx对GRPC提供了深度支持。我们可以通过Nginx将后端多个GRPC服务聚合到一个Nginx服务。同时Nginx也提供了为同一种GRPC服务注册多个后端的给你，这样可以轻松实现GRPC负载均衡的支持。Nginx的GRPC扩展是一个较大的主题，感兴趣的读者可以自行参考相关文档。
+最新的Nginx对GRPC提供了深度支持。可以通过Nginx将后端多个GRPC服务聚合到一个Nginx服务。同时Nginx也提供了为同一种GRPC服务注册多个后端的功能，这样可以轻松实现GRPC负载均衡的支持。Nginx的GRPC扩展是一个较大的主题，感兴趣的读者可以自行参考相关文档。
+
