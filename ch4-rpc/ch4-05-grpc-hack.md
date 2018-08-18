@@ -211,7 +211,7 @@ type Authentication struct {
 }
 
 func (a *Authentication) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
-	return map[string]string{"login": a.Login, "password": a.Password}, nil
+	return map[string]string{"user":a.User, "password": a.Password}, nil
 }
 func (a *Authentication) RequireTransportSecurity() bool {
 	return false
