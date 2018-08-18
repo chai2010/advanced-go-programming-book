@@ -169,6 +169,21 @@ $ grpcurl -plaintext -d '{"value": "gopher"}' \
 }
 ```
 
-如果`-d`参数是`@`则表示从标准输入读取json输入参数，这一般用于比较输入复杂的json数据。
+如果`-d`参数是`@`则表示从标准输入读取json输入参数，这一般用于比较输入复杂的json数据，也可以用于测试流方法。
+
+下面命令是链接Channel流方法，通过从标准输入读取输入流参数：
+
+```shell
+$ grpcurl -plaintext -d @ localhost:1234 HelloService.HelloService/Channel
+{"value": "gopher"}
+{
+  "value": "hello:gopher"
+}
+
+{"value": "wasm"}
+{
+  "value": "hello:wasm"
+}
+```
 
 通过grpcurl工具，我们可以在没有服务端代码的环境下测试GRPC服务。
