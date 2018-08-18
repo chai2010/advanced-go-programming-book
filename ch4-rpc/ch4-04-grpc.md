@@ -217,6 +217,10 @@ for {
 ```go
 import (
 	"github.com/docker/docker/pkg/pubsub"
+	"time"
+	"fmt"
+	"strings"
+	"runtime"
 )
 
 func main() {
@@ -224,7 +228,7 @@ func main() {
 
 	golang := p.SubscribeTopic(func(v interface{}) bool {
 		if key, ok := v.(string); ok {
-			if strings.Hasprefix("golang:") {
+			if strings.HasPrefix(key,"golang:") {
 				return true
 			}
 		}
@@ -232,7 +236,7 @@ func main() {
 	})
 	docker := p.SubscribeTopic(func(v interface{}) bool {
 		if key, ok := v.(string); ok {
-			if strings.Hasprefix("docker:") {
+			if strings.HasPrefix(key,"docker:") {
 				return true
 			}
 		}
@@ -250,8 +254,10 @@ func main() {
 	go func () {
 		fmt.Println("docker topic:", <-docker)
 	} ()
+	for {
+		runtime.Gosched()
+	}
 
-	<-make(chan bool)
 }
 ```
 
