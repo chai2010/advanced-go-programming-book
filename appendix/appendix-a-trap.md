@@ -192,7 +192,9 @@ func main() {
 		}
 	}()
 
-	select{}
+	select{
+		default:
+	}
 }
 ```
 
