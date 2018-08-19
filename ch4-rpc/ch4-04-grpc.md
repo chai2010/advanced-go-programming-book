@@ -250,10 +250,8 @@ func main() {
 	go func () {
 		fmt.Println("docker topic:", <-docker)
 	} ()
-	for {
-		runtime.Gosched()
-	}
 
+	<-make(chan bool)
 }
 ```
 
