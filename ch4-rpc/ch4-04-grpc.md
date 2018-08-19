@@ -217,10 +217,6 @@ for {
 ```go
 import (
 	"github.com/docker/docker/pkg/pubsub"
-	"time"
-	"fmt"
-	"strings"
-	"runtime"
 )
 
 func main() {
