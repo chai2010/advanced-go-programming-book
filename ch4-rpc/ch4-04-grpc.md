@@ -224,7 +224,7 @@ func main() {
 
 	golang := p.SubscribeTopic(func(v interface{}) bool {
 		if key, ok := v.(string); ok {
-			if strings.Hasprefix("golang:") {
+			if strings.HasPrefix(key, "golang:") {
 				return true
 			}
 		}
@@ -232,7 +232,7 @@ func main() {
 	})
 	docker := p.SubscribeTopic(func(v interface{}) bool {
 		if key, ok := v.(string); ok {
-			if strings.Hasprefix("docker:") {
+			if strings.HasPrefix(key, "docker:") {
 				return true
 			}
 		}
@@ -244,12 +244,12 @@ func main() {
 	go p.Publish("docker: https://www.docker.com/")
 	time.Sleep(1)
 
-	go func () {
+	go func() {
 		fmt.Println("golang topic:", <-golang)
-	} ()
-	go func () {
+	}()
+	go func() {
 		fmt.Println("docker topic:", <-docker)
-	} ()
+	}()
 
 	<-make(chan bool)
 }
