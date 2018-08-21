@@ -2,7 +2,7 @@
 
 本节将对 db/sql 官方标准库作一些简单分析，并介绍一些应用比较广泛的开源 ORM 和 sql builder。并从企业级应用开发和公司架构的角度来分析哪种技术栈对于现代的企业级应用更为合适。
 
-## 从 database/sql 讲起
+## 5.5.1 从 database/sql 讲起
 
 Go官方提供了 `database/sql` 包来给用户进行和数据库打交道的工作，实际上 `database/sql` 库就只是提供了一套操作数据库的接口和规范，例如抽象好的 sql 预处理(prepare)，连接池管理，数据绑定，事务，错误处理等等。官方并没有提供具体某种数据库实现的协议支持。
 
@@ -105,7 +105,7 @@ func main() {
 
 是的，所以社区才会有各种各样的 sql builder 和 orm 百花齐放。
 
-## 提高生产效率的 ORM 和 SQL Builder
+## 5.5.2 提高生产效率的 ORM 和 SQL Builder
 
 在 web 开发领域常常提到的 ORM 是什么？我们先看看万能的维基百科：
 
@@ -179,7 +179,7 @@ orders := orderModel.GetList(where, limit, orderBy)
 
 一旦你做的是高并发的 OLTP 在线系统，且想在人员充足分工明确的前提下最大程度控制系统的风险，使用 sql builder 就不合适了。
 
-## 脆弱的 db
+## 5.5.3 脆弱的 db
 
 无论是 ORM 还是 sql builder 都有一个致命的缺点，就是没有办法进行系统上线的事前 sql 审核。虽然很多 orm 和 sql builder 也提供了运行期打印 sql 的功能，但只在查询的时候才能进行输出。而 sql builder 和 ORM本身提供的功能太过灵活。使得你不可能通过测试枚举出所有可能在线上执行的 sql。例如你可能用 sql builder 写出下面这样的代码：
 

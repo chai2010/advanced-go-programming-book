@@ -1,4 +1,4 @@
-# 6.2 分布式 id 生成器
+# 6.1 分布式 id 生成器
 
 有时我们需要能够生成类似 MySQL 自增 ID 这样不断增大，同时又不会重复的 id。以支持业务中的高并发场景。比较典型的，电商促销时，短时间内会有大量的订单涌入到系统，比如每秒 10w+。明星出轨时，会有大量热情的粉丝发微博以表心意，同样会在短时间内产生大量的消息。
 
@@ -39,7 +39,7 @@ Twitter 的 snowflake 算法是这种场景下的一个典型解法。先来看�
 
 表示 timestamp 的 41 位，可以支持我们使用 69 年。当然，我们的时间毫秒计数不会真的从 1970 年开始记，那样我们的系统跑到 `2039/9/7 23:47:35` 就不能用了，所以这里的 timestamp 实际上只是相对于某个时间的增量，比如我们的系统上线是 2018-08-01，那么我们可以把这个 timestamp 当作是从 `2018-08-01 00:00:00.000` 的偏移量。
 
-## worker id　分配
+## 6.1.1 worker id　分配
 
 timestamp，datacenter_id，worker_id 和 sequence_id 这四个字段中，timestamp 和 sequence_id 是由程序在运行期生成的。但 datacenter_id 和 worker_id 需要我们在部署阶段就能够获取得到，并且一旦程序启动之后，就是不可更改的了(想想，如果可以随意更改，可能被不慎修改，造成最终生成的 id 有冲突)。
 
@@ -64,9 +64,9 @@ mysql> select last_insert_id();
 
 考虑到集群中即使有单个 id 生成服务的实例挂了，也就是损失一段时间的一部分 id，所以我们也可以更简单暴力一些，把 worker_id 直接写在 worker 的配置中，上线时，由部署脚本完成 worker_id 字段替换。
 
-## 开源实例
+## 6.1.2 开源实例
 
-### 标准 snowflake 实现
+### 6.1.2.1 标准 snowflake 实现
 
 `github.com/bwmarrin/snowflake` 是一个相当轻量化的 snowflake 的 Go 实现。其文档指出：
 
@@ -122,7 +122,7 @@ func main() {
 
 Epoch 就是本节开头讲的起始时间，NodeBits 指的是机器编号的位长，StepBits 指的是自增序列的位长。
 
-### sonyflake
+### 6.1.2.2 sonyflake
 
 sonyflake 是 Sony 公司的一个开源项目，基本思路和 snowflake 差不多，不过位分配上稍有不同：
 

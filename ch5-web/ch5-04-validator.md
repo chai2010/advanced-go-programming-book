@@ -6,7 +6,7 @@
 
 实际上这是一个语言无关的场景，需要进行字段校验的情况有很多，web 系统的 Form/json 提交只是一个典型的例子。我们用 go 来写一个类似上图的校验 demo。然后研究怎么一步步对其进行改进。
 
-## 重构请求校验函数
+## 5.4.1 重构请求校验函数
 
 假设我们的数据已经通过某个 binding 库绑定到了具体的 struct 上。
 
@@ -69,7 +69,7 @@ func register(req RegisterReq) error{
 
 代码更清爽，看起来也不那么别扭了。这是比较通用的重构理念。虽然使用了重构方法使我们的 validate 过程看起来优雅了，但我们还是得为每一个 http 请求都去写这么一套差不多的 validate 函数，有没有更好的办法来帮助我们解除这项体力劳动？答案就是 validator。
 
-## 用 validator 解放体力劳动
+## 5.4.2 用 validator 解放体力劳动
 
 从设计的角度讲，我们一定会为每个请求都声明一个 struct。前文中提到的校验场景我们都可以通过 validator 完成工作。还以前文中的 struct 为例。为了美观起见，我们先把 json tag 省略掉。
 
@@ -121,7 +121,7 @@ fmt.Println(err) // Key: 'RegisterReq.PasswordRepeat' Error:Field validation for
 
 如果觉得这个 validator 提供的错误信息不够人性化，例如要把错误信息返回给用户，那就不应该直接显示英文了。可以针对每种 tag 进行错误信息定制，读者可以自行探索。
 
-## 原理
+## 5.4.3 原理
 
 从结构上来看，每一个 struct 都可以看成是一棵树。假如我们有如下定义的 struct：
 

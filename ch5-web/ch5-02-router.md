@@ -34,7 +34,7 @@ DELETE /user/starred/:owner/:repo
 
 如果我们的系统也想要这样的 URI 设计，使用标准库的 mux 显然就力不从心了。
 
-## httprouter
+## 5.2.1 httprouter
 
 较流行的开源 golang web 框架大多使用 httprouter，或是基于 httprouter 的变种对路由进行支持。前面提到的 github 的参数式路由在 httprouter 中都是可以支持的。
 
@@ -103,7 +103,7 @@ r.PanicHandler = func(w http.ResponseWriter, r *http.Request, c interface{}) {
 
 目前开源界最为流行(star 数最多)的 web 框架 [gin](https://github.com/gin-gonic/gin) 使用的就是 httprouter 的变种。
 
-## 原理
+## 5.2.2 原理
 
 httprouter 和众多衍生 router 使用的数据结构被称为 radix tree，压缩字典树。读者可能没有接触过压缩字典树，但对字典树 trie tree 应该有所耳闻。下图是一个典型的字典树结构：
 
@@ -117,7 +117,7 @@ httprouter 和众多衍生 router 使用的数据结构被称为 radix tree，�
 
 每个节点上不只存储一个字母了，这也是压缩字典树中“压缩”的主要含义。使用压缩字典树可以减少树的层数，同时因为每个节点上数据存储也比通常的字典树要多，所以程序的局部性较好(一个节点的 path 加载到 cache 即可进行多个字符的对比)，从而对 CPU 缓存友好。
 
-## 压缩字典树创建过程
+## 5.2.3 压缩字典树创建过程
 
 我们来跟踪一下 httprouter 中，一个典型的压缩字典树的创建过程，路由设定如下：
 
@@ -136,7 +136,7 @@ GET /marketplace_listing/plans/ohyes
 
 最后一条补充路由是我们臆想的，除此之外所有 API 路由均来自于 api.github.com。
 
-### root 节点创建
+### 5.2.3.1 root 节点创建
 
 httprouter 的 Router struct 中存储压缩字典树使用的是下述数据结构：
 
@@ -192,7 +192,7 @@ indices: 子节点索引，当子节点为非参数类型，即本节点的 wild
 
 当然，PUT 路由只有唯一的一条路径。接下来，我们以后续的多条 GET 路径为例，讲解子节点的插入过程。
 
-### 子节点插入
+### 5.2.3.2 子节点插入
 
 当插入 `GET /marketplace_listing/plans` 时，类似前面 PUT 的过程，GET 树的结构如图所示：
 ![get radix step 1](../images/ch6-02-radix-get-1.png)
@@ -207,7 +207,7 @@ indices: 子节点索引，当子节点为非参数类型，即本节点的 wild
 
 上面这种情况比较简单，新的路由可以直接作为原路由的子节点进行插入。实际情况不会这么美好。
 
-### 边分裂
+### 5.2.3.3 边分裂
 
 接下来我们插入 `GET /search`，这时会导致树的边分裂。
 
@@ -219,7 +219,7 @@ indices: 子节点索引，当子节点为非参数类型，即本节点的 wild
 
 ![get radix step 4](../images/ch6-02-radix-get-4.png)
 
-### 子节点冲突处理
+### 5.2.3.4 子节点冲突处理
 
 在路由本身只有字符串的情况下，不会发生任何冲突。只有当路由中含有 wildcard(类似 :id) 或者 catchAll 的情况下才可能冲突。这一点在前面已经提到了。
 
