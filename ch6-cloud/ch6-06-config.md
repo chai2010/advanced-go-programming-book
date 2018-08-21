@@ -100,12 +100,12 @@ var configPath =  `/configs/remote_config.json`
 var kapi client.KeysAPI
 
 type ConfigStruct struct {
-	Addr           string `json:"addr"`
-	AesKey         string `json:"aes_key"`
-	HTTPS          bool   `json:"https"`
-	Secret         string `json:"secret"`
-	PrivateKeyPath string `json:"private_key_path"`
-	CertFilePath   string `json:"cert_file_path"`
+    Addr           string `json:"addr"`
+    AesKey         string `json:"aes_key"`
+    HTTPS          bool   `json:"https"`
+    Secret         string `json:"secret"`
+    PrivateKeyPath string `json:"private_key_path"`
+    CertFilePath   string `json:"cert_file_path"`
 }
 
 var appConfig ConfigStruct
@@ -118,10 +118,11 @@ func init() {
     }
 
     c, err := client.New(cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
-	kapi = client.NewKeysAPI(c)
+    if err != nil {
+        log.Fatal(err)
+    }
+    kapi = client.NewKeysAPI(c)
+    initConfig()
 }
 
 func watchAndUpdate() {
@@ -143,7 +144,7 @@ func watchAndUpdate() {
     }()
 }
 
-func getConfig() {
+func initConfig() {
     resp, err = kapi.Get(context.Background(), configPath, nil)
     if err != nil {
         log.Fatal(err)
@@ -153,6 +154,10 @@ func getConfig() {
     if err != nil {
         log.Fatal(err)
     }
+}
+
+func getConfig() ConfigStruct {
+    return appConfig
 }
 
 func main() {
