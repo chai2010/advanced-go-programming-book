@@ -50,10 +50,12 @@ cfg := client.Config{
 }
 ```
 
+直接用 etcd client 包中的结构体初始化，没什么可说的。
+
 ### 配置获取
 
 ```go
-resp, err = kapi.Get(context.Background(), "/name", nil)
+resp, err = kapi.Get(context.Background(), "/path/to/your/config", nil)
 if err != nil {
     log.Fatal(err)
 } else {
@@ -61,6 +63,8 @@ if err != nil {
     log.Printf("%q key has %q value\n", resp.Node.Key, resp.Node.Value)
 }
 ```
+
+获取配置使用 etcd KeysAPI 的 Get 方法，比较简单。
 
 ### 配置更新订阅
 
@@ -76,6 +80,8 @@ go func() {
 }()
 ```
 
+通过订阅 config 路径的变动事件，在该路径下内容发生变化时，客户端侧可以收到变动通知，并收到变动后的字符串值。
+
 ### 整合起来
 
 ```go
@@ -87,22 +93,24 @@ import (
     "time"
 
     "golang.org/x/net/context"
-
     "github.com/coreos/etcd/client"
 )
 
-func watchAndUpdate() {
+var configPath =  `/configs/remote_config.json`
+var kapi client.KeysAPI
+
+type ConfigStruct struct {
+	Addr           string `json:"addr"`
+	AesKey         string `json:"aes_key"`
+	HTTPS          bool   `json:"https"`
+	Secret         string `json:"secret"`
+	PrivateKeyPath string `json:"private_key_path"`
+	CertFilePath   string `json:"cert_file_path"`
 }
 
-func set() error {
-    return nil
-}
+var appConfig ConfigStruct
 
-func get() (string, error) {
-    return "", nil
-}
-
-func main() {
+func init() {
     cfg := client.Config{
         Endpoints:               []string{"http://127.0.0.1:2379"},
         Transport:               client.DefaultTransport,
@@ -110,40 +118,51 @@ func main() {
     }
 
     c, err := client.New(cfg)
-    if err != nil {
-        log.Fatal(err)
-    }
-    kapi := client.NewKeysAPI(c)
-    w := kapi.Watcher("/name", nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	kapi = client.NewKeysAPI(c)
+}
+
+func watchAndUpdate() {
+    w := kapi.Watcher(configPath, nil)
     go func() {
+        // watch 该节点下的每次变化
         for {
             resp, err := w.Next(context.Background())
-            fmt.Println(resp, err)
+            if err != nil {
+                log.Fatal(err)
+            }
             fmt.Println("new values is ", resp.Node.Value)
+
+            err = json.Unmarshal([]byte(resp.Node.Value), &appConfig)
+            if err != nil {
+                log.Fatal(err)
+            }
         }
     }()
+}
 
-    log.Print("Setting /name to alex")
-    resp, err := kapi.Set(context.Background(), "/name", "alex", nil)
+func getConfig() {
+    resp, err = kapi.Get(context.Background(), configPath, nil)
     if err != nil {
         log.Fatal(err)
-    } else {
-        log.Printf("Set is done. Metadata is %q\n", resp)
     }
 
-    log.Print("Getting /name key value")
-    resp, err = kapi.Get(context.Background(), "/name", nil)
+    err := json.Unmarshal(resp.Node.Value, &appConfig)
     if err != nil {
         log.Fatal(err)
-    } else {
-        log.Printf("Get is done. Metadata is %q\n", resp)
-        log.Printf("%q key has %q value\n", resp.Node.Key, resp.Node.Value)
     }
-    time.Sleep(time.Minute)
+}
+
+func main() {
+    // init your app
 }
 ```
 
-如果业务规模不大，使用本节中的例子就可以实现功能了。TODO
+如果业务规模不大，使用本节中的例子就可以实现功能了。
+
+这里只需要注意一点，我们在更新配置时，进行了一系列操作：watch 响应，json 解析，这些操作都不具备原子性。当单个业务请求流程中多次获取 config 时，有可能因为中途 config 发生变化而导致单个请求前后逻辑不一致。因此，在使用类似这样的方式来更新配置时，需要在单个请求的生命周期内使用同样的配置。具体实现方式可以是只在请求开始的时候获取一次配置，然后依次向下透传等等，具体情况具体分析。
 
 ## 配置膨胀
 
@@ -158,6 +177,8 @@ func main() {
 有时错误的配置可能不是格式上有问题，而是在逻辑上有问题。比如我们写 SQL 时少 select 了一个字段，更新配置时，不小心把丢掉了 json 字符串中的一个 field 而导致程序无法理解新的配置而进入诡异的逻辑。为了快速止损，最快且最有效的办法就是进行版本管理和，并支持按版本回滚。
 
 在配置进行更新时，我们要为每份配置的新内容赋予一个版本号，并将修改前的内容和版本号记录下来，当发现新配置出问题时，能够及时地回滚回来。
+
+常见的做法是，使用 MySQL 来存储配置文件/字符串的不同版本内容，在需要回滚时，只要进行简单的查询即可。
 
 ## 客户端容错
 
