@@ -74,8 +74,8 @@ w := kapi.Watcher("/path/to/your/config", nil)
 go func() {
     for {
         resp, err := w.Next(context.Background())
-        fmt.Println(resp, err)
-        fmt.Println("new values is ", resp.Node.Value)
+        log.Println(resp, err)
+        log.Println("new values is ", resp.Node.Value)
     }
 }()
 ```
@@ -88,7 +88,6 @@ go func() {
 package main
 
 import (
-    "fmt"
     "log"
     "time"
 
@@ -134,7 +133,7 @@ func watchAndUpdate() {
             if err != nil {
                 log.Fatal(err)
             }
-            fmt.Println("new values is ", resp.Node.Value)
+            log.Println("new values is ", resp.Node.Value)
 
             err = json.Unmarshal([]byte(resp.Node.Value), &appConfig)
             if err != nil {
