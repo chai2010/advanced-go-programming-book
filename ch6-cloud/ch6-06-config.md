@@ -70,7 +70,7 @@ if err != nil {
 
 ```go
 kapi := client.NewKeysAPI(c)
-w := kapi.Watcher("/name", nil)
+w := kapi.Watcher("/path/to/your/config", nil)
 go func() {
     for {
         resp, err := w.Next(context.Background())
