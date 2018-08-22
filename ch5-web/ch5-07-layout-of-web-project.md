@@ -10,7 +10,7 @@
 
 ![前后分离](../images/ch6-08-frontend-backend.png)
 
-图里的 vue 和 react 是现在前端界比较流行的两个框架，因为我们的重点不在这里，所以前端项目内的组织我们就不强调了。事实上，即使是简单的项目，业界也并没有完全遵守 MVC 功能提出者对于 M 和 C 所定义的分工。有很多公司的项目会在 controller 层塞入大量的逻辑，在 model 层就只管理数据的存储。这往往来源于对于 model 层字面含义的某种擅自引申理解。认为字面意思，这一层就是处理某种建模，而模型是什么？就是数据呗！
+图里的 vue 和 react 是现在前端界比较流行的两个框架，因为我们的重点不在这里，所以前端项目内的组织我们就不强调了。事实上，即使是简单的项目，业界也并没有完全遵守 MVC 框架提出者对于 M 和 C 所定义的分工。有很多公司的项目会在 controller 层塞入大量的逻辑，在 model 层就只管理数据的存储。这往往来源于对于 model 层字面含义的某种擅自引申理解。认为字面意思，这一层就是处理某种建模，而模型是什么？就是数据呗！
 
 这种理解显然是有问题的，业务流程也算是一种“模型”，是对真实世界用户行为或者既有流程的一种建模，并非只有按格式组织的数据才能叫模型。不过按照 MVC 的创始人的想法，我们如果把和数据打交道的代码还有业务流程全部塞进 MVC 里的 M 层的话，这个 M 层又会显得有些过于臃肿。对于复杂的项目，一个 C 和一个 M 层显然是不够用的，现在比较流行的纯后端 api 模块一般采用下述划分方法：
 
@@ -80,7 +80,7 @@ type CreateOrder struct {
 
 // thrift request struct
 type FeatureSetParams struct {
-    DriverID int64             `thrift:"driverID,1,required"`
+    DriverID int64 `thrift:"driverID,1,required"`
     OrderID int64 `thrift:"OrderID,2,required"`
     UserID int64 `thrift:"UserID,3,required"`
     ProductID int `thrift:"ProductID,4,required"`
@@ -101,7 +101,7 @@ type CreateOrderParams struct {
 
 ```go
 type FeatureSetParams struct {
-    DriverID int64             `thrift:"driverID,1,required" json:"driver_id"`
+    DriverID int64 `thrift:"driverID,1,required" json:"driver_id"`
     OrderID int64 `thrift:"OrderID,2,required" json:"order_id"`
     UserID int64 `thrift:"UserID,3,required" json:"user_id"`
     ProductID int `thrift:"ProductID,4,required" json:"prod_id"`
