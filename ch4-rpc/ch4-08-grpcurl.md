@@ -27,14 +27,14 @@ func main() {
 
 ## 4.8.2 查看服务列表
 
-grpcurl中最常使用的是list命令，用于获取服务或服务方法的列表。比如`grpcurl localhost:1234 list`命令将获取本地1234端口上的grpc服务的列表。在使用grpcurl时，需要通过`-cert`和`-key`参数设置公钥和私钥文件，链接启用了tls协议的服务。对于没有没用tls协议的grpc服务，通过`-plaintext`参数忽略tls证书的验证过程。
-
-首先安装grpcurl工具：
+grpcurl是Go语言开源社区开发的工具，需要手工安装：
 
 ```
 $ go get github.com/fullstorydev/grpcurl
 $ go install github.com/fullstorydev/grpcurl/cmd/grpcurl
 ```
+
+grpcurl中最常使用的是list命令，用于获取服务或服务方法的列表。比如`grpcurl localhost:1234 list`命令将获取本地1234端口上的grpc服务的列表。在使用grpcurl时，需要通过`-cert`和`-key`参数设置公钥和私钥文件，链接启用了tls协议的服务。对于没有没用tls协议的grpc服务，通过`-plaintext`参数忽略tls证书的验证过程。如果是Unix Socket协议，则需要指定`-unix`参数。
 
 如果没有配置好公钥和私钥文件，也没有忽略证书的验证过程，那么将会遇到类似以下的错误：
 
