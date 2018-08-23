@@ -90,10 +90,10 @@ TEXT ·Swap(SB), $0-32
 
 ```
 TEXT ·Swap(SB), $0
-	MOVEQ a+0(FP),     AX // a
-	MOVEQ b+8(FP),     BX // b
-	MOVEQ ret0+16(FP), CX // ret0
-	MOVEQ ret1+24(FP), DX // ret1
+	MOVQ a+0(FP), AX     // a = AX
+	MOVQ b+8(FP), BX     // b = BX
+	MOVQ BX, ret0+16(FP) // ret0 = BX
+	MOVQ AX, ret1+24(FP) // ret1 = AX
 	RET
 ```
 
