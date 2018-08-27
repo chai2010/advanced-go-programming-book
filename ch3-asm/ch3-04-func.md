@@ -278,8 +278,8 @@ Go语言中函数调用是一个复杂的问题，因为Go函数不仅仅要了�
 ```
 // func Swap(a, b int) (int, int)
 TEXT ·Swap(SB), $0-32
-	MOVQ a-8*2(SP), AX // a
-	MOVQ b-8*1(SP), BX // b
+	MOVQ a+0(FP), AX // AX = a
+	MOVQ b+8(FP), BX // BX = b
 
 	SWAP(AX, BX, CX)     // AX, BX = b, a
 
