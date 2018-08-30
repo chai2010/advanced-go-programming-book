@@ -70,10 +70,12 @@ func main() {
 	defer func() { for {} }()
 }
 
+//该方法在1.9以上版本已经失效，编译器会报fatal error: all goroutines are asleep - deadlock!
 func main() {
 	defer func() { select {} }()
 }
 
+//该方法在1.9以上版本已经失效，编译器会报fatal error: all goroutines are asleep - deadlock!
 func main() {
 	defer func() { <-make(chan bool) }()
 }
