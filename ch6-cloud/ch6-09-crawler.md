@@ -125,6 +125,8 @@ hello world
 
 #### 消息生产
 
+生产消息只要指定 subject 即可：
+
 ```go
 package main
 
@@ -153,6 +155,10 @@ func main() {
 ```
 
 #### 消息消费
+
+直接使用 nats 的 subscribe api 并不能达到任务分发的目的，因为 pub sub 本身是广播性质的。所有消费者都会收到完全一样的所有消息。
+
+除了普通的 subscribe 之外，nats 还提供了 queue subscribe 的功能。只要提供一个 queue group 名字(类似 kafka 中的 consumer group)，即可均衡地将任务分发给消费者。
 
 ```go
 package main
