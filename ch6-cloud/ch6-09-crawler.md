@@ -93,9 +93,35 @@ func main() {
 
 针对页面爬取来说，在执行时是否偶尔会有重复其实不太重要，因为任务结果是幂等的(这里我们只爬页面内容，不考虑评论部分)。
 
-本节我们来简单实现一个基于消息队列的爬虫，为了演示方便，我们暂时用 redis 的 list 结构来作为消息队列。实际使用时，应该针对自己的业务对消息本身的可靠性要求和公司的基础架构组件情况进行选型。
+本节我们来简单实现一个基于消息队列的爬虫，本节我们使用 nats 来做任务分发。实际开发中，应该针对自己的业务对消息本身的可靠性要求和公司的基础架构组件情况进行选型。
 
 ### nats 简介
+
+nats 是 Go 实现的一个高性能分布式消息队列，适用于高并发高吞吐量的消息分发场景。早期的 nats 以速度为重，没有支持持久化。从 16 年开始，nats 通过 nats-streaming 支持基于日志的持久化，以及可靠的消息传输。为了演示方便，我们本节中只使用 nats。
+
+nats 的服务端项目是 gnatsd，客户端与 gnatsd 的通信方式为基于 tcp 的文本协议，非常简单：
+
+TODO，用图画协议
+
+```shell
+~ ❯❯❯ telnet localhost 4222
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+INFO {"server_id":"MNbZZUS4Ed5tvSaSRHyZS1","version":"1.3.0","proto":1,"go":"go1.10.3","host":"0.0.0.0","port":4222,"max_payload":1048576,"client_id":31}
+sub foo 127.0.0.1
++OK
+pub foo 2
+hi
++OK
+MSG foo 127.0.0.1 2
+hi
+pub foo 11
+hello world
++OK
+MSG foo 127.0.0.1 11
+hello world
+```
 
 #### 消息生产
 
