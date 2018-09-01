@@ -161,7 +161,7 @@ func (this *Message) Validate() error {
 
 ## 4.6.2 REST接口
 
-GRPC服务一般用于集群内部通信，如果需要对外暴露服务一般会提供等价的REST接口。通过REST接口比较方便前端JavaScript和后端交互。开源社区中的grac-gateway项目就实现了将GRPC服务转为REST服务的能力。
+GRPC服务一般用于集群内部通信，如果需要对外暴露服务一般会提供等价的REST接口。通过REST接口比较方便前端JavaScript和后端交互。开源社区中的grpc-gateway项目就实现了将GRPC服务转为REST服务的能力。
 
 grpc-gateway的工作原理如下图：
 
