@@ -1,34 +1,3 @@
-# Go语言高级编程(Advanced Go Programming)
-
-本书涵盖CGO、Go汇编语言、RPC实现、Web框架实现、分布式系统等高阶主题，针对Go语言有一定经验想深入了解Go语言各种高级用法的开发人员。对于刚学习Go语言的读者，建议先从[《Go语言圣经》](https://github.com/golang-china/gopl-zh)开始系统学习Go语言的基础知识。
-
-![](cover.png)
-
-- 作者：柴树杉，Github [@chai2010](https://github.com/chai2010)，Twitter [@chaishushan](https://twitter.com/chaishushan)
-- 作者：曹春晖，Github [@cch123](https://github.com/cch123)
-- 网址：https://github.com/chai2010/advanced-go-programming-book
-
-## 在线阅读
-
-- https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
-
-## 关注微信公众号(golang-china)
-
-![](weixin-golang-china.jpg)
-
-## 版权声明
-
-[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/)。
-
-![Creative Commons License](./images/by-nc-sa-4.0-88x31.png)
-
-
-严禁任何商业行为使用或引用该文档的全部或部分内容！
-
-欢迎大家提供建议！
-
--------
-
 # 序言
 
 2009年11月，Google发布了Go语言，在世界范围内引发了轰动。2015年和2016年中国区的Go语言大会分别在上海和北京召开，来自Go语言团队的开发人员均作了相关的报告。纵观这几年来的发展趋势，Go语言已经成为云计算、云存储时代最重要的基础编程语言。
@@ -46,3 +15,4 @@ chai2010 - 2018年 8 月 于 武汉
 首先感谢Go语言之父和每一个为Go语言提交过补丁的朋友。感谢fango的第一本以Go语言为主题的网络小说《胡文Go.ogle》和第一本中文Go语言图书《Go语言·云动力》，是你的分享让带起了大家学习Go语言的热情。感谢韦光京对Windows平台CGO的开创性工作，不然本书可能不会有专门的CGO章节。感谢为本书提交过issue或PR的朋友（特别是fuwensun、lewgun等），你们的关注和支持是作者写作的最大动力。
 
 谢谢大家！
+
