@@ -395,13 +395,13 @@ func main() {
 
 	go func() {
 		ch <- searchByBing("golang")
-	}
+	}()
 	go func() {
 		ch <- searchByGoogle("golang")
-	}
+	}()
 	go func() {
 		ch <- searchByBaidu("golang")
-	}
+	}()
 
 	fmt.Println(<-ch)
 }
