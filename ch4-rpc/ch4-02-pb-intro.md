@@ -81,7 +81,7 @@ service HelloService {
 }
 ```
 
-但是重新生成的Go代码并没有发生变化。这是因为世界上的RPC实现有千万种，protoc编译器并不知道改如何为HelloService服务生成代码。
+但是重新生成的Go代码并没有发生变化。这是因为世界上的RPC实现有千万种，protoc编译器并不知道该如何为HelloService服务生成代码。
 
 不过在protoc-gen-go内部已经集成了一个叫grpc的插件，可以针对grpc生成代码：
 
