@@ -277,7 +277,7 @@ func deleteDocument(indexName string, typeName string, obj map[string]interface{
 
 因为 lucene 的性质，本质上搜索引擎内的数据是不可变的，所以如果要对 document 进行更新，实际上是按照 id 进行完全覆盖的操作，所以与插入的情况是一样的。
 
-使用 es 作为数据库使用时，需要注意，因为 es 有索引合并的操作，所以数据插入到 es 中到可以查询得到有一段时间(由 es 的 refresh_interval 决定)。所以千万不要把 es 当成强一致的关系型数据库来使用。
+使用 es 作为数据库使用时，需要注意，因为 es 有索引合并的操作，所以数据插入到 es 中到可以查询的到需要一段时间(由 es 的 refresh_interval 决定)。所以千万不要把 es 当成强一致的关系型数据库来使用。
 
 ### 将 sql 转换为 DSL
 
