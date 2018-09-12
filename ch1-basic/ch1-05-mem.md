@@ -263,7 +263,7 @@ Go程序的初始化和执行总是从`main.main`函数开始的。但是如果`
 
 *图 1.5-1 包初始化流程*
 
-要注意的是，在`main.main`函数执行之前所有代码都运行在同一个Goroutine中，也是运行在程序的主系统线程中。如果某个`init`函数内部用go关键字启动了新的Goroutine的话，新的Goroutine只有在进入`main.main`函数之后才可能被执行到。
+要注意的是，在`main.main`函数执行之前所有代码都运行在同一个Goroutine中，也是运行在程序的主系统线程中。如果某个`init`函数内部用go关键字启动了新的Goroutine的话，新的Goroutine和`main.main`函数是并发执行的。
 
 因为所有的`init`函数和`main`函数都是在主线程完成，它们也是满足顺序一致性模型的。
 
