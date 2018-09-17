@@ -305,15 +305,15 @@ import (
 var bucketSize = 10
 
 func main() {
-    var bucketMap = map[uint32]int{}
+    var bucketMap = map[uint64]int{}
     for i := 15000000000; i < 15000000000+10000000; i++ {
-        hashInt := murmur64(fmt.Sprint(i)) % bucketSize
+        hashInt := murmur64(fmt.Sprint(i)) % uint64(bucketSize)
         bucketMap[hashInt]++
     }
     fmt.Println(bucketMap)
 }
 
-func murmur32(p string) uint64 {
+func murmur64(p string) uint64 {
     return murmur3.Sum64([]byte(p))
 }
 ```
