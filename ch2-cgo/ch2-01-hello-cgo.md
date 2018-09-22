@@ -1,12 +1,14 @@
 # 2.1 快速入门
 
-本节我们将通过由浅入深的一系列小例子来快速掌握CGO的基本用法。
+本节我们将通过一系列由浅入深的小例子来快速掌握CGO的基本用法。
 
 ## 2.1.1 最简CGO程序
 
-真实的CGO程序一般都比较复杂。不过我们可以反其道而行之，一个最简的CGO程序该是什么样的呢？要构造一个最简CGO程序，首先要去掉一些复杂的CGO特性，同时要展示CGO程序和纯Go程序的差别来。下面是我们构建的最简CGO程序：
+真实的CGO程序一般都比较复杂。不过我们可以由浅入深，一个最简的CGO程序该是什么样的呢？要构造一个最简CGO程序，首先要忽视一些复杂的CGO特性，同时要展示CGO程序和纯Go程序的差别来。下面是我们构建的最简CGO程序：
 
 ```go
+package main
+
 import "C"
 
 func main() {
@@ -31,11 +33,11 @@ func main() {
 }
 ```
 
-我们不仅仅通过`import "C"`语句启用CGO特性，同时包含C语言的`<stdio.h>`头文件。然后通过CGO包的`C.CString`函数将Go语言字符串转为C语言字符串，最后调用C语言的`C.puts`函数向标准输出窗口打印转换后的C字符串。
+我们不仅仅通过`import "C"`语句启用CGO特性，同时包含C语言的`<stdio.h>`头文件。然后通过CGO包的`C.CString`函数将Go语言字符串转为C语言字符串，最后调用CGO包的`C.puts`函数向标准输出窗口打印转换后的C字符串。
 
 相比“Hello, World 的革命”一节中的CGO程序最大的不同是：我们没有在程序退出前释放`C.CString`创建的C语言字符串；还有我们改用`puts`函数直接向标准输出打印，之前是采用`fputs`向标准输出打印。
 
-没有释放使用`C.CString`创建的C语言字符串会导致内存泄露。但是对于这个小程序来说，这样是没有问题的，因为程序退出后操作系统会自动回收程序的所有资源。
+没有释放使用`C.CString`创建的C语言字符串会导致内存泄漏。但是对于这个小程序来说，这样是没有问题的，因为程序退出后操作系统会自动回收程序的所有资源。
 
 ## 2.1.3 使用自己的C函数
 
@@ -104,13 +106,14 @@ void SayHello(const char* s);
 // hello.c
 
 #include "hello.h"
+#include <stdio.h>
 
 void SayHello(const char* s) {
 	puts(s);
 }
 ```
 
-在hello.c文件的开头，实现者通过`#include "hello.h"`语句包含SayHello函数声明的签名，这样可以保证函数的实现满足模块对外公开的接口。
+在hello.c文件的开头，实现者通过`#include "hello.h"`语句包含SayHello函数的声明，这样可以保证函数的实现满足模块对外公开的接口。
 
 接口文件hello.h是hello模块的实现者和使用者共同的约定，但是该约定并没有要求必须使用C语言来实现SayHello函数。我们也可以用C++语言来重新实现这个C语言函数：
 
@@ -128,7 +131,7 @@ void SayHello(const char* s) {
 }
 ```
 
-在C++版本的SayHello函数实现中，我们通过C++特有的`std::cout`输出流输出字符串。不过为了保证C++语言实现的SayHello函数满足C语言头文件hello.h定义的函数规范，我们需要通过`extern "C"`语句指示该函数的链接符号遵循C语言的名字修身规则。
+在C++版本的SayHello函数实现中，我们通过C++特有的`std::cout`输出流输出字符串。不过为了保证C++语言实现的SayHello函数满足C语言头文件hello.h定义的函数规范，我们需要通过`extern "C"`语句指示该函数的链接符号遵循C语言的规则。
 
 在采用面向C语言API接口编程之后，我们彻底解放了模块实现者的语言枷锁：实现者可以用任何编程语言实现模块，只要最终满足公开的API约定即可。我们可以用C语言实现SayHello函数，也可以使用更复杂的C++语言来实现SayHello函数，当然我们也可以用汇编语言甚至Go语言来重新实现SayHello函数。
 
@@ -142,11 +145,15 @@ void SayHello(const char* s) {
 void SayHello(/*const*/ char* s);
 ```
 
-现在我们创建一个hello.go文件来用Go语言重新实现C语言接口的SayHello函数:
+现在我们创建一个hello.go文件，用Go语言重新实现C语言接口的SayHello函数:
 
 ```go
 // hello.go
 package main
+
+import "C"
+
+import "fmt"
 
 //export SayHello
 func SayHello(s *C.char) {
@@ -223,4 +230,4 @@ func SayHello(s string) {
 
 虽然看起来全部是Go语言代码，但是执行的时候是先从Go语言的`main`函数，到CGO自动生成的C语言版本`SayHello`桥接函数，最后又回到了Go语言环境的`SayHello`函数。这个代码包含了CGO编程的精华，读者需要深入理解。
 
-*思考题: main函数和SayHello函数是否在同一个Goroutine只执行？*
+*思考题: main函数和SayHello函数是否在同一个Goroutine里执行？*

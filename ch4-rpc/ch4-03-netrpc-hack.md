@@ -250,7 +250,7 @@ func doClientWork(clientChan <-chan *rpc.Client) {
 
 ## 4.3.4 上下文信息
 
-基于上下文我们可以针对不同客户端提供定制化的RPC服务。我们可以通过为每个信道提供独立的RPC服务来实现对上下文特性的支持。
+基于上下文我们可以针对不同客户端提供定制化的RPC服务。我们可以通过为每个链接提供独立的RPC服务来实现对上下文特性的支持。
 
 首先改造HelloService，里面增加了对应链接的conn成员：
 
@@ -260,7 +260,7 @@ type HelloService struct {
 }
 ```
 
-然后为每个信道启动独立的RPC服务：
+然后为每个链接启动独立的RPC服务：
 
 ```go
 func main() {
@@ -286,7 +286,7 @@ func main() {
 }
 ```
 
-Hello方法中就可以根据conn成员识别不同信道的RPC调用：
+Hello方法中就可以根据conn成员识别不同链接的RPC调用：
 
 ```go
 func (p *HelloService) Hello(request string, reply *string) error {

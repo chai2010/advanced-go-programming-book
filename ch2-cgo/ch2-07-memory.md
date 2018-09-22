@@ -83,14 +83,21 @@ func main() {
 package main
 
 /*
-void printString(const char* s) {
-	printf("%s", s);
+#include<stdio.h>
+
+void printString(const char* s, int n) {
+	int i;
+	for(i = 0; i < n; i++) {
+		putchar(s[i]);
+	}
+	putchar('\n');
 }
 */
 import "C"
 
 func printString(s string) {
-	C.printString((*C.char)(unsafe.Pointer(&s[0])))
+	p := (*reflect.StringHeader)(unsafe.Pointer(&s))
+	C.printString((*C.char)(unsafe.Pointer(p.Data)), C.int(len(s)))
 }
 
 func main() {
@@ -187,11 +194,11 @@ func (id *ObjectId) Free() interface{} {
 package main
 
 /*
-export char* NewGoString(char* );
-export void FreeGoString(char* );
-export void PrintGoString(char* );
+extern char* NewGoString(char* );
+extern void FreeGoString(char* );
+extern void PrintGoString(char* );
 
-void printString(const char* s) {
+static void printString(const char* s) {
 	char* gs = NewGoString(s);
 	PrintGoString(gs);
 	FreeGoString(gs);

@@ -4,7 +4,7 @@
 
 ## 4.6.1 验证器
 
-到目前位置，我们接触的全部是第三版的Protobuf语法。第二版的Protobuf有个默认值特性，可以为字符串或数值类型的成员定义默认值。
+到目前为止，我们接触的全部是第三版的Protobuf语法。第二版的Protobuf有个默认值特性，可以为字符串或数值类型的成员定义默认值。
 
 我们采用第二版的Protobuf语法创建文件：
 
@@ -161,13 +161,16 @@ func (this *Message) Validate() error {
 
 ## 4.6.2 REST接口
 
-GRPC服务一般用于集群内部通信，如果需要对外暴露服务一般会提供等价的REST接口。通过REST接口比较方便前端JavaScript和后端交互。开源社区中的grac-gateway项目就实现了将GRPC服务转为REST服务的能力。
+GRPC服务一般用于集群内部通信，如果需要对外暴露服务一般会提供等价的REST接口。通过REST接口比较方便前端JavaScript和后端交互。开源社区中的grpc-gateway项目就实现了将GRPC服务转为REST服务的能力。
 
 grpc-gateway的工作原理如下图：
 
-![](../images/ch4-06-grpc-gateway.png)
+![](../images/ch4.6-1-grpc-gateway.png)
 
-通过在Protobuf文件中添加路由相关的元信息，通过自定义的代码插件生成路由相关的处理代码，最终将Rest请求转给更后端的Grpc服务处理。
+*图 4.6-1 Grpc-Gateway工作流程*
+
+
+通过在Protobuf文件中添加路由相关的元信息，通过自定义的代码插件生成路由相关的处理代码，最终将REST请求转给更后端的GRPC服务处理。
 
 路由扩展元信息也是通过Protobuf的元数据扩展用法提供：
 
@@ -248,9 +251,9 @@ func main() {
 }
 ```
 
-首先通过runtime.NewServeMux()函数创建路由处理器，然后通过RegisterRestServiceHandlerFromEndpoint函数将RestService服务相关的REST接口中转到后面的GRPC服务。grpc-gateway提供runtime.ServeMux类似同时也实现了http.Handler接口，因此可以标准库中的相关函数配置使用。
+首先通过runtime.NewServeMux()函数创建路由处理器，然后通过RegisterRestServiceHandlerFromEndpoint函数将RestService服务相关的REST接口中转到后面的GRPC服务。grpc-gateway提供的runtime.ServeMux类也实现了http.Handler接口，因此可以和标准库中的相关函数配合使用。
 
-档GRPC和REST服务全部启动之后，就可以用curl请求REST服务了：
+当GRPC和REST服务全部启动之后，就可以用curl请求REST服务了：
 
 ```
 $ curl localhost:8080/get/gopher
@@ -272,3 +275,8 @@ $ protoc -I. \
 ```
 
 然后会生成一个hello.swagger.json文件。这样的话就可以通过swagger-ui这个项目，在网页中提供REST接口的文档和测试等功能。
+
+## 4.6.3 Nginx
+
+最新的Nginx对GRPC提供了深度支持。可以通过Nginx将后端多个GRPC服务聚合到一个Nginx服务。同时Nginx也提供了为同一种GRPC服务注册多个后端的功能，这样可以轻松实现GRPC负载均衡的支持。Nginx的GRPC扩展是一个较大的主题，感兴趣的读者可以自行参考相关文档。
+

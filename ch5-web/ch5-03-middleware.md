@@ -2,7 +2,7 @@
 
 本章将对现在流行的 web 框架中的中间件技术原理进行分析，并介绍如何使用中间件技术将业务和非业务代码功能进行解耦。
 
-## 代码泥潭
+## 5.3.1 代码泥潭
 
 先来看一段代码：
 
@@ -94,7 +94,7 @@ func helloHandler(wr http.ResponseWriter, r *http.Request) {
 
 修改到这里，本能地发现我们的开发工作开始陷入了泥潭。无论未来对我们的这个 web 系统有任何其它的非功能或统计需求，我们的修改必然牵一发而动全身。只要增加一个非常简单的非业务统计，我们就需要去几十个 handler 里增加这些业务无关的代码。虽然一开始我们似乎并没有做错，但是显然随着业务的发展，我们的行事方式让我们陷入了代码的泥潭。
 
-## 使用 middleware 剥离非业务逻辑
+## 5.3.2 使用 middleware 剥离非业务逻辑
 
 我们来分析一下，一开始在哪里做错了呢？我们只是一步一步地满足需求，把我们需要的逻辑按照流程写下去呀？
 
@@ -119,7 +119,7 @@ func timeMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
-    http.HandleFunc("/", timeMiddleware(hello))
+    http.Handle("/", timeMiddleware(http.HandlerFunc(hello)))
     err := http.ListenAndServe(":8080", nil)
     ...
 }
@@ -205,7 +205,7 @@ customizedHandler = logger(timeout(ratelimit(helloHandler)))
 
 功能实现了，但在上面的使用过程中我们也看到了，这种函数套函数的用法不是很美观，同时也不具备什么可读性。
 
-## 更优雅的 middleware 写法
+## 5.3.3 更优雅的 middleware 写法
 
 上一节中解决了业务功能代码和非业务功能代码的解耦，但也提到了，看起来并不美观，如果需要修改这些函数的顺序，或者增删 middleware 还是有点费劲，本节我们来进行一些“写法”上的优化。
 
@@ -253,7 +253,7 @@ func (r *Router) Add(route string, h http.Handler) {
 注意代码中的 middleware 数组遍历顺序，和用户希望的调用顺序应该是"相反"的。应该不难理解。
 
 
-## 哪些事情适合在 middleware 中做
+## 5.3.4 哪些事情适合在 middleware 中做
 
 以较流行的开源 golang 框架 chi 为例：
 

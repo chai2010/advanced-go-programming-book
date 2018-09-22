@@ -27,7 +27,10 @@ var d = [...]int{1, 2, 4: 5, 6} // 定义一个长度为6的int类型数组, 元
 
 数组的内存结构比较简单。比如下面是一个`[4]int{2,3,5,7}`数组值对应的内存结构：
 
-![](../images/ch1-03-array-4int.ditaa.png)
+![](../images/ch1.3-1-array-4int.ditaa.png)
+
+*图 1.3-1 数组布局*
+
 
 Go语言中数组是值语义。一个数组变量即表示整个数组，它并不是隐式的指向第一个元素的指针（比如C语言的数组），而是一个完整的值。当一个数组变量被赋值或者被传递的时候，实际上会复制整个数组。如果数组较大的话，数组的赋值也会有较大的开销。为了避免复制数组带来的开销，可以传递一个指向数组的指针，但是数组指针并不是数组。
 
@@ -51,13 +54,13 @@ for i, v := range b {     // 通过数组指针迭代数组的元素
 
 ```go
 	for i := range a {
-		fmt.Printf("b[%d]: %d\n", i, b[i])
+		fmt.Printf("a[%d]: %d\n", i, a[i])
 	}
 	for i, v := range b {
 		fmt.Printf("b[%d]: %d\n", i, v)
 	}
 	for i := 0; i < len(c); i++ {
-		fmt.Printf("b[%d]: %d\n", i, b[i])
+		fmt.Printf("c[%d]: %d\n", i, c[i])
 	}
 ```
 
@@ -158,7 +161,10 @@ type StringHeader struct {
 
 我们可以看看字符串“Hello, world”本身对应的内存结构：
 
-![](../images/ch1-03-string-1.ditaa.png)
+![](../images/ch1.3-2-string-1.ditaa.png)
+
+*图 1.3-2 字符串布局*
+
 
 分析可以发现，“Hello, world”字符串底层数据和以下数组是完全一致的：
 
@@ -208,7 +214,9 @@ fmt.Println("\xe7\x95\x8c") // 打印: 界
 
 下图展示了“Hello, 世界”字符串的内存结构布局:
 
-![](../images/ch1-03-string-2.ditaa.png)
+![](../images/ch1.3-3-string-2.ditaa.png)
+
+*图 1.3-3 字符串布局*
 
 Go语言的字符串中可以存放任意的二进制字节序列，而且即使是UTF8字符序列也可能会遇到坏的编码。如果遇到一个错误的UTF8编码输入，将生成一个特别的Unicode字符‘\uFFFD’，这个字符在不同的软件中的显示效果可能不太一样，在印刷中这个符号通常是一个黑色六角形或钻石形状，里面包含一个白色的问号‘�’。
 
@@ -253,7 +261,7 @@ for i := 0; i < len(s); i++ {
 Go语言除了`for range`语法对UTF8字符串提供了特殊支持外，还对字符串和`[]rune`类型的相互转换提供了特殊的支持。
 
 ```go
-fmt.Printf("%#v\n", []rune("Hello, 世界"))      // []int32{19990, 30028}
+fmt.Printf("%#v\n", []rune("世界"))      		// []int32{19990, 30028}
 fmt.Printf("%#v\n", string([]rune{'世', '界'})) // 世界
 ```
 
@@ -270,7 +278,7 @@ func forOnString(s string, forBody func(i int, r rune)) {
 	for i := 0; len(s) > 0; {
     	r, size := utf8.DecodeRuneInString(s)
 		forBody(i, r)
-    	s = s[size:]
+		s = s[size:]
 		i += size
 	}
 }
@@ -318,9 +326,9 @@ func bytes2str(s []byte) (p string) {
 func str2runes(s []byte) []rune {
 	var p []int32
 	for len(s) > 0 {
-    	r, size := utf8.DecodeRuneInString(s)
+		r, size := utf8.DecodeRuneInString(s)
 		p = append(p, r)
-    	s = s[size:]
+		s = s[size:]
 	}
 	return []rune(p)
 }
@@ -360,7 +368,10 @@ type SliceHeader struct {
 
 可以看出切片的开头部分和Go字符串是一样的，但是切片多了一个`Cap`成员表示切片指向的内存空间的最大容量（对应元素的个数，而不是字节数）。下图是`x := []int{2,3,5,7,11}`和`y := x[1:3]`两个切片对应的内存结构。
 
-![](../images/ch1-03-slice-1.ditaa.png)
+![](../images/ch1.3-4-slice-1.ditaa.png)
+
+*图 1.3-4 切片布局*
+
 
 让我们看看切片有哪些定义方式：
 
@@ -384,13 +395,13 @@ var (
 
 ```go
 	for i := range a {
-		fmt.Printf("b[%d]: %d\n", i, a[i])
+		fmt.Printf("a[%d]: %d\n", i, a[i])
 	}
 	for i, v := range b {
 		fmt.Printf("b[%d]: %d\n", i, v)
 	}
 	for i := 0; i < len(c); i++ {
-		fmt.Printf("b[%d]: %d\n", i, c[i])
+		fmt.Printf("c[%d]: %d\n", i, c[i])
 	}
 ```
 
@@ -410,7 +421,7 @@ a = append(a, 1, 2, 3)         // 追加多个元素, 手写解包方式
 a = append(a, []int{1,2,3}...) // 追加一个切片, 切片需要解包
 ```
 
-不过要注意的是，在容量不足的情况下，`append`的操作会导致重新分配内存，从而导致巨大的内存分配和复制数据代价。即使容量足够，依然需要用`append`函数的返回值来更新切片本身，因为新切片的长度已经发生了变化。
+不过要注意的是，在容量不足的情况下，`append`的操作会导致重新分配内存，可能导致巨大的内存分配和复制数据代价。即使容量足够，依然需要用`append`函数的返回值来更新切片本身，因为新切片的长度已经发生了变化。
 
 除了在切片的尾部追加，我们还可以在切片的开头添加元素：
 
@@ -450,11 +461,11 @@ copy(a[i+len(x):], a[i:]) // a[i:]向后移动len(x)个位置
 copy(a[i:], x)            // 复制新添加的切片
 ```
 
-稍显不足的是，在第一句扩展切片容量的时候，扩展空间部分的元素复制是没有必要的。并没专门有内置的函数用于扩展切片的容量，`append`本质是用于追加元素而不是扩展容量，扩展切片容量只是`append`的一个副作用。
+稍显不足的是，在第一句扩展切片容量的时候，扩展空间部分的元素复制是没有必要的。没有专门的内置函数用于扩展切片的容量，`append`本质是用于追加元素而不是扩展容量，扩展切片容量只是`append`的一个副作用。
 
 **删除切片元素**
 
-根据要删除元素的位置有三种类型：从开头位置删除，从中间位置删除，从尾部删除。其中删除切片尾部的元素最快：
+根据要删除元素的位置有三种情况：从开头位置删除，从中间位置删除，从尾部删除。其中删除切片尾部的元素最快：
 
 ```go
 a = []int{1, 2, 3}
@@ -551,7 +562,7 @@ func FindPhoneNumber(filename string) []byte {
 
 这段代码返回的`[]byte`指向保存整个文件的数组。因为切片引用了整个原始数组，导致自动垃圾回收器不能及时释放底层数组的空间。一个小的需求可能导致需要长时间保存整个文件数据。这虽然这并不是传统意义上的内存泄漏，但是可能会拖慢系统的整体性能。
 
-要修复这个问题，可以将感兴趣的数据复制到一个新的切片中（数据的传值是Go语言编程的一个哲学，虽然传值有一定的代价，但是换取好处是切断了对原始数据的依赖）：
+要修复这个问题，可以将感兴趣的数据复制到一个新的切片中（数据的传值是Go语言编程的一个哲学，虽然传值有一定的代价，但是换取的好处是切断了对原始数据的依赖）：
 
 ```go
 func FindPhoneNumber(filename string) []byte {

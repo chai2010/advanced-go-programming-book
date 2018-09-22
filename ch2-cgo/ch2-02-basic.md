@@ -1,6 +1,6 @@
 # 2.2 CGO基础
 
-要使用CGO特性，需要安装C／C++构建工具链，在macOS和Linux下是要安装GCC，在windows下是需要安装MinGW工具。同时需要保证环境变量`CGO_ENABLED`被设置为1，这表示CGO是被启用的状态。在本地构建时`CGO_ENABLED`默认是启用的，当交叉构建时CGO默认是禁止的。比如要交叉构建ARM环境运行的Go程序，需要手工设置好C/C++交叉构建的工具链，同时开启`CGO_ENABLED`环境变量。然后通过`import "C"`语句启用CGO特性。
+要使用CGO特性，需要安装C/C++构建工具链，在macOS和Linux下是要安装GCC，在windows下是需要安装MinGW工具。同时需要保证环境变量`CGO_ENABLED`被设置为1，这表示CGO是被启用的状态。在本地构建时`CGO_ENABLED`默认是启用的，当交叉构建时CGO默认是禁止的。比如要交叉构建ARM环境运行的Go程序，需要手工设置好C/C++交叉构建的工具链，同时开启`CGO_ENABLED`环境变量。然后通过`import "C"`语句启用CGO特性。
 
 ## 2.2.1 `import "C"`语句
 
@@ -37,16 +37,17 @@ cgo将当前包引用的C语言符号都放到了虚拟的C包中，同时当前
 ```go
 package cgo_helper
 
+//#include <stdio.h>
 import "C"
 
 type CChar C.char
 
 func (p *CChar) GoString() string {
-    return C.GoString((*C.char)(p))
+	return C.GoString((*C.char)(p))
 }
 
 func PrintCString(cs *C.char) {
-    print(((*CChar)(cs.GoString()))
+	C.puts(cs)
 }
 ```
 
@@ -55,16 +56,16 @@ func PrintCString(cs *C.char) {
 ```go
 package main
 
-// extern char* cs = "hello"
+//static const char* cs = "hello";
 import "C"
 import "./cgo_helper"
 
 func main() {
-    cgo_helper.PrintCString(C.cs)
+	cgo_helper.PrintCString(C.cs)
 }
 ```
 
-这段代码是不能正常工作的，因为当前main包引入的`C.cs`变量的类型是当前main包的cgo构造的虚拟的C包下的char类型，它和cgo_helper包引入的`*C.char`类型是不同的。在Go语言中方法是依附于类型存在的，不同Go包中引入的虚拟的C包的类型却是不同的，这导致从它们延伸出来的Go类型也是不同的类型，这最终导致了前面代码不能正常工作。
+这段代码是不能正常工作的，因为当前main包引入的`C.cs`变量的类型是当前main包的cgo构造的虚拟的C包下的*char类型（具体点是`*C.char`，更具体点是`*main.C.char`），它和cgo_helper包引入的`*C.char`类型（具体点是`*cgo_helper.C.char`）是不同的。在Go语言中方法是依附于类型存在的，不同Go包中引入的虚拟的C包的类型却是不同的（`main.C`不等`cgo_helper.C`），这导致从它们延伸出来的Go类型也是不同的类型（`*main.C.char`不等`*cgo_helper.C.char`），这最终导致了前面代码不能正常工作。
 
 有Go语言使用经验的用户可能会建议参数转型后再传入。但是这个方法似乎也是不可行的，因为`cgo_helper.PrintCString`的参数是它自身包引入的`*C.char`类型，在外部是无法直接获取这个类型的。换言之，一个包如果在公开的接口中直接使用了`*C.char`等类似的虚拟C包的类型，其它的Go包是无法直接使用这些类型的，除非这个Go包同时也提供了`*C.char`类型的构造函数。因为这些诸多因素，如果想在go test环境直接测试这些cgo导出的类型也会有相同的限制。
 
@@ -107,7 +108,7 @@ import "C"
 // #cgo !windows LDFLAGS: -lm
 ```
 
-其中在windows平台下，编译前会预定义X86宏为1；再非widnows平台下，在链接阶段会要求链接math数学库。这种用法对于在不同平台下只有少数编译选项差异的场景比较适用。
+其中在windows平台下，编译前会预定义X86宏为1；在非widnows平台下，在链接阶段会要求链接math数学库。这种用法对于在不同平台下只有少数编译选项差异的场景比较适用。
 
 如果在不同的系统下cgo对应着不同的c代码，我们可以先使用`#cgo`指令定义不同的C语言的宏，然后通过宏来区分不同的代码：
 
@@ -120,11 +121,11 @@ package main
 #cgo linux CFLAGS: -DCGO_OS_LINUX=1
 
 #if defined(CGO_OS_WINDOWS)
-	extern char* os = "windows";
+	static const char* os = "windows";
 #elif defined(CGO_OS_DARWIN)
-	extern char* os = "darwin";
+	static const char* os = "darwin";
 #elif defined(CGO_OS_LINUX)
-	extern char* os = "linux";
+	static const char* os = "linux";
 #else
 #	error(unknown os)
 #endif
@@ -161,7 +162,7 @@ go build -tags="windows,debug"
 
 我们可以通过`-tags`命令行参数同时指定多个build标志，它们之间用逗号分割。
 
-当有多个build tag时，我们将多个标志通过逻辑操作的规则来组合使用。比如以下的构建标志表示只有在linux/386或非cgo环境的darwin平台下才进行构建。
+当有多个build tag时，我们将多个标志通过逻辑操作的规则来组合使用。比如以下的构建标志表示只有在”linux/386“或”darwin平台下非cgo环境“才进行构建。
 
 ```go
 // +build linux,386 darwin,!cgo

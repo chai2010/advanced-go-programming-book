@@ -18,6 +18,11 @@ default:
 macos:
 	gitbook build --gitbook=3.2.3
 
+macos-pdf:
+	mv preface.md preface-bak.md && mv preface-pdf.md preface.md
+	gitbook pdf --gitbook=3.2.3
+	mv preface.md preface-pdf.md && mv preface-bak.md preface.md
+
 server:
 	go run server.go
 

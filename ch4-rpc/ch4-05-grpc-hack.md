@@ -68,7 +68,7 @@ func main() {
 
 为了避免证书的传递过程中被篡改，可以通过一个安全可靠的根证书分别对服务器和客户端的证书进行签名。这样客户端或服务器在收到对方的证书后可以通过根证书进行验证证书的有效性。
 
-根证书的生成方式和签名的自签名证书的生成方式类似：
+根证书的生成方式和自签名证书的生成方式类似：
 
 ```
 $ openssl genrsa -out ca.key 2048
@@ -211,7 +211,7 @@ type Authentication struct {
 }
 
 func (a *Authentication) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
-	return map[string]string{"login": a.Login, "password": a.Password}, nil
+	return map[string]string{"user":a.User, "password": a.Password}, nil
 }
 func (a *Authentication) RequireTransportSecurity() bool {
 	return false
@@ -326,7 +326,7 @@ func filter(
 }
 ```
 
-不过GRPC框架中只能为每个服务设置一个截取器，因此所有对截取工作只能在一个函数中完成。开源的grpc-ecosystem项目中的go-grpc-middleware包已经基于GRPC对截取器实现了链式截取器的支持。
+不过GRPC框架中只能为每个服务设置一个截取器，因此所有的截取工作只能在一个函数中完成。开源的grpc-ecosystem项目中的go-grpc-middleware包已经基于GRPC对截取器实现了链式截取器的支持。
 
 以下是go-grpc-middleware包中链式截取器的简单用法
 

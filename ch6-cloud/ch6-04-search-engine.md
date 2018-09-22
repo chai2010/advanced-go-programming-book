@@ -24,7 +24,7 @@ elasticsearch 是开源分布式搜索引擎的霸主，其依赖于 Lucene 实�
 
 ### 倒排列表
 
-虽然 es 是针对搜索场景来订制的，但如前文所言，实际应用中常常用 es 来作为 database 来使用，就是因为倒排列表的特性。可以用比较朴素的观点来理解倒排索引：
+虽然 es 是针对搜索场景来定制的，但如前文所言，实际应用中常常用 es 来作为 database 来使用，就是因为倒排列表的特性。可以用比较朴素的观点来理解倒排索引：
 
 ```
 ┌─────────────────┐       ┌─────────────┬─────────────┬─────────────┬─────────────┐
@@ -242,7 +242,7 @@ func insertDocument(db string, table string, obj map[string]interface{}) {
 
 ```go
 func query(indexName string, typeName string) (*elastic.SearchResult, error) {
-    // 通过 bool must 和 bool shoud 添加 bool 查询条件
+    // 通过 bool must 和 bool should 添加 bool 查询条件
     q := elastic.NewBoolQuery().Must(elastic.NewMatchPhraseQuery("id", 1),
         elastic.NewBoolQuery().Must(elastic.NewMatchPhraseQuery("male", "m")))
 
@@ -277,7 +277,7 @@ func deleteDocument(indexName string, typeName string, obj map[string]interface{
 
 因为 lucene 的性质，本质上搜索引擎内的数据是不可变的，所以如果要对 document 进行更新，实际上是按照 id 进行完全覆盖的操作，所以与插入的情况是一样的。
 
-使用 es 作为数据库使用时，需要注意，因为 es 有索引合并的操作，所以数据插入到 es 中到可以查询得到有一段时间(由 es 的 refresh_interval 决定)。所以千万不要把 es 当成强一致的关系型数据库来使用。
+使用 es 作为数据库使用时，需要注意，因为 es 有索引合并的操作，所以数据插入到 es 中到可以查询的到需要一段时间(由 es 的 refresh_interval 决定)。所以千万不要把 es 当成强一致的关系型数据库来使用。
 
 ### 将 sql 转换为 DSL
 
@@ -458,4 +458,4 @@ select * from wms_orders where update_time >= date_sub(now(), interval 11 minute
 
 由下游的 kafka 消费者负责把上游数据表的自增主键作为 es 的 document 的 id 进行写入，这样可以保证每次接收到 binlog 时，对应 id 的数据都被覆盖更新为最新。MySQL 的 row 格式的 binlog 会将每条记录的所有字段都提供给下游，所以实际上在向异构数据目标同步数据时，不需要考虑数据是插入还是更新，只要一律按 id 进行覆盖即可。
 
-这种模式同样需要业务遵守一条数据表规范，即表中必须有唯一主键 id 来保证我们进入 es 的数据不会发生重复。一旦不遵守该规范，那么就会在同步时导致数据重复。当然，你也可以为每一张需要的表去订制消费者的逻辑，这就不是通用系统讨论的范畴了。
+这种模式同样需要业务遵守一条数据表规范，即表中必须有唯一主键 id 来保证我们进入 es 的数据不会发生重复。一旦不遵守该规范，那么就会在同步时导致数据重复。当然，你也可以为每一张需要的表去定制消费者的逻辑，这就不是通用系统讨论的范畴了。

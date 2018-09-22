@@ -10,11 +10,11 @@
 
 ![前后分离](../images/ch6-08-frontend-backend.png)
 
-图里的 vue 和 react 是现在前端界比较流行的两个框架，因为我们的重点不在这里，所以前端项目内的组织我们就不强调了。事实上，即使是简单的项目，业界也并没有完全遵守 MVC 功能提出者对于 M 和 C 所定义的分工。有很多公司的项目会在 controller 层塞入大量的逻辑，在 model 层就只管理数据的存储。这往往来源于对于 model 层字面含义的某种擅自引申理解。认为字面意思，这一层就是处理某种建模，而模型是什么？就是数据呗！
+图里的 vue 和 react 是现在前端界比较流行的两个框架，因为我们的重点不在这里，所以前端项目内的组织我们就不强调了。事实上，即使是简单的项目，业界也并没有完全遵守 MVC 框架提出者对于 M 和 C 所定义的分工。有很多公司的项目会在 controller 层塞入大量的逻辑，在 model 层就只管理数据的存储。这往往来源于对于 model 层字面含义的某种擅自引申理解。认为字面意思，这一层就是处理某种建模，而模型是什么？就是数据呗！
 
 这种理解显然是有问题的，业务流程也算是一种“模型”，是对真实世界用户行为或者既有流程的一种建模，并非只有按格式组织的数据才能叫模型。不过按照 MVC 的创始人的想法，我们如果把和数据打交道的代码还有业务流程全部塞进 MVC 里的 M 层的话，这个 M 层又会显得有些过于臃肿。对于复杂的项目，一个 C 和一个 M 层显然是不够用的，现在比较流行的纯后端 api 模块一般采用下述划分方法：
 
-1. Controller，与上述类似，服务入口，负责处理路由，参数校验，请求转发
+1. Controller，与上述类似，服务入口，负责处理路由，参数校验，请求转发。
 2. Logic/Service，逻辑(服务)层，一般是业务逻辑的入口，可以认为从这里开始，所有的请求参数一定是合法的。业务逻辑和业务流程也都在这一层中。常见的设计中会将该层称为 Business Rules。
 3. DAO/Repository，这一层主要负责和数据、存储打交道。将下层存储以更简单的函数、接口形式暴露给 Logic 层来使用。负责数据的持久化工作。
 
@@ -80,7 +80,7 @@ type CreateOrder struct {
 
 // thrift request struct
 type FeatureSetParams struct {
-    DriverID int64             `thrift:"driverID,1,required"`
+    DriverID int64 `thrift:"driverID,1,required"`
     OrderID int64 `thrift:"OrderID,2,required"`
     UserID int64 `thrift:"UserID,3,required"`
     ProductID int `thrift:"ProductID,4,required"`
@@ -101,7 +101,7 @@ type CreateOrderParams struct {
 
 ```go
 type FeatureSetParams struct {
-    DriverID int64             `thrift:"driverID,1,required" json:"driver_id"`
+    DriverID int64 `thrift:"driverID,1,required" json:"driver_id"`
     OrderID int64 `thrift:"OrderID,2,required" json:"order_id"`
     UserID int64 `thrift:"UserID,3,required" json:"user_id"`
     ProductID int `thrift:"ProductID,4,required" json:"prod_id"`
@@ -129,6 +129,6 @@ type FeatureSetParams struct {
 
 ![control flow 2](../images/ch6-08-control-flow-2.png)
 
-之前我们学习的 middleware 是和 http 协议强相关的，遗憾的是在 thrift 中看起来没有和 http 中对等的解决这些非功能性逻辑代码重复问题的 middleware。所以我们在图上写 `thrift stuff`。这些 `stuff` 可能需要你手写去实现，然后每次增加一个新的 thrift 接口，就需要去写一遍这些非功能性代码。。
+之前我们学习的 middleware 是和 http 协议强相关的，遗憾的是在 thrift 中看起来没有和 http 中对等的解决这些非功能性逻辑代码重复问题的 middleware。所以我们在图上写 `thrift stuff`。这些 `stuff` 可能需要你手写去实现，然后每次增加一个新的 thrift 接口，就需要去写一遍这些非功能性代码。
 
 这也是很多企业项目所面临的真实问题，遗憾的是开源界并没有这样方便的多协议 middleware 解决方案。当然了，前面我们也说过，很多时候我们给自己保留的 http 接口只是用来做 debug，并不会暴露给外人用。这种情况下，这些非功能性的代码只要在 thrift 的代码中完成即可。

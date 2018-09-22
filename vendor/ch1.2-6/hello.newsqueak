@@ -1,0 +1,3 @@
+// ch1.2-6
+
+print("Hello,", "World", "\n");
