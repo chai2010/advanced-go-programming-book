@@ -10,6 +10,7 @@
 
 ## 在线阅读
 
+- https://chai2010.cn/advanced-go-programming-book/
 - https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
 
 ## 关注微信公众号(golang-china)

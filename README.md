@@ -11,8 +11,9 @@
 
 ## 在线阅读
 
-- https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
 - [SUMMARY.md](SUMMARY.md)
+- https://chai2010.cn/advanced-go-programming-book/
+- https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
 
 ## 相关报告
 
