@@ -19,9 +19,16 @@
 - 深入CGO编程: https://github.com/chai2010/gopherchina2018-cgo-talk
 
 
+## 开发者头条号
+
+https://toutiao.io/subjects/318517
+
+![](toutiao-318517-small.jpg)
+
 ## 关注微信公众号 (golang-china)
 
 ![](weixin-golang-china.jpg)
+
 
 ## 版权声明
 
