@@ -185,8 +185,8 @@ func validate(v interface{}) (bool, string) {
             tagValStr := strings.Split(tagContent, "=")
             tagVal, _ := strconv.ParseInt(tagValStr[1], 10, 64)
             if val != tagVal {
-                errmsg = "validate int failed, tag is: "+ tagVal)
-                return false
+                errmsg = "validate int failed, tag is: "+ strconv.FormatInt(tagVal, 10)
+                validateResult = false
             }
         case reflect.String:
             val := fieldVal.String()
@@ -203,22 +203,22 @@ func validate(v interface{}) (bool, string) {
             // 如果有内嵌的 struct，那么深度优先遍历
             // 就是一个递归过程
             valInter := fieldVal.Interface()
-            nestedResult := validate(valInter)
+            nestedResult, msg := validate(valInter)
             if nestedResult == false {
-                validateResult = false
+				validateResult = false
+				errmsg = msg
             }
         }
     }
-    return validateResult
+    return validateResult, errmsg
 }
 
 func main() {
     var a = T{Age: 10, Nested: Nested{Email: "abc@abc.com"}}
 
-    validateResult := validate(a)
-    fmt.Println(validateResult)
+    validateResult, errmsg := validate(a)
+    fmt.Println(validateResult, errmsg)
 }
-
 ```
 
 这里我们简单地对 eq=x 和 email 这两个 tag 进行了支持，读者可以对这个程序进行简单的修改以查看具体的 validate 效果。为了演示精简掉了错误处理和复杂 case 的处理，例如 reflect.Int8/16/32/64，reflect.Ptr 等类型的处理，如果给生产环境编写 validate 库的话，请务必做好功能的完善和容错。

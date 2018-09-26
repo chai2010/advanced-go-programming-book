@@ -1,7 +1,7 @@
 
 # 4.8 grpcurl工具
 
-Protobug本身具有反射功能，可以在运行时获取对象的Proto文件。grpc同样也提供了一个名为reflection的反射包，用于为grpc服务提供查询。GRPC官方提供了一个C++实现的grpc_cli工具，可以用于查询GRPC列表或调用GRPC方法。但是C++版本的grpc_cli安装比较复杂，我们推荐用纯Go语言实现的grpcurl工具。本节将简要介绍grpcurl工具的用法。
+Protobuf本身具有反射功能，可以在运行时获取对象的Proto文件。grpc同样也提供了一个名为reflection的反射包，用于为grpc服务提供查询。GRPC官方提供了一个C++实现的grpc_cli工具，可以用于查询GRPC列表或调用GRPC方法。但是C++版本的grpc_cli安装比较复杂，我们推荐用纯Go语言实现的grpcurl工具。本节将简要介绍grpcurl工具的用法。
 
 ## 4.8.1 启动反射服务
 
