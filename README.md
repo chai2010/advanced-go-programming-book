@@ -41,3 +41,42 @@ https://toutiao.io/subjects/318517
 严禁任何商业行为使用或引用该文档的全部或部分内容！
 
 欢迎大家提供建议！
+
+
+## 鸣谢
+
+感谢大家提供 PR！以下排名不分先后：
+
+[fuwensun](https://github.com/fuwensun)
+[qichengzx](https://github.com/qichengzx)
+[lewgun](https://github.com/lewgun)
+[plpan](https://github.com/plpan)
+[xiaoliwang](https://github.com/xiaoliwang)
+[barryz](https://github.com/barryz)
+[alphayan](https://github.com/alphayan)
+[leobuzhi](https://github.com/leobuzhi)
+[orangle](https://github.com/orangle)
+[jiayx](https://github.com/jiayx)
+[iikira](https://github.com/iikira)
+[Darren](https://github.com/Darren)
+[yangtaooo](https://github.com/yangtaooo)
+[fognome](https://github.com/fognome)
+[bcb51](https://github.com/bcb51)
+[RealDeanZhao](https://github.com/RealDeanZhao)
+[zxypetre](https://github.com/zxypetre)
+[wanyaoqi](https://github.com/wanyaoqi)
+[mathrobot](https://github.com/mathrobot)
+[Frozen-Shadow](https://github.com/Frozen-Shadow)
+[7535](https://github.com/7535)
+[polaris1119](https://github.com/polaris1119)
+[yyt030](https://github.com/yyt030)
+[templexxx](https://github.com/templexxx)
+[itfanr](https://github.com/itfanr)
+[cloverstd](https://github.com/cloverstd)
+[cloudzhou](https://github.com/cloudzhou)
+[douglarek](https://github.com/douglarek)
+[yannsun](https://github.com/yannsun)
+[xqbumu](https://github.com/xqbumu)
+[hacknode](https://github.com/hacknode)
+[ezioruan](https://github.com/ezioruan)
+[yuqaf1989](https://github.com/yuqaf1989)
