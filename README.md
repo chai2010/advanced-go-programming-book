@@ -50,7 +50,7 @@ https://toutiao.io/subjects/318517
 [fuwensun](https://github.com/fuwensun)
 [qichengzx](https://github.com/qichengzx)
 [lewgun](https://github.com/lewgun)
-[plpan](https://github.com/plpan)
+[潘培龙](https://github.com/plpan)
 [xiaoliwang](https://github.com/xiaoliwang)
 [barryz](https://github.com/barryz)
 [alphayan](https://github.com/alphayan)
