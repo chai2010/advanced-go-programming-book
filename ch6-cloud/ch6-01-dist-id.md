@@ -39,7 +39,7 @@ Twitter 的 snowflake 算法是这种场景下的一个典型解法。先来看�
 
 表示 timestamp 的 41 位，可以支持我们使用 69 年。当然，我们的时间毫秒计数不会真的从 1970 年开始记，那样我们的系统跑到 `2039/9/7 23:47:35` 就不能用了，所以这里的 timestamp 实际上只是相对于某个时间的增量，比如我们的系统上线是 2018-08-01，那么我们可以把这个 timestamp 当作是从 `2018-08-01 00:00:00.000` 的偏移量。
 
-## 6.1.1 worker id　分配
+## 6.1.1 worker_id 分配
 
 timestamp，datacenter_id，worker_id 和 sequence_id 这四个字段中，timestamp 和 sequence_id 是由程序在运行期生成的。但 datacenter_id 和 worker_id 需要我们在部署阶段就能够获取得到，并且一旦程序启动之后，就是不可更改的了(想想，如果可以随意更改，可能被不慎修改，造成最终生成的 id 有冲突)。
 
