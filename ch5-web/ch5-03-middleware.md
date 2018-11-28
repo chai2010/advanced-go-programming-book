@@ -227,7 +227,7 @@ r.Add("/", helloHandler)
 type middleware func(http.Handler) http.Handler
 
 type Router struct {
-    middlewareChain [] func(http.Handler) http.Handler
+    middlewareChain [] middleware
     mux map[string] http.Handler
 }
 
