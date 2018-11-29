@@ -84,7 +84,7 @@ node := getNodeFromPool()
 
 resp, err := remoteRPC(ctx, params)
 
-if err != nil {
+if err == nil {
     node.Vote(status.Healthy)
 } else {
     node.Vote(status.Unhealthy)
@@ -103,9 +103,10 @@ healthcheck := func(endpoint string) {
         resp, err := callRemoteHealthcheckAPI(endpoint)
         if err != nil {
             dropThisAPINode()
+			break
         }
     }
-}()
+}
 
 for _, endpoint := range endpointList {
     go healthcheck(endpoint)
