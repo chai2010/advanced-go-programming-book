@@ -91,10 +91,13 @@ type RegisterReq struct {
     Email           string   `validate:"email"`
 }
 
+validate := validator.New()
+
 func validate(req RegisterReq) error {
-    err := validate.Struct(mystruct)
+    err := validate.Struct(req)
     if err != nil {
         doSomething()
+		return err
     }
     ...
 }
@@ -115,7 +118,7 @@ var req = RegisterReq {
     Email          : "alex@abc.com",
 }
 
-err := validate.Struct(mystruct)
+err := validate(req)
 fmt.Println(err) // Key: 'RegisterReq.PasswordRepeat' Error:Field validation for 'PasswordRepeat' failed on the 'eqfield' tag
 ```
 
