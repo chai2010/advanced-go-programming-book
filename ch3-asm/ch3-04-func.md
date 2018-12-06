@@ -110,14 +110,17 @@ func Foo(a bool, b int16) (c []byte)
 
 函数的参数有不同的类型，而且返回值中含有更复杂的切片类型。我们该如何计算每个参数的位置和总的大小呢？
 
-其实函数参数和返回值的大小以及对齐问题和结构体的大小和成员对齐问题是一致的。我们可以用诡代思路将全部的参数和返回值以同样的顺序放到一个结构体中，将FP伪寄存器作为唯一的一个指针参数，而每个成员的地址也就是对应原来参数的地址。
+其实函数参数和返回值的大小以及对齐问题和结构体的大小和成员对齐问题是一致的，函数的第一个参数和第一个返回值会分别进行一次地址对齐。我们可以用诡代思路将全部的参数和返回值以同样的顺序分别放到两个结构体中，将FP伪寄存器作为唯一的一个指针参数，而每个成员的地址也就是对应原来参数的地址。
 
 用这样的策略可以很容易计算前面的Foo函数的参数和返回值的地址和总大小。为了便于描述我们定义一个`Foo_args_and_returns`临时结构体类型用于诡代原始的参数和返回值：
 
 ```go
-type Foo_args_and_returns struct {
+type Foo_args struct {
 	a bool
 	b int16
+	c []byte
+}
+type Foo_returns struct {
 	c []byte
 }
 ```
@@ -125,18 +128,25 @@ type Foo_args_and_returns struct {
 然后将Foo原来的参数替换为结构体形式，并且只保留唯一的FP作为参数：
 
 ```go
-func Foo(FP *SomeFunc_args_and_returns) {
+func Foo(FP *SomeFunc_args, FP_ret *SomeFunc_returns) {
+	// a = FP + offsetof(&args.a)
 	_ = unsafe.Offsetof(FP.a) + uintptr(FP) // a
-	_ = unsafe.Offsetof(FP.b) + uintptr(FP) // b
-	_ = unsafe.Offsetof(FP.c) + uintptr(FP) // c
+	// b = FP + offsetof(&args.b)
 
-	_ = unsafe.Sizeof(*FP) // argsize
+	// argsize = sizeof(args)
+	argsize = unsafe.Offsetof(FP)
+
+	// c = FP + argsize + offsetof(&return.c)
+	_ = uintptr(FP) + argsize + unsafe.Offsetof(FP_ret.c)
+
+	// framesize = sizeof(args) + sizeof(returns)
+	_ = unsafe.Offsetof(FP) + unsafe.Offsetof(FP_ret)
 
 	return
 }
 ```
 
-代码完全和Foo函数参数的方式类似。唯一的差异是每个函数的偏移量，这有`unsafe.Offsetof`函数自动计算生成。因为Go结构体中的每个成员已经满足了对齐要求，因此采用通用方式得到每个参数的偏移量也是满足对齐要求的。
+代码完全和Foo函数参数的方式类似。唯一的差异是每个函数的偏移量，通过`unsafe.Offsetof`函数自动计算生成。因为Go结构体中的每个成员已经满足了对齐要求，因此采用通用方式得到每个参数的偏移量也是满足对齐要求的。序言注意的是第一个返回值地址需要重新对齐机器字大小的倍数。
 
 Foo函数的参数和返回值的大小和内存布局：
 
@@ -157,7 +167,7 @@ TEXT ·Foo(SB), $0
 	RET
 ```
 
-其中a和b参数之间出现了一个字节的空洞，b和c之间出现了4个字节的空洞。出现空洞的原因是要包装每个参数变量地址都要对齐到相应的倍数。
+其中a和b参数之间出现了一个字节的空洞，b和c之间出现了4个字节的空洞。出现空洞的原因是要保证每个参数变量地址都要对齐到相应的倍数。
 
 ## 3.4.4 函数中的局部变量
 
