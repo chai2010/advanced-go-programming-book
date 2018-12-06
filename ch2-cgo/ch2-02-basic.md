@@ -157,10 +157,10 @@ var buildMode = "debug"
 
 ```
 go build -tags="debug"
-go build -tags="windows,debug"
+go build -tags="windows debug"
 ```
 
-我们可以通过`-tags`命令行参数同时指定多个build标志，它们之间用逗号分割。
+我们可以通过`-tags`命令行参数同时指定多个build标志，它们之间用空格分隔。
 
 当有多个build tag时，我们将多个标志通过逻辑操作的规则来组合使用。比如以下的构建标志表示只有在”linux/386“或”darwin平台下非cgo环境“才进行构建。
 
