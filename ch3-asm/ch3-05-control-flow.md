@@ -53,8 +53,8 @@ TEXT ·main(SB), $24-0
 
 	// 以a为参数调用函数
 	MOVQ AX, 0(SP)
-	CALL runtime·printint
-	CALL runtime·printnl
+	CALL runtime·printint(SB)
+	CALL runtime·printnl(SB)
 
 	// 函数调用后, AX/BX 寄存器可能被污染, 需要重新加载
 	MOVQ a-8*2(SP), AX // AX = a
@@ -63,13 +63,13 @@ TEXT ·main(SB), $24-0
 	// 计算b值, 并写入内存
 	MOVQ AX, BX        // BX = AX  // b = a
 	ADDQ BX, BX        // BX += BX // b += a
-	MULQ AX, BX        // BX *= AX // b *= a
+	IMULQ AX, BX       // BX *= AX // b *= a
 	MOVQ BX, b-8*1(SP) // b = BX
 
 	// 以b为参数调用函数
 	MOVQ BX, 0(SP)
-	CALL runtime·printint
-	CALL runtime·printnl
+	CALL runtime·printint(SB)
+	CALL runtime·printnl(SB)
 
 	RET
 ```
@@ -81,6 +81,8 @@ TEXT ·main(SB), $24-0
 然后给a变量分配一个AX寄存器，并且通过AX寄存器将a变量对应的内存设置为10，AX也是10。为了输出a变量，需要将AX寄存器的值放到`0(SP)`位置，这个位置的变量将在调用runtime·printint函数时作为它的参数被打印。因为我们之前已经将AX的值保存到a变量内存中了，因此在调用函数前并不需要再进行寄存器的备份工作。
 
 在调用函数返回之后，全部的寄存器将被视为可能被调用的函数修改，因此我们需要从a、b对应的内存中重新恢复寄存器AX和BX。然后参考上面Go语言中b变量的计算方式更新BX对应的值，计算完成后同样将BX的值写入到b对应的内存。
+
+需要说明的是，上面的代码中`IMULQ AX, BX`使用了`IMULQ`指令来计算乘法。没有使用`MULQ`指令的原因是`MULQ`指令默认使用`AX`保存结果。读者可以自己尝试用`MULQ`指令改写上述代码。
 
 最后以b变量作为参数再次调用runtime·printint函数进行输出工作。所有的寄存器同样可能被污染，不过main函数马上就返回了，因此不再需要恢复AX、BX等寄存器了。
 
@@ -95,8 +97,8 @@ TEXT ·main(SB), $16-0
 	MOVQ AX, temp-8(SP) // temp = AX
 
 	// 以a为参数调用函数
-	CALL runtime·printint
-	CALL runtime·printnl
+	CALL runtime·printint(SB)
+	CALL runtime·printnl(SB)
 
 	// 函数调用后, AX 可能被污染, 需要重新加载
 	MOVQ temp-8*1(SP), AX // AX = temp
@@ -104,7 +106,7 @@ TEXT ·main(SB), $16-0
 	// 计算b值, 不需要写入内存
 	MOVQ AX, BX        // BX = AX  // b = a
 	ADDQ BX, BX        // BX += BX // b += a
-	MULQ AX, BX        // BX *= AX // b *= a
+	IMULQ AX, BX       // BX *= AX // b *= a
 
 	// ...
 ```
