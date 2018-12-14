@@ -7,4 +7,4 @@
 //
 //	https://github.com/chai2010/advanced-go-programming-book
 //
-package github_com_chai2010_advanced_go_programming_book
+package gobook
