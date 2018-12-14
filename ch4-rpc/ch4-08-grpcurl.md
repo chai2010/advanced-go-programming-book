@@ -1,7 +1,7 @@
 
 # 4.8 grpcurl工具
 
-Protobuf本身具有反射功能，可以在运行时获取对象的Proto文件。grpc同样也提供了一个名为reflection的反射包，用于为grpc服务提供查询。GRPC官方提供了一个C++实现的grpc_cli工具，可以用于查询GRPC列表或调用GRPC方法。但是C++版本的grpc_cli安装比较复杂，我们推荐用纯Go语言实现的grpcurl工具。本节将简要介绍grpcurl工具的用法。
+Protobuf本身具有反射功能，可以在运行时获取对象的Proto文件。gRPC同样也提供了一个名为reflection的反射包，用于为gRPC服务提供查询。gRPC官方提供了一个C++实现的grpc_cli工具，可以用于查询gRPC列表或调用gRPC方法。但是C++版本的grpc_cli安装比较复杂，我们推荐用纯Go语言实现的grpcurl工具。本节将简要介绍grpcurl工具的用法。
 
 ## 4.8.1 启动反射服务
 
@@ -23,7 +23,7 @@ func main() {
 }
 ```
 
-如果启动了gprc反射服务，那么就可以通过reflection包提供的反射服务查询GRPC服务或调用GRPC方法。
+如果启动了gprc反射服务，那么就可以通过reflection包提供的反射服务查询gRPC服务或调用gRPC方法。
 
 ## 4.8.2 查看服务列表
 
@@ -75,7 +75,7 @@ HelloService.HelloService
 grpc.reflection.v1alpha.ServerReflection
 ```
 
-其中HelloService.HelloService是在protobuf文件定义的服务。而ServerReflection服务则是reflection包注册的反射服务。通过ServerReflection服务可以查询包括本身在内的全部GRPC服务信息。
+其中HelloService.HelloService是在protobuf文件定义的服务。而ServerReflection服务则是reflection包注册的反射服务。通过ServerReflection服务可以查询包括本身在内的全部gRPC服务信息。
 
 ## 4.8.3 服务的方法列表
 
@@ -164,7 +164,7 @@ message String {
 
 ## 4.8.5 调用方法
 
-在获取GRPC服务的详细信息之后就可以json调用GRPC方法了。
+在获取gRPC服务的详细信息之后就可以json调用gRPC方法了。
 
 下面命令通过`-d`参数传入一个json字符串作为输入参数，调用的是HelloService服务的Hello方法：
 
@@ -193,4 +193,4 @@ $ grpcurl -plaintext -d @ localhost:1234 HelloService.HelloService/Channel
 }
 ```
 
-通过grpcurl工具，我们可以在没有服务端代码的环境下测试GRPC服务。
+通过grpcurl工具，我们可以在没有服务端代码的环境下测试gRPC服务。

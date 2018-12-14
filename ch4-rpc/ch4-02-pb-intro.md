@@ -83,22 +83,22 @@ service HelloService {
 
 但是重新生成的Go代码并没有发生变化。这是因为世界上的RPC实现有千万种，protoc编译器并不知道该如何为HelloService服务生成代码。
 
-不过在protoc-gen-go内部已经集成了一个叫grpc的插件，可以针对grpc生成代码：
+不过在protoc-gen-go内部已经集成了一个名字为`grpc`的插件，可以针对gRPC生成代码：
 
 ```
 $ protoc --go_out=plugins=grpc:. hello.proto
 ```
 
-在生成的代码中多了一些类似HelloServiceServer、HelloServiceClient的新类型。这些类型是为grpc服务的，并不符合我们的RPC要求。
+在生成的代码中多了一些类似HelloServiceServer、HelloServiceClient的新类型。这些类型是为gRPC服务的，并不符合我们的RPC要求。
 
-不过grpc插件为我们提供了改进的思路，下面我们将探索如何为我们的RPC生成安全的代码。
+不过gRPC插件为我们提供了改进的思路，下面我们将探索如何为我们的RPC生成安全的代码。
 
 
 ## 4.2.2 定制代码生成插件
 
-Protobuf的protoc编译器是通过插件机制实现对不同语言的支持。比如protoc命令出现`--xxx_out`格式的参数，那么protoc将首先查询是否有内置的xxx插件，如果没有内置的xxx插件那么将继续查询当前系统中是否存在protoc-gen-xxx命名的可执行程序，最终通过查询到的插件生成代码。对于Go语言的protoc-gen-go插件来说，里面又实现了一层静态插件系统。比如protoc-gen-go内置了一个grpc插件，用户可以通过`--go_out=plugins=grpc`参数来生成grpc相关代码，否则只会针对message生成相关代码。
+Protobuf的protoc编译器是通过插件机制实现对不同语言的支持。比如protoc命令出现`--xxx_out`格式的参数，那么protoc将首先查询是否有内置的xxx插件，如果没有内置的xxx插件那么将继续查询当前系统中是否存在protoc-gen-xxx命名的可执行程序，最终通过查询到的插件生成代码。对于Go语言的protoc-gen-go插件来说，里面又实现了一层静态插件系统。比如protoc-gen-go内置了一个gRPC插件，用户可以通过`--go_out=plugins=grpc`参数来生成gRPC相关代码，否则只会针对message生成相关代码。
 
-参考grpc插件的代码，可以发现generator.RegisterPlugin函数可以用来注册插件。插件是一个generator.Plugin接口：
+参考gRPC插件的代码，可以发现generator.RegisterPlugin函数可以用来注册插件。插件是一个generator.Plugin接口：
 
 ```go
 // A Plugin provides functionality to add to the output during

@@ -1,20 +1,20 @@
-# 4.4 GRPC入门
+# 4.4 gRPC入门
 
-GRPC是Google公司基于Protobuf开发的跨语言的开源RPC框架。GRPC基于HTTP/2协议设计，可以基于一个HTTP/2链接提供多个服务，对于移动设备更加友好。本节将讲述GRPC的简单用法。
+gRPC是Google公司基于Protobuf开发的跨语言的开源RPC框架。gRPC基于HTTP/2协议设计，可以基于一个HTTP/2链接提供多个服务，对于移动设备更加友好。本节将讲述gRPC的简单用法。
 
-## 4.4.1 GRPC技术栈
+## 4.4.1 gRPC技术栈
 
-Go语言的GRPC技术栈如图4-1所示：
+Go语言的gRPC技术栈如图4-1所示：
 
 ![](../images/ch4-1-grpc-go-stack.png)
 
 *图4-1 gRPC技术栈*
 
-最底层为TCP或Unix Socket协议，在此之上是HTTP/2协议的实现，然后在HTTP/2协议之上又构建了针对Go语言的GRPC核心库。应用程序通过GRPC插件生产的Stub代码和GRPC核心库通信，也可以直接和GRPC核心库通信。
+最底层为TCP或Unix Socket协议，在此之上是HTTP/2协议的实现，然后在HTTP/2协议之上又构建了针对Go语言的gRPC核心库。应用程序通过gRPC插件生产的Stub代码和gRPC核心库通信，也可以直接和gRPC核心库通信。
 
-## 4.4.2 GRPC入门
+## 4.4.2 gRPC入门
 
-如果从Protobuf的角度看，GRPC只不过是一个针对service接口生成代码的生成器。我们在本章的第二节中手工实现了一个简单的Protobuf代码生成器插件，只不过当时生成的代码是适配标准库的RPC框架的。现在我们将学习GRPC的用法。
+如果从Protobuf的角度看，gRPC只不过是一个针对service接口生成代码的生成器。我们在本章的第二节中手工实现了一个简单的Protobuf代码生成器插件，只不过当时生成的代码是适配标准库的RPC框架的。现在我们将学习gRPC的用法。
 
 创建hello.proto文件，定义HelloService接口：
 
@@ -32,13 +32,13 @@ service HelloService {
 }
 ```
 
-使用protoc-gen-go内置的grpc插件生成GRPC代码：
+使用protoc-gen-go内置的gRPC插件生成gRPC代码：
 
 ```
 $ protoc --go_out=plugins=grpc:. hello.proto
 ```
 
-GRPC插件会为服务端和客户端生成不同的接口：
+gRPC插件会为服务端和客户端生成不同的接口：
 
 ```go
 type HelloServiceServer interface {
@@ -50,7 +50,7 @@ type HelloServiceClient interface {
 }
 ```
 
-GRPC通过context.Context参数，为每个方法调用提供了上下文支持。客户端在调用方法的时候，可以通过可选的grpc.CallOption类型的参数提供额外的上下文信息。
+gRPC通过context.Context参数，为每个方法调用提供了上下文支持。客户端在调用方法的时候，可以通过可选的grpc.CallOption类型的参数提供额外的上下文信息。
 
 基于服务端的HelloServiceServer接口可以重新实现HelloService服务：
 
@@ -65,7 +65,7 @@ func (p *HelloServiceImpl) Hello(
 }
 ```
 
-GRPC服务的启动流程和标准库的RPC服务启动流程类似：
+gRPC服务的启动流程和标准库的RPC服务启动流程类似：
 
 ```go
 func main() {
@@ -80,9 +80,9 @@ func main() {
 }
 ```
 
-首先是通过`grpc.NewServer()`构造一个GRPC服务对象，然后通过GRPC插件生成的RegisterHelloServiceServer函数注册我们实现的HelloServiceImpl服务。然后通过`grpcServer.Serve(lis)`在一个监听端口上提供GRPC服务。
+首先是通过`grpc.NewServer()`构造一个gRPC服务对象，然后通过gRPC插件生成的RegisterHelloServiceServer函数注册我们实现的HelloServiceImpl服务。然后通过`grpcServer.Serve(lis)`在一个监听端口上提供gRPC服务。
 
-然后就可以通过客户端链接GRPC服务了：
+然后就可以通过客户端链接gRPC服务了：
 
 ```go
 func main() {
@@ -101,13 +101,13 @@ func main() {
 }
 ```
 
-其中grpc.Dial负责和GRPC服务建立链接，然后NewHelloServiceClient函数基于已经建立的链接构造HelloServiceClient对象。返回的client其实是一个HelloServiceClient接口对象，通过接口定义的方法就可以调用服务端对应的GRPC服务提供的方法。
+其中grpc.Dial负责和gRPC服务建立链接，然后NewHelloServiceClient函数基于已经建立的链接构造HelloServiceClient对象。返回的client其实是一个HelloServiceClient接口对象，通过接口定义的方法就可以调用服务端对应的gRPC服务提供的方法。
 
-GRPC和标准库的RPC框架有一个区别，GRPC生成的接口并不支持异步调用。不过我们可以在多个Goroutine之间安全地共享GRPC底层的HTTP/2链接，因此可以通过在另一个Goroutine阻塞调用的方式模拟异步调用。
+gRPC和标准库的RPC框架有一个区别，gRPC生成的接口并不支持异步调用。不过我们可以在多个Goroutine之间安全地共享gRPC底层的HTTP/2链接，因此可以通过在另一个Goroutine阻塞调用的方式模拟异步调用。
 
-## 4.4.3 GRPC流
+## 4.4.3 gRPC流
 
-RPC是远程函数调用，因此每次调用的函数参数和返回值不能太大，否则将严重影响每次调用的响应时间。因此传统的RPC方法调用对于上传和下载较大数据量场景并不适合。同时传统RPC模式也不适用于对时间不确定的订阅和发布模式。为此，GRPC框架针对服务器端和客户端分别提供了流特性。
+RPC是远程函数调用，因此每次调用的函数参数和返回值不能太大，否则将严重影响每次调用的响应时间。因此传统的RPC方法调用对于上传和下载较大数据量场景并不适合。同时传统RPC模式也不适用于对时间不确定的订阅和发布模式。为此，gRPC框架针对服务器端和客户端分别提供了流特性。
 
 服务端或客户端的单向流是双向流的特例，我们在HelloService增加一个支持双向流的Channel方法：
 
@@ -220,7 +220,7 @@ for {
 
 ## 4.4.4 发布和订阅模式
 
-在前一节中，我们基于Go内置的RPC库实现了一个简化版的Watch方法。基于Watch的思路虽然也可以构造发布和订阅系统，但是因为RPC缺乏流机制导致每次只能返回一个结果。在发布和订阅模式中，由调用者主动发起的发布行为类似一个普通函数调用，而被动的订阅者则类似GRPC客户端单向流中的接收者。现在我们可以尝试基于GRPC的流特性构造一个发布和订阅系统。
+在前一节中，我们基于Go内置的RPC库实现了一个简化版的Watch方法。基于Watch的思路虽然也可以构造发布和订阅系统，但是因为RPC缺乏流机制导致每次只能返回一个结果。在发布和订阅模式中，由调用者主动发起的发布行为类似一个普通函数调用，而被动的订阅者则类似gRPC客户端单向流中的接收者。现在我们可以尝试基于gRPC的流特性构造一个发布和订阅系统。
 
 发布订阅是一个常见的设计模式，开源社区中已经存在很多该模式的实现。其中docker项目中提供了一个pubsub的极简实现，下面是基于pubsub包实现的本地发布订阅代码：
 
@@ -276,7 +276,7 @@ service PubsubService {
 }
 ```
 
-其中Publish是普通的RPC方法，Subscribe则是一个单向的流服务。然后grpc插件会为服务端和客户端生成对应的接口：
+其中Publish是普通的RPC方法，Subscribe则是一个单向的流服务。然后gRPC插件会为服务端和客户端生成对应的接口：
 
 ```go
 type PubsubServiceServer interface {
@@ -397,5 +397,5 @@ func main() {
 }
 ```
 
-到此我们就基于GRPC简单实现了一个跨网络的发布和订阅服务。
+到此我们就基于gRPC简单实现了一个跨网络的发布和订阅服务。
 
