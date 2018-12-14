@@ -4,9 +4,11 @@ GRPC是Google公司基于Protobuf开发的跨语言的开源RPC框架。GRPC基�
 
 ## 4.4.1 GRPC技术栈
 
-Go语言的GRPC技术栈如图所示：
+Go语言的GRPC技术栈如图4-1所示：
 
-![](../images/ch4.4-1-grpc-go-stack.png)
+![](../images/ch4-1-grpc-go-stack.png)
+
+*图4-1 gRPC技术栈*
 
 最底层为TCP或Unix Socket协议，在此之上是HTTP/2协议的实现，然后在HTTP/2协议之上又构建了针对Go语言的GRPC核心库。应用程序通过GRPC插件生产的Stub代码和GRPC核心库通信，也可以直接和GRPC核心库通信。
 
