@@ -8,9 +8,9 @@
 
 在一个Go源文件中，如果出现了`import "C"`指令则表示将调用cgo命令生成对应的中间文件。下图是cgo生成的中间文件的简单示意图：
 
-![](../images/ch2.5-1-cgo-generated-files.dot.png)
+![](../images/ch2-4-cgo-generated-files.dot.png)
 
-*图 2.5-1 cgo生成的中间文件*
+*图 2-4 cgo生成的中间文件*
 
 
 包中有4个Go文件，其中nocgo开头的文件中没有`import "C"`指令，其它的2个文件则包含了cgo代码。cgo命令会为每个包含了cgo代码的Go文件创建2个中间文件，比如 main.go 会分别创建 main.cgo1.go 和 main.cgo2.c 两个中间文件。然后会为整个包创建一个 `_cgo_gotypes.go` Go文件，其中包含Go语言部分辅助代码。此外还会创建一个 `_cgo_export.h` 和 `_cgo_export.c` 文件，对应Go语言导出到C语言的类型和函数。
@@ -135,9 +135,9 @@ void _cgo_506f45f9fa85_Cfunc_sum(void *v) {
 
 `C.sum`的整个调用流程图如下：
 
-![](../images/ch2.5-2-call-c-sum-v1.uml.png)
+![](../images/ch2-5-call-c-sum-v1.uml.png)
 
-*图 2.5-2 调用C函数*
+*图 2-5 调用C函数*
 
 其中`runtime.cgocall`函数是实现Go语言到C语言函数跨界调用的关键。更详细的细节可以参考 https://golang.org/src/cmd/cgo/doc.go 内部的代码注释和 `runtime.cgocall` 函数的实现。
 
@@ -248,9 +248,9 @@ func runtime.cgocallback(fn, frame unsafe.Pointer, framesize, ctxt uintptr)
 
 整个调用流程图如下：
 
-![](../images/ch2.5-3-call-c-sum-v2.uml.png)
+![](../images/ch2-6-call-c-sum-v2.uml.png)
 
-*图 2.5-3 调用导出的Go函数*
+*图 2-6 调用导出的Go函数*
 
 其中`runtime.cgocallback`函数是实现C语言到Go语言函数跨界调用的关键。更详细的细节可以参考相关函数的实现。
 
