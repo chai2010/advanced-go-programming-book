@@ -1,4 +1,4 @@
-// 1.2-16
+// go run chai2010.cn/gobook/examples/ch1.2-16
 
 package main
 

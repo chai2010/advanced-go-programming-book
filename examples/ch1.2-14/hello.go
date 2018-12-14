@@ -1,6 +1,4 @@
-// ch1.2-14
-
-// +build ignore
+// go run chai2010.cn/gobook/examples/ch1.2-14
 
 package main
 

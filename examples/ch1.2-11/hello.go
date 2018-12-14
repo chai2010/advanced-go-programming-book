@@ -1,4 +1,4 @@
-// ch1.2-11
+// chai2010.cn/gobook/examples/ch1.2-11
 
 // +build ignore
 
