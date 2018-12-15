@@ -4,7 +4,7 @@
 
 restful 是几年前刮起的 API 设计风潮，在 restful 中除了 GET 和 POST 之外，还使用了 http 协议定义的几种其它的标准化语义。具体包括：
 
-```shell
+```go
 const (
     MethodGet     = "GET"
     MethodHead    = "HEAD"
