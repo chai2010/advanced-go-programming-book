@@ -1,4 +1,4 @@
-// go run chai2010.cn/gobook/examples/ch1-01-genesis/1-hello
+// go run chai2010.cn/gobook/examples/ch1.1/1-hello
 
 package main
 
