@@ -1,0 +1,7 @@
+// +build ignore
+
+package main
+
+func main() {
+	print "hello, world\n";
+}
