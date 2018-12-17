@@ -3,3 +3,5 @@
 // license that can be found in the LICENSE file.
 
 module chai2010.cn/gobook
+
+require github.com/chai2010/advanced-go-programming-book v0.0.0-20181214135029-bcf560505d53 // indirect
