@@ -6,7 +6,7 @@
 
 在Go语言中访问C语言的符号时，一般是通过虚拟的“C”包访问，比如`C.int`对应C语言的`int`类型。有些C语言的类型是由多个关键字组成，但通过虚拟的“C”包访问C语言类型时名称部分不能有空格字符，比如`unsigned int`不能直接通过`C.unsigned int`访问。因此CGO为C语言的基础数值类型都提供了相应转换规则，比如`C.uint`对应C语言的`unsigned int`。
 
-Go语言中数值类型和C语言数据类型基本上是相似的，以下是它们的对应关系表。
+Go语言中数值类型和C语言数据类型基本上是相似的，以下是它们的对应关系表2-1所示。
 
 C语言类型               | CGO类型      | Go语言类型
 ---------------------- | ----------- | ---------
@@ -24,6 +24,8 @@ unsigned long long int | C.ulonglong | uint64
 float                  | C.float     | float32
 double                 | C.double    | float64
 size_t                 | C.size_t    | uint
+
+*表 2-1 Go语言和C语言类型对比*
 
 需要注意的是，虽然在C语言中`int`、`short`等类型没有明确定义内存大小，但是在CGO中它们的内存大小是确定的。在CGO中，C语言的`int`和`long`类型都是对应4个字节的内存大小，`size_t`类型可以当作Go语言`uint`无符号整数类型对待。
 
@@ -44,7 +46,7 @@ typedef float GoFloat32;
 typedef double GoFloat64;
 ```
 
-除了`GoInt`和`GoUint`之外，我们并不推荐直接访问`GoInt32`、`GoInt64`等类型。更好的做法是通过C语言的C99标准引入的`<stdint.h>`头文件。为了提高C语言的可移植性，在`<stdint.h>`文件中，不但每个数值类型都提供了明确内存大小，而且和Go语言的类型命名更加一致。
+除了`GoInt`和`GoUint`之外，我们并不推荐直接访问`GoInt32`、`GoInt64`等类型。更好的做法是通过C语言的C99标准引入的`<stdint.h>`头文件。为了提高C语言的可移植性，在`<stdint.h>`文件中，不但每个数值类型都提供了明确内存大小，而且和Go语言的类型命名更加一致。Go语言类型`<stdint.h>`头文件类型对比如表2-2所示。
 
 C语言类型 | CGO类型     | Go语言类型
 -------- | ---------- | ---------
@@ -56,6 +58,8 @@ int32_t  | C.int32_t  | int32
 uint32_t | C.uint32_t | uint32
 int64_t  | C.int64_t  | int64
 uint64_t | C.uint64_t | uint64
+
+*表 2-2 `<stdint.h>`类型对比*
 
 前文说过，如果C语言的类型是由多个关键字组成，则无法通过虚拟的“C”包直接访问(比如C语言的`unsigned short`不能直接通过`C.unsigned short`访问)。但是，在`<stdint.h>`中通过使用C语言的`typedef`关键字将`unsigned short`重新定义为`uint16_t`这样一个单词的类型后，我们就可以通过`C.uint16_t`访问原来的`unsigned short`类型了。对于比较复杂的C语言类型，推荐使用`typedef`关键字提供一个规则的类型命名，这样更利于在CGO中访问。
 
