@@ -40,7 +40,8 @@ grpcurl中最常使用的是list命令，用于获取服务或服务方法的列
 
 ```shell
 $ grpcurl localhost:1234 list
-Failed to dial target host "localhost:1234": tls: first record does not look like a TLS handshake
+Failed to dial target host "localhost:1234": tls: first record does not \
+look like a TLS handshake
 ```
 
 如果grpc服务正常，但是服务没有启动reflection反射服务，将会遇到以下错误：

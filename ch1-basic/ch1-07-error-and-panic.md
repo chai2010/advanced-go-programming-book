@@ -94,12 +94,12 @@ func CopyFile(dstName, srcName string) (written int64, err error) {
 
 ```go
 func ParseJSON(input string) (s *Syntax, err error) {
-    defer func() {
-        if p := recover(); p != nil {
-            err = fmt.Errorf("JSON: internal error: %v", p)
-        }
-    }()
-    // ...parser...
+	defer func() {
+		if p := recover(); p != nil {
+			err = fmt.Errorf("JSON: internal error: %v", p)
+		}
+	}()
+	// ...parser...
 }
 ```
 
@@ -113,7 +113,7 @@ Go语言库的实现习惯: 即使在包内部使用了`panic`，但是在导出
 
 ```go
 if _, err := html.Parse(resp.Body); err != nil {
-    return nil, fmt.Errorf("parsing %s as HTML: %v", url,err)
+	return nil, fmt.Errorf("parsing %s as HTML: %v", url,err)
 }
 ```
 
@@ -193,9 +193,9 @@ func main() {
 上面的例子中，错误被进行了2层包装。我们可以这样遍历原始错误经历了哪些包装流程：
 
 ```go
-    for i, e := range err.(errors.Error).Wraped() {
-        fmt.Printf("wraped(%d): %v\n", i, e)
-    }
+	for i, e := range err.(errors.Error).Wraped() {
+		fmt.Printf("wraped(%d): %v\n", i, e)
+	}
 ```
 
 同时也可以获取每个包装错误的函数调用堆栈信息：
@@ -238,7 +238,7 @@ fmt.Println(err.(errors.Error).Code())
 ```go
 f, err := os.Open("filename.ext")
 if err != nil {
-    // 失败的情形, 马上返回错误
+	// 失败的情形, 马上返回错误
 }
 
 // 正常的处理流程
@@ -422,7 +422,7 @@ func main {
 		}
 	}()
 
-	...
+	// ...
 }
 ```
 

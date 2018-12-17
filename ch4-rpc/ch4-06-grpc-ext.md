@@ -268,9 +268,9 @@ $ curl localhost:8080/post -X POST --data '{"value":"grpc"}'
 $ go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
 
 $ protoc -I. \
-	-I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-	--swagger_out=. \
-	hello.proto
+  -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+  --swagger_out=. \
+  hello.proto
 ```
 
 然后会生成一个hello.swagger.json文件。这样的话就可以通过swagger-ui这个项目，在网页中提供REST接口的文档和测试等功能。

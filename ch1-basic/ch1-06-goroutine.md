@@ -267,7 +267,9 @@ func (p *Publisher) Close() {
 }
 
 // 发送主题，可以容忍一定的超时
-func (p *Publisher) sendTopic(sub subscriber, topic topicFunc, v interface{}, wg *sync.WaitGroup) {
+func (p *Publisher) sendTopic(
+	sub subscriber, topic topicFunc, v interface{}, wg *sync.WaitGroup,
+) {
 	defer wg.Done()
 	if topic != nil && !topic(v) {
 		return
@@ -343,14 +345,14 @@ func main() {
 var limit = make(chan int, 3)
 
 func main() {
-    for _, w := range work {
-        go func() {
-            limit <- 1
-            w()
-            <-limit
-        }()
-    }
-    select{}
+	for _, w := range work {
+		go func() {
+			limit <- 1
+			w()
+			<-limit
+		}()
+	}
+	select{}
 }
 ```
 

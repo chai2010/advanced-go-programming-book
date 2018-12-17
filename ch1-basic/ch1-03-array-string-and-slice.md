@@ -11,10 +11,10 @@ Go语言中数组、字符串和切片三者是密切相关的数据结构。这
 我们先看看数组有哪些定义方式:
 
 ```go
-var a [3]int                    // 定义一个长度为3的int类型数组, 元素全部为0
-var b = [...]int{1, 2, 3}       // 定义一个长度为3的int类型数组, 元素为 1, 2, 3
-var c = [...]int{2: 3, 1: 2}    // 定义一个长度为3的int类型数组, 元素为 0, 2, 3
-var d = [...]int{1, 2, 4: 5, 6} // 定义一个长度为6的int类型数组, 元素为 1, 2, 0, 0, 5, 6
+var a [3]int                    // 定义长度为3的int型数组, 元素全部为0
+var b = [...]int{1, 2, 3}       // 定义长度为3的int型数组, 元素为 1, 2, 3
+var c = [...]int{2: 3, 1: 2}    // 定义长度为3的int型数组, 元素为 0, 2, 3
+var d = [...]int{1, 2, 4: 5, 6} // 定义长度为6的int型数组, 元素为 1, 2, 0, 0, 5, 6
 ```
 
 第一种方式是定义一个数组变量的最基本的方式，数组的长度明确指定，数组中的每个元素都以零值初始化。
@@ -169,7 +169,9 @@ type StringHeader struct {
 分析可以发现，“Hello, world”字符串底层数据和以下数组是完全一致的：
 
 ```go
-var data = [...]byte{'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd'}
+var data = [...]byte{
+	'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd',
+}
 ```
 
 字符串虽然不是切片，但是支持切片操作，不同位置的切片底层也访问的同一块内存数据（因为字符串是只读的，相同的字符串面值常量通常是对应同一个字符串常量）：
@@ -202,7 +204,8 @@ fmt.Printf("%#v\n", []byte("Hello, 世界"))
 输出的结果是：
 
 ```go
-[]byte{0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0xe4, 0xb8, 0x96, 0xe7, 0x95, 0x8c}
+[]byte{0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0xe4, 0xb8, 0x96, 0xe7, \
+0x95, 0x8c}
 ```
 
 分析可以发现`0xe4, 0xb8, 0x96`对应中文“世”，`0xe7, 0x95, 0x8c`对应中文“界”。我们也可以在字符串面值中直指定UTF8编码后的值（源文件中全部是ASCII码，可以避免出现多字节的字符）。
@@ -276,7 +279,7 @@ fmt.Printf("%#v\n", string([]rune{'世', '界'})) // 世界
 ```go
 func forOnString(s string, forBody func(i int, r rune)) {
 	for i := 0; len(s) > 0; {
-    	r, size := utf8.DecodeRuneInString(s)
+		r, size := utf8.DecodeRuneInString(s)
 		forBody(i, r)
 		s = s[size:]
 		i += size
@@ -360,9 +363,9 @@ func runes2string(s []int32) string {
 
 ```go
 type SliceHeader struct {
-    Data uintptr
-    Len  int
-    Cap  int
+	Data uintptr
+	Len  int
+	Cap  int
 }
 ```
 
@@ -555,8 +558,8 @@ func Filter(s []byte, fn func(x byte) bool) []byte {
 
 ```go
 func FindPhoneNumber(filename string) []byte {
-    b, _ := ioutil.ReadFile(filename)
-    return regexp.MustCompile("[0-9]+").Find(b)
+	b, _ := ioutil.ReadFile(filename)
+	return regexp.MustCompile("[0-9]+").Find(b)
 }
 ```
 
@@ -566,8 +569,8 @@ func FindPhoneNumber(filename string) []byte {
 
 ```go
 func FindPhoneNumber(filename string) []byte {
-    b, _ := ioutil.ReadFile(filename)
-    b = regexp.MustCompile("[0-9]+").Find(b)
+	b, _ := ioutil.ReadFile(filename)
+	b = regexp.MustCompile("[0-9]+").Find(b)
 	return append([]byte{}, b...)
 }
 ```

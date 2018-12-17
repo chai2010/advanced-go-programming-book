@@ -262,7 +262,9 @@ type ServiceMethodSpec struct {
 然后我们新建一个buildServiceSpec方法用来解析每个服务的ServiceSpec元信息：
 
 ```go
-func (p *netrpcPlugin) buildServiceSpec(svc *descriptor.ServiceDescriptorProto) *ServiceSpec {
+func (p *netrpcPlugin) buildServiceSpec(
+	svc *descriptor.ServiceDescriptorProto,
+) *ServiceSpec {
 	spec := &ServiceSpec{
 		ServiceName: generator.CamelCase(svc.GetName()),
 	}

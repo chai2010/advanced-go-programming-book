@@ -129,8 +129,12 @@ type HelloServiceServer interface {
 	Channel(HelloService_ChannelServer) error
 }
 type HelloServiceClient interface {
-	Hello(ctx context.Context, in *String, opts ...grpc.CallOption) (*String, error)
-	Channel(ctx context.Context, opts ...grpc.CallOption) (HelloService_ChannelClient, error)
+	Hello(ctx context.Context, in *String, opts ...grpc.CallOption) (
+		*String, error,
+	)
+	Channel(ctx context.Context, opts ...grpc.CallOption) (
+		HelloService_ChannelClient, error,
+	)
 }
 ```
 
@@ -356,11 +360,15 @@ func main() {
 
 	client := NewPubsubServiceClient(conn)
 
-	_, err = client.Publish(context.Background(), &String{Value: "golang: hello Go"})
+	_, err = client.Publish(
+		context.Background(), &String{Value: "golang: hello Go"},
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = client.Publish(context.Background(), &String{Value: "docker: hello Docker"})
+	_, err = client.Publish(
+		context.Background(), &String{Value: "docker: hello Docker"},
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -378,7 +386,9 @@ func main() {
 	defer conn.Close()
 
 	client := NewPubsubServiceClient(conn)
-	stream, err := client.SubscribeTopic(context.Background(), &String{Value: "golang:"})
+	stream, err := client.SubscribeTopic(
+		context.Background(), &String{Value: "golang:"},
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

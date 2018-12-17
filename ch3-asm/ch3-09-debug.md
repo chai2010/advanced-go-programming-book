@@ -231,16 +231,19 @@ i = 3
 (dlv) goroutine
 Thread 101686 at ./main.go:10
 Goroutine 1:
-        Runtime: ./main.go:10 main.main (0x10aea33)
-        User: ./main.go:10 main.main (0x10aea33)
-        Go: /usr/local/go/src/runtime/asm_amd64.s:258 runtime.rt0_go (0x1051643)
-        Start: /usr/local/go/src/runtime/proc.go:109 runtime.main (0x102bb90)
+  Runtime: ./main.go:10 main.main (0x10aea33)
+  User: ./main.go:10 main.main (0x10aea33)
+  Go: /usr/local/go/src/runtime/asm_amd64.s:258 runtime.rt0_go (0x1051643)
+  Start: /usr/local/go/src/runtime/proc.go:109 runtime.main (0x102bb90)
 (dlv) goroutines
 [4 goroutines]
 * Goroutine 1 - User: ./main.go:10 main.main (0x10aea33) (thread 101686)
-  Goroutine 2 - User: /usr/local/go/src/runtime/proc.go:292 runtime.gopark (0x102c189)
-  Goroutine 3 - User: /usr/local/go/src/runtime/proc.go:292 runtime.gopark (0x102c189)
-  Goroutine 4 - User: /usr/local/go/src/runtime/proc.go:292 runtime.gopark (0x102c189)
+  Goroutine 2 - User: /usr/local/go/src/runtime/proc.go:292 \
+                runtime.gopark (0x102c189)
+  Goroutine 3 - User: /usr/local/go/src/runtime/proc.go:292 \
+                runtime.gopark (0x102c189)
+  Goroutine 4 - User: /usr/local/go/src/runtime/proc.go:292 \
+                runtime.gopark (0x102c189)
 (dlv)
 ```
 
@@ -290,25 +293,25 @@ TEXT ·asmSayHello(SB), $16-0
 Breakpoint 1 set at 0x105011f for main.main() ./main.go:3
 (dlv) continue
 > main.main() ./main.go:3 (hits goroutine(1):1 total:1) (PC: 0x105011f)
-     1: package main
-     2:
-=>   3: func main() { asmSayHello() }
-     4:
-     5: func asmSayHello()
+  1: package main
+  2:
+=>3: func main() { asmSayHello() }
+  4:
+  5: func asmSayHello()
 (dlv) disassemble
 TEXT main.main(SB) /path/to/pkg/main.go
-        main.go:3       0x1050110       65488b0c25a0080000 mov rcx, qword ptr gs:[0x8a0]
-        main.go:3       0x1050119       483b6110           cmp rsp, qword ptr [rcx+0x10]
-        main.go:3       0x105011d       761a               jbe 0x1050139
-=>      main.go:3       0x105011f*      4883ec08           sub rsp, 0x8
-        main.go:3       0x1050123       48892c24           mov qword ptr [rsp], rbp
-        main.go:3       0x1050127       488d2c24           lea rbp, ptr [rsp]
-        main.go:3       0x105012b       e880000000         call $main.asmSayHello
-        main.go:3       0x1050130       488b2c24           mov rbp, qword ptr [rsp]
-        main.go:3       0x1050134       4883c408           add rsp, 0x8
-        main.go:3       0x1050138       c3                 ret
-        main.go:3       0x1050139       e87288ffff         call $runtime.morestack_noctxt
-        main.go:3       0x105013e       ebd0               jmp $main.main
+  main.go:3 0x1050110  65488b0c25a0080000 mov rcx, qword ptr g  [0x8a0]
+  main.go:3 0x1050119  483b6110           cmp rsp, qword ptr [r  +0x10]
+  main.go:3 0x105011d  761a               jbe 0x1050139
+=>main.go:3 0x105011f* 4883ec08           sub rsp, 0x8
+  main.go:3 0x1050123  48892c24           mov qword ptr [rsp], rbp
+  main.go:3 0x1050127  488d2c24           lea rbp, ptr [rsp]
+  main.go:3 0x105012b  e880000000         call $main.asmSayHello
+  main.go:3 0x1050130  488b2c24           mov rbp, qword ptr [rsp]
+  main.go:3 0x1050134  4883c408           add rsp, 0x8
+  main.go:3 0x1050138  c3                 ret
+  main.go:3 0x1050139  e87288ffff         call $runtime.morestack_noctxt
+  main.go:3 0x105013e  ebd0               jmp $main.main
 (dlv)
 ```
 

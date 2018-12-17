@@ -318,7 +318,8 @@ RPC的服务架设在“/jsonrpc”路径，在处理函数中基于http.Respons
 模拟一次RPC调用的过程就是向该链接发送一个json字符串：
 
 ```
-$ curl localhost:1234/jsonrpc -X POST --data '{"method":"HelloService.Hello","params":["hello"],"id":0}'
+$ curl localhost:1234/jsonrpc -X POST \
+	--data '{"method":"HelloService.Hello","params":["hello"],"id":0}'
 ```
 
 返回的结果依然是json字符串：

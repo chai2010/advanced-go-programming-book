@@ -458,7 +458,7 @@ struct Int {
 	int Twice() {
 		const int* p = (int*)(this);
 		return (*p) * 2;
-    }
+	}
 };
 int main() {
 	int x = 42;

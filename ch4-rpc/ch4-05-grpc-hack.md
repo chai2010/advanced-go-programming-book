@@ -116,7 +116,9 @@ func main() {
 		RootCAs:            certPool,
 	})
 
-	conn, err := grpc.Dial("localhost:5000", grpc.WithTransportCredentials(creds))
+	conn, err := grpc.Dial(
+		"localhost:5000", grpc.WithTransportCredentials(creds),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -210,7 +212,9 @@ type Authentication struct {
 	Password string
 }
 
-func (a *Authentication) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
+func (a *Authentication) GetRequestMetadata(context.Context, ...string) (
+	map[string]string, error,
+) {
 	return map[string]string{"user":a.User, "password": a.Password}, nil
 }
 func (a *Authentication) RequireTransportSecurity() bool {
@@ -339,7 +343,7 @@ myServer := grpc.NewServer(
 	)),
 	grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
 		filter1, filter2, ...
-    )),
+	)),
 )
 ```
 
@@ -396,7 +400,9 @@ func main() {
 				mux.ServeHTTP(w, r)
 				return
 			}
-			if strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
+			if strings.Contains(
+				r.Header.Get("Content-Type"), "application/grpc",
+			) {
 				grpcServer.ServeHTTP(w, r) // gRPC Server
 				return
 			}

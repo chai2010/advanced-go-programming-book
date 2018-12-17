@@ -268,13 +268,15 @@ panic: runtime error: cgo result has Go pointer
 
 goroutine 1 [running]:
 main._cgoexpwrap_cfb3840e3af2_getGoPtr.func1(0xc420051dc0)
-        command-line-arguments/_obj/_cgo_gotypes.go:60 +0x3a
+  command-line-arguments/_obj/_cgo_gotypes.go:60 +0x3a
 main._cgoexpwrap_cfb3840e3af2_getGoPtr(0xc420016078)
-        command-line-arguments/_obj/_cgo_gotypes.go:62 +0x67
+  command-line-arguments/_obj/_cgo_gotypes.go:62 +0x67
 main._Cfunc_Main()
-        command-line-arguments/_obj/_cgo_gotypes.go:43 +0x41
+  command-line-arguments/_obj/_cgo_gotypes.go:43 +0x41
 main.main()
-        /Users/chai/go/src/github.com/chai2010/advanced-go-programming-book/examples/ch2-xx/return-go-ptr/main.go:17 +0x20
+  /Users/chai/go/src/github.com/chai2010 \
+  /advanced-go-programming-book/examples/ch2-xx \
+  /return-go-ptr/main.go:17 +0x20
 exit status 2
 ```
 
