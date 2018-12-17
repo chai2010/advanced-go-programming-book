@@ -6,15 +6,15 @@ restful 是几年前刮起的 API 设计风潮，在 restful 中除了 GET 和 P
 
 ```go
 const (
-    MethodGet     = "GET"
-    MethodHead    = "HEAD"
-    MethodPost    = "POST"
-    MethodPut     = "PUT"
-    MethodPatch   = "PATCH" // RFC 5789
-    MethodDelete  = "DELETE"
-    MethodConnect = "CONNECT"
-    MethodOptions = "OPTIONS"
-    MethodTrace   = "TRACE"
+	MethodGet     = "GET"
+	MethodHead    = "HEAD"
+	MethodPost    = "POST"
+	MethodPut     = "PUT"
+	MethodPatch   = "PATCH" // RFC 5789
+	MethodDelete  = "DELETE"
+	MethodConnect = "CONNECT"
+	MethodOptions = "OPTIONS"
+	MethodTrace   = "TRACE"
 )
 ```
 
@@ -57,15 +57,15 @@ panic: wildcard route ':id' conflicts with existing children in path '/user/:id'
 
 goroutine 1 [running]:
 github.com/cch123/httprouter.(*node).insertChild(0xc4200801e0, 0xc42004fc01, 0x126b177, 0x3, 0x126b171, 0x9, 0x127b668)
-    /Users/caochunhui/go_work/src/github.com/cch123/httprouter/tree.go:256 +0x841
+  /Users/caochunhui/go_work/src/github.com/cch123/httprouter/tree.go:256 +0x841
 github.com/cch123/httprouter.(*node).addRoute(0xc4200801e0, 0x126b171, 0x9, 0x127b668)
-    /Users/caochunhui/go_work/src/github.com/cch123/httprouter/tree.go:221 +0x22a
+  /Users/caochunhui/go_work/src/github.com/cch123/httprouter/tree.go:221 +0x22a
 github.com/cch123/httprouter.(*Router).Handle(0xc42004ff38, 0x126a39b, 0x3, 0x126b171, 0x9, 0x127b668)
-    /Users/caochunhui/go_work/src/github.com/cch123/httprouter/router.go:262 +0xc3
+  /Users/caochunhui/go_work/src/github.com/cch123/httprouter/router.go:262 +0xc3
 github.com/cch123/httprouter.(*Router).GET(0xc42004ff38, 0x126b171, 0x9, 0x127b668)
-    /Users/caochunhui/go_work/src/github.com/cch123/httprouter/router.go:193 +0x5e
+  /Users/caochunhui/go_work/src/github.com/cch123/httprouter/router.go:193 +0x5e
 main.main()
-    /Users/caochunhui/test/go_web/httprouter_learn2.go:18 +0xaf
+  /Users/caochunhui/test/go_web/httprouter_learn2.go:18 +0xaf
 exit status 2
 ```
 
@@ -88,16 +88,16 @@ Pattern: /src/*filepath
 ```go
 r := httprouter.New()
 r.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("oh no, not found"))
+	w.Write([]byte("oh no, not found"))
 })
 ```
 
 或者内部 panic 的时候：
 ```go
 r.PanicHandler = func(w http.ResponseWriter, r *http.Request, c interface{}) {
-    log.Printf("Recovering from panic, Reason: %#v", c.(error))
-    w.WriteHeader(http.StatusInternalServerError)
-    w.Write([]byte(c.(error).Error()))
+	log.Printf("Recovering from panic, Reason: %#v", c.(error))
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write([]byte(c.(error).Error()))
 }
 ```
 
@@ -143,9 +143,9 @@ httprouter 的 Router struct 中存储压缩字典树使用的是下述数据结
 ```go
 // 略去了其它部分的 Router struct
 type Router struct {
-    // ...
-    trees map[string]*node
-    // ...
+	// ...
+	trees map[string]*node
+	// ...
 }
 ```
 

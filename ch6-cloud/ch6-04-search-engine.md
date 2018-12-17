@@ -57,19 +57,22 @@ elasticsearch 是开源分布式搜索引擎的霸主，其依赖于 Lucene 实�
 
 ```go
 func equal() {
-    if postEntry.docID of '天气' == postEntry.docID of '气很' && postEntry.offset + 1 of '天气' == postEntry.offset of '气很' {
-        return true
-    }
+	if postEntry.docID of '天气' == postEntry.docID of '气很' &&
+		postEntry.offset + 1 of '天气' == postEntry.offset of '气很' {
+			return true
+	}
 
-    if postEntry.docID of '气很' == postEntry.docID of '很好' && postEntry.offset + 1 of '气很' == postEntry.offset of '很好' {
-        return true
-    }
+	if postEntry.docID of '气很' == postEntry.docID of '很好' &&
+		postEntry.offset + 1 of '气很' == postEntry.offset of '很好' {
+		return true
+	}
 
-    if postEntry.docID of '天气' == postEntry.docID of '很好' && postEntry.offset + 2 of '天气' == postEntry.offset of '很好' {
-        return true
-    }
+	if postEntry.docID of '天气' == postEntry.docID of '很好' &&
+		postEntry.offset + 2 of '天气' == postEntry.offset of '很好' {
+		return true
+	}
 
-    return false
+	return false
 }
 ```
 
@@ -171,7 +174,7 @@ if field_1 == 1 && field_2 == 2 && field_3 == 3 && field_4 == 4 {
 
 ```go
 if field_1 == 1 || field_2 == 2 {
-    return true
+	return true
 }
 ```
 
@@ -193,21 +196,21 @@ es 的 Bool Query 方案，实际上就是用 json 来表达了这种程序语�
 // 选用 elastic 版本时
 // 注意与自己使用的 elasticsearch 要对应
 import (
-    elastic "gopkg.in/olivere/elastic.v3"
+	elastic "gopkg.in/olivere/elastic.v3"
 )
 
 var esClient *elastic.Client
 
 func initElasticsearchClient(host string, port string) {
-    var err error
-    esClient, err = elastic.NewClient(
-        elastic.SetURL(fmt.Sprintf("http://%s:%s", host, port)),
-        elastic.SetMaxRetries(3),
-    )
+	var err error
+	esClient, err = elastic.NewClient(
+		elastic.SetURL(fmt.Sprintf("http://%s:%s", host, port)),
+		elastic.SetMaxRetries(3),
+	)
 
-    if err != nil {
-        // log error
-    }
+	if err != nil {
+		// log error
+	}
 }
 ```
 
@@ -216,62 +219,65 @@ func initElasticsearchClient(host string, port string) {
 ```go
 func insertDocument(db string, table string, obj map[string]interface{}) {
 
-    id := obj["id"]
+	id := obj["id"]
 
-    var indexName, typeName string
-    // 数据库中的 database/table 概念，可以简单映射到 es 的 index 和 type
-    // 不过需要注意，因为 es 中的 _type 本质上只是 document 的一个字段
-    // 所以单个 index 内容过多会导致性能问题
-    // 在新版本中 type 已经废弃
-    // 为了让不同表的数据落入不同的 index，这里我们用 table+name 作为 index 的名字
-    indexName = fmt.Sprintf("%v_%v", db, table)
-    typeName = table
+	var indexName, typeName string
+	// 数据库中的 database/table 概念，可以简单映射到 es 的 index 和 type
+	// 不过需要注意，因为 es 中的 _type 本质上只是 document 的一个字段
+	// 所以单个 index 内容过多会导致性能问题
+	// 在新版本中 type 已经废弃
+	// 为了让不同表的数据落入不同的 index，这里我们用 table+name 作为 index 的名字
+	indexName = fmt.Sprintf("%v_%v", db, table)
+	typeName = table
 
-    //正常情况
-    res, err := esClient.Index().Index(indexName).Type(typeName).Id(id).BodyJson(obj).Do()
-    if err != nil {
-      // handle error
-    } else {
-      // insert success
-    }
+	// 正常情况
+	res, err := esClient.Index().Index(indexName).Type(typeName).Id(id).BodyJson(obj).Do()
+	if err != nil {
+		// handle error
+	} else {
+		// insert success
+	}
 }
-
 ```
 
 获取：
 
 ```go
 func query(indexName string, typeName string) (*elastic.SearchResult, error) {
-    // 通过 bool must 和 bool should 添加 bool 查询条件
-    q := elastic.NewBoolQuery().Must(elastic.NewMatchPhraseQuery("id", 1),
-        elastic.NewBoolQuery().Must(elastic.NewMatchPhraseQuery("male", "m")))
+	// 通过 bool must 和 bool should 添加 bool 查询条件
+	q := elastic.NewBoolQuery().Must(elastic.NewMatchPhraseQuery("id", 1),
+	elastic.NewBoolQuery().Must(elastic.NewMatchPhraseQuery("male", "m")))
 
-    q = q.Should(elastic.NewMatchPhraseQuery("name", "alex"),
-        elastic.NewMatchPhraseQuery("name", "xargin"))
+	q = q.Should(
+		elastic.NewMatchPhraseQuery("name", "alex"),
+		elastic.NewMatchPhraseQuery("name", "xargin"),
+	)
 
-    searchService := esClient.Search(indexName).Type(typeName)
-    res, err := searchService.Query(q).Do()
-    if err != nil {
-        // log error
-        return nil, err
-    }
+	searchService := esClient.Search(indexName).Type(typeName)
+	res, err := searchService.Query(q).Do()
+	if err != nil {
+		// log error
+		return nil, err
+	}
 
-    return res, nil
+	return res, nil
 }
 ```
 
 删除：
 
 ```go
-func deleteDocument(indexName string, typeName string, obj map[string]interface{}) {
-    id := obj["id"]
+func deleteDocument(
+	indexName string, typeName string, obj map[string]interface{},
+) {
+	id := obj["id"]
 
-    res, err := esClient.Delete().Index(indexName).Type(typeName).Id(id).Do()
-    if err != nil {
-      // handle error
-    } else {
-      // delete success
-    }
+	res, err := esClient.Delete().Index(indexName).Type(typeName).Id(id).Do()
+	if err != nil {
+		// handle error
+	} else {
+		// delete success
+	}
 }
 ```
 
@@ -284,7 +290,9 @@ func deleteDocument(indexName string, typeName string, obj map[string]interface{
 比如我们有一段 bool 表达式，user_id = 1 and (product_id = 1 and (star_num = 4 or star_num = 5) and banned = 1)，写成 SQL 是如下形式：
 
 ```sql
-select * from xxx where user_id = 1 and (product_id = 1 and (star_num = 4 or star_num = 5) and banned = 1)
+select * from xxx where user_id = 1 and (
+	product_id = 1 and (star_num = 4 or star_num = 5) and banned = 1
+)
 ```
 
 写成 es 的 DSL 是如下形式：
@@ -399,7 +407,9 @@ select * from wms_orders where update_time >= date_sub(now(), interval 10 minute
 当然，考虑到边界情况，我们可以让这个时间段的数据与前一次的有一些重叠：
 
 ```sql
-select * from wms_orders where update_time >= date_sub(now(), interval 11 minute);
+select * from wms_orders where update_time >= date_sub(
+	now(), interval 11 minute
+);
 ```
 
 取最近 11 分钟有变动的数据覆盖更新到 es 中。这种方案的缺点显而易见，我们必须要求业务数据严格遵守一定的规范。比如这里的，必须要有 update_time 字段，并且每次创建和更新都要保证该字段有正确的时间值。否则我们的同步逻辑就会丢失数据。

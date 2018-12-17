@@ -24,13 +24,13 @@
 
 ```go
 func BusinessProcess(ctx context.Context, params Params) (resp, error){
-    ValidateLogin()
-    ValidateParams()
-    AntispamCheck()
-    GetPrice()
-    CreateOrder()
-    UpdateUserStatus()
-    NotifyDownstreamSystems()
+	ValidateLogin()
+	ValidateParams()
+	AntispamCheck()
+	GetPrice()
+	CreateOrder()
+	UpdateUserStatus()
+	NotifyDownstreamSystems()
 }
 ```
 
@@ -40,13 +40,13 @@ func BusinessProcess(ctx context.Context, params Params) (resp, error){
 
 ```go
 func CreateOrder() {
-    ValidateDistrict() // 判断是否是地区限定商品
-    ValidateVIPProduct() // 检查是否是只提供给 vip 的商品
-    GetUserInfo() // 从用户系统获取更详细的用户信息
-    GetProductDesc() // 从商品系统中获取商品在该时间点的详细信息
-    DecrementStorage() // 扣减库存
-    CreateOrderSnapshot() // 创建订单快照
-    return CreateSuccess
+	ValidateDistrict()    // 判断是否是地区限定商品
+	ValidateVIPProduct()  // 检查是否是只提供给 vip 的商品
+	GetUserInfo()         // 从用户系统获取更详细的用户信息
+	GetProductDesc()      // 从商品系统中获取商品在该时间点的详细信息
+	DecrementStorage()    // 扣减库存
+	CreateOrderSnapshot() // 创建订单快照
+	return CreateSuccess
 }
 ```
 
@@ -63,12 +63,12 @@ func CreateOrder() {
 ```go
 // OrderCreator 创建订单流程
 type OrderCreator interface {
-    ValidateDistrict()    // 判断是否是地区限定商品
-    ValidateVIPProduct()  // 检查是否是只提供给 vip 的商品
-    GetUserInfo()         // 从用户系统获取更详细的用户信息
-    GetProductDesc()      // 从商品系统中获取商品在该时间点的详细信息
-    DecrementStorage()    // 扣减库存
-    CreateOrderSnapshot() // 创建订单快照
+	ValidateDistrict()    // 判断是否是地区限定商品
+	ValidateVIPProduct()  // 检查是否是只提供给 vip 的商品
+	GetUserInfo()         // 从用户系统获取更详细的用户信息
+	GetProductDesc()      // 从商品系统中获取商品在该时间点的详细信息
+	DecrementStorage()    // 扣减库存
+	CreateOrderSnapshot() // 创建订单快照
 }
 ```
 
@@ -86,30 +86,30 @@ type OrderCreator interface {
 
 ```go
 import (
-    "sample.com/travelorder"
-    "sample.com/marketorder"
+	"sample.com/travelorder"
+	"sample.com/marketorder"
 )
 
 func CreateOrder() {
-    switch businessType {
-        case TravelBusiness:
-            travelorder.CreateOrder()
-        case MarketBusiness:
-            marketorder.CreateOrderForMarket()
-        default:
-            return errors.New("not supported business")
-    }
+	switch businessType {
+	case TravelBusiness:
+		travelorder.CreateOrder()
+	case MarketBusiness:
+		marketorder.CreateOrderForMarket()
+	default:
+		return errors.New("not supported business")
+	}
 }
 
 func ValidateUser() {
-    switch businessType {
-        case TravelBusiness:
-            travelorder.ValidateUserVIP()
-        case MarketBusiness:
-            marketorder.ValidateUserRegistered()
-        default:
-            return errors.New("not supported business")
-    }
+	switch businessType {
+	case TravelBusiness:
+		travelorder.ValidateUserVIP()
+	case MarketBusiness:
+		marketorder.ValidateUserRegistered()
+	default:
+		return errors.New("not supported business")
+	}
 }
 
 // ...
@@ -122,35 +122,35 @@ switch ...
 
 ```go
 type BusinessInstance interface {
-    ValidateLogin()
-    ValidateParams()
-    AntispamCheck()
-    GetPrice()
-    CreateOrder()
-    UpdateUserStatus()
-    NotifyDownstreamSystems()
+	ValidateLogin()
+	ValidateParams()
+	AntispamCheck()
+	GetPrice()
+	CreateOrder()
+	UpdateUserStatus()
+	NotifyDownstreamSystems()
 }
 
 func entry() {
-    var bi BusinessInstance
-    switch businessType {
-        case TravelBusiness:
-            bi = travelorder.New()
-        case MarketBusiness:
-            bi = marketorder.New()
-        default:
-            return errors.New("not supported business")
-    }
+	var bi BusinessInstance
+	switch businessType {
+		case TravelBusiness:
+			bi = travelorder.New()
+		case MarketBusiness:
+			bi = marketorder.New()
+		default:
+			return errors.New("not supported business")
+	}
 }
 
 func BusinessProcess(bi BusinessInstance) {
-    bi.ValidateLogin()
-    bi.ValidateParams()
-    bi.AntispamCheck()
-    bi.GetPrice()
-    bi.CreateOrder()
-    bi.UpdateUserStatus()
-    bi.NotifyDownstreamSystems()
+	bi.ValidateLogin()
+	bi.ValidateParams()
+	bi.AntispamCheck()
+	bi.GetPrice()
+	bi.CreateOrder()
+	bi.UpdateUserStatus()
+	bi.NotifyDownstreamSystems()
 }
 ```
 
@@ -162,7 +162,7 @@ Go 被人称道的最多的地方是其 interface 设计的正交性，模块之
 
 ```go
 type Writer interface {
-    Write(p []byte) (n int, err error)
+	Write(p []byte) (n int, err error)
 }
 ```
 
@@ -172,7 +172,7 @@ type Writer interface {
 type MyType struct {}
 
 func (m MyType) Write(p []byte) (n int, err error) {
-    return 0, nil
+	return 0, nil
 }
 ```
 
@@ -182,7 +182,7 @@ func (m MyType) Write(p []byte) (n int, err error) {
 package log
 
 func SetOutput(w io.Writer) {
-    output = w
+	output = w
 }
 ```
 
@@ -194,7 +194,7 @@ package my-business
 import "xy.com/log"
 
 func init() {
-    log.SetOutput(MyType)
+	log.SetOutput(MyType)
 }
 ```
 
@@ -208,8 +208,8 @@ func init() {
 package main
 
 type OrderCreator interface {
-    ValidateUser()
-    CreateOrder()
+	ValidateUser()
+	CreateOrder()
 }
 
 type BookOrderCreator struct{}
@@ -217,12 +217,12 @@ type BookOrderCreator struct{}
 func (boc BookOrderCreator) ValidateUser() {}
 
 func createOrder(oc OrderCreator) {
-    oc.ValidateUser()
-    oc.CreateOrder()
+	oc.ValidateUser()
+	oc.CreateOrder()
 }
 
 func main() {
-    createOrder(BookOrderCreator{})
+	createOrder(BookOrderCreator{})
 }
 ```
 
@@ -231,7 +231,7 @@ func main() {
 ```shell
 # command-line-arguments
 ./a.go:18:30: cannot use BookOrderCreator literal (type BookOrderCreator) as type OrderCreator in argument to createOrder:
-    BookOrderCreator does not implement OrderCreator (missing CreateOrder method)
+	BookOrderCreator does not implement OrderCreator (missing CreateOrder method)
 ```
 
 所以 interface 也可以认为是一种编译期进行检查的保证类型安全的手段。
@@ -242,15 +242,15 @@ func main() {
 
 ```go
 func entry() {
-    var bi BusinessInstance
-    switch businessType {
-        case TravelBusiness:
-            bi = travelorder.New()
-        case MarketBusiness:
-            bi = marketorder.New()
-        default:
-            return errors.New("not supported business")
-    }
+	var bi BusinessInstance
+	switch businessType {
+	case TravelBusiness:
+		bi = travelorder.New()
+	case MarketBusiness:
+		bi = marketorder.New()
+	default:
+		return errors.New("not supported business")
+	}
 }
 ```
 
@@ -258,12 +258,12 @@ func entry() {
 
 ```go
 var businessInstanceMap = map[int]BusinessInstance {
-    TravelBusiness : travelorder.New(),
-    MarketBusiness : marketorder.New(),
+	TravelBusiness : travelorder.New(),
+	MarketBusiness : marketorder.New(),
 }
 
 func entry() {
-    bi := businessInstanceMap[businessType]
+	bi := businessInstanceMap[businessType]
 }
 ```
 

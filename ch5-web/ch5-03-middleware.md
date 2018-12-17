@@ -11,13 +11,13 @@
 package main
 
 func hello(wr http.ResponseWriter, r *http.Request) {
-    wr.Write([]byte("hello"))
+	wr.Write([]byte("hello"))
 }
 
 func main() {
-    http.HandleFunc("/", hello)
-    err := http.ListenAndServe(":8080", nil)
-    ...
+	http.HandleFunc("/", hello)
+	err := http.ListenAndServe(":8080", nil)
+	...
 }
 ```
 
@@ -30,10 +30,10 @@ func main() {
 var logger = log.New(os.Stdout, "", 0)
 
 func hello(wr http.ResponseWriter, r *http.Request) {
-    timeStart := time.Now()
-    wr.Write([]byte("hello"))
-    timeElapsed := time.Since(timeStart)
-    logger.Println(timeElapsed)
+	timeStart := time.Now()
+	wr.Write([]byte("hello"))
+	timeElapsed := time.Since(timeStart)
+	logger.Println(timeElapsed)
 }
 ```
 
@@ -47,30 +47,30 @@ func hello(wr http.ResponseWriter, r *http.Request) {
 package main
 
 func helloHandler(wr http.ResponseWriter, r *http.Request) {
-    ...
+	// ...
 }
 
 func showInfoHandler(wr http.ResponseWriter, r *http.Request) {
-    ...
+	// ...
 }
 
 func showEmailHandler(wr http.ResponseWriter, r *http.Request) {
-    ...
+	// ...
 }
 
 func showFriendsHandler(wr http.ResponseWriter, r *http.Request) {
-    timeStart := time.Now()
-    wr.Write([]byte("your friends is tom and alex"))
-    timeElapsed := time.Since(timeStart)
-    logger.Println(timeElapsed)
+	timeStart := time.Now()
+	wr.Write([]byte("your friends is tom and alex"))
+	timeElapsed := time.Since(timeStart)
+	logger.Println(timeElapsed)
 }
 
 func main() {
-    http.HandleFunc("/", helloHandler)
-    http.HandleFunc("/info/show", showInfoHandler)
-    http.HandleFunc("/email/show", showEmailHandler)
-    http.HandleFunc("/friends/show", showFriendsHandler)
-    ...
+	http.HandleFunc("/", helloHandler)
+	http.HandleFunc("/info/show", showInfoHandler)
+	http.HandleFunc("/email/show", showEmailHandler)
+	http.HandleFunc("/friends/show", showFriendsHandler)
+	// ...
 }
 
 ```
@@ -83,12 +83,12 @@ func main() {
 
 ```go
 func helloHandler(wr http.ResponseWriter, r *http.Request) {
-    timeStart := time.Now()
-    wr.Write([]byte("hello"))
-    timeElapsed := time.Since(timeStart)
-    logger.Println(timeElapsed)
-    // 新增耗时上报
-    metrics.Upload("timeHandler", timeElapsed)
+	timeStart := time.Now()
+	wr.Write([]byte("hello"))
+	timeElapsed := time.Since(timeStart)
+	logger.Println(timeElapsed)
+	// 新增耗时上报
+	metrics.Upload("timeHandler", timeElapsed)
 }
 ```
 
@@ -103,25 +103,25 @@ func helloHandler(wr http.ResponseWriter, r *http.Request) {
 ```go
 
 func hello(wr http.ResponseWriter, r *http.Request) {
-    wr.Write([]byte("hello"))
+	wr.Write([]byte("hello"))
 }
 
 func timeMiddleware(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(wr http.ResponseWriter, r *http.Request) {
-        timeStart := time.Now()
+	return http.HandlerFunc(func(wr http.ResponseWriter, r *http.Request) {
+		timeStart := time.Now()
 
-        // next handler
-        next.ServeHTTP(wr, r)
+		// next handler
+		next.ServeHTTP(wr, r)
 
-        timeElapsed := time.Since(timeStart)
-        logger.Println(timeElapsed)
-    })
+		timeElapsed := time.Since(timeStart)
+		logger.Println(timeElapsed)
+	})
 }
 
 func main() {
-    http.Handle("/", timeMiddleware(http.HandlerFunc(hello)))
-    err := http.ListenAndServe(":8080", nil)
-    ...
+	http.Handle("/", timeMiddleware(http.HandlerFunc(hello)))
+	err := http.ListenAndServe(":8080", nil)
+	...
 }
 ```
 
@@ -129,7 +129,7 @@ func main() {
 
 ```go
 type Handler interface {
-    ServeHTTP(ResponseWriter, *Request)
+	ServeHTTP(ResponseWriter, *Request)
 }
 ```
 
@@ -137,13 +137,13 @@ type Handler interface {
 
 ```go
 type Handler interface {
-    ServeHTTP(ResponseWriter, *Request)
+	ServeHTTP(ResponseWriter, *Request)
 }
 
 type HandlerFunc func(ResponseWriter, *Request)
 
 func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request)
-    f(w, r)
+	f(w, r)
 }
 
 ```
@@ -188,19 +188,19 @@ customizedHandler = logger(timeout(ratelimit(helloHandler)))
 再直白一些，这个流程在进行请求处理的时候实际上就是不断地进行函数压栈再出栈，有一些类似于递归的执行流：
 
 ```
-[exec of logger logic]           函数栈: []
+[exec of logger logic]		   函数栈: []
 
-[exec of timeout logic]          函数栈: [logger]
+[exec of timeout logic]		  函数栈: [logger]
 
-[exec of ratelimit logic]        函数栈: [timeout/logger]
+[exec of ratelimit logic]		函数栈: [timeout/logger]
 
-[exec of helloHandler logic]     函数栈: [ratelimit/timeout/logger]
+[exec of helloHandler logic]	 函数栈: [ratelimit/timeout/logger]
 
 [exec of ratelimit logic part2]  函数栈: [timeout/logger]
 
-[exec of timeout logic part2]    函数栈: [logger]
+[exec of timeout logic part2]	函数栈: [logger]
 
-[exec of logger logic part2]     函数栈: []
+[exec of logger logic part2]	 函数栈: []
 ```
 
 功能实现了，但在上面的使用过程中我们也看到了，这种函数套函数的用法不是很美观，同时也不具备什么可读性。
@@ -227,26 +227,26 @@ r.Add("/", helloHandler)
 type middleware func(http.Handler) http.Handler
 
 type Router struct {
-    middlewareChain [] middleware
-    mux map[string] http.Handler
+	middlewareChain [] middleware
+	mux map[string] http.Handler
 }
 
 func NewRouter() *Router{
-    return &Router{}
+	return &Router{}
 }
 
 func (r *Router) Use(m middleware) {
-    r.middlewareChain = append(r.middlewareChain, m)
+	r.middlewareChain = append(r.middlewareChain, m)
 }
 
 func (r *Router) Add(route string, h http.Handler) {
-    var mergedHandler = h
+	var mergedHandler = h
 
-    for i := len(r.middlewareChain) - 1; i >= 0; i-- {
-        mergedHandler = r.middlewareChain[i](mergedHandler)
-    }
+	for i := len(r.middlewareChain) - 1; i >= 0; i-- {
+		mergedHandler = r.middlewareChain[i](mergedHandler)
+	}
 
-    r.mux[route] = mergedHandler
+	r.mux[route] = mergedHandler
 }
 ```
 

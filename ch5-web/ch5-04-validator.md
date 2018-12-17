@@ -12,31 +12,31 @@
 
 ```go
 type RegisterReq struct {
-    Username        string   `json:"username"`
-    PasswordNew     string   `json:"password_new"`
-    PasswordRepeat  string   `json:"password_repeat"`
-    Email           string   `json:"email"`
+	Username       string   `json:"username"`
+	PasswordNew    string   `json:"password_new"`
+	PasswordRepeat string   `json:"password_repeat"`
+	Email          string   `json:"email"`
 }
 
 func register(req RegisterReq) error{
-    if len(req.Username) > 0 {
-        if len(req.PasswordNew) > 0 && len(req.PasswordRepeat) > 0 {
-            if req.PasswordNew == req.PasswordRepeat {
-                if emailFormatValid(req.Email) {
-                    createUser()
-                    return nil
-                } else {
-                    return errors.New("invalid email")
-                }
-            } else {
-                return errors.New("password and reinput must be the same")
-            }
-        } else {
-            return errors.New("password and password reinput must be longer than 0")
-        }
-    } else {
-        return errors.New("length of username cannot be 0")
-    }
+	if len(req.Username) > 0 {
+		if len(req.PasswordNew) > 0 && len(req.PasswordRepeat) > 0 {
+			if req.PasswordNew == req.PasswordRepeat {
+				if emailFormatValid(req.Email) {
+					createUser()
+					return nil
+				} else {
+					return errors.New("invalid email")
+				}
+			} else {
+				return errors.New("password and reinput must be the same")
+			}
+		} else {
+			return errors.New("password and password reinput must be longer than 0")
+		}
+	} else {
+		return errors.New("length of username cannot be 0")
+	}
 }
 ```
 
@@ -46,24 +46,24 @@ func register(req RegisterReq) error{
 
 ```go
 func register(req RegisterReq) error{
-    if len(req.Username) == 0 {
-        return errors.New("length of username cannot be 0")
-    }
+	if len(req.Username) == 0 {
+		return errors.New("length of username cannot be 0")
+	}
 
-    if len(req.PasswordNew) == 0 || len(req.PasswordRepeat) == 0 {
-        return errors.New("password and password reinput must be longer than 0")
-    }
+	if len(req.PasswordNew) == 0 || len(req.PasswordRepeat) == 0 {
+		return errors.New("password and password reinput must be longer than 0")
+	}
 
-    if req.PasswordNew != req.PasswordRepeat {
-        return errors.New("password and reinput must be the same")
-    }
+	if req.PasswordNew != req.PasswordRepeat {
+		return errors.New("password and reinput must be the same")
+	}
 
-    if emailFormatValid(req.Email) {
-        return errors.New("invalid email")
-    }
+	if emailFormatValid(req.Email) {
+		return errors.New("invalid email")
+	}
 
-    createUser()
-    return nil
+	createUser()
+	return nil
 }
 ```
 
@@ -81,25 +81,25 @@ func register(req RegisterReq) error{
 import "gopkg.in/go-playground/validator.v9"
 
 type RegisterReq struct {
-    // 字符串的 gt=0 表示长度必须 > 0，gt = greater than
-    Username        string   `validate:"gt=0"`
-    // 同上
-    PasswordNew     string   `validate:"gt=0"`
-    // eqfield 跨字段相等校验
-    PasswordRepeat  string   `validate:"eqfield=PasswordNew"`
-    // 合法 email 格式校验
-    Email           string   `validate:"email"`
+	// 字符串的 gt=0 表示长度必须 > 0，gt = greater than
+	Username       string   `validate:"gt=0"`
+	// 同上
+	PasswordNew    string   `validate:"gt=0"`
+	// eqfield 跨字段相等校验
+	PasswordRepeat string   `validate:"eqfield=PasswordNew"`
+	// 合法 email 格式校验
+	Email          string   `validate:"email"`
 }
 
 validate := validator.New()
 
 func validate(req RegisterReq) error {
-    err := validate.Struct(req)
-    if err != nil {
-        doSomething()
+	err := validate.Struct(req)
+	if err != nil {
+		doSomething()
 		return err
-    }
-    ...
+	}
+	...
 }
 
 ```
@@ -112,14 +112,17 @@ func validate(req RegisterReq) error {
 //...
 
 var req = RegisterReq {
-    Username       : "Xargin",
-    PasswordNew    : "ohno",
-    PasswordRepeat : "ohn",
-    Email          : "alex@abc.com",
+	Username       : "Xargin",
+	PasswordNew    : "ohno",
+	PasswordRepeat : "ohn",
+	Email          : "alex@abc.com",
 }
 
 err := validate(req)
-fmt.Println(err) // Key: 'RegisterReq.PasswordRepeat' Error:Field validation for 'PasswordRepeat' failed on the 'eqfield' tag
+fmt.Println(err)
+
+// Key: 'RegisterReq.PasswordRepeat' Error:Field validation for
+// 'PasswordRepeat' failed on the 'eqfield' tag
 ```
 
 如果觉得这个 validator 提供的错误信息不够人性化，例如要把错误信息返回给用户，那就不应该直接显示英文了。可以针对每种 tag 进行错误信息定制，读者可以自行探索。
@@ -130,11 +133,11 @@ fmt.Println(err) // Key: 'RegisterReq.PasswordRepeat' Error:Field validation for
 
 ```go
 type Nested struct {
-    Email string `validate:"email"`
+	Email string `validate:"email"`
 }
 type T struct {
-    Age    int `validate:"eq=10"`
-    Nested Nested
+	Age	int `validate:"eq=10"`
+	Nested Nested
 }
 ```
 
@@ -150,77 +153,81 @@ type T struct {
 package main
 
 import (
-    "fmt"
-    "reflect"
-    "regexp"
-    "strconv"
-    "strings"
+	"fmt"
+	"reflect"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 type Nested struct {
-    Email string `validate:"email"`
+	Email string `validate:"email"`
 }
 type T struct {
-    Age    int `validate:"eq=10"`
-    Nested Nested
+	Age	int `validate:"eq=10"`
+	Nested Nested
 }
 
 func validateEmail(input string) bool {
-    if pass, _ := regexp.MatchString(`^([\w\.\_]{2,10})@(\w{1,}).([a-z]{2,4})$`, input); pass {
-        return true
-    }
-    return false
+	if pass, _ := regexp.MatchString(
+		`^([\w\.\_]{2,10})@(\w{1,}).([a-z]{2,4})$`, input,
+	); pass {
+		return true
+	}
+	return false
 }
 
 func validate(v interface{}) (bool, string) {
-    validateResult := true
-    errmsg := "success"
-    vt := reflect.TypeOf(v)
-    vv := reflect.ValueOf(v)
-    for i := 0; i < vv.NumField(); i++ {
-        fieldVal := vv.Field(i)
-        tagContent := vt.Field(i).Tag.Get("validate")
-        k := fieldVal.Kind()
+	validateResult := true
+	errmsg := "success"
+	vt := reflect.TypeOf(v)
+	vv := reflect.ValueOf(v)
+	for i := 0; i < vv.NumField(); i++ {
+		fieldVal := vv.Field(i)
+		tagContent := vt.Field(i).Tag.Get("validate")
+		k := fieldVal.Kind()
 
-        switch k {
-        case reflect.Int:
-            val := fieldVal.Int()
-            tagValStr := strings.Split(tagContent, "=")
-            tagVal, _ := strconv.ParseInt(tagValStr[1], 10, 64)
-            if val != tagVal {
-                errmsg = "validate int failed, tag is: "+ strconv.FormatInt(tagVal, 10)
-                validateResult = false
-            }
-        case reflect.String:
-            val := fieldVal.String()
-            tagValStr := tagContent
-            switch tagValStr {
-            case "email":
-                nestedResult := validateEmail(val)
-                if nestedResult == false {
-                    errmsg = "validate mail failed, field val is: "+ val
-                    validateResult = false
-                }
-            }
-        case reflect.Struct:
-            // 如果有内嵌的 struct，那么深度优先遍历
-            // 就是一个递归过程
-            valInter := fieldVal.Interface()
-            nestedResult, msg := validate(valInter)
-            if nestedResult == false {
+		switch k {
+		case reflect.Int:
+			val := fieldVal.Int()
+			tagValStr := strings.Split(tagContent, "=")
+			tagVal, _ := strconv.ParseInt(tagValStr[1], 10, 64)
+			if val != tagVal {
+				errmsg = "validate int failed, tag is: "+ strconv.FormatInt(
+					tagVal, 10,
+				)
+				validateResult = false
+			}
+		case reflect.String:
+			val := fieldVal.String()
+			tagValStr := tagContent
+			switch tagValStr {
+			case "email":
+				nestedResult := validateEmail(val)
+				if nestedResult == false {
+					errmsg = "validate mail failed, field val is: "+ val
+					validateResult = false
+				}
+			}
+		case reflect.Struct:
+			// 如果有内嵌的 struct，那么深度优先遍历
+			// 就是一个递归过程
+			valInter := fieldVal.Interface()
+			nestedResult, msg := validate(valInter)
+			if nestedResult == false {
 				validateResult = false
 				errmsg = msg
-            }
-        }
-    }
-    return validateResult, errmsg
+			}
+		}
+	}
+	return validateResult, errmsg
 }
 
 func main() {
-    var a = T{Age: 10, Nested: Nested{Email: "abc@abc.com"}}
+	var a = T{Age: 10, Nested: Nested{Email: "abc@abc.com"}}
 
-    validateResult, errmsg := validate(a)
-    fmt.Println(validateResult, errmsg)
+	validateResult, errmsg := validate(a)
+	fmt.Println(validateResult, errmsg)
 }
 ```
 

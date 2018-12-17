@@ -6,24 +6,24 @@
 package main
 
 import (
-    "sync"
+	"sync"
 )
 
 // 全局变量
 var counter int
 
 func main() {
-    var wg sync.WaitGroup
-    for i := 0; i < 1000; i++ {
-        wg.Add(1)
-        go func() {
-            defer wg.Done()
-            counter++
-        }()
-    }
+	var wg sync.WaitGroup
+	for i := 0; i < 1000; i++ {
+		wg.Add(1)
+		go func() {
+		defer wg.Done()
+			counter++
+		}()
+	}
 
-    wg.Wait()
-    println(counter)
+	wg.Wait()
+	println(counter)
 }
 ```
 
@@ -47,13 +47,13 @@ func main() {
 var wg sync.WaitGroup
 var l sync.Mutex
 for i := 0; i < 1000; i++ {
-    wg.Add(1)
-    go func() {
-        defer wg.Done()
-        l.Lock()
-        counter++
-        l.Unlock()
-    }()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		l.Lock()
+		counter++
+		l.Unlock()
+	}()
 }
 
 wg.Wait()
@@ -74,58 +74,58 @@ println(counter)
 package main
 
 import (
-    "sync"
+	"sync"
 )
 
 // Lock try lock
 type Lock struct {
-    c chan struct{}
+	c chan struct{}
 }
 
 // NewLock generate a try lock
 func NewLock() Lock {
-    var l Lock
-    l.c = make(chan struct{}, 1)
-    l.c <- struct{}{}
-    return l
+	var l Lock
+	l.c = make(chan struct{}, 1)
+	l.c <- struct{}{}
+	return l
 }
 
 // Lock try lock, return lock result
 func (l Lock) Lock() bool {
-    lockResult := false
-    select {
-    case <-l.c:
-        lockResult = true
-    default:
-    }
-    return lockResult
+	lockResult := false
+	select {
+	case <-l.c:
+		lockResult = true
+	default:
+	}
+	return lockResult
 }
 
 // Unlock , Unlock the try lock
 func (l Lock) Unlock() {
-    l.c <- struct{}{}
+	l.c <- struct{}{}
 }
 
 var counter int
 
 func main() {
-    var l = NewLock()
-    var wg sync.WaitGroup
-    for i := 0; i < 10; i++ {
-        wg.Add(1)
-        go func() {
-            defer wg.Done()
-            if !l.Lock() {
-                // log error
-                println("lock failed")
-                return
-            }
-            counter++
-            println("current counter", counter)
-            l.Unlock()
-        }()
-    }
-    wg.Wait()
+	var l = NewLock()
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if !l.Lock() {
+				// log error
+				println("lock failed")
+				return
+			}
+			counter++
+			println("current counter", counter)
+			l.Unlock()
+		}()
+	}
+	wg.Wait()
 }
 ```
 
@@ -141,67 +141,66 @@ func main() {
 package main
 
 import (
-    "fmt"
-    "sync"
-    "time"
+	"fmt"
+	"sync"
+	"time"
 
-    "github.com/go-redis/redis"
+	"github.com/go-redis/redis"
 )
 
 func incr() {
-    client := redis.NewClient(&redis.Options{
-        Addr:     "localhost:6379",
-        Password: "", // no password set
-        DB:       0,  // use default DB
-    })
+	client := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
 
-    var lockKey = "counter_lock"
-    var counterKey = "counter"
+	var lockKey = "counter_lock"
+	var counterKey = "counter"
 
-    // lock
-    resp := client.SetNX(lockKey, 1, time.Second*5)
-    lockSuccess, err := resp.Result()
+	// lock
+	resp := client.SetNX(lockKey, 1, time.Second*5)
+	lockSuccess, err := resp.Result()
 
-    if err != nil || !lockSuccess {
-        fmt.Println(err, "lock result: ", lockSuccess)
-        return
-    }
+	if err != nil || !lockSuccess {
+		fmt.Println(err, "lock result: ", lockSuccess)
+		return
+	}
 
-    // counter ++
-    getResp := client.Get(counterKey)
-    cntValue, err := getResp.Int64()
-    if err == nil {
-        cntValue++
-        resp := client.Set(counterKey, cntValue, 0)
-        _, err := resp.Result()
-        if err != nil {
-            // log err
-            println("set value error!")
-        }
-    }
-    println("current counter is ", cntValue)
+	// counter ++
+	getResp := client.Get(counterKey)
+	cntValue, err := getResp.Int64()
+	if err == nil {
+		cntValue++
+		resp := client.Set(counterKey, cntValue, 0)
+		_, err := resp.Result()
+		if err != nil {
+			// log err
+			println("set value error!")
+		}
+	}
+	println("current counter is ", cntValue)
 
-    delResp := client.Del(lockKey)
-    unlockSuccess, err := delResp.Result()
-    if err == nil && unlockSuccess > 0 {
-        println("unlock success!")
-    } else {
-        println("unlock failed", err)
-    }
+	delResp := client.Del(lockKey)
+	unlockSuccess, err := delResp.Result()
+	if err == nil && unlockSuccess > 0 {
+		println("unlock success!")
+	} else {
+		println("unlock failed", err)
+	}
 }
 
 func main() {
-    var wg sync.WaitGroup
-    for i := 0; i < 10; i++ {
-        wg.Add(1)
-        go func() {
-            defer wg.Done()
-            incr()
-        }()
-    }
-    wg.Wait()
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			incr()
+		}()
+	}
+	wg.Wait()
 }
-
 ```
 
 看看运行结果：
@@ -233,28 +232,28 @@ setnx 很适合在高并发场景下，用来争抢一些“唯一”的资源�
 package main
 
 import (
-    "time"
+	"time"
 
-    "github.com/samuel/go-zookeeper/zk"
+	"github.com/samuel/go-zookeeper/zk"
 )
 
 func main() {
-    c, _, err := zk.Connect([]string{"127.0.0.1"}, time.Second) //*10)
-    if err != nil {
-        panic(err)
-    }
-    l := zk.NewLock(c, "/lock", zk.WorldACL(zk.PermAll))
-    err = l.Lock()
-    if err != nil {
-        panic(err)
-    }
-    println("lock succ, do your business logic")
+	c, _, err := zk.Connect([]string{"127.0.0.1"}, time.Second) //*10)
+	if err != nil {
+		panic(err)
+	}
+	l := zk.NewLock(c, "/lock", zk.WorldACL(zk.PermAll))
+	err = l.Lock()
+	if err != nil {
+		panic(err)
+	}
+	println("lock succ, do your business logic")
 
-    time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 10)
 
-    // do some thing
-    l.Unlock()
-    println("unlock succ, finish business logic")
+	// do some thing
+	l.Unlock()
+	println("unlock succ, finish business logic")
 }
 ```
 
@@ -270,34 +269,33 @@ func main() {
 package main
 
 import (
-    "log"
+	"log"
 
-    "github.com/zieckey/etcdsync"
+	"github.com/zieckey/etcdsync"
 )
 
 func main() {
-    m, err := etcdsync.New("/lock", 10, []string{"http://127.0.0.1:2379"})
-    if m == nil || err != nil {
-        log.Printf("etcdsync.New failed")
-        return
-    }
-    err = m.Lock()
-    if err != nil {
-        log.Printf("etcdsync.Lock failed")
-        return
-    }
+	m, err := etcdsync.New("/lock", 10, []string{"http://127.0.0.1:2379"})
+	if m == nil || err != nil {
+		log.Printf("etcdsync.New failed")
+		return
+	}
+	err = m.Lock()
+	if err != nil {
+		log.Printf("etcdsync.Lock failed")
+		return
+	}
 
-    log.Printf("etcdsync.Lock OK")
-    log.Printf("Get the lock. Do something here.")
+	log.Printf("etcdsync.Lock OK")
+	log.Printf("Get the lock. Do something here.")
 
-    err = m.Unlock()
-    if err != nil {
-        log.Printf("etcdsync.Unlock failed")
-    } else {
-        log.Printf("etcdsync.Unlock OK")
-    }
+	err = m.Unlock()
+	if err != nil {
+		log.Printf("etcdsync.Unlock failed")
+	} else {
+		log.Printf("etcdsync.Unlock OK")
+	}
 }
-
 ```
 
 etcd 中没有像 ZooKeeper 那样的 sequence 节点。所以其锁实现和基于 ZooKeeper 实现的有所不同。在上述示例代码中使用的 etcdsync 的 Lock 流程是：
@@ -313,56 +311,57 @@ etcd 中没有像 ZooKeeper 那样的 sequence 节点。所以其锁实现和基
 package main
 
 import (
-    "fmt"
-    "time"
+	"fmt"
+	"time"
 
-    "github.com/garyburd/redigo/redis"
-    "gopkg.in/redsync.v1"
+	"github.com/garyburd/redigo/redis"
+	"gopkg.in/redsync.v1"
 )
 
 func newPool(server string) *redis.Pool {
-    return &redis.Pool{
-        MaxIdle:     3,
-        IdleTimeout: 240 * time.Second,
+	return &redis.Pool{
+		MaxIdle:     3,
+		IdleTimeout: 240 * time.Second,
 
-        Dial: func() (redis.Conn, error) {
-            c, err := redis.Dial("tcp", server)
-            if err != nil {
-                return nil, err
-            }
-            return c, err
-        },
+		Dial: func() (redis.Conn, error) {
+			c, err := redis.Dial("tcp", server)
+			if err != nil {
+				return nil, err
+			}
+			return c, err
+		},
 
-        TestOnBorrow: func(c redis.Conn, t time.Time) error {
-            _, err := c.Do("PING")
-            return err
-        },
-    }
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			_, err := c.Do("PING")
+			return err
+		},
+	}
 }
 
 func newPools(servers []string) []redsync.Pool {
-    pools := []redsync.Pool{}
-    for _, server := range servers {
-        pool := newPool(server)
-        pools = append(pools, pool)
-    }
+	pools := []redsync.Pool{}
+	for _, server := range servers {
+		pool := newPool(server)
+		pools = append(pools, pool)
+	}
 
-    return pools
+	return pools
 }
 
 func main() {
-    pools := newPools([]string{"127.0.0.1:6379", "127.0.0.1:6378", "127.0.0.1:6377"})
-    rs := redsync.New(pools)
-    m := rs.NewMutex("/lock")
+	pools := newPools([]string{
+		"127.0.0.1:6379", "127.0.0.1:6378", "127.0.0.1:6377",
+	})
+	rs := redsync.New(pools)
+	m := rs.NewMutex("/lock")
 
-    err := m.Lock()
-    if err != nil {
-        panic(err)
-    }
-    fmt.Println("lock success")
-    unlockRes := m.Unlock()
-    fmt.Println("unlock result: ", unlockRes)
-
+	err := m.Lock()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("lock success")
+	unlockRes := m.Unlock()
+	fmt.Println("unlock result: ", unlockRes)
 }
 ```
 

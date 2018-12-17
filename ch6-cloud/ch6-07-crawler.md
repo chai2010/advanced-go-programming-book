@@ -16,56 +16,55 @@
 package main
 
 import (
-    "fmt"
-    "regexp"
-    "time"
+	"fmt"
+	"regexp"
+	"time"
 
-    "github.com/gocolly/colly"
+	"github.com/gocolly/colly"
 )
 
 var visited = map[string]bool{}
 
 func main() {
-    // Instantiate default collector
-    c := colly.NewCollector(
-        colly.AllowedDomains("www.v2ex.com"),
-        colly.MaxDepth(1),
-    )
+	// Instantiate default collector
+	c := colly.NewCollector(
+		colly.AllowedDomains("www.v2ex.com"),
+		colly.MaxDepth(1),
+	)
 
-    detailRegex, _ := regexp.Compile(`/go/go\?p=\d+$`)
-    listRegex, _ := regexp.Compile(`/t/\d+#\w+`)
+	detailRegex, _ := regexp.Compile(`/go/go\?p=\d+$`)
+	listRegex, _ := regexp.Compile(`/t/\d+#\w+`)
 
-    // On every a element which has href attribute call callback
-    c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-        link := e.Attr("href")
+	// On every a element which has href attribute call callback
+	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+		link := e.Attr("href")
 
-        // 已访问过的详情页或列表页，跳过
-        if visited[link] && (detailRegex.Match([]byte(link)) || listRegex.Match([]byte(link))) {
-            return
-        }
+		// 已访问过的详情页或列表页，跳过
+		if visited[link] && (detailRegex.Match([]byte(link)) || listRegex.Match([]byte(link))) {
+			return
+		}
 
-        // 匹配下列两种 url 模式的，才去 visit
-        // https://www.v2ex.com/go/go?p=2
-        // https://www.v2ex.com/t/472945#reply3
-        if !detailRegex.Match([]byte(link)) && !listRegex.Match([]byte(link)) {
-            println("not match", link)
-            return
-        }
-        time.Sleep(time.Second)
-        println("match", link)
+		// 匹配下列两种 url 模式的，才去 visit
+		// https://www.v2ex.com/go/go?p=2
+		// https://www.v2ex.com/t/472945#reply3
+		if !detailRegex.Match([]byte(link)) && !listRegex.Match([]byte(link)) {
+			println("not match", link)
+			return
+		}
+		time.Sleep(time.Second)
+		println("match", link)
 
-        visited[link] = true
+		visited[link] = true
 
-        time.Sleep(time.Millisecond * 2)
-        c.Visit(e.Request.AbsoluteURL(link))
-    })
+		time.Sleep(time.Millisecond * 2)
+		c.Visit(e.Request.AbsoluteURL(link))
+	})
 
-    err := c.Visit("https://www.v2ex.com/go/go")
-    if err != nil {
-        fmt.Println(err)
-    }
+	err := c.Visit("https://www.v2ex.com/go/go")
+	if err != nil {
+		fmt.Println(err)
+	}
 }
-
 ```
 
 ## 分布式爬虫
@@ -108,8 +107,8 @@ nats 的服务端项目是 gnatsd，客户端与 gnatsd 的通信方式为基于
 ```go
 nc, err := nats.Connect(nats.DefaultURL)
 if err != nil {
-    // log error
-    return
+	// log error
+	return
 }
 
 // 指定 subject 为 tasks，消息内容随意
@@ -127,8 +126,8 @@ nc.Flush()
 ```go
 nc, err := nats.Connect(nats.DefaultURL)
 if err != nil {
-    // log error
-    return
+	// log error
+	return
 }
 
 // queue subscribe 相当于在消费者之间进行任务分发的分支均衡
@@ -136,19 +135,19 @@ if err != nil {
 // nats 中的 queue 概念上类似于 kafka 中的 consumer group
 sub, err := nc.QueueSubscribeSync("tasks", "workers")
 if err != nil {
-    // log error
-    return
+	// log error
+	return
 }
 
 var msg *nats.Msg
 for {
-    msg, err = sub.NextMsg(time.Hour * 10000)
-    if err != nil {
-        // log error
-        break
-    }
-    // 正确地消费到了消息
-    // 可用 nats.Msg 对象处理任务
+	msg, err = sub.NextMsg(time.Hour * 10000)
+	if err != nil {
+		// log error
+		break
+	}
+	// 正确地消费到了消息
+	// 可用 nats.Msg 对象处理任务
 }
 ```
 
@@ -160,10 +159,10 @@ for {
 package main
 
 import (
-    "fmt"
-    "net/url"
+	"fmt"
+	"net/url"
 
-    "github.com/gocolly/colly"
+	"github.com/gocolly/colly"
 )
 
 var domain2Collector = map[string]*colly.Collector{}
@@ -172,62 +171,62 @@ var maxDepth = 10
 var natsURL = "nats://localhost:4222"
 
 func factory(urlStr string) *colly.Collector {
-    u, _ := url.Parse(urlStr)
-    return domain2Collector[u.Host]
+	u, _ := url.Parse(urlStr)
+	return domain2Collector[u.Host]
 }
 
 func initV2exCollector() *colly.Collector {
-    c := colly.NewCollector(
-        colly.AllowedDomains("www.v2ex.com"),
-        colly.MaxDepth(maxDepth),
-    )
+	c := colly.NewCollector(
+		colly.AllowedDomains("www.v2ex.com"),
+		colly.MaxDepth(maxDepth),
+	)
 
-    c.OnResponse(func(resp *colly.Response) {
-        // 做一些爬完之后的善后工作
-        // 比如页面已爬完的确认存进 MySQL
-    })
+	c.OnResponse(func(resp *colly.Response) {
+		// 做一些爬完之后的善后工作
+		// 比如页面已爬完的确认存进 MySQL
+	})
 
-    c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-        // 基本的反爬虫策略
-        time.Sleep(time.Second * 2)
+	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+		// 基本的反爬虫策略
+		time.Sleep(time.Second * 2)
 
-        // TODO, 正则 match 列表页的话，就 visit
-        // TODO, 正则 match 落地页的话，就发消息队列
-        c.Visit(e.Request.AbsoluteURL(link))
-    })
-    return c
+		// TODO, 正则 match 列表页的话，就 visit
+		// TODO, 正则 match 落地页的话，就发消息队列
+		c.Visit(e.Request.AbsoluteURL(link))
+	})
+	return c
 }
 
 func initV2fxCollector() *colly.Collector {
-    c := colly.NewCollector(
-        colly.AllowedDomains("www.v2fx.com"),
-        colly.MaxDepth(maxDepth),
-    )
+	c := colly.NewCollector(
+		colly.AllowedDomains("www.v2fx.com"),
+		colly.MaxDepth(maxDepth),
+	)
 
-    c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-    })
+	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+	})
 
-    return c
+	return c
 }
 
 func init() {
-    domain2Collector["www.v2ex.com"] = initV2exCollector()
-    domain2Collector["www.v2fx.com"] = initV2fxCollector()
+	domain2Collector["www.v2ex.com"] = initV2exCollector()
+	domain2Collector["www.v2fx.com"] = initV2fxCollector()
 
-    var err error
-    nc, err = nats.Connect(natsURL)
-    if err != nil {
-        // log fatal
-        os.Exit(1)
-    }
+	var err error
+	nc, err = nats.Connect(natsURL)
+	if err != nil {
+		// log fatal
+		os.Exit(1)
+	}
 }
 
 func main() {
-    urls := []string{"https://www.v2ex.com", "https://www.v2fx.com"}
-    for _, url := range urls {
-        instance := factory(url)
-        instance.Visit(url)
-    }
+	urls := []string{"https://www.v2ex.com", "https://www.v2fx.com"}
+	for _, url := range urls {
+		instance := factory(url)
+		instance.Visit(url)
+	}
 }
 
 ```
@@ -238,10 +237,10 @@ func main() {
 package main
 
 import (
-    "fmt"
-    "net/url"
+	"fmt"
+	"net/url"
 
-    "github.com/gocolly/colly"
+	"github.com/gocolly/colly"
 )
 
 var domain2Collector = map[string]*colly.Collector{}
@@ -250,73 +249,72 @@ var maxDepth = 10
 var natsURL = "nats://localhost:4222"
 
 func factory(urlStr string) *colly.Collector {
-    u, _ := url.Parse(urlStr)
-    return domain2Collector[u.Host]
+	u, _ := url.Parse(urlStr)
+	return domain2Collector[u.Host]
 }
 
 func initV2exCollector() *colly.Collector {
-    c := colly.NewCollector(
-        colly.AllowedDomains("www.v2ex.com"),
-        colly.MaxDepth(maxDepth),
-    )
+	c := colly.NewCollector(
+		colly.AllowedDomains("www.v2ex.com"),
+		colly.MaxDepth(maxDepth),
+	)
 
-    return c
+	return c
 }
 
 func initV2fxCollector() *colly.Collector {
-    c := colly.NewCollector(
-        colly.AllowedDomains("www.v2fx.com"),
-        colly.MaxDepth(maxDepth),
-    )
+	c := colly.NewCollector(
+		colly.AllowedDomains("www.v2fx.com"),
+		colly.MaxDepth(maxDepth),
+	)
 
-    return c
+	return c
 }
 
 func init() {
-    domain2Collector["www.v2ex.com"] = initV2exCollector()
-    domain2Collector["www.v2fx.com"] = initV2fxCollector()
+	domain2Collector["www.v2ex.com"] = initV2exCollector()
+	domain2Collector["www.v2fx.com"] = initV2fxCollector()
 
-    var err error
-    nc, err = nats.Connect(natsURL)
-    if err != nil {
-        // log fatal
-        os.Exit(1)
-    }
+	var err error
+	nc, err = nats.Connect(natsURL)
+	if err != nil {
+		// log fatal
+		os.Exit(1)
+	}
 }
 
 func startConsumer() {
-    nc, err := nats.Connect(nats.DefaultURL)
-    if err != nil {
-        // log error
-        return
-    }
+	nc, err := nats.Connect(nats.DefaultURL)
+	if err != nil {
+		// log error
+		return
+	}
 
-    sub, err := nc.QueueSubscribeSync("tasks", "workers")
-    if err != nil {
-        // log error
-        return
-    }
+	sub, err := nc.QueueSubscribeSync("tasks", "workers")
+	if err != nil {
+		// log error
+		return
+	}
 
-    var msg *nats.Msg
-    for {
-        msg, err = sub.NextMsg(time.Hour * 10000)
-        if err != nil {
-            // log error
-            break
-        }
+	var msg *nats.Msg
+	for {
+		msg, err = sub.NextMsg(time.Hour * 10000)
+		if err != nil {
+			// log error
+			break
+		}
 
-        urlStr := string(msg.Data)
-        ins := factory(urlStr)
-        // 因为最下游拿到的一定是对应网站的落地页
-        // 所以不用进行多余的判断了，直接爬内容即可
-        ins.Visit(urlStr)
-    }
+		urlStr := string(msg.Data)
+		ins := factory(urlStr)
+		// 因为最下游拿到的一定是对应网站的落地页
+		// 所以不用进行多余的判断了，直接爬内容即可
+		ins.Visit(urlStr)
+	}
 }
 
 func main() {
-    startConsumer()
+	startConsumer()
 }
-
 ```
 
 从代码层面上来讲，这里的生产者和消费者其实本质上差不多。如果日后我们要灵活地支持增加、减少各种网站的爬取的话，应该思考如何将这些爬虫的策略、参数尽量地配置化。

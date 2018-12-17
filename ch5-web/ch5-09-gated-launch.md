@@ -13,8 +13,8 @@
 
 ## 5.9.1 通过分批次部署实现灰度发布
 
-假如服务部署在 15 个实例(可能是物理机，也可能是容器)上，我们把这 15 个实例分为四组，按照先后顺序，分别有 1-2-4-8 台机器，保证每次扩展时大概都是二倍的关系。 
- 
+假如服务部署在 15 个实例(可能是物理机，也可能是容器)上，我们把这 15 个实例分为四组，按照先后顺序，分别有 1-2-4-8 台机器，保证每次扩展时大概都是二倍的关系。
+
 ![online group](../images/ch5-online-group.png)
 
 为什么要用 2 倍？这样能够保证我们不管有多少台机器，都不会把组划分得太多。例如 1024 台机器，实际上也就只需要 1-2-4-8-16-32-64-128-256-512 部署十次就可以全部部署完毕。
@@ -32,12 +32,12 @@
 ```go
 // pass 3/1000
 func passed() bool {
-    key := hashFunctions(userID) % 1000
-    if key <= 2 {
-        return true
-    }
+	key := hashFunctions(userID) % 1000
+	if key <= 2 {
+		return true
+	}
 
-    return false
+	return false
 }
 ```
 
@@ -61,7 +61,7 @@ func passed() bool {
 
 ```go
 func isTrue() bool {
-    return true/false according to the rate provided by user
+	return true/false according to the rate provided by user
 }
 ```
 
@@ -71,11 +71,11 @@ func isTrue() bool {
 
 ```go
 func isTrue(phone string) bool {
-    if hash of phone matches {
-        return true
-    }
+	if hash of phone matches {
+		return true
+	}
 
-    return false
+	return false
 }
 ```
 
@@ -123,16 +123,16 @@ func isTrue(phone string) bool {
 var cityID2Open = [12000]bool{}
 
 func init() {
-    readConfig()
-    for i:=0;i<len(cityID2Open);i++ {
-        if city i is opened in configs {
-            cityID2Open[i] = true
-        }
-    }
+	readConfig()
+	for i:=0;i<len(cityID2Open);i++ {
+		if city i is opened in configs {
+			cityID2Open[i] = true
+		}
+	}
 }
 
 func isPassed(cityID int) bool {
-    return cityID2Open[cityID]
+	return cityID2Open[cityID]
 }
 ```
 
@@ -142,20 +142,19 @@ func isPassed(cityID int) bool {
 var cityID2Open = map[int]struct{}{}
 
 func init() {
-    readConfig()
-    for _, city := range openCities {
-        cityID2Open[city] = struct{}{}
-    }
+	readConfig()
+	for _, city := range openCities {
+		cityID2Open[city] = struct{}{}
+	}
 }
 
 func isPassed(cityID int) bool {
-    if _, ok := cityID2Open[cityID]; ok {
-        return true
-    }
+	if _, ok := cityID2Open[cityID]; ok {
+		return true
+	}
 
-    return false
+	return false
 }
-
 ```
 
 按白名单、按业务线、按 UA、按分发渠道发布，本质上和按城市发布是一样的，这里就不再赘述了。
@@ -165,20 +164,20 @@ func isPassed(cityID int) bool {
 ```go
 
 func init() {
-    rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().UnixNano())
 }
 
 // rate 为 0~100
 func isPassed(rate int) bool {
-    if rate >= 100 {
-        return true
-    }
+	if rate >= 100 {
+		return true
+	}
 
-    if rate > 0 && rand.Int(100) > rate {
-        return true
-    }
+	if rate > 0 && rand.Int(100) > rate {
+		return true
+	}
 
-    return false
+	return false
 }
 ```
 
@@ -193,28 +192,30 @@ hash.go:
 ```go
 package main
 
-import "crypto/md5"
-import "crypto/sha1"
-import "github.com/spaolacci/murmur3"
+import (
+	"crypto/md5"
+	"crypto/sha1"
+
+	"github.com/spaolacci/murmur3"
+)
 
 var str = "hello world"
 
 func md5Hash() [16]byte {
-    return md5.Sum([]byte(str))
+	return md5.Sum([]byte(str))
 }
 
 func sha1Hash() [20]byte {
-    return sha1.Sum([]byte(str))
+	return sha1.Sum([]byte(str))
 }
 
 func murmur32() uint32 {
-    return murmur3.Sum32([]byte(str))
+	return murmur3.Sum32([]byte(str))
 }
 
 func murmur64() uint64 {
-    return murmur3.Sum64([]byte(str))
+	return murmur3.Sum64([]byte(str))
 }
-
 ```
 
 hash_test.go
@@ -225,27 +226,27 @@ package main
 import "testing"
 
 func BenchmarkMD5(b *testing.B) {
-    for i := 0; i < b.N; i++ {
-        md5Hash()
-    }
+	for i := 0; i < b.N; i++ {
+		md5Hash()
+	}
 }
 
 func BenchmarkSHA1(b *testing.B) {
-    for i := 0; i < b.N; i++ {
-        sha1Hash()
-    }
+	for i := 0; i < b.N; i++ {
+		sha1Hash()
+	}
 }
 
 func BenchmarkMurmurHash32(b *testing.B) {
-    for i := 0; i < b.N; i++ {
-        murmur32()
-    }
+	for i := 0; i < b.N; i++ {
+		murmur32()
+	}
 }
 
 func BenchmarkMurmurHash64(b *testing.B) {
-    for i := 0; i < b.N; i++ {
-        murmur64()
-    }
+	for i := 0; i < b.N; i++ {
+		murmur64()
+	}
 }
 
 ```
@@ -254,12 +255,12 @@ func BenchmarkMurmurHash64(b *testing.B) {
 ~/t/g/hash_bench git:master ❯❯❯ go test -bench=.
 goos: darwin
 goarch: amd64
-BenchmarkMD5-4            	10000000	       180 ns/op
-BenchmarkSHA1-4           	10000000	       211 ns/op
-BenchmarkMurmurHash32-4   	50000000	        25.7 ns/op
-BenchmarkMurmurHash64-4   	20000000	        66.2 ns/op
+BenchmarkMD5-4          10000000 180 ns/op
+BenchmarkSHA1-4         10000000 211 ns/op
+BenchmarkMurmurHash32-4 50000000  25.7 ns/op
+BenchmarkMurmurHash64-4 20000000  66.2 ns/op
 PASS
-ok  	_/Users/caochunhui/test/go/hash_bench	7.050s
+ok _/Users/caochunhui/test/go/hash_bench 7.050s
 ```
 
 可见 murmurhash 相比其它的算法有三倍以上的性能提升。
@@ -274,29 +275,30 @@ ok  	_/Users/caochunhui/test/go/hash_bench	7.050s
 package main
 
 import (
-    "fmt"
+	"fmt"
 
-    "github.com/spaolacci/murmur3"
+	"github.com/spaolacci/murmur3"
 )
 
 var bucketSize = 10
 
 func main() {
-    var bucketMap = map[uint64]int{}
-    for i := 15000000000; i < 15000000000+10000000; i++ {
-        hashInt := murmur64(fmt.Sprint(i)) % uint64(bucketSize)
-        bucketMap[hashInt]++
-    }
-    fmt.Println(bucketMap)
+	var bucketMap = map[uint64]int{}
+	for i := 15000000000; i < 15000000000+10000000; i++ {
+		hashInt := murmur64(fmt.Sprint(i)) % uint64(bucketSize)
+		bucketMap[hashInt]++
+	}
+	fmt.Println(bucketMap)
 }
 
 func murmur64(p string) uint64 {
-    return murmur3.Sum64([]byte(p))
+	return murmur3.Sum64([]byte(p))
 }
 ```
 
 ```shell
-map[7:999475 5:1000359 1:999945 6:1000200 3:1000193 9:1000765 2:1000044 4:1000343 8:1000823 0:997853]
+map[7:999475 5:1000359 1:999945 6:1000200 3:1000193 9:1000765 2:1000044 \
+4:1000343 8:1000823 0:997853]
 ```
 
 偏差基本都在 1/100 以内，是可以接受的。

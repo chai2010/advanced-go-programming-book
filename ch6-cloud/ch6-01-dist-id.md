@@ -7,7 +7,6 @@
 Twitter 的 snowflake 算法是这种场景下的一个典型解法。先来看看 snowflake 是怎么一回事：
 
 ```
-
                                                                datacenter_id          sequence_id
     unused
                                                                       │                     │
@@ -28,7 +27,6 @@ Twitter 的 snowflake 算法是这种场景下的一个典型解法。先来看�
                                       │                                        │
 
                             time in milliseconds                          worker_id
-
 ```
 
 首先确定我们的数值是 64 位，int64 类型，被划分为四部分，不含开头的第一个 bit，因为这个 bit 是符号位。用 41 位来表示收到请求时的时间戳，单位为毫秒，然后五位来表示数据中心的 id，然后再五位来表示机器的实例 id，最后是 12 位的循环自增 id(到达 1111 1111 1111 后会归 0)。
@@ -82,42 +80,46 @@ mysql> select last_insert_id();
 package main
 
 import (
-    "fmt"
-    "os"
+	"fmt"
+	"os"
 
-    "github.com/bwmarrin/snowflake"
+	"github.com/bwmarrin/snowflake"
 )
 
 func main() {
-    n, err := snowflake.NewNode(1)
-    if err != nil {
-        println(err)
-        os.Exit(1)
-    }
+	n, err := snowflake.NewNode(1)
+	if err != nil {
+		println(err)
+		os.Exit(1)
+	}
 
-    for i := 0; i < 3; i++ {
-        id := n.Generate()
-        fmt.Println("id", id)
-        fmt.Println("node: ", id.Node(), "step: ", id.Step(), "time: ", id.Time(), "\n")
-    }
+	for i := 0; i < 3; i++ {
+		id := n.Generate()
+		fmt.Println("id", id)
+		fmt.Println(
+			"node: ", id.Node(),
+			"step: ", id.Step(),
+			"time: ", id.Time(),
+			"\n",
+		)
+	}
 }
-
 ```
 
 当然，这个库也给我们留好了定制的后路：
 
 ```go
-    // Epoch is set to the twitter snowflake epoch of Nov 04 2010 01:42:54 UTC
-    // You may customize this to set a different epoch for your application.
-    Epoch int64 = 1288834974657
+	// Epoch is set to the twitter snowflake epoch of Nov 04 2010 01:42:54 UTC
+	// You may customize this to set a different epoch for your application.
+	Epoch int64 = 1288834974657
 
-    // Number of bits to use for Node
-    // Remember, you have a total 22 bits to share between Node/Step
-    NodeBits uint8 = 10
+	// Number of bits to use for Node
+	// Remember, you have a total 22 bits to share between Node/Step
+	NodeBits uint8 = 10
 
-    // Number of bits to use for Step
-    // Remember, you have a total 22 bits to share between Node/Step
-    StepBits uint8 = 12
+	// Number of bits to use for Step
+	// Remember, you have a total 22 bits to share between Node/Step
+	StepBits uint8 = 12
 ```
 
 Epoch 就是本节开头讲的起始时间，NodeBits 指的是机器编号的位长，StepBits 指的是自增序列的位长。
@@ -144,9 +146,9 @@ Settings 数据结构如下：
 
 ```go
 type Settings struct {
-    StartTime      time.Time
-    MachineID      func() (uint16, error)
-    CheckMachineID func(uint16) bool
+	StartTime      time.Time
+	MachineID      func() (uint16, error)
+	CheckMachineID func(uint16) bool
 }
 ```
 
@@ -169,57 +171,56 @@ redis 127.0.0.1:6379> SADD base64_encoding_of_last16bits MzI0Mgo=
 package main
 
 import (
-    "fmt"
-    "os"
-    "time"
+	"fmt"
+	"os"
+	"time"
 
-    "github.com/sony/sonyflake"
+	"github.com/sony/sonyflake"
 )
 
 func getMachineID() (uint16, error) {
-    var machineID uint16
-    var err error
-    machineID = readMachineIDFromLocalFile()
-    if machineID == 0 {
-        machineID, err = generateMachineID()
-        if err != nil {
-            return 0, err
-        }
-    }
+	var machineID uint16
+	var err error
+	machineID = readMachineIDFromLocalFile()
+	if machineID == 0 {
+		machineID, err = generateMachineID()
+		if err != nil {
+			return 0, err
+		}
+	}
 
-    return machineID, nil
+	return machineID, nil
 }
 
 func checkMachineID(machineID uint16) bool {
-    saddResult, err := saddMachineIDToRedisSet()
-    if err != nil || saddResult == 0 {
-        return true
-    }
+	saddResult, err := saddMachineIDToRedisSet()
+	if err != nil || saddResult == 0 {
+		return true
+	}
 
-    err := saveMachineIDToLocalFile(machineID)
-    if err != nil {
-        return true
-    }
+	err := saveMachineIDToLocalFile(machineID)
+	if err != nil {
+		return true
+	}
 
-    return false
+	return false
 }
 
 func main() {
-    t, _ := time.Parse("2006-01-02", "2018-01-01")
-    settings := sonyflake.Settings{
-        StartTime:      t,
-        MachineID:      getMachineID,
-        CheckMachineID: checkMachineID,
-    }
+	t, _ := time.Parse("2006-01-02", "2018-01-01")
+	settings := sonyflake.Settings{
+		StartTime:      t,
+		MachineID:      getMachineID,
+		CheckMachineID: checkMachineID,
+	}
 
-    sf := sonyflake.NewSonyflake(settings)
-    id, err := sf.NextID()
-    if err != nil {
-        fmt.Println(err)
-        os.Exit(1)
-    }
+	sf := sonyflake.NewSonyflake(settings)
+	id, err := sf.NextID()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-    fmt.Println(id)
+	fmt.Println(id)
 }
-
 ```

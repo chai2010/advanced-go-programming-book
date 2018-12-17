@@ -31,12 +31,12 @@
 ```shell
 etcdctl get /configs/remote_config.json
 {
-    "addr" : "127.0.0.1:1080",
-    "aes_key" : "01B345B7A9ABC00F0123456789ABCDAF",
-    "https" : false,
-    "secret" : "",
-    "private_key_path" : "",
-    "cert_file_path" : ""
+	"addr" : "127.0.0.1:1080",
+	"aes_key" : "01B345B7A9ABC00F0123456789ABCDAF",
+	"https" : false,
+	"secret" : "",
+	"private_key_path" : "",
+	"cert_file_path" : ""
 }
 ```
 
@@ -44,9 +44,9 @@ etcdctl get /configs/remote_config.json
 
 ```go
 cfg := client.Config{
-    Endpoints:               []string{"http://127.0.0.1:2379"},
-    Transport:               client.DefaultTransport,
-    HeaderTimeoutPerRequest: time.Second,
+	Endpoints:               []string{"http://127.0.0.1:2379"},
+	Transport:               client.DefaultTransport,
+	HeaderTimeoutPerRequest: time.Second,
 }
 ```
 
@@ -57,10 +57,10 @@ cfg := client.Config{
 ```go
 resp, err = kapi.Get(context.Background(), "/path/to/your/config", nil)
 if err != nil {
-    log.Fatal(err)
+	log.Fatal(err)
 } else {
-    log.Printf("Get is done. Metadata is %q\n", resp)
-    log.Printf("%q key has %q value\n", resp.Node.Key, resp.Node.Value)
+	log.Printf("Get is done. Metadata is %q\n", resp)
+	log.Printf("%q key has %q value\n", resp.Node.Key, resp.Node.Value)
 }
 ```
 
@@ -72,11 +72,11 @@ if err != nil {
 kapi := client.NewKeysAPI(c)
 w := kapi.Watcher("/path/to/your/config", nil)
 go func() {
-    for {
-        resp, err := w.Next(context.Background())
-        log.Println(resp, err)
-        log.Println("new values is ", resp.Node.Value)
-    }
+	for {
+		resp, err := w.Next(context.Background())
+		log.Println(resp, err)
+		log.Println("new values is ", resp.Node.Value)
+	}
 }()
 ```
 
@@ -88,79 +88,79 @@ go func() {
 package main
 
 import (
-    "log"
-    "time"
+	"log"
+	"time"
 
-    "golang.org/x/net/context"
-    "github.com/coreos/etcd/client"
+	"golang.org/x/net/context"
+	"github.com/coreos/etcd/client"
 )
 
 var configPath =  `/configs/remote_config.json`
 var kapi client.KeysAPI
 
 type ConfigStruct struct {
-    Addr           string `json:"addr"`
-    AesKey         string `json:"aes_key"`
-    HTTPS          bool   `json:"https"`
-    Secret         string `json:"secret"`
-    PrivateKeyPath string `json:"private_key_path"`
-    CertFilePath   string `json:"cert_file_path"`
+	Addr           string `json:"addr"`
+	AesKey         string `json:"aes_key"`
+	HTTPS          bool   `json:"https"`
+	Secret         string `json:"secret"`
+	PrivateKeyPath string `json:"private_key_path"`
+	CertFilePath   string `json:"cert_file_path"`
 }
 
 var appConfig ConfigStruct
 
 func init() {
-    cfg := client.Config{
-        Endpoints:               []string{"http://127.0.0.1:2379"},
-        Transport:               client.DefaultTransport,
-        HeaderTimeoutPerRequest: time.Second,
-    }
+	cfg := client.Config{
+		Endpoints:               []string{"http://127.0.0.1:2379"},
+		Transport:               client.DefaultTransport,
+		HeaderTimeoutPerRequest: time.Second,
+	}
 
-    c, err := client.New(cfg)
-    if err != nil {
-        log.Fatal(err)
-    }
-    kapi = client.NewKeysAPI(c)
-    initConfig()
+	c, err := client.New(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	kapi = client.NewKeysAPI(c)
+	initConfig()
 }
 
 func watchAndUpdate() {
-    w := kapi.Watcher(configPath, nil)
-    go func() {
-        // watch 该节点下的每次变化
-        for {
-            resp, err := w.Next(context.Background())
-            if err != nil {
-                log.Fatal(err)
-            }
-            log.Println("new values is ", resp.Node.Value)
+	w := kapi.Watcher(configPath, nil)
+	go func() {
+		// watch 该节点下的每次变化
+		for {
+			resp, err := w.Next(context.Background())
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Println("new values is ", resp.Node.Value)
 
-            err = json.Unmarshal([]byte(resp.Node.Value), &appConfig)
-            if err != nil {
-                log.Fatal(err)
-            }
-        }
-    }()
+			err = json.Unmarshal([]byte(resp.Node.Value), &appConfig)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	}()
 }
 
 func initConfig() {
-    resp, err = kapi.Get(context.Background(), configPath, nil)
-    if err != nil {
-        log.Fatal(err)
-    }
+	resp, err = kapi.Get(context.Background(), configPath, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    err := json.Unmarshal(resp.Node.Value, &appConfig)
-    if err != nil {
-        log.Fatal(err)
-    }
+	err := json.Unmarshal(resp.Node.Value, &appConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func getConfig() ConfigStruct {
-    return appConfig
+	return appConfig
 }
 
 func main() {
-    // init your app
+	// init your app
 }
 ```
 

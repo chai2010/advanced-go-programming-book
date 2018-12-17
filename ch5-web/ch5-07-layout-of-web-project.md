@@ -29,7 +29,10 @@
 这样我们 controller 中的入口函数就变成了下面这样：
 
 ```go
-func CreateOrder(ctx context.Context, req *CreateOrderStruct) (*CreateOrderRespStruct, error) {
+func CreateOrder(ctx context.Context, req *CreateOrderStruct) (
+	*CreateOrderRespStruct, error,
+) {
+	// ...
 }
 ```
 
@@ -40,26 +43,26 @@ CreateOrder 有两个参数，ctx 用来传入 trace_id 一类的需要串联请
 ```go
 // defined in protocol layer
 type CreateOrderRequest struct {
-    OrderID int64 `json:"order_id"`
-    // ...
+	OrderID int64 `json:"order_id"`
+	// ...
 }
 
 // defined in controller
 type CreateOrderParams struct {
-    OrderID int64
+	OrderID int64
 }
 
 func HTTPCreateOrderHandler(wr http.ResponseWriter, r *http.Request) {
-    var req CreateOrderRequest
-    var params CreateOrderParams
-    ctx := context.TODO()
-    // bind data to req
-    bind(r, &req)
-    // map protocol binded to protocol-independent
-    map(req, params)
-    logicResp,err := controller.CreateOrder(ctx, &params)
-    if err != nil {}
-    // ...
+	var req CreateOrderRequest
+	var params CreateOrderParams
+	ctx := context.TODO()
+	// bind data to req
+	bind(r, &req)
+	// map protocol binded to protocol-independent
+	map(req, params)
+	logicResp,err := controller.CreateOrder(ctx, &params)
+	if err != nil {}
+	// ...
 }
 ```
 
@@ -72,27 +75,27 @@ func HTTPCreateOrderHandler(wr http.ResponseWriter, r *http.Request) {
 ```go
 // http request struct
 type CreateOrder struct {
-    OrderID int64 `json:"order_id" validate:"required"`
-    UserID int64 `json:"user_id" validate:"required"`
-    ProductID int `json:"prod_id" validate:"required"`
-    Addr string `json:"addr" validate:"required"`
+	OrderID   int64  `json:"order_id" validate:"required"`
+	UserID    int64  `json:"user_id" validate:"required"`
+	ProductID int    `json:"prod_id" validate:"required"`
+	Addr      string `json:"addr" validate:"required"`
 }
 
 // thrift request struct
 type FeatureSetParams struct {
-    DriverID int64 `thrift:"driverID,1,required"`
-    OrderID int64 `thrift:"OrderID,2,required"`
-    UserID int64 `thrift:"UserID,3,required"`
-    ProductID int `thrift:"ProductID,4,required"`
-    Addr string `thrift:"Addr,5,required"`
+	DriverID  int64  `thrift:"driverID,1,required"`
+	OrderID   int64  `thrift:"OrderID,2,required"`
+	UserID    int64  `thrift:"UserID,3,required"`
+	ProductID int    `thrift:"ProductID,4,required"`
+	Addr      string `thrift:"Addr,5,required"`
 }
 
 // controller input struct
 type CreateOrderParams struct {
-    OrderID int64
-    UserID int64
-    ProductID int
-    Addr string
+	OrderID int64
+	UserID int64
+	ProductID int
+	Addr string
 }
 
 ```
@@ -101,11 +104,11 @@ type CreateOrderParams struct {
 
 ```go
 type FeatureSetParams struct {
-    DriverID int64 `thrift:"driverID,1,required" json:"driver_id"`
-    OrderID int64 `thrift:"OrderID,2,required" json:"order_id"`
-    UserID int64 `thrift:"UserID,3,required" json:"user_id"`
-    ProductID int `thrift:"ProductID,4,required" json:"prod_id"`
-    Addr string `thrift:"Addr,5,required" json:"addr"`
+	DriverID  int64  `thrift:"driverID,1,required" json:"driver_id"`
+	OrderID   int64  `thrift:"OrderID,2,required" json:"order_id"`
+	UserID    int64  `thrift:"UserID,3,required" json:"user_id"`
+	ProductID int    `thrift:"ProductID,4,required" json:"prod_id"`
+	Addr      string `thrift:"Addr,5,required" json:"addr"`
 }
 ```
 

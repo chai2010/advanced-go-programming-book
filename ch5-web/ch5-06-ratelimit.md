@@ -39,18 +39,18 @@ Core: 2
 Threads: 4
 
 Graphics/Displays:
-      Chipset Model: Intel Iris Graphics 6100
-          Resolution: 2560 x 1600 Retina
-    Memory Slots:
-          Size: 4 GB
-          Speed: 1867 MHz
-          Size: 4 GB
-          Speed: 1867 MHz
+	  Chipset Model: Intel Iris Graphics 6100
+		  Resolution: 2560 x 1600 Retina
+	Memory Slots:
+		  Size: 4 GB
+		  Speed: 1867 MHz
+		  Size: 4 GB
+		  Speed: 1867 MHz
 Storage:
-          Size: 250.14 GB (250,140,319,744 bytes)
-          Media Name: APPLE SSD SM0256G Media
-          Size: 250.14 GB (250,140,319,744 bytes)
-          Medium Type: SSD
+		  Size: 250.14 GB (250,140,319,744 bytes)
+		  Media Name: APPLE SSD SM0256G Media
+		  Size: 250.14 GB (250,140,319,744 bytes)
+		  Medium Type: SSD
 ```
 
 测试结果：
@@ -59,32 +59,32 @@ Storage:
 ~ ❯❯❯ wrk -c 10 -d 10s -t10 http://localhost:9090
 Running 10s test @ http://localhost:9090
   10 threads and 10 connections
-  Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency   339.99us    1.28ms  44.43ms   98.29%
-    Req/Sec     4.49k   656.81     7.47k    73.36%
+  Thread Stats   Avg	  Stdev	 Max   +/- Stdev
+	Latency   339.99us	1.28ms  44.43ms   98.29%
+	Req/Sec	 4.49k   656.81	 7.47k	73.36%
   449588 requests in 10.10s, 54.88MB read
 Requests/sec:  44513.22
-Transfer/sec:      5.43MB
+Transfer/sec:	  5.43MB
 
 ~ ❯❯❯ wrk -c 10 -d 10s -t10 http://localhost:9090
 Running 10s test @ http://localhost:9090
   10 threads and 10 connections
-  Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency   334.76us    1.21ms  45.47ms   98.27%
-    Req/Sec     4.42k   633.62     6.90k    71.16%
+  Thread Stats   Avg	  Stdev	 Max   +/- Stdev
+	Latency   334.76us	1.21ms  45.47ms   98.27%
+	Req/Sec	 4.42k   633.62	 6.90k	71.16%
   443582 requests in 10.10s, 54.15MB read
 Requests/sec:  43911.68
-Transfer/sec:      5.36MB
+Transfer/sec:	  5.36MB
 
 ~ ❯❯❯ wrk -c 10 -d 10s -t10 http://localhost:9090
 Running 10s test @ http://localhost:9090
   10 threads and 10 connections
-  Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency   379.26us    1.34ms  44.28ms   97.62%
-    Req/Sec     4.55k   591.64     8.20k    76.37%
+  Thread Stats   Avg	  Stdev	 Max   +/- Stdev
+	Latency   379.26us	1.34ms  44.28ms   97.62%
+	Req/Sec	 4.55k   591.64	 8.20k	76.37%
   455710 requests in 10.10s, 55.63MB read
 Requests/sec:  45118.57
-Transfer/sec:      5.51MB
+Transfer/sec:	  5.51MB
 ```
 
 多次测试的结果在 4w 左右的 QPS 浮动，响应时间最多也就是 40ms 左右，对于一个 web 程序来说，这已经是很不错的成绩了，我们只是照抄了别人的示例代码，就完成了一个高性能的 `hello world` 服务器，是不是很有成就感？
@@ -135,7 +135,9 @@ func NewBucketWithRate(rate float64, capacity int64) *Bucket
 ```go
 func (tb *Bucket) Take(count int64) time.Duration {}
 func (tb *Bucket) TakeAvailable(count int64) int64 {}
-func (tb *Bucket) TakeMaxDuration(count int64, maxWait time.Duration) (time.Duration, bool) {}
+func (tb *Bucket) TakeMaxDuration(count int64, maxWait time.Duration) (
+	time.Duration, bool,
+) {}
 func (tb *Bucket) Wait(count int64) {}
 func (tb *Bucket) WaitMaxDuration(count int64, maxWait time.Duration) bool {}
 ```
@@ -223,22 +225,22 @@ current token cnt: 100 2018-06-16 18:17:50.313970334 +0800 CST m=+1.060937371
 
 ```go
 func TakeAvailable(block bool) bool{
-    var takenResult bool
-    if block {
-        select {
-        case <-tokenBucket:
-            takenResult = true
-        }
-    } else {
-        select {
-        case <-tokenBucket:
-            takenResult = true
-        default:
-            takenResult = false
-        }
-    }
+	var takenResult bool
+	if block {
+		select {
+		case <-tokenBucket:
+			takenResult = true
+		}
+	} else {
+		select {
+		case <-tokenBucket:
+			takenResult = true
+		default:
+			takenResult = false
+		}
+	}
 
-    return takenResult
+	return takenResult
 }
 ```
 
