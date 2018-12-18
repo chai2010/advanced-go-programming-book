@@ -142,7 +142,7 @@ type Handler interface {
 
 type HandlerFunc func(ResponseWriter, *Request)
 
-func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request)
+func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request) {
 	f(w, r)
 }
 
