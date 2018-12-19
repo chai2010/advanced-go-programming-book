@@ -108,7 +108,7 @@ func main() {
 
 ## 5.5.2 提高生产效率的 ORM 和 SQL Builder
 
-在 web 开发领域常常提到的 ORM 是什么？我们先看看万能的维基百科：
+在Web开发领域常常提到的ORM是什么？我们先看看万能的维基百科：
 
 ```
 对象关系映射（英语：Object Relational Mapping，简称ORM，或O/RM，或O/R mapping），

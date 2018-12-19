@@ -1,6 +1,6 @@
 # 5.2 router 请求路由
 
-在常见的 web 框架中，router 是必备的组件。golang 圈子里 router 也时常被称为 http 的 multiplexer。在上一节中我们通过对 Burrow 代码的简单学习，已经知道如何用 http 标准库中内置的 mux 来完成简单的路由功能了。如果开发 web 系统对路径中带参数没什么兴趣的话，用 http 标准库中的 mux 就可以。
+在常见的 Web 框架中，router 是必备的组件。golang 圈子里 router 也时常被称为 http 的 multiplexer。在上一节中我们通过对 Burrow 代码的简单学习，已经知道如何用 http 标准库中内置的 mux 来完成简单的路由功能了。如果开发 Web 系统对路径中带参数没什么兴趣的话，用 http 标准库中的 mux 就可以。
 
 restful 是几年前刮起的 API 设计风潮，在 restful 中除了 GET 和 POST 之外，还使用了 http 协议定义的几种其它的标准化语义。具体包括：
 
@@ -36,7 +36,7 @@ DELETE /user/starred/:owner/:repo
 
 ## 5.2.1 httprouter
 
-较流行的开源 golang web 框架大多使用 httprouter，或是基于 httprouter 的变种对路由进行支持。前面提到的 github 的参数式路由在 httprouter 中都是可以支持的。
+较流行的开源 golang Web 框架大多使用 httprouter，或是基于 httprouter 的变种对路由进行支持。前面提到的 github 的参数式路由在 httprouter 中都是可以支持的。
 
 因为 httprouter 中使用的是显式匹配，所以在设计路由的时候需要规避一些会导致路由冲突的情况，例如：
 
@@ -101,7 +101,7 @@ r.PanicHandler = func(w http.ResponseWriter, r *http.Request, c interface{}) {
 }
 ```
 
-目前开源界最为流行(star 数最多)的 web 框架 [gin](https://github.com/gin-gonic/gin) 使用的就是 httprouter 的变种。
+目前开源界最为流行(star 数最多)的Web框架 [gin](https://github.com/gin-gonic/gin) 使用的就是 httprouter 的变种。
 
 ## 5.2.2 原理
 
