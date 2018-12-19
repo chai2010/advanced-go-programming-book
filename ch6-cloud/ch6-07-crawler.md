@@ -119,9 +119,9 @@ nc.Flush()
 
 #### 基本消息消费
 
-直接使用 nats 的 subscribe api 并不能达到任务分发的目的，因为 pub sub 本身是广播性质的。所有消费者都会收到完全一样的所有消息。
+直接使用nats的subscribe API并不能达到任务分发的目的，因为pub sub本身是广播性质的。所有消费者都会收到完全一样的所有消息。
 
-除了普通的 subscribe 之外，nats 还提供了 queue subscribe 的功能。只要提供一个 queue group 名字(类似 kafka 中的 consumer group)，即可均衡地将任务分发给消费者。
+除了普通的subscribe之外，nats还提供了queue subscribe的功能。只要提供一个queue group名字(类似kafka中的 consumer group)，即可均衡地将任务分发给消费者。
 
 ```go
 nc, err := nats.Connect(nats.DefaultURL)
@@ -153,7 +153,7 @@ for {
 
 #### 结合 colly 的消息生产
 
-我们为每一个网站定制一个对应的 collector，并设置相应的规则，比如 v2ex，v2fx(虚构的)，再用简单的工厂方法来将该 collector 和其 host 对应起来：
+我们为每一个网站定制一个对应的collector，并设置相应的规则，比如v2ex，v2fx(虚构的)，再用简单的工厂方法来将该collector和其host对应起来：
 
 ```go
 package main
