@@ -1,6 +1,6 @@
 # 5.2 router 请求路由
 
-在常见的Web框架中，router是必备的组件。golang圈子里router也时常被称为http的multiplexer。在上一节中我们通过对Burrow代码的简单学习，已经知道如何用http标准库中内置的mux来完成简单的路由功能了。如果开发Web系统对路径中带参数没什么兴趣的话，用http标准库中的mux就可以。
+在常见的Web框架中，router是必备的组件。Go语言圈子里router也时常被称为http的multiplexer。在上一节中我们通过对Burrow代码的简单学习，已经知道如何用http标准库中内置的mux来完成简单的路由功能了。如果开发Web系统对路径中带参数没什么兴趣的话，用http标准库中的mux就可以。
 
 RESTful是几年前刮起的API设计风潮，在RESTful中除了GET和POST之外，还使用了http协议定义的几种其它的标准化语义。具体包括：
 

@@ -255,7 +255,7 @@ func (r *Router) Add(route string, h http.Handler) {
 
 ## 5.3.4 哪些事情适合在 middleware 中做
 
-以较流行的开源golang框架chi为例：
+以较流行的开源Go语言框架chi为例：
 
 ```
 compress.go

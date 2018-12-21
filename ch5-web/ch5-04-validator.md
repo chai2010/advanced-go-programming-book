@@ -40,7 +40,7 @@ func register(req RegisterReq) error{
 }
 ```
 
-我们在 golang 里成功写出了 hadoken 开路的箭头型代码。。这种代码一般怎么进行优化呢？
+我们用Go语言成功写出了 hadoken 开路的箭头型代码。。这种代码一般怎么进行优化呢？
 
 很简单，在《重构》一书中已经给出了方案：[Guard Clauses](https://refactoring.com/catalog/replaceNestedConditionalWithGuardClauses.html)。
 
@@ -235,4 +235,4 @@ func main() {
 
 在前一小节中介绍的 validator 组件在功能上要远比我们这里的 demo 复杂的多。但原理很简单，就是用 reflect 对 struct 进行树形遍历。有心的读者这时候可能会产生一个问题，我们对 struct 进行 validate 时大量使用了 reflect，而 go 的 reflect 在性能上不太出众，有时甚至会影响到我们程序的性能。这样的考虑确实有一些道理，但需要对 struct 进行大量校验的场景往往出现在 Web 服务，这里并不一定是程序的性能瓶颈所在，实际的效果还是要从 pprof 中做更精确的判断。
 
-如果基于反射的 validator 真的成为了你服务的性能瓶颈怎么办？现在也有一种思路可以避免反射：使用 golang 内置的 parser 对源代码进行扫描，然后根据 struct 的定义生成校验代码。我们可以将所有需要校验的结构体放在单独的 package 内。这就交给读者自己去探索了。
+如果基于反射的 validator 真的成为了你服务的性能瓶颈怎么办？现在也有一种思路可以避免反射：使用Go语言内置的 parser 对源代码进行扫描，然后根据 struct 的定义生成校验代码。我们可以将所有需要校验的结构体放在单独的 package 内。这就交给读者自己去探索了。
