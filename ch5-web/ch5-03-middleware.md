@@ -79,7 +79,7 @@ func main() {
 
 渐渐的我们的系统增加到了30个路由和`handler`函数，每次增加新的handler，我们的第一件工作就是把之前写的所有和业务逻辑无关的周边代码先拷贝过来。
 
-接下来系统安稳地运行了一段时间，突然有一天，老板找到你，我们最近找人新开发了监控系统，为了系统运行可以更加可控，需要把每个接口运行的耗时数据主动上报到我们的监控系统里。给监控系统起个名字吧，叫metrics。现在你需要修改代码并把耗时通过HTTP Post的方式发给metrics 了。我们来修改一下helloHandler：
+接下来系统安稳地运行了一段时间，突然有一天，老板找到你，我们最近找人新开发了监控系统，为了系统运行可以更加可控，需要把每个接口运行的耗时数据主动上报到我们的监控系统里。给监控系统起个名字吧，叫metrics。现在你需要修改代码并把耗时通过HTTP Post的方式发给metrics 了。我们来修改一下`helloHandler()`：
 
 ```go
 func helloHandler(wr http.ResponseWriter, r *http.Request) {
@@ -125,7 +125,7 @@ func main() {
 }
 ```
 
-这样就非常轻松地实现了业务与非业务之间的剥离，魔法就在于这个timeMiddleware。可以从代码中看到，我们的timeMiddleware也是一个函数，其参数为http.Handler，http.Handler的定义在`net/http`包中：
+这样就非常轻松地实现了业务与非业务之间的剥离，魔法就在于这个timeMiddleware。可以从代码中看到，我们的`timeMiddleware()`也是一个函数，其参数为`http.Handler`，`http.Handler`的定义在`net/http`包中：
 
 ```go
 type Handler interface {
@@ -181,9 +181,11 @@ func (mux *ServeMux) HandleFunc(pattern string, handler func(ResponseWriter, *Re
 customizedHandler = logger(timeout(ratelimit(helloHandler)))
 ```
 
-这个函数链在执行过程中的上下文可以用下面这张图来表示。
+这个函数链在执行过程中的上下文可以用*图 5-8*来表示。
 
 ![](../images/ch6-03-middleware_flow.png)
+
+*图 5-8 请求处理过程*
 
 再直白一些，这个流程在进行请求处理的时候实际上就是不断地进行函数压栈再出栈，有一些类似于递归的执行流：
 
@@ -278,9 +280,11 @@ throttler.go
 
 每一个Web框架都会有对应的middleware组件，如果你有兴趣，也可以向这些项目贡献有用的middleware，只要合理一般项目的维护人也愿意合并你的Pull Request。
 
-比如开源界很火的gin这个框架，就专门为用户贡献的middleware开了一个仓库：
+比如开源界很火的gin这个框架，就专门为用户贡献的middleware开了一个仓库，见*图 5-9*：
 
 ![](../images/ch6-03-gin_contrib.png)
+
+*图 5-9 *
 
 如果读者去阅读gin的源码的话，可能会发现gin的middleware中处理的并不是`http.Handler`，而是一个叫`gin.HandlerFunc`的函数类型，和本节中讲解的`http.Handler`签名并不一样。不过实际上gin的handler也只是针对其框架的一种封装，middleware的原理与本节中的说明是一致的。
 
