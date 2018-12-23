@@ -30,7 +30,7 @@ PUT /user/starred/:owner/:repo
 DELETE /user/starred/:owner/:repo
 ```
 
-相信聪明的你已经猜出来了，这是github官方文档中挑出来的几个api设计。RESTful风格的API重度依赖请求路径。会将很多参数放在请求URI中。除此之外还会使用很多并不那么常见的HTTP状态码，不过本节只讨论路由，所以先略过不谈。
+相信聪明的你已经猜出来了，这是github官方文档中挑出来的几个API设计。RESTful风格的API重度依赖请求路径。会将很多参数放在请求URI中。除此之外还会使用很多并不那么常见的HTTP状态码，不过本节只讨论路由，所以先略过不谈。
 
 如果我们的系统也想要这样的URI设计，使用标准库的mux显然就力不从心了。
 
