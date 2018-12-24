@@ -1,6 +1,6 @@
-# 5.3 middleware 中间件
+# 5.3 中间件
 
-本章将对现在流行的Web框架中的中间件技术原理进行分析，并介绍如何使用中间件技术将业务和非业务代码功能进行解耦。
+本章将对现在流行的Web框架中的中间件(middleware)技术原理进行分析，并介绍如何使用中间件技术将业务和非业务代码功能进行解耦。
 
 ## 5.3.1 代码泥潭
 
@@ -94,7 +94,7 @@ func helloHandler(wr http.ResponseWriter, r *http.Request) {
 
 修改到这里，本能地发现我们的开发工作开始陷入了泥潭。无论未来对我们的这个 Web 系统有任何其它的非功能或统计需求，我们的修改必然牵一发而动全身。只要增加一个非常简单的非业务统计，我们就需要去几十个handler里增加这些业务无关的代码。虽然一开始我们似乎并没有做错，但是显然随着业务的发展，我们的行事方式让我们陷入了代码的泥潭。
 
-## 5.3.2 使用 middleware 剥离非业务逻辑
+## 5.3.2 使用中间件剥离非业务逻辑
 
 我们来分析一下，一开始在哪里做错了呢？我们只是一步一步地满足需求，把我们需要的逻辑按照流程写下去呀？
 
@@ -125,7 +125,7 @@ func main() {
 }
 ```
 
-这样就非常轻松地实现了业务与非业务之间的剥离，魔法就在于这个timeMiddleware。可以从代码中看到，我们的`timeMiddleware()`也是一个函数，其参数为`http.Handler`，`http.Handler`的定义在`net/http`包中：
+这样就非常轻松地实现了业务与非业务之间的剥离，魔法就在于这个`timeMiddleware`。可以从代码中看到，我们的`timeMiddleware()`也是一个函数，其参数为`http.Handler`，`http.Handler`的定义在`net/http`包中：
 
 ```go
 type Handler interface {
@@ -207,7 +207,7 @@ customizedHandler = logger(timeout(ratelimit(helloHandler)))
 
 功能实现了，但在上面的使用过程中我们也看到了，这种函数套函数的用法不是很美观，同时也不具备什么可读性。
 
-## 5.3.3 更优雅的 middleware 写法
+## 5.3.3 更优雅的中间件写法
 
 上一节中解决了业务功能代码和非业务功能代码的解耦，但也提到了，看起来并不美观，如果需要修改这些函数的顺序，或者增删中间件还是有点费劲，本节我们来进行一些“写法”上的优化。
 
@@ -221,7 +221,7 @@ r.Use(ratelimit)
 r.Add("/", helloHandler)
 ```
 
-通过多步设置，我们拥有了和上一节差不多的执行函数链。胜在直观易懂，如果我们要增加或者删除middleware，只要简单地增加删除对应的Use调用就可以了。非常方便。
+通过多步设置，我们拥有了和上一节差不多的执行函数链。胜在直观易懂，如果我们要增加或者删除中间件，只要简单地增加删除对应的`Use()`调用就可以了。非常方便。
 
 从框架的角度来讲，怎么实现这样的功能呢？也不复杂：
 
@@ -252,39 +252,39 @@ func (r *Router) Add(route string, h http.Handler) {
 }
 ```
 
-注意代码中的middleware数组遍历顺序，和用户希望的调用顺序应该是"相反"的。应该不难理解。
+注意代码中的`middleware`数组遍历顺序，和用户希望的调用顺序应该是"相反"的。应该不难理解。
 
 
-## 5.3.4 哪些事情适合在 middleware 中做
+## 5.3.4 哪些事情适合在中间件中做
 
 以较流行的开源Go语言框架chi为例：
 
 ```
 compress.go
-  => 对 http 的 response body 进行压缩处理
+  => 对http的响应体进行压缩处理
 heartbeat.go
-  => 设置一个特殊的路由，例如 /ping，/healthcheck，用来给 load balancer 一类的前置服务进行探活
+  => 设置一个特殊的路由，例如/ping，/healthcheck，用来给负载均衡一类的前置服务进行探活
 logger.go
-  => 打印 request 处理日志，例如请求处理时间，请求路由
+  => 打印请求处理处理日志，例如请求处理时间，请求路由
 profiler.go
-  => 挂载 pprof 需要的路由，如 /pprof、/pprof/trace 到系统中
+  => 挂载pprof需要的路由，如`/pprof`、`/pprof/trace`到系统中
 realip.go
-  => 从请求头中读取 X-Forwarded-For 和 X-Real-IP，将 http.Request 中的 RemoteAddr 修改为得到的 RealIP
+  => 从请求头中读取X-Forwarded-For和X-Real-IP，将http.Request中的RemoteAddr修改为得到的RealIP
 requestid.go
-  => 为本次请求生成单独的 requestid，可一路透传，用来生成分布式调用链路，也可用于在日志中串连单次请求的所有逻辑
+  => 为本次请求生成单独的requestid，可一路透传，用来生成分布式调用链路，也可用于在日志中串连单次请求的所有逻辑
 timeout.go
-  => 用 context.Timeout 设置超时时间，并将其通过 http.Request 一路透传下去
+  => 用context.Timeout设置超时时间，并将其通过http.Request一路透传下去
 throttler.go
-  => 通过定长大小的 channel 存储 token，并通过这些 token 对接口进行限流
+  => 通过定长大小的channel存储token，并通过这些token对接口进行限流
 ```
 
-每一个Web框架都会有对应的middleware组件，如果你有兴趣，也可以向这些项目贡献有用的middleware，只要合理一般项目的维护人也愿意合并你的Pull Request。
+每一个Web框架都会有对应的中间件组件，如果你有兴趣，也可以向这些项目贡献有用的中间件，只要合理一般项目的维护人也愿意合并你的Pull Request。
 
-比如开源界很火的gin这个框架，就专门为用户贡献的middleware开了一个仓库，见*图 5-9*：
+比如开源界很火的gin这个框架，就专门为用户贡献的中间件开了一个仓库，见*图 5-9*：
 
 ![](../images/ch6-03-gin_contrib.png)
 
 *图 5-9 *
 
-如果读者去阅读gin的源码的话，可能会发现gin的middleware中处理的并不是`http.Handler`，而是一个叫`gin.HandlerFunc`的函数类型，和本节中讲解的`http.Handler`签名并不一样。不过实际上gin的handler也只是针对其框架的一种封装，middleware的原理与本节中的说明是一致的。
+如果读者去阅读gin的源码的话，可能会发现gin的中间件中处理的并不是`http.Handler`，而是一个叫`gin.HandlerFunc`的函数类型，和本节中讲解的`http.Handler`签名并不一样。不过实际上gin的`handler`也只是针对其框架的一种封装，中间件的原理与本节中的说明是一致的。
 
