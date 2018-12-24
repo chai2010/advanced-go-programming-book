@@ -153,7 +153,7 @@ type Router struct {
 }
 ```
 
-trees中的key即为http 1.1的RFC中定义的各种method，具体有：
+`trees`中的`key`即为http 1.1的RFC中定义的各种方法，具体有：
 
 ```shell
 GET
@@ -165,16 +165,16 @@ PATCH
 DELETE
 ```
 
-每一种method对应的都是一棵独立的压缩字典树，这些树彼此之间不共享数据。具体到我们上面用到的路由，PUT和GET是两棵树而非一棵。
+每一种方法对应的都是一棵独立的压缩字典树，这些树彼此之间不共享数据。具体到我们上面用到的路由，`PUT`和`GET`是两棵树而非一棵。
 
-简单来讲，某个method第一次插入的路由就会导致对应字典树的根节点被创建，我们按顺序，先是一个PUT：
+简单来讲，某个方法第一次插入的路由就会导致对应字典树的根节点被创建，我们按顺序，先是一个`PUT`：
 
 ```go
 r := httprouter.New()
 r.PUT("/user/installations/:installation_id/repositories/:reposit", Hello)
 ```
 
-这样PUT对应的根节点就会被创建出来。把这棵PUT的树画出来：
+这样`PUT`对应的根节点就会被创建出来。把这棵`PUT`的树画出来：
 
 ![put radix tree](../images/ch6-02-radix-put.png)
 
@@ -197,7 +197,7 @@ indices: 子节点索引，当子节点为非参数类型，即本节点的 wild
 
 ```
 
-当然，PUT路由只有唯一的一条路径。接下来，我们以后续的多条GET路径为例，讲解子节点的插入过程。
+当然，`PUT`路由只有唯一的一条路径。接下来，我们以后续的多条GET路径为例，讲解子节点的插入过程。
 
 ### 5.2.3.2 子节点插入
 
