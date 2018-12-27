@@ -1,8 +1,8 @@
 # 5.2 router 请求路由
 
-在常见的Web框架中，router是必备的组件。Go语言圈子里router也时常被称为http的multiplexer。在上一节中我们通过对Burrow代码的简单学习，已经知道如何用http标准库中内置的mux来完成简单的路由功能了。如果开发Web系统对路径中带参数没什么兴趣的话，用http标准库中的mux就可以。
+在常见的Web框架中，router是必备的组件。Go语言圈子里router也时常被称为`http`的multiplexer。在上一节中我们通过对Burrow代码的简单学习，已经知道如何用`http`标准库中内置的mux来完成简单的路由功能了。如果开发Web系统对路径中带参数没什么兴趣的话，用`http`标准库中的`mux`就可以。
 
-RESTful是几年前刮起的API设计风潮，在RESTful中除了GET和POST之外，还使用了http协议定义的几种其它的标准化语义。具体包括：
+RESTful是几年前刮起的API设计风潮，在RESTful中除了GET和POST之外，还使用了HTTP协议定义的几种其它的标准化语义。具体包括：
 
 ```go
 const (
@@ -30,9 +30,9 @@ PUT /user/starred/:owner/:repo
 DELETE /user/starred/:owner/:repo
 ```
 
-相信聪明的你已经猜出来了，这是github官方文档中挑出来的几个API设计。RESTful风格的API重度依赖请求路径。会将很多参数放在请求URI中。除此之外还会使用很多并不那么常见的HTTP状态码，不过本节只讨论路由，所以先略过不谈。
+相信聪明的你已经猜出来了，这是Github官方文档中挑出来的几个API设计。RESTful风格的API重度依赖请求路径。会将很多参数放在请求URI中。除此之外还会使用很多并不那么常见的HTTP状态码，不过本节只讨论路由，所以先略过不谈。
 
-如果我们的系统也想要这样的URI设计，使用标准库的mux显然就力不从心了。
+如果我们的系统也想要这样的URI设计，使用标准库的`mux`显然就力不从心了。
 
 ## 5.2.1 httprouter
 
@@ -50,7 +50,7 @@ GET /user/info/:name
 POST /user/:id
 ```
 
-简单来讲的话，如果两个路由拥有一致的http method(指 GET/POST/PUT/DELETE)和请求路径前缀，且在某个位置出现了A路由是wildcard(指 :id 这种形式)参数，B路由则是普通字符串，那么就会发生路由冲突。路由冲突会在初始化阶段直接panic：
+简单来讲的话，如果两个路由拥有一致的http方法(指 GET/POST/PUT/DELETE)和请求路径前缀，且在某个位置出现了A路由是wildcard（指:id这种形式）参数，B路由则是普通字符串，那么就会发生路由冲突。路由冲突会在初始化阶段直接panic：
 
 ```shell
 panic: wildcard route ':id' conflicts with existing children in path '/user/:id'
@@ -81,7 +81,7 @@ Pattern: /src/*filepath
  /src/subdir/somefile.go   filepath = "subdir/somefile.go"
 ```
 
-这种设计在RESTful中可能不太常见，主要是为了能够使用httprouter来做简单的http静态文件服务器。
+这种设计在RESTful中可能不太常见，主要是为了能够使用httprouter来做简单的HTTP静态文件服务器。
 
 除了正常情况下的路由支持，httprouter也支持对一些特殊情况下的回调函数进行定制，例如404的时候：
 
@@ -101,17 +101,17 @@ r.PanicHandler = func(w http.ResponseWriter, r *http.Request, c interface{}) {
 }
 ```
 
-目前开源界最为流行(star数最多)的Web框架[gin](https://github.com/gin-gonic/gin)使用的就是httprouter的变种。
+目前开源界最为流行（star数最多）的Web框架[gin](https://github.com/gin-gonic/gin)使用的就是httprouter的变种。
 
 ## 5.2.2 原理
 
-httprouter和众多衍生router使用的数据结构被称为压缩字典树(Radix Tree)。读者可能没有接触过压缩字典树，但对字典树(Trie Tree)应该有所耳闻。*图 5-1*是一个典型的字典树结构：
+httprouter和众多衍生router使用的数据结构被称为压缩字典树（Radix Tree）。读者可能没有接触过压缩字典树，但对字典树（Trie Tree）应该有所耳闻。*图 5-1*是一个典型的字典树结构：
 
 ![trie tree](../images/ch6-02-trie.png)
 
 *图 5-1 字典树*
 
-字典树常用来进行字符串检索，例如用给定的字符串序列建立字典树。对于目标字符串，只要从根节点开始深度优先搜索，即可判断出该字符串是否曾经出现过，时间复杂度为O(n)，n可以认为是目标字符串的长度。为什么要这样做？字符串本身不像数值类型可以进行数值比较，两个字符串对比的时间复杂度取决于字符串长度。如果不用字典树来完成上述功能，要对历史字符串进行排序，再利用二分查找之类的算法去搜索，时间复杂度只高不低。可认为字典树是一种空间换时间的典型做法。
+字典树常用来进行字符串检索，例如用给定的字符串序列建立字典树。对于目标字符串，只要从根节点开始深度优先搜索，即可判断出该字符串是否曾经出现过，时间复杂度为`O(n)`，n可以认为是目标字符串的长度。为什么要这样做？字符串本身不像数值类型可以进行数值比较，两个字符串对比的时间复杂度取决于字符串长度。如果不用字典树来完成上述功能，要对历史字符串进行排序，再利用二分查找之类的算法去搜索，时间复杂度只高不低。可认为字典树是一种空间换时间的典型做法。
 
 普通的字典树有一个比较明显的缺点，就是每个字母都需要建立一个孩子节点，这样会导致字典树的层数比较深，压缩字典树相对好地平衡了字典树的优点和缺点。是典型的压缩字典树结构：
 
@@ -119,7 +119,7 @@ httprouter和众多衍生router使用的数据结构被称为压缩字典树(Rad
 
 *图 5-2 压缩字典树*
 
-每个节点上不只存储一个字母了，这也是压缩字典树中“压缩”的主要含义。使用压缩字典树可以减少树的层数，同时因为每个节点上数据存储也比通常的字典树要多，所以程序的局部性较好(一个节点的path加载到 cache 即可进行多个字符的对比)，从而对CPU缓存友好。
+每个节点上不只存储一个字母了，这也是压缩字典树中“压缩”的主要含义。使用压缩字典树可以减少树的层数，同时因为每个节点上数据存储也比通常的字典树要多，所以程序的局部性较好（一个节点的path加载到cache即可进行多个字符的对比），从而对CPU缓存友好。
 
 ## 5.2.3 压缩字典树创建过程
 
@@ -138,7 +138,7 @@ GET /support
 GET /marketplace_listing/plans/ohyes
 ```
 
-最后一条补充路由是我们臆想的，除此之外所有API路由均来自于api.github.com。
+最后一条补充路由是我们臆想的，除此之外所有API路由均来自于`api.github.com`。
 
 ### 5.2.3.1 root 节点创建
 
@@ -153,7 +153,7 @@ type Router struct {
 }
 ```
 
-`trees`中的`key`即为http 1.1的RFC中定义的各种方法，具体有：
+`trees`中的`key`即为HTTP 1.1的RFC中定义的各种方法，具体有：
 
 ```shell
 GET
@@ -193,7 +193,7 @@ nType: 当前节点类型，有四个枚举值: 分别为 static/root/param/catc
     param                    // 参数节点，例如 :id
     catchAll                 // 通配符节点，例如 *anyway
 
-indices: 子节点索引，当子节点为非参数类型，即本节点的 wildChild 为 false 时，会将每个子节点的首字母放在该索引数组。说是数组，实际上是个 string。
+indices：子节点索引，当子节点为非参数类型，即本节点的wildChild为false时，会将每个子节点的首字母放在该索引数组。说是数组，实际上是个string。
 
 ```
 
@@ -209,7 +209,7 @@ indices: 子节点索引，当子节点为非参数类型，即本节点的 wild
 
 因为第一个路由没有参数，path都被存储到根节点上了。所以只有一个节点。
 
-然后插入 `GET /marketplace_listing/plans/:id/accounts`，新的路径与之前的路径有共同的前缀，且可以直接在之前叶子节点后进行插入，那么结果也很简单，插入后的树结构见*图 5-5*:
+然后插入`GET /marketplace_listing/plans/:id/accounts`，新的路径与之前的路径有共同的前缀，且可以直接在之前叶子节点后进行插入，那么结果也很简单，插入后的树结构见*图 5-5*:
 
 ![get radix step 2](../images/ch6-02-radix-get-2.png)
 
@@ -227,7 +227,7 @@ indices: 子节点索引，当子节点为非参数类型，即本节点的 wild
 
 *图 5-6 插入第三个节点，导致边分裂*
 
-原有路径和新的路径在初始的`/`位置发生分裂，这样需要把原有的root节点内容下移，再将新路由 `search`同样作为子节点挂在root节点之下。这时候因为子节点出现多个，root节点的indices提供子节点索引，这时候该字段就需要派上用场了。"ms" 代表子节点的首字母分别为m(marketplace)和s(search)。
+原有路径和新的路径在初始的`/`位置发生分裂，这样需要把原有的root节点内容下移，再将新路由 `search`同样作为子节点挂在root节点之下。这时候因为子节点出现多个，root节点的indices提供子节点索引，这时候该字段就需要派上用场了。"ms"代表子节点的首字母分别为m（marketplace）和s（search）。
 
 我们一口作气，把`GET /status`和`GET /support`也插入到树中。这时候会导致在`search`节点上再次发生分裂，最终结果见*图 5-7*：
 
@@ -237,7 +237,7 @@ indices: 子节点索引，当子节点为非参数类型，即本节点的 wild
 
 ### 5.2.3.4 子节点冲突处理
 
-在路由本身只有字符串的情况下，不会发生任何冲突。只有当路由中含有wildcard(类似 :id)或者catchAll的情况下才可能冲突。这一点在前面已经提到了。
+在路由本身只有字符串的情况下，不会发生任何冲突。只有当路由中含有wildcard（类似 :id）或者catchAll的情况下才可能冲突。这一点在前面已经提到了。
 
 子节点的冲突处理很简单，分几种情况：
 

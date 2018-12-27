@@ -79,7 +79,7 @@ func main() {
 
 渐渐的我们的系统增加到了30个路由和`handler`函数，每次增加新的handler，我们的第一件工作就是把之前写的所有和业务逻辑无关的周边代码先拷贝过来。
 
-接下来系统安稳地运行了一段时间，突然有一天，老板找到你，我们最近找人新开发了监控系统，为了系统运行可以更加可控，需要把每个接口运行的耗时数据主动上报到我们的监控系统里。给监控系统起个名字吧，叫metrics。现在你需要修改代码并把耗时通过HTTP Post的方式发给metrics 了。我们来修改一下`helloHandler()`：
+接下来系统安稳地运行了一段时间，突然有一天，老板找到你，我们最近找人新开发了监控系统，为了系统运行可以更加可控，需要把每个接口运行的耗时数据主动上报到我们的监控系统里。给监控系统起个名字吧，叫metrics。现在你需要修改代码并把耗时通过HTTP Post的方式发给metrics系统了。我们来修改一下`helloHandler()`：
 
 ```go
 func helloHandler(wr http.ResponseWriter, r *http.Request) {
@@ -92,7 +92,7 @@ func helloHandler(wr http.ResponseWriter, r *http.Request) {
 }
 ```
 
-修改到这里，本能地发现我们的开发工作开始陷入了泥潭。无论未来对我们的这个 Web 系统有任何其它的非功能或统计需求，我们的修改必然牵一发而动全身。只要增加一个非常简单的非业务统计，我们就需要去几十个handler里增加这些业务无关的代码。虽然一开始我们似乎并没有做错，但是显然随着业务的发展，我们的行事方式让我们陷入了代码的泥潭。
+修改到这里，本能地发现我们的开发工作开始陷入了泥潭。无论未来对我们的这个Web系统有任何其它的非功能或统计需求，我们的修改必然牵一发而动全身。只要增加一个非常简单的非业务统计，我们就需要去几十个handler里增加这些业务无关的代码。虽然一开始我们似乎并没有做错，但是显然随着业务的发展，我们的行事方式让我们陷入了代码的泥潭。
 
 ## 5.3.2 使用中间件剥离非业务逻辑
 
@@ -153,13 +153,13 @@ func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request) {
 func (ResponseWriter, *Request)
 ```
 
-那么这个handler和`http.HandlerFunc()`就有了一致的函数签名，可以将该handler函数进行类型转换，转为`http.HandlerFunc`。而`http.HandlerFunc`实现了`http.Handler`这个接口。在http库需要调用你的handler函数来处理http请求时，会调用`HandlerFunc`的`ServeHTTP`函数，可见一个请求的基本调用链是这样的：
+那么这个`handler`和`http.HandlerFunc()`就有了一致的函数签名，可以将该`handler()`函数进行类型转换，转为`http.HandlerFunc`。而`http.HandlerFunc`实现了`http.Handler`这个接口。在`http`库需要调用你的handler函数来处理http请求时，会调用`HandlerFunc()`的`ServeHTTP()`函数，可见一个请求的基本调用链是这样的：
 
 ```go
 h = getHandler() => h.ServeHTTP(w, r) => h(w, r)
 ```
 
-上面提到的把自定义handler转换为`http.HandlerFunc`这个过程是必须的，因为我们的handler没有直接实现`ServeHTTP`这个接口。上面的代码中我们看到的HandleFunc(注意HandlerFunc和HandleFunc的区别)里也可以看到这个强制转换过程：
+上面提到的把自定义`handler`转换为`http.HandlerFunc()`这个过程是必须的，因为我们的`handler`没有直接实现`ServeHTTP`这个接口。上面的代码中我们看到的HandleFunc(注意HandlerFunc和HandleFunc的区别)里也可以看到这个强制转换过程：
 
 ```go
 func HandleFunc(pattern string, handler func(ResponseWriter, *Request)) {
@@ -284,7 +284,7 @@ throttler.go
 
 ![](../images/ch6-03-gin_contrib.png)
 
-*图 5-9 *
+*图 5-9 gin的中间件仓库*
 
 如果读者去阅读gin的源码的话，可能会发现gin的中间件中处理的并不是`http.Handler`，而是一个叫`gin.HandlerFunc`的函数类型，和本节中讲解的`http.Handler`签名并不一样。不过实际上gin的`handler`也只是针对其框架的一种封装，中间件的原理与本节中的说明是一致的。
 
