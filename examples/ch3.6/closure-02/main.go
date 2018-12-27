@@ -23,7 +23,7 @@ func NewTwiceFunClosure(x int) func() int {
 func ptrToFunc(p unsafe.Pointer) func() int
 
 func asmFunTwiceClosureAddr() uintptr
-func asmFunTwiceClosureBody()
+func asmFunTwiceClosureBody() int
 
 func main() {
 	fnTwice := NewTwiceFunClosure(1)

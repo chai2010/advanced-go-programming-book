@@ -352,7 +352,7 @@ func NewTwiceFunClosure(x int) func() int {
 func ptrToFunc(p unsafe.Pointer) func() int
 
 func asmFunTwiceClosureAddr() uintptr
-func asmFunTwiceClosureBody()
+func asmFunTwiceClosureBody() int
 ```
 
 其中`ptrToFunc`用于将指针转化为`func() int`类型的闭包函数，`asmFunTwiceClosureAddr`用于返回闭包函数机器指令的开始地址（类似全局函数的地址），`asmFunTwiceClosureBody`是闭包函数对应的全局函数的实现。
