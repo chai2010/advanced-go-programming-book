@@ -300,3 +300,87 @@ TEXT ·sum(SB), $16-16
 
 喜欢深究的读者可能会有一个问题：如果进行垃圾回收或栈调整时，寄存器中的指针是如何维护的？前文说过，Go语言的函数调用是通过栈进行传递参数的，并没有使用寄存器传递参数。同时函数调用之后所有的寄存器视为失效。因此在调整和维护指针时，只需要扫描内存中的指针数据，寄存器中的数据在垃圾回收器函数返回后都需要重新加载，因此寄存器是不需要扫描的。
 
+## 3.6.6 闭包函数
+
+闭包函数是最强大的函数，因为闭包函数可以捕获外层局部作用域内部的变量，因此闭包函数本身就具有了状态。从理论上来说，全局的函数也是闭包函数的子集，只不过全局函数并没有捕获外层变量而已。
+
+为了理解闭包函数如何工作，我们先构造如下的例子：
+
+```go
+package main
+
+func NewTwiceFunClosure(x int) func() int {
+	return func() int {
+		x *= 2
+		return x
+	}
+}
+
+func main() {
+	fnTwice := NewTwiceFunClosure(1)
+
+	println(fnTwice()) // 1*2 => 2
+	println(fnTwice()) // 2*2 => 4
+	println(fnTwice()) // 4*2 => 8
+}
+```
+
+其中`NewTwiceFunClosure`函数返回一个闭包函数，返回的闭包函数捕获外层的`x`参数。返回的闭包函数在执行时，每次将捕获的外层变量乘以2之后再返回。在`main`函数中，首先以1作为参数调用`NewTwiceFunClosure`函数构造一个闭包函数，返回的闭包函数保存在`fnTwice`闭包函数类型的变量中。然后每次调用`fnTwice`闭包函数将返回翻倍后的结果，也就是：2，4，8。
+
+上述的代码，从Go语言层面是非常容易理解的。但是闭包函数在汇编语言层面是如何工作的呢？下面我们尝试手工构造闭包函数来展示闭包的工作原理。首先是构造`FunTwiceClosure`结构体类型，用来表示闭包对象：
+
+```go
+type FunTwiceClosure struct {
+	F uintptr
+	X int
+}
+
+func NewTwiceFunClosure(x int) func() int {
+	var p = &FunTwiceClosure{
+		F: asmFunTwiceClosureAddr(),
+		X: x,
+	}
+	return ptrToFunc(unsafe.Pointer(p))
+}
+```
+
+`FunTwiceClosure`结构体包含两个成员，第一个成员`F`表示闭包函数的函数指令的地址，第二个成员`X`表示闭包捕获的外部变量。如果闭包函数捕获了多个外部变量，那么`FunTwiceClosure`结构体也要做相应的调整。然后构造`FunTwiceClosure`结构体对象，也就是闭包函数对象。其中`asmFunTwiceClosureAddr`函数用于辅助获取闭包函数的函数指令的地址，采用汇编语言实现。最后通过`ptrToFunc`辅助函数将结构体指针转为闭包函数对象返回，该函数也是通过汇编语言实现。
+
+汇编语言实现了以下三个辅助函数：
+
+```go
+func ptrToFunc(p unsafe.Pointer) func() int
+
+func asmFunTwiceClosureAddr() uintptr
+func asmFunTwiceClosureBody()
+```
+
+其中`ptrToFunc`用于将指针转化为`func() int`类型的闭包函数，`asmFunTwiceClosureAddr`用于返回闭包函数机器指令的开始地址（类似全局函数的地址），`asmFunTwiceClosureBody`是闭包函数对应的全局函数的实现。
+
+然后用Go汇编语言实现以上三个辅助函数：
+
+```s
+#include "textflag.h"
+
+TEXT ·ptrToFunc(SB), NOSPLIT, $0-16
+	MOVQ ptr+0(FP), AX // AX = ptr
+	MOVQ AX, ret+8(FP) // return AX
+	RET
+
+TEXT ·asmFunTwiceClosureAddr(SB), NOSPLIT, $0-8
+	LEAQ ·asmFunTwiceClosureBody(SB), AX // AX = ·asmFunTwiceClosureBody(SB)
+	MOVQ AX, ret+0(FP)                   // return AX
+	RET
+
+TEXT ·asmFunTwiceClosureBody(SB), NOSPLIT|NEEDCTXT, $0-8
+	MOVQ 8(DX), AX
+	ADDQ AX   , AX        // AX *= 2
+	MOVQ AX   , 8(DX)     // ctx.X = AX
+	MOVQ AX   , ret+0(FP) // return AX
+	RET
+```
+
+其中`·ptrToFunc`和`·asmFunTwiceClosureAddr`函数的实现比较简单，我们不再详细描述。最重要的是`·asmFunTwiceClosureBody`函数的实现：它有一个`NEEDCTXT`标志。采用`NEEDCTXT`标志定义的函数表示需要一个上下文环境，在AMD64环境下是通过`DX`寄存器来传递这个上下文环境指针，也就是对应`FunTwiceClosure`结构体的指针。函数手写从`FunTwiceClosure`结构体对象取出之前捕获的`X`，将`X`乘以2之后写回内存，最后返回修改之后的`X`的值。
+
+如果是在汇编语言中调用闭包函数，也可以遵循同样的流程：首先为构造闭包对象，其中保存捕获的外层变量；在调用闭包函数时首先要拿到闭包对象，用闭包对象初始化`DX`，然后从闭包对象中取出函数地址并用`CALL`指针调用。
+
