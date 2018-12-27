@@ -351,9 +351,21 @@ myServer := grpc.NewServer(
 
 ## 4.5.4 和Web服务共存
 
-gRPC构建在HTTP/2协议之上，因此我们可以将gRPC服务和普通的Web服务架设在同一个端口之上。因为目前Go语言版本的gRPC实现还不够完善，只有启用了TLS协议之后才能将gRPC和Web服务运行在同一个端口。
+gRPC构建在HTTP/2协议之上，因此我们可以将gRPC服务和普通的Web服务架设在同一个端口之上。
 
-服务器证书的生成过程前文已经讲过，这里不再赘述。启用普通的https服务器非常简单：
+对于没有启动TLS协议的服务则需要对HTTP2/2特性做适当的调整：
+
+```go
+func main() {
+	mux := http.NewServeMux()
+
+	h2Handler := h2c.NewHandler(mux, &http2.Server{})
+	server = &http.Server{Addr: ":3999", Handler: h2Handler}
+	server.ListenAndServe()
+}
+```
+
+启用普通的https服务器则非常简单：
 
 ```go
 func main() {
