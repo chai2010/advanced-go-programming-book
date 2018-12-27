@@ -28,11 +28,15 @@ Elasticsearch是开源分布式搜索引擎的霸主，其依赖于Lucene实现�
 
 ![posting-list](../images/ch6-posting_list.png)
 
+*图 6-10 倒排列表*
+
 对Elasticsearch中的数据进行查询时，本质就是求多个排好序的序列求交集。非数值类型字段涉及到分词问题，大多数内部使用场景下，我们可以直接使用默认的bi-gram分词。什么是bi-gram分词呢：
 
-即将所有Ti和T(i+1)组成一个词(在es中叫term)，然后再编排其倒排列表，这样我们的倒排列表大概就是这样的：
+即将所有Ti和T(i+1)组成一个词(在Elasticsearch中叫term)，然后再编排其倒排列表，这样我们的倒排列表大概就是这样的：
 
 ![terms](../images/ch6-terms.png)
+
+*图 6-11 “今天天气很好”的分词结果*
 
 当用户搜索'天气很好'时，其实就是求：天气、气很、很好三组倒排列表的交集，但这里的相等判断逻辑有些特殊，用伪代码表示一下：
 
@@ -345,6 +349,8 @@ SQL的where部分就是boolean expression。我们之前提到过，这种bool�
 
 ![ast](../images/ch6-ast-dsl.png)
 
+*图 6-12 AST和DSL之间的对应关系*
+
 既然结构上完全一致，逻辑上我们就可以相互转换。我们以广度优先对AST树进行遍历，然后将二元表达式转换成json字符串，再拼装起来就可以了，限于篇幅，本文中就不给出示例了，读者朋友可以查看：
 
 > github.com/cch123/elasticsql
@@ -360,6 +366,8 @@ SQL的where部分就是boolean expression。我们之前提到过，这种bool�
 ### 通过时间戳进行增量数据同步
 
 ![sync to es](../images/ch6-sync.png)
+
+*图 6-13 基于时间戳的数据同步*
 
 这种同步方式与业务强绑定，例如wms系统中的出库单，我们并不需要非常实时，稍微有延迟也可以接受，那么我们可以每分钟从MySQL的出库单表中，把最近十分钟创建的所有出库单取出，批量存入es中，具体的逻辑实际上就是一条SQL：
 
@@ -380,6 +388,8 @@ select * from wms_orders where update_time >= date_sub(
 ### 通过 binlog 进行数据同步
 
 ![binlog-sync](../images/ch6-binlog-sync.png)
+
+*图 6-13 基于binlog的数据同步*
 
 业界使用较多的是阿里开源的Canal，来进行binlog解析与同步。canal会伪装成MySQL的从库，然后解析好行格式的binlog，再以更容易解析的格式(例如json)发送到消息队列。
 

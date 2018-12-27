@@ -78,6 +78,8 @@ func main() {
 
 ![dist-crawler](../images/ch6-dist-crawler.png)
 
+*图 6-14 爬虫工作流程*
+
 上游的主要工作是根据预先配置好的起点来爬取所有的目标“列表页”，列表页的html内容中会包含有所有详情页的链接。详情页的数量一般是列表页的10~100倍，所以我们将这些详情页链接作为“任务”内容，通过消息队列分发出去。
 
 针对页面爬取来说，在执行时是否偶尔会有重复其实不太重要，因为任务结果是幂等的(这里我们只爬页面内容，不考虑评论部分)。
@@ -94,9 +96,13 @@ nats的服务端项目是gnatsd，客户端与gnatsd的通信方式为基于tcp�
 
 ![nats-protocol-pub](../images/ch6-09-nats-protocol-pub.png)
 
+*图 6-15 nats协议中的pub*
+
 以workers的queue从tasks subject订阅消息：
 
 ![nats-protocol-sub](../images/ch6-09-nats-protocol-sub.png)
+
+*图 6-16 nats协议中的sub*
 
 其中的queue参数是可选的，如果希望在分布式的消费端进行任务的负载均衡，而不是所有人都收到同样的消息，那么就要给消费端指定相同的queue名字。
 

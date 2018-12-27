@@ -4,9 +4,11 @@
 
 在插入数据库之前，我们需要给这些消息/订单先打上一个ID，然后再插入到我们的数据库。对这个id的要求是希望其中能带有一些时间信息，这样即使我们后端的系统对消息进行了分库分表，也能够以时间顺序对这些消息进行排序。
 
-Twitter的snowflake算法是这种场景下的一个典型解法。先来看看snowflake是怎么一回事：
+Twitter的snowflake算法是这种场景下的一个典型解法。先来看看snowflake是怎么一回事，见*图 6-1*：
 
 ![snowflake](../images/ch6-snowflake.png)
+
+*图 6-1 snowflake中的比特位分布*
 
 首先确定我们的数值是64 位，int64类型，被划分为四部分，不含开头的第一个bit，因为这个bit是符号位。用41位来表示收到请求时的时间戳，单位为毫秒，然后五位来表示数据中心的id，然后再五位来表示机器的实例id，最后是12位的循环自增id(到达 1111 1111 1111 后会归 0)。
 
@@ -48,6 +50,8 @@ mysql> select last_insert_id();
 `github.com/bwmarrin/snowflake` 是一个相当轻量化的snowflake的Go实现。其文档指出：
 
 ![ch6-snowflake-easy](../images/ch6-snowflake-easy.png)
+
+*图 6-2 snowflake库*
 
 和标准的snowflake完全一致。使用上比较简单：
 
@@ -101,9 +105,11 @@ Epoch 就是本节开头讲的起始时间，NodeBits指的是机器编号的位
 
 ### 6.1.2.2 sonyflake
 
-sonyflake是Sony公司的一个开源项目，基本思路和snowflake差不多，不过位分配上稍有不同：
+sonyflake是Sony公司的一个开源项目，基本思路和snowflake差不多，不过位分配上稍有不同，见*图 6-2*：
 
 ![sonyflake](../images/ch6-snoyflake.png)
+
+*图 6-3 sonyflake*
 
 这里的时间只用了39个bit，但时间的单位变成了10ms，所以理论上比41位表示的时间还要久(174 years)。
 
