@@ -279,7 +279,7 @@ fmt.Printf("%#v\n", string([]rune{'世', '界'})) // 世界
 ```go
 func forOnString(s string, forBody func(i int, r rune)) {
 	for i := 0; len(s) > 0; {
-		r, size := utf8.DecodeRuneInString(s)
+		r, size := utf8.DecodeRune(s)
 		forBody(i, r)
 		s = s[size:]
 		i += size
@@ -329,7 +329,7 @@ func bytes2str(s []byte) (p string) {
 func str2runes(s []byte) []rune {
 	var p []int32
 	for len(s) > 0 {
-		r, size := utf8.DecodeRuneInString(s)
+		r, size := utf8.DecodeRune(s)
 		p = append(p, r)
 		s = s[size:]
 	}
