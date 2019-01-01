@@ -72,14 +72,14 @@ func HTTPCreateOrderHandler(wr http.ResponseWriter, r *http.Request) {
 }
 ```
 
-理论上我们可以用同一个request struct组合上不同的tag，来达到一个struct来给不同的协议复用的目的。不过遗憾的是在thrift中，request struct也是通过IDL生成的，其内容在自动生成的ttypes.go文件中，我们还是需要在thrift的入口将这个自动生成的struct映射到我们logic入口所需要的struct上。gRPC也是类似。这部分代码还是需要的。
+理论上我们可以用同一个请求结构体组合上不同的tag，来达到一个struct来给不同的协议复用的目的。不过遗憾的是在thrift中，请求结构体也是通过IDL生成的，其内容在自动生成的ttypes.go文件中，我们还是需要在thrift的入口将这个自动生成的struct映射到我们logic入口所需要的struct上。gRPC也是类似。这部分代码还是需要的。
 
 聪明的读者可能已经可以看出来了，协议细节处理这一层实际上有大量重复劳动，每一个接口在协议这一层的处理，无非是把数据从协议特定的struct(例如`http.Request`，thrift的被包装过了) 读出来，再绑定到我们协议无关的struct上，再把这个struct映射到controller入口的struct上，这些代码实际上长得都差不多。差不多的代码都遵循着某种模式，那么我们可以对这些模式进行简单的抽象，用代码生成的方式，把繁复的协议处理代码从工作内容中抽离出去。
 
 先来看看http对应的struct、thrift对应的struct和我们协议无关的struct分别长什么样子：
 
 ```go
-// http request struct
+// http 请求结构体
 type CreateOrder struct {
 	OrderID   int64  `json:"order_id" validate:"required"`
 	UserID    int64  `json:"user_id" validate:"required"`
@@ -87,7 +87,7 @@ type CreateOrder struct {
 	Addr      string `json:"addr" validate:"required"`
 }
 
-// thrift request struct
+// thrift 请求结构体
 type FeatureSetParams struct {
 	DriverID  int64  `thrift:"driverID,1,required"`
 	OrderID   int64  `thrift:"OrderID,2,required"`
@@ -118,7 +118,7 @@ type FeatureSetParams struct {
 }
 ```
 
-然后通过代码生成把thrift的IDL和http的request struct都生成出来，如*图 5-16所示*
+然后通过代码生成把thrift的IDL和http的请求结构体都生成出来，如*图 5-16所示*
 
 ![code gen](../images/ch6-08-code-gen.png)
 
