@@ -1,6 +1,6 @@
 # 6.2 分布式锁
 
-在单机程序并发或并行修改全局变量时，需要对修改行为加锁以创造临界区。为什么需要加锁呢？可以看看这段代码：
+在单机程序并发或并行修改全局变量时，需要对修改行为加锁以创造临界区。为什么需要加锁呢？我们看看在不加锁的情况下并发计数会发生什么情况：
 
 ```go
 package main
@@ -70,6 +70,10 @@ println(counter)
 
 ## 6.2.2 trylock
 
+在某些场景，我们只是希望一个任务有单一的执行者。而不像计数器场景一样，所有goroutine都执行成功。后来的goroutine在抢锁失败后，需要放弃其流程。这时候就需要trylock了。
+
+trylock顾名思义，尝试加锁，加锁成功执行后续流程，如果加锁失败的话也不会阻塞，而会直接返回加锁的结果。在Go语言中我们可以用大小为1的Channel来模拟trylock：
+
 ```go
 package main
 
@@ -129,13 +133,15 @@ func main() {
 }
 ```
 
-因为我们的逻辑限定每个goroutine只有成功执行了`Lock`才会继续执行后续逻辑，因此在`Unlock`时可以保证Lock结构体中的channel一定是空，从而不会阻塞，也不会失败。
+因为我们的逻辑限定每个goroutine只有成功执行了`Lock`才会继续执行后续逻辑，因此在`Unlock`时可以保证Lock结构体中的channel一定是空，从而不会阻塞，也不会失败。上面的代码使用了大小为1的channel来模拟trylock，理论上还可以使用标准库中的CAS来实现相同的功能且成本更低，读者可以自行尝试。
 
 在单机系统中，trylock并不是一个好选择。因为大量的goroutine抢锁可能会导致CPU无意义的资源浪费。有一个专有名词用来描述这种抢锁的场景：活锁。
 
 活锁指的是程序看起来在正常执行，但实际上CPU周期被浪费在抢锁，而非执行任务上，从而程序整体的执行效率低下。活锁的问题定位起来要麻烦很多。所以在单机场景下，不建议使用这种锁。
 
-## 6.2.3 基于 Redis 的 setnx
+## 6.2.3 基于Redis的setnx
+
+在分布式场景下，我们也需要这种“抢占”的逻辑，这时候怎么办呢？我们可以使用Redis提供的`setnx`命令：
 
 ```go
 package main
@@ -226,7 +232,7 @@ unlock success!
 
 所以，我们需要依赖于这些请求到达Redis节点的顺序来做正确的抢锁操作。如果用户的网络环境比较差，那也只能自求多福了。
 
-## 6.2.4 基于 ZooKeeper
+## 6.2.4 基于ZooKeeper
 
 ```go
 package main
@@ -259,11 +265,13 @@ func main() {
 
 基于ZooKeeper的锁与基于Redis的锁的不同之处在于Lock成功之前会一直阻塞，这与我们单机场景中的`mutex.Lock`很相似。
 
-其原理也是基于临时sequence节点和watch API，例如我们这里使用的是`/lock`节点。Lock会在该节点下的节点列表中插入自己的值，只要节点下的子节点发生变化，就会通知所有watch该节点的程序。这时候程序会检查当前节点下最小的子节点的id是否与自己的一致。如果一致，说明加锁成功了。
+其原理也是基于临时Sequence节点和watch API，例如我们这里使用的是`/lock`节点。Lock会在该节点下的节点列表中插入自己的值，只要节点下的子节点发生变化，就会通知所有watch该节点的程序。这时候程序会检查当前节点下最小的子节点的id是否与自己的一致。如果一致，说明加锁成功了。
 
 这种分布式的阻塞锁比较适合分布式任务调度场景，但不适合高频次持锁时间短的抢锁场景。按照Google的Chubby论文里的阐述，基于强一致协议的锁适用于`粗粒度`的加锁操作。这里的粗粒度指锁占用时间较长。我们在使用时也应思考在自己的业务场景中使用是否合适。
 
 ## 6.2.5 基于 etcd
+
+etcd是分布式系统中，功能上与ZooKeeper类似的组件，这两年越来越火了。上面基于ZooKeeper我们实现了分布式阻塞锁，基于etcd，也可以实现类似的功能：
 
 ```go
 package main
@@ -298,76 +306,14 @@ func main() {
 }
 ```
 
-etcd中没有像ZooKeeper那样的sequence节点。所以其锁实现和基于ZooKeeper实现的有所不同。在上述示例代码中使用的etcdsync的Lock流程是：
+etcd中没有像ZooKeeper那样的Sequence节点。所以其锁实现和基于ZooKeeper实现的有所不同。在上述示例代码中使用的etcdsync的Lock流程是：
 
 1. 先检查`/lock`路径下是否有值，如果有值，说明锁已经被别人抢了
 2. 如果没有值，那么写入自己的值。写入成功返回，说明加锁成功。写入时如果节点被其它节点写入过了，那么会导致加锁失败，这时候到 3
 3. watch `/lock`下的事件，此时陷入阻塞
 4. 当`/lock`路径下发生事件时，当前进程被唤醒。检查发生的事件是否是删除事件（说明锁被持有者主动unlock），或者过期事件（说明锁过期失效）。如果是的话，那么回到 1，走抢锁流程。
 
-## 6.2.6 Redlock
-
-```go
-package main
-
-import (
-	"fmt"
-	"time"
-
-	"github.com/garyburd/redigo/redis"
-	"gopkg.in/redsync.v1"
-)
-
-func newPool(server string) *redis.Pool {
-	return &redis.Pool{
-		MaxIdle:     3,
-		IdleTimeout: 240 * time.Second,
-
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", server)
-			if err != nil {
-				return nil, err
-			}
-			return c, err
-		},
-
-		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			_, err := c.Do("PING")
-			return err
-		},
-	}
-}
-
-func newPools(servers []string) []redsync.Pool {
-	pools := []redsync.Pool{}
-	for _, server := range servers {
-		pool := newPool(server)
-		pools = append(pools, pool)
-	}
-
-	return pools
-}
-
-func main() {
-	pools := newPools([]string{
-		"127.0.0.1:6379", "127.0.0.1:6378", "127.0.0.1:6377",
-	})
-	rs := redsync.New(pools)
-	m := rs.NewMutex("/lock")
-
-	err := m.Lock()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("lock success")
-	unlockRes := m.Unlock()
-	fmt.Println("unlock result: ", unlockRes)
-}
-```
-
-Redlock也是一种阻塞锁，单个节点操作对应的是`set nx px`命令，超过半数节点返回成功时，就认为加锁成功。
-
-关于Redlock设计曾经在社区引起一场口水战，分布式专家各抒己见。不过这个不是我们要讨论的内容，相关链接在参考资料中给出。
+值得一提的是，在etcdv3的API中官方已经提供了可以直接使用的锁API，读者可以查阅etcd的文档做进一步的学习。
 
 ## 6.2.7 如何选择
 
@@ -375,9 +321,7 @@ Redlock也是一种阻塞锁，单个节点操作对应的是`set nx px`命令�
 
 如果发展到了分布式服务阶段，但业务规模不大，qps很小的情况下，使用哪种锁方案都差不多。如果公司内已有可以使用的ZooKeeper、etcd或者Redis集群，那么就尽量在不引入新的技术栈的情况下满足业务需求。
 
-业务发展到一定量级的话，就需要从多方面来考虑了。首先是你的锁是否在任何恶劣的条件下都不允许数据丢失，如果不允许，那么就不要使用Redis的setnx的简单锁。
-
-如果要使用Redlock，那么要考虑你们公司Redis的集群方案，是否可以直接把对应的Redis的实例的ip+port暴露给开发人员。如果不可以，那也没法用。
+业务发展到一定量级的话，就需要从多方面来考虑了。首先是你的锁是否在任何恶劣的条件下都不允许数据丢失，如果不允许，那么就不要使用Redis的`setnx`的简单锁。
 
 对锁数据的可靠性要求极高的话，那只能使用etcd或者ZooKeeper这种通过一致性协议保证数据可靠性的锁方案。但可靠的背面往往都是较低的吞吐量和较高的延迟。需要根据业务的量级对其进行压力测试，以确保分布式锁所使用的etcd或ZooKeeper集群可以承受得住实际的业务请求压力。需要注意的是，etcd和Zookeeper集群是没有办法通过增加节点来提高其性能的。要对其进行横向扩展，只能增加搭建多个集群来支持更多的请求。这会进一步提高对运维和监控的要求。多个集群可能需要引入proxy，没有proxy那就需要业务去根据某个业务id来做分片。如果业务已经上线的情况下做扩展，还要考虑数据的动态迁移。这些都不是容易的事情。
 

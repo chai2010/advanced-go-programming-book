@@ -47,7 +47,7 @@ mysql> select last_insert_id();
 
 ### 6.1.2.1 标准 snowflake 实现
 
-`github.com/bwmarrin/snowflake` 是一个相当轻量化的snowflake的Go实现。其文档指出：
+`github.com/bwmarrin/snowflake` 是一个相当轻量化的snowflake的Go实现。其文档对各位使用的定义见*图 6-2*所示。
 
 ![ch6-snowflake-easy](../images/ch6-snowflake-easy.png)
 
@@ -85,7 +85,7 @@ func main() {
 }
 ```
 
-当然，这个库也给我们留好了定制的后路：
+当然，这个库也给我们留好了定制的后路，其中预留了一些可定制字段：
 
 ```go
 	// Epoch is set to the twitter snowflake epoch of Nov 04 2010 01:42:54 UTC
@@ -105,7 +105,7 @@ func main() {
 
 ### 6.1.2.2 sonyflake
 
-sonyflake是Sony公司的一个开源项目，基本思路和snowflake差不多，不过位分配上稍有不同，见*图 6-2*：
+sonyflake是Sony公司的一个开源项目，基本思路和snowflake差不多，不过位分配上稍有不同，见*图 6-3*：
 
 ![sonyflake](../images/ch6-snoyflake.png)
 

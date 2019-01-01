@@ -8,9 +8,7 @@
 
 ## 基于colly的单机爬虫
 
-有很多程序员比较喜欢在v2ex上讨论问题，发表观点，有时候可能懒癌发作，我们希望能直接命令行爬到v2ex在Go tag下的新贴，只要简单写一个爬虫即可。
-
-《Go 语言编程》一书给出了简单的爬虫示例，经过了多年的发展，现在使用Go语言写一个网站的爬虫要更加方便，比如用colly来实现爬取v2ex前十页内容：
+《Go 语言编程》一书给出了简单的爬虫示例，经过了多年的发展，现在使用Go语言写一个网站的爬虫要更加方便，比如用colly来实现爬取某网站（虚拟站点，这里用abcdefg作为占位符）在Go语言标签下的前十页内容：
 
 ```go
 package main
@@ -28,14 +26,16 @@ var visited = map[string]bool{}
 func main() {
 	// Instantiate default collector
 	c := colly.NewCollector(
-		colly.AllowedDomains("www.v2ex.com"),
+		colly.AllowedDomains("www.abcdefg.com"),
 		colly.MaxDepth(1),
 	)
 
+	// 我们认为匹配该模式的是该网站的详情页
 	detailRegex, _ := regexp.Compile(`/go/go\?p=\d+$`)
+	// 匹配下面模式的是该网站的列表页
 	listRegex, _ := regexp.Compile(`/t/\d+#\w+`)
 
-	// On every a element which has href attribute call callback
+	// 所有a标签，上设置回调函数
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
 
@@ -44,13 +44,15 @@ func main() {
 			return
 		}
 
-		// 匹配下列两种 url 模式的，才去 visit
-		// https://www.v2ex.com/go/go?p=2
-		// https://www.v2ex.com/t/472945#reply3
+		// 既不是列表页，也不是详情页
+		// 那么不是我们关心的内容，要跳过
 		if !detailRegex.Match([]byte(link)) && !listRegex.Match([]byte(link)) {
 			println("not match", link)
 			return
 		}
+
+		// 因为大多数网站有反爬虫策略
+		// 所以爬虫逻辑中应该有 sleep 逻辑以避免被封杀
 		time.Sleep(time.Second)
 		println("match", link)
 
@@ -60,10 +62,8 @@ func main() {
 		c.Visit(e.Request.AbsoluteURL(link))
 	})
 
-	err := c.Visit("https://www.v2ex.com/go/go")
-	if err != nil {
-		fmt.Println(err)
-	}
+	err := c.Visit("https://www.abcdefg.com/go/go")
+	if err != nil {fmt.Println(err)}
 }
 ```
 
@@ -112,10 +112,7 @@ nats的服务端项目是gnatsd，客户端与gnatsd的通信方式为基于tcp�
 
 ```go
 nc, err := nats.Connect(nats.DefaultURL)
-if err != nil {
-	// log error
-	return
-}
+if err != nil {return}
 
 // 指定 subject 为 tasks，消息内容随意
 err = nc.Publish("tasks", []byte("your task content"))
@@ -131,27 +128,18 @@ nc.Flush()
 
 ```go
 nc, err := nats.Connect(nats.DefaultURL)
-if err != nil {
-	// log error
-	return
-}
+if err != nil {return}
 
 // queue subscribe 相当于在消费者之间进行任务分发的分支均衡
 // 前提是所有消费者都使用 workers 这个 queue
 // nats 中的 queue 概念上类似于 Kafka 中的 consumer group
 sub, err := nc.QueueSubscribeSync("tasks", "workers")
-if err != nil {
-	// log error
-	return
-}
+if err != nil {return}
 
 var msg *nats.Msg
 for {
 	msg, err = sub.NextMsg(time.Hour * 10000)
-	if err != nil {
-		// log error
-		break
-	}
+	if err != nil {break}
 	// 正确地消费到了消息
 	// 可用 nats.Msg 对象处理任务
 }
@@ -159,7 +147,7 @@ for {
 
 #### 结合colly的消息生产
 
-我们为每一个网站定制一个对应的collector，并设置相应的规则，比如v2ex，v2fx（虚构的），再用简单的工厂方法来将该collector和其host对应起来：
+我们为每一个网站定制一个对应的collector，并设置相应的规则，比如abcdefg，hijklmn（虚构的），再用简单的工厂方法来将该collector和其host对应起来，每个站点爬到列表页之后，需要在当前程序中把所有链接解析出来，并把落地页的URL发往消息队列。
 
 ```go
 package main
@@ -181,9 +169,9 @@ func factory(urlStr string) *colly.Collector {
 	return domain2Collector[u.Host]
 }
 
-func initV2exCollector() *colly.Collector {
+func initABCDECollector() *colly.Collector {
 	c := colly.NewCollector(
-		colly.AllowedDomains("www.v2ex.com"),
+		colly.AllowedDomains("www.abcdefg.com"),
 		colly.MaxDepth(maxDepth),
 	)
 
@@ -194,18 +182,25 @@ func initV2exCollector() *colly.Collector {
 
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		// 基本的反爬虫策略
+		link := e.Attr("href")
 		time.Sleep(time.Second * 2)
 
-		// TODO, 正则 match 列表页的话，就 visit
-		// TODO, 正则 match 落地页的话，就发消息队列
-		c.Visit(e.Request.AbsoluteURL(link))
+		// 正则 match 列表页的话，就 visit
+		if listRegex.Match([]byte(link)) {
+			c.Visit(e.Request.AbsoluteURL(link))
+		}
+		// 正则 match 落地页的话，就发消息队列
+		if detailRegex.Match([]byte(link)) {
+			err = nc.Publish("tasks", []byte(link))
+			nc.Flush()
+		}
 	})
 	return c
 }
 
-func initV2fxCollector() *colly.Collector {
+func initHIJKLCollector() *colly.Collector {
 	c := colly.NewCollector(
-		colly.AllowedDomains("www.v2fx.com"),
+		colly.AllowedDomains("www.hijklmn.com"),
 		colly.MaxDepth(maxDepth),
 	)
 
@@ -216,19 +211,16 @@ func initV2fxCollector() *colly.Collector {
 }
 
 func init() {
-	domain2Collector["www.v2ex.com"] = initV2exCollector()
-	domain2Collector["www.v2fx.com"] = initV2fxCollector()
+	domain2Collector["www.abcdefg.com"] = initV2exCollector()
+	domain2Collector["www.hijklmn.com"] = initV2fxCollector()
 
 	var err error
 	nc, err = nats.Connect(natsURL)
-	if err != nil {
-		// log fatal
-		os.Exit(1)
-	}
+	if err != nil {os.Exit(1)}
 }
 
 func main() {
-	urls := []string{"https://www.v2ex.com", "https://www.v2fx.com"}
+	urls := []string{"https://www.abcdefg.com", "https://www.hijklmn.com"}
 	for _, url := range urls {
 		instance := factory(url)
 		instance.Visit(url)
@@ -238,6 +230,8 @@ func main() {
 ```
 
 #### 结合 colly 的消息消费
+
+消费端就简单一些了，我们只需要订阅对应的主题，并直接访问网站的详情页(落地页)即可。
 
 ```go
 package main
@@ -261,60 +255,48 @@ func factory(urlStr string) *colly.Collector {
 
 func initV2exCollector() *colly.Collector {
 	c := colly.NewCollector(
-		colly.AllowedDomains("www.v2ex.com"),
+		colly.AllowedDomains("www.abcdefg.com"),
 		colly.MaxDepth(maxDepth),
 	)
-
 	return c
 }
 
 func initV2fxCollector() *colly.Collector {
 	c := colly.NewCollector(
-		colly.AllowedDomains("www.v2fx.com"),
+		colly.AllowedDomains("www.hijklmn.com"),
 		colly.MaxDepth(maxDepth),
 	)
-
 	return c
 }
 
 func init() {
-	domain2Collector["www.v2ex.com"] = initV2exCollector()
-	domain2Collector["www.v2fx.com"] = initV2fxCollector()
+	domain2Collector["www.abcdefg.com"] = initABCDECollector()
+	domain2Collector["www.hijklmn.com"] = initHIJKLCollector()
 
 	var err error
 	nc, err = nats.Connect(natsURL)
-	if err != nil {
-		// log fatal
-		os.Exit(1)
-	}
+	if err != nil {os.Exit(1)}
 }
 
 func startConsumer() {
 	nc, err := nats.Connect(nats.DefaultURL)
-	if err != nil {
-		// log error
-		return
-	}
+	if err != nil {return}
 
 	sub, err := nc.QueueSubscribeSync("tasks", "workers")
-	if err != nil {
-		// log error
-		return
-	}
+	if err != nil {return}
 
 	var msg *nats.Msg
 	for {
 		msg, err = sub.NextMsg(time.Hour * 10000)
-		if err != nil {
-			// log error
-			break
-		}
+		if err != nil {break}
 
 		urlStr := string(msg.Data)
 		ins := factory(urlStr)
 		// 因为最下游拿到的一定是对应网站的落地页
 		// 所以不用进行多余的判断了，直接爬内容即可
 		ins.Visit(urlStr)
+		// 防止被封杀
+		time.Sleep(time.Second)
 	}
 }
 
