@@ -236,7 +236,7 @@ func main() {
 	BookOrderCreator does not implement OrderCreator (missing CreateOrder method)
 ```
 
-所以interface也可以认为是一种编译期进行检查的保证类型安全的手段。
+所以接口也可以认为是一种编译期进行检查的保证类型安全的手段。
 
 ## 5.8.5 表驱动开发
 
