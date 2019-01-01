@@ -10,7 +10,7 @@
 ![](cover.png)
 
 - 作者：柴树杉，Github [@chai2010](https://github.com/chai2010)，Twitter [@chaishushan](https://twitter.com/chaishushan)，主页 https://chai2010.cn/about
-- 作者：曹春晖，Github [@cch123](https://github.com/cch123)
+- 作者：曹春晖，Github [@cch123](https://github.com/cch123)，主页 http:://xargin.com
 - 网址：https://github.com/chai2010/advanced-go-programming-book
 - Star历史：https://starcharts.herokuapp.com/chai2010/advanced-go-programming-book.svg
 
