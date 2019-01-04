@@ -41,10 +41,7 @@ https://toutiao.io/subjects/318517
 
 ## 版权声明
 
-[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/)。
-
-![Creative Commons License](./images/by-nc-sa-4.0-88x31.png)
-
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Go语言高级编程</span> 由 <a xmlns:cc="http://creativecommons.org/ns#" href="https://github.com/chai2010/advanced-go-programming-book" property="cc:attributionName" rel="cc:attributionURL">柴树杉，曹春晖</a> 采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享 署名-非商业性使用-禁止演绎 4.0 国际 许可协议</a>进行许可。
 
 严禁任何商业行为使用或引用该文档的全部或部分内容！
 
