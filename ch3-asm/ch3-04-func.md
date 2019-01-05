@@ -246,7 +246,7 @@ func main() {
 
 func printsum(a, b int) {
 	var ret = sum(a, b)
-	println(sum)
+	println(ret)
 }
 
 func sum(a, b int) int {
