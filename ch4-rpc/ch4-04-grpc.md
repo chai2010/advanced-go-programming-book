@@ -294,7 +294,7 @@ type PubsubServiceClient interface {
 	)
 }
 
-type HelloService_SubscribeServer interface {
+type PubsubService_SubscribeServer interface {
 	Send(*String) error
 	grpc.ServerStream
 }
