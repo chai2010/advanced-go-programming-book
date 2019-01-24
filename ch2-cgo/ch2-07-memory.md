@@ -32,9 +32,9 @@ func freeByteSlice(p []byte) {
 
 func main() {
 	s := makeByteSlize(1<<32+1)
-	s[len[s]-1] = 1234
-	print(s[len[s]-1])
-	freeByteSlice(p)
+	s[len(s)-1] = 255
+	print(s[len(s)-1])
+	freeByteSlice(s)
 }
 ```
 
