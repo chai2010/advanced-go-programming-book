@@ -213,8 +213,10 @@ LOOP_END:
 下面用汇编语言重新实现LoopAdd函数
 
 ```
+#include "textflag.h"
+
 // func LoopAdd(cnt, v0, step int) int
-TEXT ·LoopAdd(SB),  $0-32
+TEXT ·LoopAdd(SB), NOSPLIT,  $0-32
 	MOVQ cnt+0(FP), AX   // cnt
 	MOVQ v0+8(FP), BX    // v0/result
 	MOVQ step+16(FP), CX // step
