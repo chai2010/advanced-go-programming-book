@@ -185,7 +185,6 @@ func LoopAdd(cnt, v0, step int) int {
 新的LoopAdd函数只有if/goto语句构成：
 
 ```go
-
 func LoopAdd(cnt, v0, step int) int {
 	var i = 0
 	var result = 0
