@@ -7,6 +7,7 @@
 真实的CGO程序一般都比较复杂。不过我们可以由浅入深，一个最简的CGO程序该是什么样的呢？要构造一个最简CGO程序，首先要忽视一些复杂的CGO特性，同时要展示CGO程序和纯Go程序的差别来。下面是我们构建的最简CGO程序：
 
 ```go
+// hello.go
 package main
 
 import "C"
@@ -16,13 +17,14 @@ func main() {
 }
 ```
 
-代码通过`import "C"`语句启用CGO特性，主函数只是通过Go内置的println函数输出字符串，其中并没有任何和CGO相关的代码。虽然没有调用CGO的相关函数，但是go build命令会在编译和链接阶段启动gcc编译器，这已经是一个完整的CGO程序了。
+代码通过`import "C"`语句启用CGO特性，主函数只是通过Go内置的println函数输出字符串，其中并没有任何和CGO相关的代码。虽然没有调用CGO的相关函数，但是`go build`命令会在编译和链接阶段启动gcc编译器，这已经是一个完整的CGO程序了。
 
 ## 2.1.2 基于C标准库函数输出字符串
 
 第一章那个CGO程序还不够简单，我们现在来看看更简单的版本：
 
 ```go
+// hello.go
 package main
 
 //#include <stdio.h>
@@ -44,6 +46,7 @@ func main() {
 前面我们使用了标准库中已有的函数。现在我们先自定义一个叫`SayHello`的C函数来实现打印，然后从Go语言环境中调用这个`SayHello`函数：
 
 ```go
+// hello.go
 package main
 
 /*
@@ -77,6 +80,7 @@ void SayHello(const char* s) {
 然后在CGO部分先声明`SayHello`函数，其它部分不变：
 
 ```go
+// hello.go
 package main
 
 //void SayHello(const char* s);
@@ -86,6 +90,8 @@ func main() {
 	C.SayHello(C.CString("Hello, World\n"))
 }
 ```
+
+注意，如果之前运行的命令是`go run hello.go`或`go build hello.go`的话，此处须使用`go run "your/package"`或`go build "your/package"`才可以。若本就在包路径下的话，也可以直接运行`go run .`或`go build`。
 
 既然`SayHello`函数已经放到独立的C文件中了，我们自然可以将对应的C文件编译打包为静态库或动态库文件供使用。如果是以静态库或动态库方式引用`SayHello`函数的话，需要将对应的C源文件移出当前目录（CGO构建程序会自动构建当前目录下的C源文件，从而导致C函数名冲突）。关于静态库等细节将在稍后章节讲解。
 
