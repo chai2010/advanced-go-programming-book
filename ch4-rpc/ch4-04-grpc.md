@@ -386,7 +386,7 @@ func main() {
 	defer conn.Close()
 
 	client := NewPubsubServiceClient(conn)
-	stream, err := client.SubscribeTopic(
+	stream, err := client.Subscribe(
 		context.Background(), &String{Value: "golang:"},
 	)
 	if err != nil {
