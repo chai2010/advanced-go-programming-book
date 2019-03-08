@@ -240,7 +240,7 @@ func main() {
 
 	err := RegisterRestServiceHandlerFromEndpoint(
 		ctx, mux, "localhost:5000",
-		grpc.WithInsecure(),
+		[]grpc.DialOption{grpc.WithInsecure()},
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -248,6 +248,26 @@ func main() {
 
 	http.ListenAndServe(":8080", mux)
 }
+```
+
+启动grpc服务 ,端口5000
+```go
+type RestServiceImpl struct{}
+
+func (r *RestServiceImpl) Get(ctx context.Context, message *StringMessage) (*StringMessage, error) {
+	return &StringMessage{Value: "Get hi:" + message.Value + "#"}, nil
+}
+
+func (r *RestServiceImpl) Post(ctx context.Context, message *StringMessage) (*StringMessage, error) {
+	return &StringMessage{Value: "Post hi:" + message.Value + "@"}, nil
+}
+func main() {
+	grpcServer := grpc.NewServer()
+	RegisterRestServiceServer(grpcServer, new(RestServiceImpl))
+	lis, _ := net.Listen("tcp", ":5000")
+	grpcServer.Serve(lis)
+}
+
 ```
 
 首先通过runtime.NewServeMux()函数创建路由处理器，然后通过RegisterRestServiceHandlerFromEndpoint函数将RestService服务相关的REST接口中转到后面的gRPC服务。grpc-gateway提供的runtime.ServeMux类也实现了http.Handler接口，因此可以和标准库中的相关函数配合使用。
