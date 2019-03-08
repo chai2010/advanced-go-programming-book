@@ -125,9 +125,12 @@ protoc  \
 	--proto_path=${GOPATH}/src \
 	--proto_path=${GOPATH}/src/github.com/google/protobuf/src \
 	--proto_path=. \
-	--govalidators_out=. \
+	--govalidators_out=. --go_out=plugins=grpc:.\
 	hello.proto
 ```
+
+> windows:替换 `${GOPATH}` 为 `%GOPATH%` 即可.
+
 
 以上的命令会调用protoc-gen-govalidators程序，生成一个独立的名为hello.validator.pb.go的文件：
 
@@ -213,9 +216,11 @@ go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
 $ protoc -I/usr/local/include -I. \
 	-I$GOPATH/src \
 	-I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-	--grpc-gateway_out=. \
+	--grpc-gateway_out=. --go_out=plugins=grpc:.\
 	hello.proto
 ```
+
+> windows:替换 `${GOPATH}` 为 `%GOPATH%` 即可.
 
 插件会为RestService服务生成对应的RegisterRestServiceHandlerFromEndpoint函数：
 
