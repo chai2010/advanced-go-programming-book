@@ -176,7 +176,7 @@ func incr() {
 	// counter ++
 	getResp := client.Get(counterKey)
 	cntValue, err := getResp.Int64()
-	if err == nil {
+	if err == nil || err == redis.Nil {
 		cntValue++
 		resp := client.Set(counterKey, cntValue, 0)
 		_, err := resp.Result()
