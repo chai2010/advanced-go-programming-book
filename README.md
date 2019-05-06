@@ -20,6 +20,12 @@
 - https://chai2010.cn/advanced-go-programming-book/
 - https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
 
+## 相关文章
+
+1. [GopherChina 2019大会推荐书单来啦](https://zhuanlan.zhihu.com/p/63910336)
+1. [深入Go的底层，带你走近一群有追求的人](https://mp.weixin.qq.com/s/obnnVkO2EiFnuXk_AIDHWw)
+
+
 ## 相关报告
 
 1. [Go语言简介](https://talks.godoc.org/github.com/chai2010/awesome-go-zh/chai2010/chai2010-golang-intro.slide) - [chai2010](https://github.com/chai2010/awesome-go-zh/tree/master/chai2010) 武汉·黄鹤会 2018/12/16
