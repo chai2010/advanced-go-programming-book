@@ -13,6 +13,10 @@
 - https://chai2010.cn/advanced-go-programming-book/
 - https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
 
+## 加入光谷码农
+
+![](https://chai2010.cn/static-images/weixin-guanggu-coder-qun.jpg)
+
 ## 关注微信公众号(golang-china)
 
 ![](weixin-golang-china.jpg)
