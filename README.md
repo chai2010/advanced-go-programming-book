@@ -2,6 +2,7 @@
 
 *推广: [《WebAssembly标准入门》开始预售了，欢迎关注！](https://github.com/chai2010/awesome-wasm-zh/blob/master/webassembly-primer.md)([京东购买](https://item.jd.com/12499372.html))*
 
+*推广: 欢迎关注 [光谷码农·每日新闻](https://guanggu-coder.cn/)*
 
 ----
 
@@ -33,6 +34,9 @@
 1. [Go语言并发编程](https://talks.godoc.org/github.com/chai2010/awesome-go-zh/chai2010/chai2010-golang-concurrency.slide) - [chai2010](https://github.com/chai2010/awesome-go-zh/tree/master/chai2010) 武汉·光谷猫友会 2018/09/16, [整理01](https://mp.weixin.qq.com/s/UaY9gJU85dq-dXlOhLYY1Q)/[整理02](https://mp.weixin.qq.com/s/_aKNO-H11GEDA-l0rycfQQ)
 1. 深入CGO编程: https://github.com/chai2010/gopherchina2018-cgo-talk
 
+## 武汉·光谷码农微信群
+
+![](http://pr68a1oh5.bkt.clouddn.com/weixin-guanggu-coder.jpg)
 
 ## 开发者头条号
 
