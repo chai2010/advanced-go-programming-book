@@ -2,6 +2,7 @@
 
 *推广: [《WebAssembly标准入门》开始预售了，欢迎关注！](https://github.com/chai2010/awesome-wasm-zh/blob/master/webassembly-primer.md)([京东购买](https://item.jd.com/12499372.html))*
 
+*推广: 欢迎关注 [光谷码农·每日新闻](https://guanggu-coder.cn/)*
 
 ----
 
