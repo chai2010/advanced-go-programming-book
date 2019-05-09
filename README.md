@@ -38,15 +38,15 @@
 
 ![](http://pr68a1oh5.bkt.clouddn.com/weixin-guanggu-coder.jpg)
 
+## 关注微信公众号 (guanggu-coder)
+
+![](weixin-guanggu-coder.jpg)
+
 ## 开发者头条号
 
 https://toutiao.io/subjects/318517
 
 ![](toutiao-318517-small.jpg)
-
-## 关注微信公众号 (golang-china)
-
-![](weixin-golang-china.jpg)
 
 
 ## 版权声明

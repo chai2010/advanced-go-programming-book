@@ -17,9 +17,10 @@
 
 ![](https://chai2010.cn/static-images/weixin-guanggu-coder-qun.jpg)
 
-## 关注微信公众号(golang-china)
+## 关注微信公众号 (guanggu-coder)
 
-![](weixin-golang-china.jpg)
+![](weixin-guanggu-coder.jpg)
+
 
 ## 版权声明
 
