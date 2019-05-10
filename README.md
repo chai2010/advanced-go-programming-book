@@ -36,7 +36,7 @@
 
 ## 关注微信公众号 (guanggu-coder)
 
-![](weixin-guanggu-coder.jpg)
+![](weixin-guanggu-coder-logo.png)
 
 ## 开发者头条号
 
