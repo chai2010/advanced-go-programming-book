@@ -21,6 +21,10 @@
 - https://chai2010.cn/advanced-go-programming-book/
 - https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
 
+## 网易云课堂·光谷码农课堂
+
+https://study.163.com/provider/480000001914454/index.htm
+
 ## 相关文章
 
 1. [GopherChina 2019大会推荐书单来啦](https://zhuanlan.zhihu.com/p/63910336)
@@ -41,7 +45,6 @@
 ## 关注微信公众号(光谷码农/guanggu-coder)
 
 ![](https://chai2010.cn/advanced-go-programming-book/weixin-guanggu-coder-logo.png)
-
 
 ## 开发者头条号
 
