@@ -13,10 +13,17 @@
 - https://chai2010.cn/advanced-go-programming-book/
 - https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
 
+
 ## 关注微信公众号 (guanggu-coder)
 
 ![](weixin-guanggu-coder-logo.png)
 
+
+## 网易云课堂·光谷码农课堂
+
+https://study.163.com/provider/480000001914454/index.htm
+
+![](163study-go-master.jpg)
 
 ## 版权声明
 

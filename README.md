@@ -27,6 +27,8 @@
 
 https://study.163.com/provider/480000001914454/index.htm
 
+![](163study-go-master.jpg)
+
 ## 相关文章
 
 1. [GopherChina 2019大会推荐书单来啦](https://zhuanlan.zhihu.com/p/63910336)
