@@ -17,6 +17,10 @@
 - 网址：https://github.com/chai2010/advanced-go-programming-book
 - Star历史：https://starcharts.herokuapp.com/chai2010/advanced-go-programming-book.svg
 
+购买链接：
+
+- https://www.epubit.com/book/detail/40090
+
 ## 在线阅读
 
 - [SUMMARY.md](SUMMARY.md)

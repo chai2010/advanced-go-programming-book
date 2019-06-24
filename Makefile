@@ -27,8 +27,9 @@ server:
 	go run server.go
 
 cover:
-	convert -resize 1800x2360! cover.png cover.jpg
-	convert -resize 200x262!   cover.png cover_small.jpg
+	convert A20181610.jpg cover.png
+	convert -resize 1800x2360! A20181610.jpg cover.jpg
+	convert -resize 200x262!   A20181610.jpg cover_small.jpg
 
 
 # https://chai2010.cn/advanced-go-programming-book
