@@ -322,8 +322,9 @@ type SliceHeader struct {
 
 ```go
 /*
-static char arr[10];
-static char *s = "Hello";
+#include <string.h>
+char arr[10];
+char *s = "Hello";
 */
 import "C"
 import (
@@ -347,7 +348,7 @@ func main() {
 	s0Hdr.Len = int(C.strlen(C.s))
 
 	sLen := int(C.strlen(C.s))
-	s1 := string((*[31]byte)(unsafe.Pointer(&C.s[0]))[:sLen:sLen])
+    	s1 := string((*[31]byte)(unsafe.Pointer(C.s))[:sLen:sLen])
 }
 ```
 
