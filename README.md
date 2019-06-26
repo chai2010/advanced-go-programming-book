@@ -46,13 +46,11 @@ https://study.163.com/provider/480000001914454/index.htm
 1. [Go语言并发编程](https://talks.godoc.org/github.com/chai2010/awesome-go-zh/chai2010/chai2010-golang-concurrency.slide) - [chai2010](https://github.com/chai2010/awesome-go-zh/tree/master/chai2010) 武汉·光谷猫友会 2018/09/16, [整理01](https://mp.weixin.qq.com/s/UaY9gJU85dq-dXlOhLYY1Q)/[整理02](https://mp.weixin.qq.com/s/_aKNO-H11GEDA-l0rycfQQ)
 1. 深入CGO编程: https://github.com/chai2010/gopherchina2018-cgo-talk
 
-## 加入微信群
-
-![](https://chai2010.cn/static-images/weixin-golang.jpg)
-
 ## 关注微信公众号(光谷码农/guanggu-coder)
 
 ![](https://chai2010.cn/advanced-go-programming-book/weixin-guanggu-coder-logo.png)
+
+**加入微信群：公众号底部菜单扫码进群。**
 
 ## 开发者头条号
 
