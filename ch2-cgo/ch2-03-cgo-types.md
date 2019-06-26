@@ -326,8 +326,10 @@ static char arr[10];
 static char *s = "Hello";
 */
 import "C"
-import "fmt"
-
+import (
+	"reflect"
+	"unsafe"
+)
 func main() {
 	// 通过 reflect.SliceHeader 转换
 	var arr0 []byte
