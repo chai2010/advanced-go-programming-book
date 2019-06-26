@@ -245,13 +245,13 @@ f, _ := OpenFile("foo.dat")
 
 // 绑定到了 f 对象
 // func Close() error
-var Close = func Close() error {
+var Close = func() error {
 	return (*File).Close(f)
 }
 
 // 绑定到了 f 对象
 // func Read(offset int64, data []byte) int
-var Read = func Read(offset int64, data []byte) int {
+var Read = func(offset int64, data []byte) int {
 	return (*File).Read(f, offset, data)
 }
 
