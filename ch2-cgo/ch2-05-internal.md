@@ -162,7 +162,7 @@ func main() {}
 CGO的语法细节不在赘述。为了在C语言中使用sum函数，我们需要将Go代码编译为一个C静态库：
 
 ```
-$ go build -buildmode=c-archive -o sum.a sum.go
+$ go build -buildmode=c-archive -o sum.a main.go
 ```
 
 如果没有错误的话，以上编译命令将生成一个`sum.a`静态库和`sum.h`头文件。其中`sum.h`头文件将包含sum函数的声明，静态库中将包含sum函数的实现。
