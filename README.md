@@ -19,7 +19,8 @@
 
 购买链接：
 
-- https://www.epubit.com/book/detail/40090
+- 京东：https://item.m.jd.com/product/12647494.html
+- 异步：https://www.epubit.com/book/detail/40090
 
 ## 在线阅读
 
