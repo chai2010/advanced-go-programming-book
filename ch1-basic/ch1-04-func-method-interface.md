@@ -183,7 +183,7 @@ func CloseFile(f *File) error {
 }
 
 // 读文件数据
-func ReadFile(f *File, int64 offset, data []byte) int {
+func ReadFile(f *File, offset int64, data []byte) int {
 	// ...
 }
 ```
@@ -199,7 +199,7 @@ func (f *File) CloseFile() error {
 }
 
 // 读文件数据
-func (f *File) ReadFile(int64 offset, data []byte) int {
+func (f *File) ReadFile(offset int64, data []byte) int {
 	// ...
 }
 ```
@@ -213,7 +213,7 @@ func (f *File) Close() error {
 }
 
 // 读文件数据
-func (f *File) Read(int64 offset, data []byte) int {
+func (f *File) Read(offset int64, data []byte) int {
 	// ...
 }
 ```
@@ -228,7 +228,7 @@ func (f *File) Read(int64 offset, data []byte) int {
 var CloseFile = (*File).Close
 
 // 不依赖具体的文件对象
-// func ReadFile(f *File, int64 offset, data []byte) int
+// func ReadFile(f *File, offset int64, data []byte) int
 var ReadFile = (*File).Read
 
 // 文件处理
@@ -245,13 +245,13 @@ f, _ := OpenFile("foo.dat")
 
 // 绑定到了 f 对象
 // func Close() error
-var Close = func Close() error {
+var Close = func() error {
 	return (*File).Close(f)
 }
 
 // 绑定到了 f 对象
-// func Read(int64 offset, data []byte) int
-var Read = func Read(int64 offset, data []byte) int {
+// func Read(offset int64, data []byte) int
+var Read = func(offset int64, data []byte) int {
 	return (*File).Read(f, offset, data)
 }
 
@@ -271,7 +271,7 @@ f, _ := OpenFile("foo.dat")
 var Close = f.Close
 
 // 方法值: 绑定到了 f 对象
-// func Read(int64 offset, data []byte) int
+// func Read(offset int64, data []byte) int
 var Read = f.Read
 
 // 文件处理

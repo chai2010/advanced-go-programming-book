@@ -8,15 +8,26 @@
 - 作者：曹春晖，Github [@cch123](https://github.com/cch123)
 - 网址：https://github.com/chai2010/advanced-go-programming-book
 
+购买链接：
+
+- https://www.epubit.com/book/detail/40090
+
 ## 在线阅读
 
 - https://chai2010.cn/advanced-go-programming-book/
 - https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
 
+
 ## 关注微信公众号 (guanggu-coder)
 
 ![](weixin-guanggu-coder-logo.png)
 
+
+## 网易云课堂·光谷码农课堂
+
+https://study.163.com/provider/480000001914454/index.htm
+
+![](163study-go-master.jpg)
 
 ## 版权声明
 
