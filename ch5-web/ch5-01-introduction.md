@@ -146,7 +146,7 @@ func handleKafka(app *ApplicationContext, w http.ResponseWriter, r *http.Request
 }
 ```
 
-因为默认的`net/http`包中的`mux`不支持带参数的路由，所以Burrow这个项目使用了非常蹩脚的字符串`Split`和乱七八糟的 `switch case`来达到自己的目的，但实际上却让本来应该很集中的路由管理逻辑变得复杂，散落在系统的各处，难以维护和管理。如果读者细心地看过这些代码之后，可能会发现其它的几个`handler`函数逻辑上较简单，最复杂的也就是这个`handleKafka()`。但实际上我们的系统总是从这样微不足道的混乱开始积少成多，最终变得难以收拾。
+因为默认的`net/http`包中的`mux`不支持带参数的路由，所以Burrow这个项目使用了非常蹩脚的字符串`Split`和乱七八糟的 `switch case`来达到自己的目的，但却让本来应该很集中的路由管理逻辑变得复杂，散落在系统的各处，难以维护和管理。如果读者细心地看过这些代码之后，可能会发现其它的几个`handler`函数逻辑上较简单，最复杂的也就是这个`handleKafka()`。而我们的系统总是从这样微不足道的混乱开始积少成多，最终变得难以收拾。
 
 根据我们的经验，简单地来说，只要你的路由带有参数，并且这个项目的API数目超过了10，就尽量不要使用`net/http`中默认的路由。在Go开源界应用最广泛的router是httpRouter，很多开源的router框架都是基于httpRouter进行一定程度的改造的成果。关于httpRouter路由的原理，会在本章节的router一节中进行详细的阐释。
 

@@ -98,7 +98,7 @@ func helloHandler(wr http.ResponseWriter, r *http.Request) {
 
 我们来分析一下，一开始在哪里做错了呢？我们只是一步一步地满足需求，把我们需要的逻辑按照流程写下去呀？
 
-实际上，我们犯的最大的错误是把业务代码和非业务代码揉在了一起。对于大多数的场景来讲，非业务的需求都是在http请求处理前做一些事情，并且在响应完成之后做一些事情。我们有没有办法使用一些重构思路把这些公共的非业务功能代码剥离出去呢？回到刚开头的例子，我们需要给我们的`helloHandler()`增加超时时间统计，我们可以使用一种叫`function adapter`的方法来对`helloHandler()`进行包装：
+我们犯的最大的错误，是把业务代码和非业务代码揉在了一起。对于大多数的场景来讲，非业务的需求都是在http请求处理前做一些事情，并且在响应完成之后做一些事情。我们有没有办法使用一些重构思路把这些公共的非业务功能代码剥离出去呢？回到刚开头的例子，我们需要给我们的`helloHandler()`增加超时时间统计，我们可以使用一种叫`function adapter`的方法来对`helloHandler()`进行包装：
 
 ```go
 
@@ -147,7 +147,7 @@ func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request) {
 }
 
 ```
-实际上只要你的handler函数签名是：
+只要你的handler函数签名是：
 
 ```go
 func (ResponseWriter, *Request)
@@ -187,7 +187,7 @@ customizedHandler = logger(timeout(ratelimit(helloHandler)))
 
 *图 5-8 请求处理过程*
 
-再直白一些，这个流程在进行请求处理的时候实际上就是不断地进行函数压栈再出栈，有一些类似于递归的执行流：
+再直白一些，这个流程在进行请求处理的时候就是不断地进行函数压栈再出栈，有一些类似于递归的执行流：
 
 ```
 [exec of logger logic]		   函数栈: []
@@ -286,5 +286,5 @@ throttler.go
 
 *图 5-9 gin的中间件仓库*
 
-如果读者去阅读gin的源码的话，可能会发现gin的中间件中处理的并不是`http.Handler`，而是一个叫`gin.HandlerFunc`的函数类型，和本节中讲解的`http.Handler`签名并不一样。不过实际上gin的`handler`也只是针对其框架的一种封装，中间件的原理与本节中的说明是一致的。
+如果读者去阅读gin的源码的话，可能会发现gin的中间件中处理的并不是`http.Handler`，而是一个叫`gin.HandlerFunc`的函数类型，和本节中讲解的`http.Handler`签名并不一样。不过gin的`handler`也只是针对其框架的一种封装，中间件的原理与本节中的说明是一致的。
 

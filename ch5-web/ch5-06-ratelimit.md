@@ -31,7 +31,7 @@ func main() {
 }
 ```
 
-我们需要衡量一下这个Web服务的吞吐量，再具体一些，实际上就是接口的QPS。借助wrk，在家用电脑 Macbook Pro上对这个 `hello world` 服务进行基准测试，Mac的硬件情况如下：
+我们需要衡量一下这个Web服务的吞吐量，再具体一些，就是接口的QPS。借助wrk，在家用电脑 Macbook Pro上对这个 `hello world` 服务进行基准测试，Mac的硬件情况如下：
 
 ```shell
 CPU: Intel(R) Core(TM) i5-5257U CPU @ 2.70GHz
@@ -148,7 +148,7 @@ func (tb *Bucket) WaitMaxDuration(count int64, maxWait time.Duration) bool {}
 
 ## 5.6.2 原理
 
-从功能上来看，令牌桶模型实际上就是对全局计数的加减法操作过程，但使用计数需要我们自己加读写锁，有小小的思想负担。如果我们对Go语言已经比较熟悉的话，很容易想到可以用buffered channel来完成简单的加令牌取令牌操作：
+从功能上来看，令牌桶模型就是对全局计数的加减法操作过程，但使用计数需要我们自己加读写锁，有小小的思想负担。如果我们对Go语言已经比较熟悉的话，很容易想到可以用buffered channel来完成简单的加令牌取令牌操作：
 
 ```go
 var tokenBucket = make(chan struct{}, capacity)
