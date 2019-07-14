@@ -17,10 +17,19 @@
 - 网址：https://github.com/chai2010/advanced-go-programming-book
 - Star历史：https://starcharts.herokuapp.com/chai2010/advanced-go-programming-book.svg
 
-购买链接：
+## 购买链接：
 
 - 京东：https://item.m.jd.com/product/12647494.html
 - 异步：https://www.epubit.com/book/detail/40090
+
+如果你喜欢本书，欢迎到豆瓣评论：
+
+- https://book.douban.com/subject/34442131/
+
+## 抄袭&侵权
+
+- [千锋教育原文抄袭《Go语言高级编程》](https://mp.weixin.qq.com/s/0Jtx79ZSgKY8bBdEvl-PlQ) 证据截图：[01.pdf](chaoxi/zhihu-qianfeng-01.pdf), [02.pdf](chaoxi/zhihu-qianfeng-02.pdf)
+
 
 ## 在线阅读
 
