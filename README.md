@@ -26,10 +26,13 @@
 
 - https://book.douban.com/subject/34442131/
 
+<!--
+
 ## 抄袭&侵权
 
 - [千锋教育原文抄袭《Go语言高级编程》](https://mp.weixin.qq.com/s/0Jtx79ZSgKY8bBdEvl-PlQ) 证据截图：[01.pdf](chaoxi/zhihu-qianfeng-01.pdf), [02.pdf](chaoxi/zhihu-qianfeng-02.pdf)
 
+-->
 
 ## 在线阅读
 
