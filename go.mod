@@ -5,3 +5,5 @@
 module chai2010.cn/gobook
 
 require github.com/chai2010/advanced-go-programming-book v0.0.0-20181214135029-bcf560505d53 // indirect
+
+go 1.13
