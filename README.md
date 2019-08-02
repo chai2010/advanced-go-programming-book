@@ -1,5 +1,7 @@
 # Go语言高级编程 (Advanced Go Programming)
 
+*QQ群：102319854（中国最早的Go语言QQ群）*
+
 *推广: 欢迎关注 [网易云课堂·光谷码农课堂](https://study.163.com/provider/480000001914454/index.htm)*
 
 *推广: [《WebAssembly标准入门》开始预售了，欢迎关注！](https://github.com/chai2010/awesome-wasm-zh/blob/master/webassembly-primer.md)([京东购买](https://item.jd.com/12499372.html))*
