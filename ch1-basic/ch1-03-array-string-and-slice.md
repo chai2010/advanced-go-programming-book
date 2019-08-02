@@ -326,14 +326,14 @@ func bytes2str(s []byte) (p string) {
 **`[]rune(s)`转换模拟实现**
 
 ```go
-func str2runes(s []byte) []rune {
+func str2runes(s string) []rune{
 	var p []int32
-	for len(s) > 0 {
-		r, size := utf8.DecodeRune(s)
-		p = append(p, int32(r))
-		s = s[size:]
-	}
-	return []rune(p)
+	for len(s)>0 {
+        r,size:=utf8.DecodeRuneInString(s)
+        p=append(p,int32(r))
+        s=s[size:]
+        }
+        return []rune(p)
 }
 ```
 
