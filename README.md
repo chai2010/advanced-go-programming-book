@@ -26,6 +26,8 @@
 
 如果你喜欢本书，欢迎到豆瓣评论：
 
+[![](douban.png)](https://book.douban.com/subject/34442131/)
+
 - https://book.douban.com/subject/34442131/
 
 <!--
