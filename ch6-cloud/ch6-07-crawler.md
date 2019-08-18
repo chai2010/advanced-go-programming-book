@@ -211,9 +211,8 @@ func initHIJKLCollector() *colly.Collector {
 }
 
 func init() {
-	domain2Collector["www.abcdefg.com"] = initV2exCollector()
-	domain2Collector["www.hijklmn.com"] = initV2fxCollector()
-
+	domain2Collector["www.abcdefg.com"] = initABCDECollector()
+	domain2Collector["www.hijklmn.com"] = initHIJKLCollector()
 	var err error
 	nc, err = nats.Connect(natsURL)
 	if err != nil {os.Exit(1)}
@@ -270,8 +269,8 @@ func initV2fxCollector() *colly.Collector {
 }
 
 func init() {
-	domain2Collector["www.abcdefg.com"] = initABCDECollector()
-	domain2Collector["www.hijklmn.com"] = initHIJKLCollector()
+	domain2Collector["www.abcdefg.com"] = initV2exCollector()
+	domain2Collector["www.hijklmn.com"] = initV2fxCollector()
 
 	var err error
 	nc, err = nats.Connect(natsURL)
