@@ -194,4 +194,4 @@ $ grpcurl -plaintext -d @ localhost:1234 HelloService.HelloService/Channel
 }
 ```
 
-通过grpcurl工具，我们可以在没有服务端代码的环境下测试gRPC服务。
+通过grpcurl工具，我们可以在没有客户端代码的环境下测试gRPC服务。
