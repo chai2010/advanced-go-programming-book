@@ -220,7 +220,7 @@ func main() {
 }
 ```
 
-为了避免对protoc-gen-go插件造成干扰，我们将我们的可执行程序命名为protoc-gen-go-netrpc，表示包含了nerpc插件。然后用以下命令重新编译hello.proto文件：
+为了避免对protoc-gen-go插件造成干扰，我们将我们的可执行程序命名为protoc-gen-go-netrpc，表示包含了netrpc插件。然后用以下命令重新编译hello.proto文件：
 
 ```
 $ protoc --go-netrpc_out=plugins=netrpc:. hello.proto
