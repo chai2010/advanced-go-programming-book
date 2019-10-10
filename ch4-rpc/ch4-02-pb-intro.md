@@ -125,7 +125,11 @@ type Plugin interface {
 
 ```go
 import (
+	"bytes"
+	"log"
+	"html/template"
 	"github.com/golang/protobuf/protoc-gen-go/generator"
+	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 )
 
 type netrpcPlugin struct{ *generator.Generator }
