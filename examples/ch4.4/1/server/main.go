@@ -7,7 +7,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	hs "ch4.4-1/helloservice"
+	hs "github.com/chai2010/advanced-go-programming-book/examples/ch4.4/1/helloservice"
 )
 
 type HelloServiceImpl struct{}

@@ -5,18 +5,18 @@ import (
 	"net"
 	"net/rpc"
 
-	pb "gobook.examples/ch4-02-proto/hello.pb"
+	rpcpb "github.com/chai2010/advanced-go-programming-book/examples/ch4.2/hello.pb"
 )
 
 type HelloService struct{}
 
-func (p *HelloService) Hello(request pb.String, reply *pb.String) error {
+func (p *HelloService) Hello(request *rpcpb.String, reply *rpcpb.String) error {
 	reply.Value = "hello:" + request.GetValue()
 	return nil
 }
 
 func main() {
-	rpc.Register(new(HelloService))
+	rpcpb.RegisterHelloService(rpc.DefaultServer, new(HelloService))
 
 	listener, err := net.Listen("tcp", ":1234")
 	if err != nil {
