@@ -1,112 +1,112 @@
-# 2.1 快速入门
+# 2.1 Quick Start
 
-本节我们将通过一系列由浅入深的小例子来快速掌握CGO的基本用法。
+In this section, we will quickly grasp the basic usage of CGO through a series of small examples from the shallower to the deeper.
 
-## 2.1.1 最简CGO程序
+## 2.1.1 The simplest CGO program
 
-真实的CGO程序一般都比较复杂。不过我们可以由浅入深，一个最简的CGO程序该是什么样的呢？要构造一个最简CGO程序，首先要忽视一些复杂的CGO特性，同时要展示CGO程序和纯Go程序的差别来。下面是我们构建的最简CGO程序：
+Real CGO programs are generally more complicated. But we can go from shallow to deep, what is the simplest CGO program? To construct a minimal CGO program, first ignore some of the complex CGO features, and at the same time show the difference between CGO programs and pure Go programs. Here is the simplest CGO program we built:
 
 ```go
 // hello.go
-package main
+Package main
 
-import "C"
+Import "C"
 
-func main() {
-	println("hello cgo")
+Func main() {
+Println("hello cgo")
 }
 ```
 
-代码通过`import "C"`语句启用CGO特性，主函数只是通过Go内置的println函数输出字符串，其中并没有任何和CGO相关的代码。虽然没有调用CGO的相关函数，但是`go build`命令会在编译和链接阶段启动gcc编译器，这已经是一个完整的CGO程序了。
+The code enables the CGO feature via the `import "C"` statement. The main function simply outputs the string via Go's built-in println function, which does not have any CGO-related code. Although the CGO related function is not called, the `go build` command will start the gcc compiler during the compile and link phases, which is already a complete CGO program.
 
-## 2.1.2 基于C标准库函数输出字符串
+## 2.1.2 Output string based on C standard library function
 
-第一章那个CGO程序还不够简单，我们现在来看看更简单的版本：
+The first chapter of the CGO program is not simple enough, let's take a look at the simpler version:
 
 ```go
 // hello.go
-package main
+Package main
 
 //#include <stdio.h>
-import "C"
+Import "C"
 
-func main() {
-	C.puts(C.CString("Hello, World\n"))
+Func main() {
+C.puts(C.CString("Hello, World\n"))
 }
 ```
 
-我们不仅仅通过`import "C"`语句启用CGO特性，同时包含C语言的`<stdio.h>`头文件。然后通过CGO包的`C.CString`函数将Go语言字符串转为C语言字符串，最后调用CGO包的`C.puts`函数向标准输出窗口打印转换后的C字符串。
+We not only enable the CGO feature via the `import "C"` statement, but also include the C's `<stdio.h>` header file. Then convert the Go language string to a C language string through the CGO package's `C.CString` function, and finally call the CGO package's `C.puts` function to print the converted C string to the standard output window.
 
-相比“Hello, World 的革命”一节中的CGO程序最大的不同是：我们没有在程序退出前释放`C.CString`创建的C语言字符串；还有我们改用`puts`函数直接向标准输出打印，之前是采用`fputs`向标准输出打印。
+The biggest difference compared to the CGO program in the "Hello, World Revolution" section is that we didn't release the C language string created by `C.CString` before the program exits; we also use the `puts` function instead. Standard output printing, previously printed with standard output using `fputs`.
 
-没有释放使用`C.CString`创建的C语言字符串会导致内存泄漏。但是对于这个小程序来说，这样是没有问题的，因为程序退出后操作系统会自动回收程序的所有资源。
+Failure to release a C-language string created with `C.CString` will result in a memory leak. But for this small program, this is no problem, because the operating system will automatically reclaim all the resources of the program after the program exits.
 
-## 2.1.3 使用自己的C函数
+## 2.1.3 Using your own C function
 
-前面我们使用了标准库中已有的函数。现在我们先自定义一个叫`SayHello`的C函数来实现打印，然后从Go语言环境中调用这个`SayHello`函数：
+Earlier we used the functions already in the standard library. Now let's customize a C function called `SayHello` to print, and then call this `SayHello` function from the Go locale:
 
 ```go
 // hello.go
-package main
+Package main
 
 /*
 #include <stdio.h>
 
-static void SayHello(const char* s) {
-	puts(s);
+Static void SayHello(const char* s) {
+Puts(s);
 }
 */
-import "C"
+Import "C"
 
-func main() {
-	C.SayHello(C.CString("Hello, World\n"))
+Func main() {
+C.SayHello(C.CString("Hello, World\n"))
 }
 ```
 
-除了`SayHello`函数是我们自己实现的之外，其它的部分和前面的例子基本相似。
+Except that the `SayHello` function is implemented by ourselves, the other parts are basically similar to the previous examples.
 
-我们也可以将`SayHello`函数放到当前目录下的一个C语言源文件中（后缀名必须是`.c`）。因为是编写在独立的C文件中，为了允许外部引用，所以需要去掉函数的`static`修饰符。
+We can also put the `SayHello` function in a C source file in the current directory (the suffix must be `.c`). Because it is written in a separate C file, in order to allow external references, you need to remove the function's `static` modifier.
 
 ```c
 // hello.c
 
 #include <stdio.h>
 
-void SayHello(const char* s) {
-	puts(s);
+Void SayHello(const char* s) {
+Puts(s);
 }
 ```
 
-然后在CGO部分先声明`SayHello`函数，其它部分不变：
+Then declare the `SayHello` function in the CGO section, leaving the rest unchanged:
 
 ```go
 // hello.go
-package main
+Package main
 
 //void SayHello(const char* s);
-import "C"
+Import "C"
 
-func main() {
-	C.SayHello(C.CString("Hello, World\n"))
+Func main() {
+C.SayHello(C.CString("Hello, World\n"))
 }
 ```
 
-注意，如果之前运行的命令是`go run hello.go`或`go build hello.go`的话，此处须使用`go run "your/package"`或`go build "your/package"`才可以。若本就在包路径下的话，也可以直接运行`go run .`或`go build`。
+Note that if the previously run command is `go run hello.go` or `go build hello.go`, you must use `go run "your/package"` or `go build "your/package"` . If you are in the package path, you can also run `go run .` or `go build` directly.
 
-既然`SayHello`函数已经放到独立的C文件中了，我们自然可以将对应的C文件编译打包为静态库或动态库文件供使用。如果是以静态库或动态库方式引用`SayHello`函数的话，需要将对应的C源文件移出当前目录（CGO构建程序会自动构建当前目录下的C源文件，从而导致C函数名冲突）。关于静态库等细节将在稍后章节讲解。
+Since the `SayHello` function has been placed in a separate C file, we can naturally compile the corresponding C file into a static library or a dynamic library file for use. If the `SayHello` function is referenced in a static library or a dynamic library, the corresponding C source file needs to be moved out of the current directory (the CGO build program will automatically build the C source file in the current directory, causing C function name conflicts). Details such as static libraries will be explained later in the chapter.
 
-## 2.1.4 C代码的模块化
+## 2.1.4 Modification of C code
 
-在编程过程中，抽象和模块化是将复杂问题简化的通用手段。当代码语句变多时，我们可以将相似的代码封装到一个个函数中；当程序中的函数变多时，我们将函数拆分到不同的文件或模块中。而模块化编程的核心是面向程序接口编程（这里的接口并不是Go语言的interface，而是API的概念）。
+Abstraction and modularity are common means of simplifying complex problems during programming. When there are more code statements, we can wrap similar code into a single function; when there are more functions in the program, we split the function into different files or modules. The core of modular programming is programming interface programming (the interface here is not the interface of the Go language, but the concept of the API).
 
-在前面的例子中，我们可以抽象一个名为hello的模块，模块的全部接口函数都在hello.h头文件定义：
+In the previous example, we can abstract a module named hello, and all the interface functions of the module are defined in the hello.h header file:
 
 ```c
 // hello.h
-void SayHello(const char* s);
+Void SayHello(const char* s);
 ```
 
-其中只有一个SayHello函数的声明。但是作为hello模块的用户来说，就可以放心地使用SayHello函数，而无需关心函数的具体实现。而作为SayHello函数的实现者来说，函数的实现只要满足头文件中函数的声明的规范即可。下面是SayHello函数的C语言实现，对应hello.c文件：
+There is only one declaration for the SayHello function. But as a user of the hello module, you can safely use the SayHello function without worrying about the concrete implementation of the function. As the implementer of the SayHello function, the implementation of the function only needs to meet the specification of the function declaration in the header file. The following is the C language implementation of the SayHello function, corresponding to the hello.c file:
 
 ```c
 // hello.c
@@ -114,126 +114,126 @@ void SayHello(const char* s);
 #include "hello.h"
 #include <stdio.h>
 
-void SayHello(const char* s) {
-	puts(s);
+Void SayHello(const char* s) {
+Puts(s);
 }
 ```
 
-在hello.c文件的开头，实现者通过`#include "hello.h"`语句包含SayHello函数的声明，这样可以保证函数的实现满足模块对外公开的接口。
+At the beginning of the hello.c file, the implementer includes the declaration of the SayHello function via the `#include "hello.h"` statement, which ensures that the implementation of the function satisfies the interface exposed by the module.
 
-接口文件hello.h是hello模块的实现者和使用者共同的约定，但是该约定并没有要求必须使用C语言来实现SayHello函数。我们也可以用C++语言来重新实现这个C语言函数：
+The interface file hello.h is a common contract between the implementer and the user of the hello module, but the convention does not require that the C language be used to implement the SayHello function. We can also reimplement this C language function in C++:
 
 ```c++
 // hello.cpp
 
 #include <iostream>
 
-extern "C" {
-	#include "hello.h"
+Extern "C" {
+#include "hello.h"
 }
 
-void SayHello(const char* s) {
-	std::cout << s;
+Void SayHello(const char* s) {
+Std::cout << s;
 }
 ```
 
-在C++版本的SayHello函数实现中，我们通过C++特有的`std::cout`输出流输出字符串。不过为了保证C++语言实现的SayHello函数满足C语言头文件hello.h定义的函数规范，我们需要通过`extern "C"`语句指示该函数的链接符号遵循C语言的规则。
+In the C++ version of the SayHello function implementation, we output the stream output string through the C++-specific `std::cout` output stream. However, in order to ensure that the SayHello function implemented by the C++ language satisfies the function specification defined by the C language header file hello.h, we need to indicate the link symbol of the function to follow the C language rules through the `extern "C"` statement.
 
-在采用面向C语言API接口编程之后，我们彻底解放了模块实现者的语言枷锁：实现者可以用任何编程语言实现模块，只要最终满足公开的API约定即可。我们可以用C语言实现SayHello函数，也可以使用更复杂的C++语言来实现SayHello函数，当然我们也可以用汇编语言甚至Go语言来重新实现SayHello函数。
+After programming with the C language API interface, we completely liberated the language shackles of the module implementer: the implementer can implement the module in any programming language, as long as the public API convention is finally met. We can implement the SayHello function in C language, or use the more complex C++ language to implement the SayHello function. Of course, we can reimplement the SayHello function in assembly language or even Go language.
 
 
-## 2.1.5 用Go重新实现C函数
+## 2.1.5 Reimplement C function with Go
 
-其实CGO不仅仅用于Go语言中调用C语言函数，还可以用于导出Go语言函数给C语言函数调用。在前面的例子中，我们已经抽象一个名为hello的模块，模块的全部接口函数都在hello.h头文件定义：
+In fact, CGO is not only used to call C language functions in Go language, but also can be used to export Go language functions to C language function calls. In the previous example, we have abstracted a module named hello, and all the interface functions of the module are defined in the hello.h header file:
 
 ```c
 // hello.h
-void SayHello(/*const*/ char* s);
+Void SayHello(/*const*/ char* s);
 ```
 
-现在我们创建一个hello.go文件，用Go语言重新实现C语言接口的SayHello函数:
+Now let's create a hello.go file and reimplement the SayHello function of the C language interface in Go language:
 
 ```go
 // hello.go
-package main
+Package main
 
-import "C"
+Import "C"
 
-import "fmt"
+Import "fmt"
 
 //export SayHello
-func SayHello(s *C.char) {
-	fmt.Print(C.GoString(s))
+Func SayHello(s *C.char) {
+fmt.Print(C.GoString(s))
 }
 ```
 
-我们通过CGO的`//export SayHello`指令将Go语言实现的函数`SayHello`导出为C语言函数。为了适配CGO导出的C语言函数，我们禁止了在函数的声明语句中的const修饰符。需要注意的是，这里其实有两个版本的`SayHello`函数：一个Go语言环境的；另一个是C语言环境的。cgo生成的C语言版本SayHello函数最终会通过桥接代码调用Go语言版本的SayHello函数。
+We use the `//export SayHello` directive of CGO to export the function `SayHello` implemented by Go to C language functions. In order to adapt the C language functions exported by CGO, we disable the const modifier in the declaration statement of the function. It should be noted that there are actually two versions of the `SayHello` function: one for the Go locale; the other is for the C locale. The C language version of the SayHello function generated by cgo will eventually call the Go version of the SayHello function via the bridge code.
 
-通过面向C语言接口的编程技术，我们不仅仅解放了函数的实现者，同时也简化的函数的使用者。现在我们可以将SayHello当作一个标准库的函数使用（和puts函数的使用方式类似）：
+Through the programming technology for the C language interface, we not only liberate the implementer of the function, but also simplify the user of the function. Now we can use SayHello as a function of a standard library (similar to the way the puts function is used):
 
 ```go
-package main
+Package main
 
 //#include <hello.h>
-import "C"
+Import "C"
 
-func main() {
-	C.SayHello(C.CString("Hello, World\n"))
+Func main() {
+C.SayHello(C.CString("Hello, World\n"))
 }
 ```
 
-一切似乎都回到了开始的CGO代码，但是代码内涵更丰富了。
+Everything seems to have returned to the beginning of the CGO code, but the code is richer.
 
-## 2.1.6 面向C接口的Go编程
+## 2.1.6 Go programming for C interface
 
-在开始的例子中，我们的全部CGO代码都在一个Go文件中。然后，通过面向C接口编程的技术将SayHello分别拆分到不同的C文件，而main依然是Go文件。再然后，是用Go函数重新实现了C语言接口的SayHello函数。但是对于目前的例子来说只有一个函数，要拆分到三个不同的文件确实有些繁琐了。
+In the beginning example, all of our CGO code is in a Go file. Then, SayHello is split into different C files by the technology for C interface programming, and main is still a Go file. Then, the SayHello function of the C language interface is reimplemented with the Go function. But for the current example there is only one function, and splitting into three different files is a bit cumbersome.
 
-正所谓合久必分、分久必合，我们现在尝试将例子中的几个文件重新合并到一个Go文件。下面是合并后的成果：
+The so-called long-term must be divided, long-term must be combined, we now try to re-consolidate several files in the example into a Go file. The following are the combined results:
 
 ```go
-package main
+Package main
 
 //void SayHello(char* s);
-import "C"
+Import "C"
 
-import (
-	"fmt"
+Import (
+"fmt"
 )
 
-func main() {
-	C.SayHello(C.CString("Hello, World\n"))
+Func main() {
+C.SayHello(C.CString("Hello, World\n"))
 }
 
 //export SayHello
-func SayHello(s *C.char) {
-	fmt.Print(C.GoString(s))
+Func SayHello(s *C.char) {
+fmt.Print(C.GoString(s))
 }
 ```
 
-现在版本的CGO代码中C语言代码的比例已经很少了，但是我们依然可以进一步以Go语言的思维来提炼我们的CGO代码。通过分析可以发现`SayHello`函数的参数如果可以直接使用Go字符串是最直接的。在Go1.10中CGO新增加了一个`_GoString_`预定义的C语言类型，用来表示Go语言字符串。下面是改进后的代码：
+The proportion of C code in the current version of CGO code is very small, but we can still further refine our CGO code with the Go language. Through analysis, you can find that the parameters of the `SayHello` function are the most direct if you can directly use the Go string. In Go1.10, CGO added a new `_GoString_` predefined C language type to represent the Go language string. Here's the improved code:
 
 ```go
 // +build go1.10
 
-package main
+Package main
 
 //void SayHello(_GoString_ s);
-import "C"
+Import "C"
 
-import (
-	"fmt"
+Import (
+"fmt"
 )
 
-func main() {
-	C.SayHello("Hello, World\n")
+Func main() {
+C.SayHello("Hello, World\n")
 }
 
 //export SayHello
-func SayHello(s string) {
-	fmt.Print(s)
+Func SayHello(s string) {
+fmt.Print(s)
 }
 ```
 
-虽然看起来全部是Go语言代码，但是执行的时候是先从Go语言的`main`函数，到CGO自动生成的C语言版本`SayHello`桥接函数，最后又回到了Go语言环境的`SayHello`函数。这个代码包含了CGO编程的精华，读者需要深入理解。
+Although it seems that all are Go language code, the implementation is from the `main` function of Go language to the C language version `SayHello` bridge function automatically generated by CGO, and finally returns to the `SayHello` function of Go language environment. . This code contains the essence of CGO programming, and the reader needs to understand it in depth.
 
-*思考题: main函数和SayHello函数是否在同一个Goroutine里执行？*
+* Questions: Is the main function and the SayHello function executed in the same Goroutine? *

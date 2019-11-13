@@ -1,278 +1,278 @@
-# 2.3 类型转换
+# 2.3 Type Conversion
 
-最初CGO是为了达到方便从Go语言函数调用C语言函数（用C语言实现Go语言声明的函数）以复用C语言资源这一目的而出现的（因为C语言还会涉及回调函数，自然也会涉及到从C语言函数调用Go语言函数（用Go语言实现C语言声明的函数））。现在，它已经演变为C语言和Go语言双向通讯的桥梁。要想利用好CGO特性，自然需要了解此二语言类型之间的转换规则，这是本节要讨论的问题。
+Originally, CGO was created to facilitate the use of C language functions (functions that implement Go language declarations in C language) to reuse C language resources (because C language also involves callback functions, naturally It involves calling Go language functions from C language functions (functions that implement C language declarations in Go)). Now, it has evolved into a bridge between two-way communication between C and Go. In order to take advantage of the CGO feature, it is natural to understand the conversion rules between the two language types. This is the problem to be discussed in this section.
 
-## 2.3.1 数值类型
+## 2.3.1 Numerical types
 
-在Go语言中访问C语言的符号时，一般是通过虚拟的“C”包访问，比如`C.int`对应C语言的`int`类型。有些C语言的类型是由多个关键字组成，但通过虚拟的“C”包访问C语言类型时名称部分不能有空格字符，比如`unsigned int`不能直接通过`C.unsigned int`访问。因此CGO为C语言的基础数值类型都提供了相应转换规则，比如`C.uint`对应C语言的`unsigned int`。
+When accessing C language symbols in Go language, it is usually accessed through a virtual "C" package, such as `C.int` corresponding to the C language's `int` type. Some C language types are composed of multiple keywords, but when accessing C language types through virtual "C" packages, the name part cannot have white space characters. For example, `unsigned int` cannot be accessed directly through `C.unsigned int`. Therefore, CGO provides corresponding conversion rules for the basic numeric types of C language, such as `C.uint` corresponding to C's `unsigned int`.
 
-Go语言中数值类型和C语言数据类型基本上是相似的，以下是它们的对应关系表2-1所示。
+The numeric type and the C language data type in the Go language are basically similar, and the following is the correspondence between them in Table 2-1.
 
-C语言类型               | CGO类型      | Go语言类型
+C language type | CGO type | Go language type
 ---------------------- | ----------- | ---------
-char                   | C.char      | byte
-singed char            | C.schar     | int8
-unsigned char          | C.uchar     | uint8
-short                  | C.short     | int16
-unsigned short         | C.ushort     | uint16
-int                    | C.int       | int32
-unsigned int           | C.uint      | uint32
-long                   | C.long      | int32
-unsigned long          | C.ulong     | uint32
-long long int          | C.longlong  | int64
-unsigned long long int | C.ulonglong | uint64
-float                  | C.float     | float32
-double                 | C.double    | float64
-size_t                 | C.size_t    | uint
+Char | C.char | byte
+Singed char | C.schar | int8
+Unsigned char | C.uchar | uint8
+Short | C.short | int16
+Unsigned short | C.ushort | uint16
+Int | C.int | int32
+Unsigned int | C.uint | uint32
+Long | C.long | int32
+Unsigned long | C.ulong | uint32
+Long long int | C.longlong | int64
+Unsigned long long int | C.ulonglong | uint64
+Float | C.float | float32
+Double | C.double | float64
+Size_t | C.size_t | uint
 
-*表 2-1 Go语言和C语言类型对比*
+*Table 2-1 Comparison of Go language and C language type*
 
-需要注意的是，虽然在C语言中`int`、`short`等类型没有明确定义内存大小，但是在CGO中它们的内存大小是确定的。在CGO中，C语言的`int`和`long`类型都是对应4个字节的内存大小，`size_t`类型可以当作Go语言`uint`无符号整数类型对待。
+It should be noted that although the types of `int`, `short`, etc. in the C language do not explicitly define the memory size, their memory size is determined in CGO. In CGO, the C's `int` and `long` types all correspond to a 4-byte memory size, and the `size_t` type can be treated as a Go language `uint` unsigned integer type.
 
-CGO中，虽然C语言的`int`固定为4字节的大小，但是Go语言自己的`int`和`uint`却在32位和64位系统下分别对应4个字节和8个字节大小。如果需要在C语言中访问Go语言的`int`类型，可以通过`GoInt`类型访问，`GoInt`类型在CGO工具生成的`_cgo_export.h`头文件中定义。其实在`_cgo_export.h`头文件中，每个基本的Go数值类型都定义了对应的C语言类型，它们一般都是以单词Go为前缀。下面是64位环境下，`_cgo_export.h`头文件生成的Go数值类型的定义，其中`GoInt`和`GoUint`类型分别对应`GoInt64`和`GoUint64`：
+In CGO, although the C language 'int` is fixed to a size of 4 bytes, the Go language's own `int` and `uint` correspond to 4 bytes and 8 bytes respectively under 32-bit and 64-bit systems. size. If you need to access the Go language's `int` type in the C language, you can access it with the `GoInt` type, and the `GoInt` type is defined in the `_cgo_export.h` header file generated by the CGO tool. In fact, in the `_cgo_export.h` header file, each basic Go value type defines the corresponding C language type, which are generally prefixed with the word Go. The following is a definition of the Go value type generated by the `_cgo_export.h` header file in a 64-bit environment, where the `GoInt` and `GoUint` types correspond to `GoInt64` and `GoUint64` respectively:
 
 ```c
-typedef signed char GoInt8;
-typedef unsigned char GoUint8;
-typedef short GoInt16;
-typedef unsigned short GoUint16;
-typedef int GoInt32;
-typedef unsigned int GoUint32;
-typedef long long GoInt64;
-typedef unsigned long long GoUint64;
-typedef GoInt64 GoInt;
-typedef GoUint64 GoUint;
-typedef float GoFloat32;
-typedef double GoFloat64;
+Typedef signed char GoInt8;
+Typedef unsigned char GoUint8;
+Typedef short GoInt16;
+Typedef unsigned short GoUint16;
+Typedef int GoInt32;
+Typedef unsigned int GoUint32;
+Typedef long long GoInt64;
+Typedef unsigned long long GoUint64;
+Typedef GoInt64 GoInt;
+Typedef GoUint64 GoUint;
+Typedef float GoFloat32;
+Typedef double GoFloat64;
 ```
 
-除了`GoInt`和`GoUint`之外，我们并不推荐直接访问`GoInt32`、`GoInt64`等类型。更好的做法是通过C语言的C99标准引入的`<stdint.h>`头文件。为了提高C语言的可移植性，在`<stdint.h>`文件中，不但每个数值类型都提供了明确内存大小，而且和Go语言的类型命名更加一致。Go语言类型`<stdint.h>`头文件类型对比如表2-2所示。
+In addition to `GoInt` and `GoUint`, we do not recommend direct access to `GoInt32`, `GoInt64` and other types. A better approach is to use the `<stdint.h>` header file introduced by the C language C99 standard. In order to improve the portability of C language, not only does each numeric type provide explicit memory size in the `<stdint.h>` file, but it is more consistent with the type name of the Go language. The Go language type `<stdint.h>` header file type pair is shown in Table 2-2.
 
-C语言类型 | CGO类型     | Go语言类型
+C language type | CGO type | Go language type
 -------- | ---------- | ---------
-int8_t   | C.int8_t   | int8
-uint8_t  | C.uint8_t  | uint8
-int16_t  | C.int16_t  | int16
-uint16_t | C.uint16_t | uint16
-int32_t  | C.int32_t  | int32
-uint32_t | C.uint32_t | uint32
-int64_t  | C.int64_t  | int64
-uint64_t | C.uint64_t | uint64
+Int8_t | C.int8_t | int8
+Uint8_t | C.uint8_t | uint8
+Int16_t | C.int16_t | int16
+Uint16_t | C.uint16_t | uint16
+Int32_t | C.int32_t | int32
+Uint32_t | C.uint32_t | uint32
+Int64_t | C.int64_t | int64
+Uint64_t | C.uint64_t | uint64
 
-*表 2-2 `<stdint.h>`类型对比*
+*Table 2-2 `<stdint.h>` Type Comparison*
 
-前文说过，如果C语言的类型是由多个关键字组成，则无法通过虚拟的“C”包直接访问(比如C语言的`unsigned short`不能直接通过`C.unsigned short`访问)。但是，在`<stdint.h>`中通过使用C语言的`typedef`关键字将`unsigned short`重新定义为`uint16_t`这样一个单词的类型后，我们就可以通过`C.uint16_t`访问原来的`unsigned short`类型了。对于比较复杂的C语言类型，推荐使用`typedef`关键字提供一个规则的类型命名，这样更利于在CGO中访问。
+As mentioned above, if the C language type is composed of multiple keywords, it cannot be accessed directly through the virtual "C" package (for example, the C language `unsigned short` cannot be accessed directly through `C.unsigned short`). However, after ``resigned short` is redefined as `uint16_t` in the `<stdint.h>` by the C type 'typedef` keyword, we can access the original by `C.uint16_t` The `unsigned short` type. For more complex C language types, it is recommended to use the `typedef` keyword to provide a type name for the rule, which is more convenient for access in CGO.
 
-## 2.3.2 Go 字符串和切片
+## 2.3.2 Go string and slice
 
-在CGO生成的`_cgo_export.h`头文件中还会为Go语言的字符串、切片、字典、接口和管道等特有的数据类型生成对应的C语言类型：
+In the `_cgo_export.h` header file generated by CGO, the corresponding C language type is also generated for the unique data types of Go language strings, slices, dictionaries, interfaces, and pipes:
 
 ```c
-typedef struct { const char *p; GoInt n; } GoString;
-typedef void *GoMap;
-typedef void *GoChan;
-typedef struct { void *t; void *v; } GoInterface;
-typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
+Typedef struct { const char *p; GoInt n; } GoString;
+Typedef void *GoMap;
+Typedef void *GoChan;
+Typedef struct { void *t; void *v; } GoInterface;
+Typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
 ```
 
-不过需要注意的是，其中只有字符串和切片在CGO中有一定的使用价值，因为CGO为他们的某些GO语言版本的操作函数生成了C语言版本，因此二者可以在Go调用C语言函数时马上使用;而CGO并未针对其他的类型提供相关的辅助函数，且Go语言特有的内存模型导致我们无法保持这些由Go语言管理的内存指针，所以它们C语言环境并无使用的价值。
+However, it should be noted that only strings and slices have some value in CGO, because CGO generates C language versions for some of their GO language versions of the operation functions, so both can call C language functions in Go. It is used immediately; CGO does not provide related helper functions for other types, and the Go language-specific memory model prevents us from maintaining these memory pointers managed by the Go language, so their C-language environment has no value to use.
 
-在导出的C语言函数中我们可以直接使用Go字符串和切片。假设有以下两个导出函数：
+In the exported C language function we can directly use Go strings and slices. Suppose you have the following two export functions:
 
 ```go
 //export helloString
-func helloString(s string) {}
+Func helloString(s string) {}
 
 //export helloSlice
-func helloSlice(s []byte) {}
+Func helloSlice(s []byte) {}
 ```
 
-CGO生成的`_cgo_export.h`头文件会包含以下的函数声明：
+The `_cgo_export.h` header file generated by CGO will contain the following function declarations:
 
 ```c
-extern void helloString(GoString p0);
-extern void helloSlice(GoSlice p0);
+Extern void helloString(GoString p0);
+Extern void helloSlice(GoSlice p0);
 ```
 
-不过需要注意的是，如果使用了GoString类型则会对`_cgo_export.h`头文件产生依赖，而这个头文件是动态输出的。
+However, it should be noted that if the GoString type is used, it will have a dependency on the `_cgo_export.h` header file, which is dynamically output.
 
-Go1.10针对Go字符串增加了一个`_GoString_`预定义类型，可以降低在cgo代码中可能对`_cgo_export.h`头文件产生的循环依赖的风险。我们可以调整helloString函数的C语言声明为：
+Go1.10 adds a `_GoString_` predefined type to the Go string to reduce the risk of circular dependencies on the `_cgo_export.h` header file in cgo code. We can adjust the C language declaration of the helloString function to:
 
 ```c
-extern void helloString(_GoString_ p0);
+Extern void helloString(_GoString_ p0);
 ```
 
-因为`_GoString_`是预定义类型，我们无法通过此类型直接访问字符串的长度和指针等信息。Go1.10同时也增加了以下两个函数用于获取字符串结构中的长度和指针信息：
+Because `_GoString_` is a predefined type, we can't directly access the length and pointer of the string through this type. Go1.10 also adds the following two functions to get the length and pointer information in the string structure:
 
 ```c
-size_t _GoStringLen(_GoString_ s);
-const char *_GoStringPtr(_GoString_ s);
+Size_t _GoStringLen(_GoString_ s);
+Const char *_GoStringPtr(_GoString_ s);
 ```
 
-更严谨的做法是为C语言函数接口定义严格的头文件，然后基于稳定的头文件实现代码。
+A more rigorous approach is to define strict header files for C language function interfaces and then implement the code based on stable header files.
 
-## 2.3.3 结构体、联合、枚举类型
+## 2.3.3 Structure, union, enumeration type
 
-C语言的结构体、联合、枚举类型不能作为匿名成员被嵌入到Go语言的结构体中。在Go语言中，我们可以通过`C.struct_xxx`来访问C语言中定义的`struct xxx`结构体类型。结构体的内存布局按照C语言的通用对齐规则，在32位Go语言环境C语言结构体也按照32位对齐规则，在64位Go语言环境按照64位的对齐规则。对于指定了特殊对齐规则的结构体，无法在CGO中访问。
+The structure, union, and enumeration types of the C language cannot be embedded as an anonymous member into the structure of the Go language. In Go, we can access the `struct xxx` structure type defined in C by `C.struct_xxx`. The memory layout of the structure follows the general alignment rules of the C language. In the 32-bit Go language environment, the C language structure also follows the 32-bit alignment rule, and the 64-bit Go language environment follows the 64-bit alignment rule. For structures that have special alignment rules specified, they cannot be accessed in CGO.
 
-结构体的简单用法如下：
+The simple usage of the structure is as follows:
 
 ```go
 /*
-struct A {
-	int i;
-	float f;
+Struct A {
+Int i;
+Float f;
 };
 */
-import "C"
-import "fmt"
+Import "C"
+Import "fmt"
 
-func main() {
-	var a C.struct_A
-	fmt.Println(a.i)
-	fmt.Println(a.f)
+Func main() {
+Var a C.struct_A
+fmt.Println(a.i)
+fmt.Println(a.f)
 }
 ```
 
-如果结构体的成员名字中碰巧是Go语言的关键字，可以通过在成员名开头添加下划线来访问：
+If the member name of the structure happens to be a keyword in the Go language, you can access it by adding an underscore at the beginning of the member name:
 
 ```go
 /*
-struct A {
-	int type; // type 是 Go 语言的关键字
+Struct A {
+Int type; // type is the keyword for the Go language
 };
 */
-import "C"
-import "fmt"
+Import "C"
+Import "fmt"
 
-func main() {
-	var a C.struct_A
-	fmt.Println(a._type) // _type 对应 type
+Func main() {
+Var a C.struct_A
+fmt.Println(a._type) // _type corresponds to type
 }
 ```
 
-但是如果有2个成员：一个是以Go语言关键字命名，另一个刚好是以下划线和Go语言关键字命名，那么以Go语言关键字命名的成员将无法访问（被屏蔽）：
+But if there are 2 members: one is named after the Go language keyword, and the other is just the underscore and the Go language keyword, then members named after the Go language keyword will not be accessible (blocked):
 
 ```go
 /*
-struct A {
-	int   type;  // type 是 Go 语言的关键字
-	float _type; // 将屏蔽CGO对 type 成员的访问
+Struct A {
+Int type; // type is the keyword for the Go language
+Float _type; // will block CGO access to type members
 };
 */
-import "C"
-import "fmt"
+Import "C"
+Import "fmt"
 
-func main() {
-	var a C.struct_A
-	fmt.Println(a._type) // _type 对应 _type
+Func main() {
+Var a C.struct_A
+fmt.Println(a._type) // _type corresponds to _type
 }
 ```
 
-C语言结构体中位字段对应的成员无法在Go语言中访问，如果需要操作位字段成员，需要通过在C语言中定义辅助函数来完成。对应零长数组的成员，无法在Go语言中直接访问数组的元素，但其中零长的数组成员所在位置的偏移量依然可以通过`unsafe.Offsetof(a.arr)`来访问。
+Members corresponding to the bit field in the C language structure cannot be accessed in the Go language. If you need to manipulate the bit field members, you need to define the helper function in the C language. For members of a zero-length array, the elements of the array cannot be directly accessed in the Go language, but the offset of the position of the zero-length array member can still be accessed by `unsafe.Offsetof(a.arr)`.
 
 ```go
 /*
-struct A {
-	int   size: 10; // 位字段无法访问
-	float arr[];    // 零长的数组也无法访问
+Struct A {
+Int size: 10; // bit field cannot be accessed
+Float arr[]; // Zero-length arrays are also inaccessible
 };
 */
-import "C"
-import "fmt"
+Import "C"
+Import "fmt"
 
-func main() {
-	var a C.struct_A
-	fmt.Println(a.size) // 错误: 位字段无法访问
-	fmt.Println(a.arr)  // 错误: 零长的数组也无法访问
+Func main() {
+Var a C.struct_A
+fmt.Println(a.size) // Error: Bit field cannot be accessed
+fmt.Println(a.arr) // Error: Zero-length array is also inaccessible
 }
 ```
 
-在C语言中，我们无法直接访问Go语言定义的结构体类型。
+In the C language, we can't directly access the structure type defined by the Go language.
 
-对于联合类型，我们可以通过`C.union_xxx`来访问C语言中定义的`union xxx`类型。但是Go语言中并不支持C语言联合类型，它们会被转为对应大小的字节数组。
+For the union type, we can access the `union xxx` type defined in the C language by `C.union_xxx`. However, the C language union types are not supported in the Go language, and they are converted to byte arrays of corresponding sizes.
 
 ```go
 /*
 #include <stdint.h>
 
-union B1 {
-	int i;
-	float f;
+Union B1 {
+Int i;
+Float f;
 };
 
-union B2 {
-	int8_t i8;
-	int64_t i64;
+Union B2 {
+Int8_t i8;
+Int64_t i64;
 };
 */
-import "C"
-import "fmt"
+Import "C"
+Import "fmt"
 
-func main() {
-	var b1 C.union_B1;
-	fmt.Printf("%T\n", b1) // [4]uint8
+Func main() {
+Var b1 C.union_B1;
+fmt.Printf("%T\n", b1) // [4]uint8
 
-	var b2 C.union_B2;
-	fmt.Printf("%T\n", b2) // [8]uint8
+Var b2 C.union_B2;
+fmt.Printf("%T\n", b2) // [8]uint8
 }
 ```
 
-如果需要操作C语言的联合类型变量，一般有三种方法：第一种是在C语言中定义辅助函数；第二种是通过Go语言的"encoding/binary"手工解码成员(需要注意大端小端问题)；第三种是使用`unsafe`包强制转型为对应类型(这是性能最好的方式)。下面展示通过`unsafe`包访问联合类型成员的方式：
+If you need to manipulate the C type joint type variable, there are generally three methods: the first is to define the helper function in the C language; the second is to manually decode the member through the "encoding/binary" of the Go language (note the big endian Problem); the third is to use the `unsafe` package to cast to the corresponding type (this is the best way to perform). The following shows how to access federated type members via the `unsafe` package:
 
 ```go
 /*
 #include <stdint.h>
 
-union B {
-	int i;
-	float f;
+Union B {
+Int i;
+Float f;
 };
 */
-import "C"
-import "fmt"
+Import "C"
+Import "fmt"
 
-func main() {
-	var b C.union_B;
-	fmt.Println("b.i:", *(*C.int)(unsafe.Pointer(&b)))
-	fmt.Println("b.f:", *(*C.float)(unsafe.Pointer(&b)))
+Func main() {
+Var b C.union_B;
+fmt.Println("b.i:", *(*C.int)(unsafe.Pointer(&b)))
+fmt.Println("b.f:", *(*C.float)(unsafe.Pointer(&b)))
 }
 ```
 
-虽然`unsafe`包访问最简单、性能也最好，但是对于有嵌套联合类型的情况处理会导致问题复杂化。对于复杂的联合类型，推荐通过在C语言中定义辅助函数的方式处理。
+Although the `unsafe` package is the easiest to access and the best in performance, it can complicate the problem when dealing with nested union types. For complex union types, it is recommended to handle them by defining helper functions in the C language.
 
-对于枚举类型，我们可以通过`C.enum_xxx`来访问C语言中定义的`enum xxx`结构体类型。
+For enumerated types, we can access the `enum xxx` structure type defined in C by `C.enum_xxx`.
 
 ```go
 /*
-enum C {
-	ONE,
-	TWO,
+Enum C {
+ONE,
+TWO,
 };
 */
-import "C"
-import "fmt"
+Import "C"
+Import "fmt"
 
-func main() {
-	var c C.enum_C = C.TWO
-	fmt.Println(c)
-	fmt.Println(C.ONE)
-	fmt.Println(C.TWO)
+Func main() {
+Var c C.enum_C = C.TWO
+fmt.Println(c)
+fmt.Println(C.ONE)
+fmt.Println(C.TWO)
 }
 ```
 
-在C语言中，枚举类型底层对应`int`类型，支持负数类型的值。我们可以通过`C.ONE`、`C.TWO`等直接访问定义的枚举值。
+In C, the underlying type of the enumeration type corresponds to the `int` type, which supports values ​​of negative types. We can directly access the defined enumeration values ​​through `C.ONE`, `C.TWO`, etc.
 
-## 2.3.4 数组、字符串和切片
+## 2.3.4 Arrays, strings, and slices
 
-在C语言中，数组名其实对应于一个指针，指向特定类型特定长度的一段内存，但是这个指针不能被修改；当把数组名传递给一个函数时，实际上传递的是数组第一个元素的地址。为了讨论方便，我们将一段特定长度的内存统称为数组。C语言的字符串是一个char类型的数组，字符串的长度需要根据表示结尾的NULL字符的位置确定。C语言中没有切片类型。
+In C, the array name actually corresponds to a pointer to a piece of memory of a specific length of a particular type, but this pointer cannot be modified; when passing the array name to a function, it actually passes the first element of the array. address. For the sake of discussion, we will refer to a certain length of memory as an array. The C language string is an array of char type, and the length of the string needs to be determined according to the position of the NULL character indicating the end. There is no slice type in C language.
 
-在Go语言中，数组是一种值类型，而且数组的长度是数组类型的一个部分。Go语言字符串对应一段长度确定的只读byte类型的内存。Go语言的切片则是一个简化版的动态数组。
+In Go, an array is a value type, and the length of the array is a part of the array type. The Go language string corresponds to a certain length of read-only byte type memory. The slice of the Go language is a simplified version of the dynamic array.
 
 
-Go语言和C语言的数组、字符串和切片之间的相互转换可以简化为Go语言的切片和C语言中指向一定长度内存的指针之间的转换。
+The conversion between Go and C arrays, strings, and slices can be simplified to convert between Go slices and C pointers pointing to a certain length of memory.
 
-CGO的C虚拟包提供了以下一组函数，用于Go语言和C语言之间数组和字符串的双向转换：
+CGO's C virtual package provides the following set of functions for bidirectional conversion of arrays and strings between Go and C:
 
 ```go
 // Go string to C string
@@ -280,142 +280,142 @@ CGO的C虚拟包提供了以下一组函数，用于Go语言和C语言之间数�
 // It is the caller's responsibility to arrange for it to be
 // freed, such as by calling C.free (be sure to include stdlib.h
 // if C.free is needed).
-func C.CString(string) *C.char
+Func C.CString(string) *C.char
 
 // Go []byte slice to C array
 // The C array is allocated in the C heap using malloc.
 // It is the caller's responsibility to arrange for it to be
 // freed, such as by calling C.free (be sure to include stdlib.h
 // if C.free is needed).
-func C.CBytes([]byte) unsafe.Pointer
+Func C.CBytes([]byte) unsafe.Pointer
 
 // C string to Go string
-func C.GoString(*C.char) string
+Func C.GoString(*C.char) string
 
 // C data with explicit length to Go string
-func C.GoStringN(*C.char, C.int) string
+Func C.GoStringN(*C.char, C.int) string
 
 // C data with explicit length to Go []byte
-func C.GoBytes(unsafe.Pointer, C.int) []byte
+Func C.GoBytes(unsafe.Pointer, C.int) []byte
 ```
 
-其中`C.CString`针对输入的Go字符串，克隆一个C语言格式的字符串；返回的字符串由C语言的`malloc`函数分配，不使用时需要通过C语言的`free`函数释放。`C.CBytes`函数的功能和`C.CString`类似，用于从输入的Go语言字节切片克隆一个C语言版本的字节数组，同样返回的数组需要在合适的时候释放。`C.GoString`用于将从NULL结尾的C语言字符串克隆一个Go语言字符串。`C.GoStringN`是另一个字符数组克隆函数。`C.GoBytes`用于从C语言数组，克隆一个Go语言字节切片。
+Where `C.CString` is a string of C language format for the input Go string; the returned string is allocated by the C language's `malloc` function, and needs to be released by the C language's `free` function when not in use. The function of the `C.CBytes` function is similar to `C.CString`, which is used to clone a C language version of a byte array from the input Go language byte slice. The same returned array needs to be released at the appropriate time. `C.GoString` is used to clone a C language string from a NULL-terminated C language string. `C.GoStringN` is another character array clone function. `C.GoBytes` is used to clone a Go language byte slice from a C language array.
 
-该组辅助函数都是以克隆的方式运行。当Go语言字符串和切片向C语言转换时，克隆的内存由C语言的`malloc`函数分配，最终可以通过`free`函数释放。当C语言字符串或数组向Go语言转换时，克隆的内存由Go语言分配管理。通过该组转换函数，转换前和转换后的内存依然在各自的语言环境中，它们并没有跨越Go语言和C语言。克隆方式实现转换的优点是接口和内存管理都很简单，缺点是克隆需要分配新的内存和复制操作都会导致额外的开销。
+This set of helper functions is run in clone mode. When the Go language string and slice are converted to C, the cloned memory is allocated by the C language's `malloc` function, which can be finally released by the `free` function. When a C language string or array is converted to Go, the cloned memory is managed by the Go language. With this set of conversion functions, the pre-conversion and post-conversion memory is still in their respective locales, and they do not span Go and C languages. The advantage of cloning mode conversion is that interface and memory management are very simple. The disadvantage is that cloning needs to allocate new memory and copy operations will result in additional overhead.
 
-在`reflect`包中有字符串和切片的定义：
+There are string and slice definitions in the `reflect` package:
 
 ```go
-type StringHeader struct {
-    Data uintptr
-    Len  int
+Type StringHeader struct {
+    Data uintptr
+    Len int
 }
 
-type SliceHeader struct {
-    Data uintptr
-    Len  int
-    Cap  int
+Type SliceHeader struct {
+    Data uintptr
+    Len int
+    Cap int
 }
 ```
 
-如果不希望单独分配内存，可以在Go语言中直接访问C语言的内存空间：
+If you don't want to allocate memory separately, you can directly access the memory space of the C language in the Go language:
 
 ```go
 /*
 #include <string.h>
-char arr[10];
-char *s = "Hello";
+Char arr[10];
+Char *s = "Hello";
 */
-import "C"
-import (
-	"reflect"
-	"unsafe"
+Import "C"
+Import (
+"reflect"
+"unsafe"
 )
-func main() {
-	// 通过 reflect.SliceHeader 转换
-	var arr0 []byte
-	var arr0Hdr = (*reflect.SliceHeader)(unsafe.Pointer(&arr0))
-	arr0Hdr.Data = uintptr(unsafe.Pointer(&C.arr[0]))
-	arr0Hdr.Len = 10
-	arr0Hdr.Cap = 10
+Func main() {
+// Convert by reflect.SliceHeader
+Var arr0 []byte
+Var arr0Hdr = (*reflect.SliceHeader)(unsafe.Pointer(&arr0))
+arr0Hdr.Data = uintptr(unsafe.Pointer(&C.arr[0]))
+arr0Hdr.Len = 10
+arr0Hdr.Cap = 10
 
-	// 通过切片语法转换
-	arr1 := (*[31]byte)(unsafe.Pointer(&C.arr[0]))[:10:10]
+// Convert by slice syntax
+Arr1 := (*[31]byte)(unsafe.Pointer(&C.arr[0]))[:10:10]
 
-	var s0 string
-	var s0Hdr = (*reflect.StringHeader)(unsafe.Pointer(&s0))
-	s0Hdr.Data = uintptr(unsafe.Pointer(C.s))
-	s0Hdr.Len = int(C.strlen(C.s))
+Var s0 string
+Var s0Hdr = (*reflect.StringHeader)(unsafe.Pointer(&s0))
+s0Hdr.Data = uintptr(unsafe.Pointer(C.s))
+s0Hdr.Len = int(C.strlen(C.s))
 
-	sLen := int(C.strlen(C.s))
-    	s1 := string((*[31]byte)(unsafe.Pointer(C.s))[:sLen:sLen])
+sLen := int(C.strlen(C.s))
+    S1 := string((*[31]byte)(unsafe.Pointer(C.s))[:sLen:sLen])
 }
 ```
 
-因为Go语言的字符串是只读的，用户需要自己保证Go字符串在使用期间，底层对应的C字符串内容不会发生变化、内存不会被提前释放掉。
+Because the Go language string is read-only, the user needs to ensure that the contents of the underlying C string will not change during the use of the Go string, and the memory will not be released in advance.
 
-在CGO中，会为字符串和切片生成和上面结构对应的C语言版本的结构体：
+In CGO, the C language version of the structure corresponding to the above structure is generated for strings and slices:
 
 ```c
-typedef struct { const char *p; GoInt n; } GoString;
-typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
+Typedef struct { const char *p; GoInt n; } GoString;
+Typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
 ```
 
-在C语言中可以通过`GoString`和`GoSlice`来访问Go语言的字符串和切片。如果是Go语言中数组类型，可以将数组转为切片后再行转换。如果字符串或切片对应的底层内存空间由Go语言的运行时管理，那么在C语言中不能长时间保存Go内存对象。
+In the C language, you can access the strings and slices of the Go language with `GoString` and `GoSlice`. If it is an array type in Go, you can convert the array to a slice and then convert it. If the underlying memory space corresponding to a string or slice is managed by the runtime of the Go language, the Go memory object cannot be saved for a long time in the C language.
 
-关于CGO内存模型的细节在稍后章节中会详细讨论。
+Details on the CGO memory model are discussed in more detail in later chapters.
 
-## 2.3.5 指针间的转换
+## 2.3.5 Conversion between pointers
 
-在C语言中，不同类型的指针是可以显式或隐式转换的，如果是隐式只是会在编译时给出一些警告信息。但是Go语言对于不同类型的转换非常严格，任何C语言中可能出现的警告信息在Go语言中都可能是错误！指针是C语言的灵魂，指针间的自由转换也是cgo代码中经常要解决的第一个重要的问题。
+In C language, different types of pointers can be explicitly or implicitly converted. If it is implicit, it will only give some warning information at compile time. But the Go language is very strict for different types of conversions, and any warning messages that may appear in the C language may be wrong in the Go language! Pointers are the soul of C language, and the free conversion between pointers is also the first important problem that is often solved in cgo code.
 
-在Go语言中两个指针的类型完全一致则不需要转换可以直接通用。如果一个指针类型是用type命令在另一个指针类型基础之上构建的，换言之两个指针底层是相同完全结构的指针，那么我我们可以通过直接强制转换语法进行指针间的转换。但是cgo经常要面对的是2个完全不同类型的指针间的转换，原则上这种操作在纯Go语言代码是严格禁止的。
+In the Go language, the two pointers are exactly the same type and can be directly used without conversion. If a pointer type is built on top of another pointer type with the type command, in other words, the underlying two pointers are pointers of the same full structure, then we can convert between pointers by direct cast syntax. However, cgo often has to deal with the conversion between two completely different types of pointers. In principle, this operation is strictly prohibited in pure Go language code.
 
-cgo存在的一个目的就是打破Go语言的禁止，恢复C语言应有的指针的自由转换和指针运算。以下代码演示了如何将X类型的指针转化为Y类型的指针：
+One of the purposes of cgo is to break the prohibition of the Go language and restore the free conversion and pointer operations of the pointers that the C language should have. The following code demonstrates how to convert a pointer of type X to a pointer of type Y:
 
 ```go
-var p *X
-var q *Y
+Var p *X
+Var q *Y
 
 q = (*Y)(unsafe.Pointer(p)) // *X => *Y
 p = (*X)(unsafe.Pointer(q)) // *Y => *X
 ```
 
-为了实现X类型指针到Y类型指针的转换，我们需要借助`unsafe.Pointer`作为中间桥接类型实现不同类型指针之间的转换。`unsafe.Pointer`指针类型类似C语言中的`void*`类型的指针。
+In order to convert the X type pointer to the Y type pointer, we need to use `unsafe.Pointer` as the intermediate bridge type to implement conversion between different types of pointers. The `unsafe.Pointer` pointer type is similar to the pointer of the `void*` type in C language.
 
-下面是指针间的转换流程的示意图：
+The following is a schematic diagram of the conversion process between pointers:
 
 ![](../images/ch2-1-x-ptr-to-y-ptr.uml.png)
 
-*图 2-1 X类型指针转Y类型指针*
+*Figure 2-1 X type pointer to Y type pointer *
 
 
-任何类型的指针都可以通过强制转换为`unsafe.Pointer`指针类型去掉原有的类型信息，然后再重新赋予新的指针类型而达到指针间的转换的目的。
+Any type of pointer can be cast to the `unsafe.Pointer` pointer type to remove the original type information, and then re-assigned a new pointer type to achieve the purpose of the conversion between pointers.
 
-## 2.3.6 数值和指针的转换
+## 2.3.6 Conversion of values ​​and pointers
 
-不同类型指针间的转换看似复杂，但是在cgo中已经算是比较简单的了。在C语言中经常遇到用普通数值表示指针的场景，也就是说如何实现数值和指针的转换也是cgo需要面对的一个问题。
+The conversion between different types of pointers seems complicated, but it is relatively simple in cgo. In the C language, I often encounter scenes that use ordinary values ​​to represent pointers. That is to say, how to implement numeric and pointer conversion is also a problem that cgo needs to face.A problem.
 
-为了严格控制指针的使用，Go语言禁止将数值类型直接转为指针类型！不过，Go语言针对`unsafe.Pointr`指针类型特别定义了一个uintptr类型。我们可以uintptr为中介，实现数值类型到`unsafe.Pointr`指针类型到转换。再结合前面提到的方法，就可以实现数值和指针的转换了。
+In order to strictly control the use of pointers, Go language prohibits the conversion of numeric types directly into pointer types! However, the Go language specifically defines a uintptr type for the `unsafe.Pointr` pointer type. We can use uintptr as an intermediary to implement numeric types to `unsafe.Pointr` pointer types to conversions. Combined with the previously mentioned methods, the conversion of values ​​and pointers can be achieved.
 
-下面流程图演示了如何实现int32类型到C语言的`char*`字符串指针类型的相互转换：
+The following flow chart demonstrates how to convert the inchar32 type to the C language's `char*` string pointer type:
 
 ![](../images/ch2-2-int32-to-char-ptr.uml.png)
 
-*图 2-2 int32和`char*`指针转换*
+*Figure 2-2 int32 and `char*` pointer conversion*
 
 
-转换分为几个阶段，在每个阶段实现一个小目标：首先是int32到uintptr类型，然后是uintptr到`unsafe.Pointr`指针类型，最后是`unsafe.Pointr`指针类型到`*C.char`类型。
+The conversion is divided into several stages, and a small goal is implemented in each stage: first the int32 to uintptr type, then the uintptr to the `unsafe.Pointr` pointer type, and finally the `unsafe.Pointr` pointer type to `*C.char `Type.
 
-## 2.3.7 切片间的转换
+## 2.3.7 Conversion between slices
 
-在C语言中数组也一种指针，因此两个不同类型数组之间的转换和指针间转换基本类似。但是在Go语言中，数组或数组对应的切片都不再是指针类型，因此我们也就无法直接实现不同类型的切片之间的转换。
+Arrays are also a kind of pointer in C language, so the conversion between two different types of arrays is basically similar to the conversion between pointers. However, in the Go language, the slice corresponding to an array or an array is no longer a pointer type, so we cannot directly convert between different types of slices.
 
-不过Go语言的reflect包提供了切片类型的底层结构，再结合前面讨论到不同类型之间的指针转换技术就可以实现`[]X`和`[]Y`类型的切片转换：
+However, the Go reflection package provides the underlying structure of the slice type, and the slice conversion of the `[]X` and `[]Y` types can be implemented by combining the pointer conversion techniques discussed above between different types:
 
 ```go
-var p []X
-var q []Y
+Var p []X
+Var q []Y
 
 pHdr := (*reflect.SliceHeader)(unsafe.Pointer(&p))
 qHdr := (*reflect.SliceHeader)(unsafe.Pointer(&q))
@@ -425,13 +425,13 @@ pHdr.Len = qHdr.Len * unsafe.Sizeof(q[0]) / unsafe.Sizeof(p[0])
 pHdr.Cap = qHdr.Cap * unsafe.Sizeof(q[0]) / unsafe.Sizeof(p[0])
 ```
 
-不同切片类型之间转换的思路是先构造一个空的目标切片，然后用原有的切片底层数据填充目标切片。如果X和Y类型的大小不同，需要重新设置Len和Cap属性。需要注意的是，如果X或Y是空类型，上述代码中可能导致除0错误，实际代码需要根据情况酌情处理。
+The idea of ​​converting between different slice types is to construct an empty target slice first, and then fill the target slice with the original slice underlying data. If the X and Y types are different in size, you need to reset the Len and Cap properties. It should be noted that if X or Y is a null type, the above code may cause a divide-by-zero error, and the actual code needs to be handled as appropriate.
 
-下面演示了切片间的转换的具体流程：
+The following shows the specific flow of the conversion between slices:
 
 ![](../images/ch2-3-x-slice-to-y-slice.uml.png)
 
-*图 2-3 X类型切片转Y类型切片*
+*Figure 2-3 X type slice to Y type slice *
 
 
-针对CGO中常用的功能，作者封装了 "github.com/chai2010/cgo" 包，提供基本的转换功能，具体的细节可以参考实现代码。
+For the features commonly used in CGO, the author encapsulates the "github.com/chai2010/cgo" package, which provides basic conversion functions. For details, refer to the implementation code.
