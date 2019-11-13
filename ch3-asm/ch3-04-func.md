@@ -1,302 +1,301 @@
-# 3.4 函数
+# 3.4 function
 
-终于到函数了！因为Go汇编语言中，可以也建议通过Go语言来定义全局变量，那么剩下的也就是函数了。只有掌握了汇编函数的基本用法，才能真正算是Go汇编语言入门。本章将简单讨论Go汇编中函数的定义和用法。
+Finally arrived at the function! Because Go assembly language can also be recommended to define global variables through the Go language, then the rest is the function. Only by mastering the basic usage of assembly functions can you really get started with Go assembly language. This chapter will briefly discuss the definition and usage of functions in Go assembly.
 
-## 3.4.1 基本语法
+## 3.4.1 Basic Grammar
 
-函数标识符通过TEXT汇编指令定义，表示该行开始的指令定义在TEXT内存段。TEXT语句后的指令一般对应函数的实现，但是对于TEXT指令本身来说并不关心后面是否有指令。因此TEXT和LABEL定义的符号是类似的，区别只是LABEL是用于跳转标号，但是本质上他们都是通过标识符映射一个内存地址。
+The function identifier is defined by the TEXT assembly instruction, and the instruction indicating the start of the line is defined in the TEXT memory segment. The instruction after the TEXT statement generally corresponds to the implementation of the function, but for the TEXT instruction itself, it does not care whether there is an instruction later. So the symbols defined by TEXT and LABEL are similar, except that LABEL is used for jump labels, but essentially they all map a memory address by identifier.
 
-函数的定义的语法如下：
+The syntax for the definition of a function is as follows:
 
 ```
 TEXT symbol(SB), [flags,] $framesize[-argsize]
 ```
 
-函数的定义部分由5个部分组成：TEXT指令、函数名、可选的flags标志、函数帧大小和可选的函数参数大小。
+The definition part of the function consists of five parts: the TEXT instruction, the function name, the optional flags flag, the function frame size, and the optional function parameter size.
 
-其中TEXT用于定义函数符号，函数名中当前包的路径可以省略。函数的名字后面是`(SB)`，表示是函数名符号相对于SB伪寄存器的偏移量，二者组合在一起最终是绝对地址。作为全局的标识符的全局变量和全局函数的名字一般都是基于SB伪寄存器的相对地址。标志部分用于指示函数的一些特殊行为，标志在`textlags.h`文件中定义，常见的`NOSPLIT`主要用于指示叶子函数不进行栈分裂。framesize部分表示函数的局部变量需要多少栈空间，其中包含调用其它函数时准备调用参数的隐式栈空间。最后是可以省略的参数大小，之所以可以省略是因为编译器可以从Go语言的函数声明中推导出函数参数的大小。
+Where TEXT is used to define the function symbol, the path of the current package in the function name can be omitted. The name of the function is followed by `(SB)`, which is the offset of the function name symbol from the SB pseudo-register. The two are combined to form an absolute address. The names of global variables and global functions that are global identifiers are generally based on the relative addresses of the SB pseudo-registers. The flag part is used to indicate some special behavior of the function. The flag is defined in the `textlags.h` file. The common `NOSPLIT` is mainly used to indicate that the leaf function does not split the stack. The framesize section indicates how much stack space is needed for a function's local variables, including the implicit stack space that is ready to call parameters when calling other functions. Finally, the size of the parameter that can be omitted can be omitted because the compiler can derive the size of the function parameter from the function declaration of the Go language.
 
 
-我们首先从一个简单的Swap函数开始。Swap函数用于交互输入的两个参数的顺序，然后通过返回值返回交换了顺序的结果。如果用Go语言中声明Swap函数，大概这样的：
+Let's start with a simple Swap function. The Swap function is used to interactively input the order of the two parameters, and then returns the result of the exchanged order by the return value. If you declare a Swap function in Go, this is probably the case:
 
 ```go
-package main
+Package main
 
 //go:nosplit
-func Swap(a, b int) (int, int)
+Func Swap(a, b int) (int, int)
 ```
 
-下面是main包中Swap函数在汇编中两种定义方式：
+The following is the two definitions of the Swap function in the main package in the assembly:
 
 ```
 // func Swap(a, b int) (int, int)
-TEXT ·Swap(SB), NOSPLIT, $0-32
+TEXT · Swap(SB), NOSPLIT, $0-32
 
 // func Swap(a, b int) (int, int)
-TEXT ·Swap(SB), NOSPLIT, $0
+TEXT · Swap(SB), NOSPLIT, $0
 ```
 
-下图是Swap函数几种不同写法的对比关系图：
+The following figure is a comparison of several different ways of writing Swap functions:
 
 ![](../images/ch3-8-func-decl-01.ditaa.png)
 
-*图 3-8 函数定义*
+*Figure 3-8 Function Definition*
 
 
-第一种是最完整的写法：函数名部分包含了当前包的路径，同时指明了函数的参数大小为32个字节（对应参数和返回值的4个int类型）。第二种写法则比较简洁，省略了当前包的路径和参数的大小。如果有NOSPLIT标注，会禁止汇编器为汇编函数插入栈分裂的代码。NOSPLIT对应Go语言中的`//go:nosplit`注释。
+The first is the most complete way of writing: the function name part contains the path of the current package, and indicates that the function's parameter size is 32 bytes (the four int types corresponding to the parameter and the return value). The second method is simpler, omitting the path and parameter size of the current package. If there is a NOSPLIT annotation, the assembler is prevented from inserting stack split code for the assembly function. NOSPLIT corresponds to the `//go:nosplit` annotation in Go.
 
-目前可能遇到的函数标志有NOSPLIT、WRAPPER和NEEDCTXT几个。其中NOSPLIT不会生成或包含栈分裂代码，这一般用于没有任何其它函数调用的叶子函数，这样可以适当提高性能。WRAPPER标志则表示这个是一个包装函数，在panic或runtime.caller等某些处理函数帧的地方不会增加函数帧计数。最后的NEEDCTXT表示需要一个上下文参数，一般用于闭包函数。
+The function flags that may be encountered so far are several NOSPLIT, WRAPPER, and NEEDCTXT. Where NOSPLIT does not generate or contain stack split code, which is typically used for leaf functions without any other function calls, which can improve performance appropriately. The WRAPPER flag indicates that this is a wrapper function that does not increment the function frame count in some processing function frames such as panic or runtime.caller. The last NEEDCTXT indicates that a context parameter is required, which is typically used for closure functions.
 
-需要注意的是函数也没有类型，上面定义的Swap函数签名可以下面任意一种格式：
+It should be noted that the function has no type. The Swap function signature defined above can be in any of the following formats:
 
 ```
-func Swap(a, b, c int) int
-func Swap(a, b, c, d int)
-func Swap() (a, b, c, d int)
-func Swap() (a []int, d int)
+Func Swap(a, b, c int) int
+Func Swap(a, b, c, d int)
+Func Swap() (a, b, c, d int)
+Func Swap() (a []int, d int)
 // ...
 ```
 
-对于汇编函数来说，只要是函数的名字和参数大小一致就可以是相同的函数了。而且在Go汇编语言中，输入参数和返回值参数是没有任何的区别的。
+For the assembly function, as long as the name of the function and the size of the parameters are the same, it can be the same function. And in Go assembly language, there is no difference between input parameters and return value parameters.
 
-## 3.4.2 函数参数和返回值
+## 3.4.2 Function parameters and return values
 
-对于函数来说，最重要的是函数对外提供的API约定，包含函数的名称、参数和返回值。当这些都确定之后，如何精确计算参数和返回值的大小是第一个需要解决的问题。
+For functions, the most important is the API convention provided by the function, including the name, parameters, and return value of the function. When these are all determined, how to accurately calculate the size of the parameters and the return value is the first problem to be solved.
 
-比如有一个Swap函数的签名如下：
+For example, the signature of a Swap function is as follows:
 
 ```go
-func Swap(a, b int) (ret0, ret1 int)
+Func Swap(a, b int) (ret0, ret1 int)
 ```
 
-对于这个函数，我们可以轻易看出它需要4个int类型的空间，参数和返回值的大小也就是32个字节：
+For this function, we can easily see that it requires 4 spaces of type int, and the size of the parameters and return value is 32 bytes:
 
 ```
-TEXT ·Swap(SB), $0-32
+TEXT · Swap(SB), $0-32
 ```
 
-那么如何在汇编中引用这4个参数呢？为此Go汇编中引入了一个FP伪寄存器，表示函数当前帧的地址，也就是第一个参数的地址。因此我们以通过`+0(FP)`、`+8(FP)`、`+16(FP)`和`+24(FP)`来分别引用a、b、ret0和ret1四个参数。
+So how do you reference these four parameters in assembly? To this end, the Go assembly introduces an FP pseudo-register that represents the address of the current frame of the function, which is the address of the first parameter. Therefore, we refer to the four parameters a, b, ret0 and ret1 by `+0(FP)`, `+8(FP)`, `+16(FP)` and `+24(FP)` respectively.
 
-但是在汇编代码中，我们并不能直接以`+0(FP)`的方式来使用参数。为了编写易于维护的汇编代码，Go汇编语言要求，任何通过FP伪寄存器访问的变量必和一个临时标识符前缀组合后才能有效，一般使用参数对应的变量名作为前缀。
+But in assembly code, we can't use parameters directly in the way of `+0(FP)`. In order to write easy-to-maintain assembly code, Go assembly language requires that any variable accessed through the FP pseudo-register must be combined with a temporary identifier prefix to be valid. Generally, the variable name corresponding to the parameter is used as a prefix.
 
 
-下图是Swap函数中参数和返回值在内存中的布局图：
+The following figure is the layout of the parameters and return values ​​in the Swap function in memory:
 
 ![](../images/ch3-9-func-decl-02.ditaa.png)
 
-*图 3-9 函数定义*
+*Figure 3-9 Function Definition*
 
-下面的代码演示了如何在汇编函数中使用参数和返回值：
+The following code demonstrates how to use parameters and return values ​​in an assembly function:
 
 ```
 TEXT ·Swap(SB), $0
-	MOVQ a+0(FP), AX     // AX = a
-	MOVQ b+8(FP), BX     // BX = b
-	MOVQ BX, ret0+16(FP) // ret0 = BX
-	MOVQ AX, ret1+24(FP) // ret1 = AX
-	RET
+MOVQ a+0(FP), AX // AX = a
+MOVQ b+8(FP), BX // BX = b
+MOVQ BX, ret0+16(FP) // ret0 = BX
+MOVQ AX, ret1+24(FP) // ret1 = AX
+RET
 ```
 
-从代码可以看出a、b、ret0和ret1的内存地址是依次递增的，FP伪寄存器是第一个变量的开始地址。
+It can be seen from the code that the memory addresses of a, b, ret0 and ret1 are sequentially incremented, and the FP pseudo-register is the start address of the first variable.
 
 
-## 3.4.3 参数和返回值的内存布局
+## 3.4.3 Memory layout of parameters and return values
 
-如果是参数和返回值类型比较复杂的情况该如何处理呢？下面我们再尝试一个更复杂的函数参数和返回值的计算。比如有以下一个函数：
+What if the parameters and return types are more complicated? Let's try a more complicated calculation of function parameters and return values. For example, there is one of the following functions:
 
 ```go
-func Foo(a bool, b int16) (c []byte)
+Func Foo(a bool, b int16) (c []byte)
 ```
 
-函数的参数有不同的类型，而且返回值中含有更复杂的切片类型。我们该如何计算每个参数的位置和总的大小呢？
+The arguments to the function have different types, and the return value contains more complex slice types. How do we calculate the position and total size of each parameter?
 
-其实函数参数和返回值的大小以及对齐问题和结构体的大小和成员对齐问题是一致的，函数的第一个参数和第一个返回值会分别进行一次地址对齐。我们可以用诡代思路将全部的参数和返回值以同样的顺序分别放到两个结构体中，将FP伪寄存器作为唯一的一个指针参数，而每个成员的地址也就是对应原来参数的地址。
+In fact, the size of the function parameters and the return value and the alignment problem are consistent with the size of the structure and the member alignment problem. The first parameter of the function and the first return value are aligned once. We can use the descendant idea to put all the parameters and return values ​​into the two structures in the same order. The FP pseudo-register is used as the only pointer parameter, and the address of each member is the address corresponding to the original parameter. .
 
-用这样的策略可以很容易计算前面的Foo函数的参数和返回值的地址和总大小。为了便于描述我们定义一个`Foo_args_and_returns`临时结构体类型用于诡代原始的参数和返回值：
+With such a strategy, it is easy to calculate the address and total size of the parameters and return values ​​of the previous Foo function. For the sake of description we define a `Foo_args_and_returns` temporary structure type for degenerate the original parameters and return values:
 
 ```go
-type Foo_args struct {
-	a bool
-	b int16
-	c []byte
+Type Foo_args struct {
+a bool
+b int16
+c []byte
 }
-type Foo_returns struct {
-	c []byte
-}
-```
-
-然后将Foo原来的参数替换为结构体形式，并且只保留唯一的FP作为参数：
-
-```go
-func Foo(FP *SomeFunc_args, FP_ret *SomeFunc_returns) {
-	// a = FP + offsetof(&args.a)
-	_ = unsafe.Offsetof(FP.a) + uintptr(FP) // a
-	// b = FP + offsetof(&args.b)
-
-	// argsize = sizeof(args)
-	argsize = unsafe.Offsetof(FP)
-
-	// c = FP + argsize + offsetof(&return.c)
-	_ = uintptr(FP) + argsize + unsafe.Offsetof(FP_ret.c)
-
-	// framesize = sizeof(args) + sizeof(returns)
-	_ = unsafe.Offsetof(FP) + unsafe.Offsetof(FP_ret)
-
-	return
+Type Foo_returns struct {
+c []byte
 }
 ```
 
-代码完全和Foo函数参数的方式类似。唯一的差异是每个函数的偏移量，通过`unsafe.Offsetof`函数自动计算生成。因为Go结构体中的每个成员已经满足了对齐要求，因此采用通用方式得到每个参数的偏移量也是满足对齐要求的。序言注意的是第一个返回值地址需要重新对齐机器字大小的倍数。
+Then replace Foo's original parameters with the struct form and leave only the unique FP as a parameter:
 
-Foo函数的参数和返回值的大小和内存布局：
+```go
+Func Foo(FP *SomeFunc_args, FP_ret *SomeFunc_returns) {
+// a = FP + offsetof(&args.a)
+_ = unsafe.Offsetof(FP.a) + uintptr(FP) // a
+// b = FP + offsetof(&args.b)
+
+// argsize = sizeof(args)
+Argsize = unsafe.Offsetof(FP)
+
+// c = FP + argsize + offsetof(&return.c)
+_ = uintptr(FP) + argsize + unsafe.Offsetof(FP_ret.c)
+
+// framesize = sizeof(args) + sizeof(returns)
+_ = unsafe.Offsetof(FP) + unsafe.Offsetof(FP_ret)
+
+Return
+}
+```
+
+The code is completely similar to the Foo function parameters. The only difference is the offset of each function, which is automatically calculated by the `unsafe.Offsetof` function. Since each member of the Go structure already satisfies the alignment requirements, the offset obtained for each parameter in a generic manner also satisfies the alignment requirements. The preamble notes that the first return value address needs to be realigned to a multiple of the machine word size.
+
+The size and memory layout of the parameters and return values ​​of the Foo function:
 
 ![](../images/ch3-10-func-arg-01.ditaa.png)
 
-*图 3-10 函数的参数*
+*Figure 3-10 Function parameters *
 
 
-下面的代码演示了Foo汇编函数参数和返回值的定位：
+The following code demonstrates the positioning of the Foo assembly function parameters and return values:
 
 ```
-TEXT ·Foo(SB), $0
-	MOVEQ a+0(FP),       AX // a
-	MOVEQ b+2(FP),       BX // b
-	MOVEQ c_dat+8*1(FP), CX // c.Data
-	MOVEQ c_len+8*2(FP), DX // c.Len
-	MOVEQ c_cap+8*3(FP), DI // c.Cap
-	RET
+TEXT · Foo(SB), $0
+MOVEQ a+0(FP), AX // a
+MOVEQ b+2(FP), BX // b
+MOVEQ c_dat+8*1(FP), CX // c.Data
+MOVEQ c_len+8*2(FP), DX // c.Len
+MOVEQ c_cap+8*3(FP), DI // c.Cap
+RET
 ```
 
-其中a和b参数之间出现了一个字节的空洞，b和c之间出现了4个字节的空洞。出现空洞的原因是要保证每个参数变量地址都要对齐到相应的倍数。
+There is a one-byte gap between the a and b parameters, and a 4-byte gap between b and c. The reason for the hole is to ensure that each parameter variable address is aligned to the corresponding multiple.
 
-## 3.4.4 函数中的局部变量
+## 3.4.4 Local variables in functions
 
-从Go语言函数角度讲，局部变量是函数内明确定义的变量，同时也包含函数的参数和返回值变量。但是从Go汇编角度看，局部变量是指函数运行时，在当前函数栈帧所对应的内存内的变量，不包含函数的参数和返回值（因为访问方式有差异）。函数栈帧的空间主要由函数参数和返回值、局部变量和被调用其它函数的参数和返回值空间组成。为了便于理解，我们可以将汇编函数的局部变量类比为Go语言函数中显式定义的变量，不包含参数和返回值部分。
+From the perspective of Go language functions, local variables are well-defined variables within a function, as well as function parameters and return value variables. However, from the perspective of Go assembly, the local variable refers to the variable in the memory corresponding to the current function stack frame when the function is running, and does not include the function parameters and return values ​​(because the access methods are different). The space of the function stack frame is mainly composed of function parameters and return values, local variables, and parameters and return value spaces of other functions being called. For ease of understanding, we can compare the local variables of the assembly function to the variables explicitly defined in the Go language function, without the parameters and return value parts.
 
-为了便于访问局部变量，Go汇编语言引入了伪SP寄存器，对应当前栈帧的底部。因为在当前栈帧时栈的底部是固定不变的，因此局部变量的相对于伪SP的偏移量也就是固定的，这可以简化局部变量的维护工作。SP真伪寄存器的区分只有一个原则：如果使用SP时有一个临时标识符前缀就是伪SP，否则就是真SP寄存器。比如`a(SP)`和`b+8(SP)`有a和b临时前缀，这里都是伪SP，而前缀部分一般用于表示局部变量的名字。而`(SP)`和`+8(SP)`没有临时标识符作为前缀，它们都是真SP寄存器。
+To facilitate access to local variables, Go assembly language introduces a pseudo SP register that corresponds to the bottom of the current stack frame. Because the bottom of the stack is fixed at the current stack frame, the offset of the local variable relative to the pseudo SP is fixed, which simplifies the maintenance of local variables. The SP authenticity register is distinguished by only one principle: if the SP is used, a temporary identifier prefix is ​​a pseudo SP, otherwise it is a true SP register. For example, `a(SP)` and `b+8(SP)` have temporary prefixes a and b, which are pseudo SPs, and the prefix part is generally used to indicate the name of a local variable. And `(SP)` and `+8(SP)` have no temporary identifiers as prefixes, they are all true SP registers.
 
-在X86平台，函数的调用栈是从高地址向低地址增长的，因此伪SP寄存器对应栈帧的底部其实是对应更大的地址。当前栈的顶部对应真实存在的SP寄存器，对应当前函数栈帧的栈顶，对应更小的地址。如果整个内存用Memory数组表示，那么`Memory[0(SP):end-0(SP)]`就是对应当前栈帧的切片，其中开始位置是真SP寄存器，结尾部分是伪SP寄存器。真SP寄存器一般用于表示调用其它函数时的参数和返回值，真SP寄存器对应内存较低的地址，所以被访问变量的偏移量是正数；而伪SP寄存器对应高地址，对应的局部变量的偏移量都是负数。
+On the X86 platform, the call stack of a function grows from a high address to a low address, so the pseudo SP register corresponds to a larger address at the bottom of the stack frame. The top of the current stack corresponds to the real SP register, corresponding to the top of the stack of the current function stack frame, corresponding to a smaller address. If the entire memory is represented by a Memory array, then `Memory[0(SP):end-0(SP)]` is the slice corresponding to the current stack frame, where the start position is the true SP register and the end is the pseudo SP register. The true SP register is generally used to indicate the parameters and return values ​​when calling other functions. The true SP register corresponds to the lower memory address, so the offset of the accessed variable is a positive number; and the pseudo SP register corresponds to the high address, the corresponding local variable. The offsets are all negative.
 
-为了便于对比，我们将前面Foo函数的参数和返回值变量改成局部变量：
+For the sake of comparison, we changed the parameters of the previous Foo function and the return value variable to local variables:
 
 ```go
-func Foo() {
-	var c []byte
-	var b int16
-	var a bool
+Func Foo() {
+Var c []byte
+Var b int16
+Var a bool
 }
 ```
 
-然后通过汇编语言重新实现Foo函数，并通过伪SP来定位局部变量：
+Then reimplement the Foo function through assembly language and locate the local variables with pseudo SP:
 
 ```
-TEXT ·Foo(SB), $32-0
-	MOVQ a-32(SP),      AX // a
-	MOVQ b-30(SP),      BX // b
-	MOVQ c_data-24(SP), CX // c.Data
-	MOVQ c_len-16(SP),  DX // c.Len
-	MOVQ c_cap-8(SP),   DI // c.Cap
-	RET
+TEXT · Foo(SB), $32-0
+MOVQ a-32(SP), AX // a
+MOVQ b-30(SP), BX // b
+MOVQ c_data-24(SP), CX // c.Data
+MOVQ c_lEn-16(SP), DX // c.Len
+MOVQ c_cap-8(SP), DI // c.Cap
+RET
 ```
 
-Foo函数有3个局部变量，但是没有调用其它的函数，因为对齐和填充的问题导致函数的栈帧大小为32个字节。因为Foo函数没有参数和返回值，因此参数和返回值大小为0个字节，当然这个部分可以省略不写。而局部变量中先定义的变量c离伪SP寄存器对应的地址最近，最后定义的变量a离伪SP寄存器最远。有两个因素导致出现这种逆序的结果：一个从Go语言函数角度理解，先定义的c变量地址要比后定义的变量的地址更大；另一个是伪SP寄存器对应栈帧的底部，而X86中栈是从高向低生长的，所以最先定义有着更大地址的c变量离栈的底部伪SP更近。
+The Foo function has three local variables, but no other functions are called, because the alignment and padding problems cause the function's stack frame size to be 32 bytes. Because the Foo function has no parameters and return values, the parameter and return value is 0 bytes. Of course, this part can be omitted. The variable c first defined in the local variable is closest to the address corresponding to the pseudo SP register, and the last defined variable a is farthest from the pseudo SP register. There are two factors that lead to the result of this reverse order: one understands from the perspective of the Go language function that the first defined c variable address is larger than the address of the later defined variable; the other is that the pseudo SP register corresponds to the bottom of the stack frame, and The stack in X86 grows from high to low, so the first variable that defines a larger address is closer to the bottom pseudo SP of the stack.
 
-我们同样可以通过结构体来模拟局部变量的布局：
+We can also simulate the layout of local variables through structures:
 
 ```go
-func Foo() {
-	var local [1]struct{
-		a bool
-		b int16
-		c []byte
-	}
-	var SP = &local[1];
+Func Foo() {
+Var local [1]struct{
+a bool
+b int16
+c []byte
+}
+Var SP = &local[1];
 
-	_ = -(unsafe.Sizeof(local)-unsafe.Offsetof(local.a)) + uintptr(&SP) // a
-	_ = -(unsafe.Sizeof(local)-unsafe.Offsetof(local.b)) + uintptr(&SP) // b
-	_ = -(unsafe.Sizeof(local)-unsafe.Offsetof(local.c)) + uintptr(&SP) // c
+_ = -(unsafe.Sizeof(local)-unsafe.Offsetof(local.a)) + uintptr(&SP) // a
+_ = -(unsafe.Sizeof(local)-unsafe.Offsetof(local.b)) + uintptr(&SP) // b
+_ = -(unsafe.Sizeof(local)-unsafe.Offsetof(local.c)) + uintptr(&SP) // c
 }
 ```
 
-我们将之前的三个局部变量挪到一个结构体中。然后构造一个SP变量对应伪SP寄存器，对应局部变量结构体的顶部。然后根据局部变量总大小和每个变量对应成员的偏移量计算相对于伪SP的距离，最终偏移量是一个负数。
+We moved the previous three local variables into a structure. Then construct an SP variable corresponding to the pseudo SP register, corresponding to the top of the local variable structure. The distance from the pseudo SP is then calculated based on the total size of the local variables and the offset of the corresponding member of each variable, the final offset being a negative number.
 
-通过这种方式可以处理复杂的局部变量的偏移，同时也能保证每个变量地址的对齐要求。当然，除了地址对齐外，局部变量的布局并没有顺序要求。对于汇编比较熟悉同学可以根据自己的习惯组织变量的布局。
+In this way, it is possible to handle the offset of complex local variables while also ensuring the alignment requirements of each variable address. Of course, in addition to address alignment, the layout of local variables is not ordered. For the assembly, the familiar students can organize the layout of the variables according to their own habits.
 
-下面是Foo函数的局部变量的大小和内存布局：
+Here is the size and memory layout of the local variables of the Foo function:
 
 ![](../images/ch3-11-func-local-var-01.ditaa.png)
 
-*图 3-11 函数的局部变量*
+*Figure 3-11 Local variables of the function*
 
 
-从图中可以看出Foo函数局部变量和前一个例子中参数和返回值的内存布局是完全一样的，这也是我们故意设计的结果。但是参数和返回值是通过伪FP寄存器定位的，FP寄存器对应第一个参数的开始地址（第一个参数地址较低），因此每个变量的偏移量是正数。而局部变量是通过伪SP寄存器定位的，而伪SP寄存器对应的是第一个局部变量的结束地址（第一个局部变量地址较大），因此每个局部变量的偏移量都是负数。
+It can be seen from the figure that the Foo function local variable is exactly the same as the memory layout of the parameter and return value in the previous example, which is the result of our deliberate design. However, the parameters and return values ​​are located by the pseudo FP register, which corresponds to the start address of the first parameter (the first parameter address is lower), so the offset of each variable is a positive number. The local variable is located by the pseudo SP register, and the pseudo SP register corresponds to the end address of the first local variable (the first local variable address is large), so the offset of each local variable is negative.
 
-## 3.4.5 调用其它函数
+## 3.4.5 Calling other functions
 
-常见的用Go汇编实现的函数都是叶子函数，也就是被其它函数调用的函数，但是很少调用其它函数。这主要是因为叶子函数比较简单，可以简化汇编函数的编写；同时一般性能或特性的瓶颈也处于叶子函数。但是能够调用其它函数和能够被其它函数调用同样重要，否则Go汇编就不是一个完整的汇编语言。
+Common functions implemented with Go assembly are leaf functions, which are functions called by other functions, but rarely call other functions. This is mainly because the leaf function is relatively simple and can simplify the writing of assembly functions; at the same time, the general performance or feature bottleneck is also in the leaf function. But being able to call other functions is as important as being able to be called by other functions, otherwise Go assembly is not a complete assembly language.
 
-在前文中我们已经学习了一些汇编实现的函数参数和返回值处理的规则。那么一个显然的问题是，汇编函数的参数是从哪里来的？答案同样明显，被调用函数的参数是由调用方准备的：调用方在栈上设置好空间和数据后调用函数，被调用方在返回前将返回值放在对应的位置，函数通过RET指令返回调用方函数之后，调用方再从返回值对应的栈内存位置取出结果。Go语言函数的调用参数和返回值均是通过栈传输的，这样做的优点是函数调用栈比较清晰，缺点是函数调用有一定的性能损耗（Go编译器是通过函数内联来缓解这个问题的影响）。
+In the previous section we have learned some rules about the implementation of function parameters and return value processing. So an obvious question is, where does the argument to the assembly function come from? The answer is equally obvious. The parameters of the called function are prepared by the caller: the caller calls the function after setting the space and data on the stack. The callee puts the return value in the corresponding position before returning, and the function returns via the RET instruction. After the caller function, the caller fetches the result from the stack memory location corresponding to the return value. The calling parameters and return values ​​of the Go language function are transmitted through the stack. The advantage of this is that the function call stack is relatively clear. The disadvantage is that the function call has a certain performance loss (the Go compiler is used to alleviate this problem through function inlining). influences).
 
-为了便于展示，我们先使用Go语言来构造三个逐级调用的函数：
+For the sake of presentation, let's use the Go language to construct three functions that are called step by step:
 
 ```go
-func main() {
-	printsum(1, 2)
+Func main() {
+Printsum(1, 2)
 }
 
-func printsum(a, b int) {
-	var ret = sum(a, b)
-	println(ret)
+Func printsum(a, b int) {
+Var ret = sum(a, b)
+Println(ret)
 }
 
-func sum(a, b int) int {
-	return a+b
+Func sum(a, b int) int {
+Return a+b
 }
 ```
 
-其中main函数通过字面值常量直接调用printsum函数，printsum函数输出两个整数的和。而printsum函数内部又通过调用sum函数计算两个数的和，并最终调用打印函数进行输出。因为printsum既是被调用函数又是调用函数，所以它是我们要重点分析的函数。
+The main function directly calls the printsum function through a literal constant, and the printsum function outputs the sum of two integers. The printsum function internally calculates the sum of the two numbers by calling the sum function, and finally calls the print function to output. Because printsum is both a called function and a calling function, it is the function we want to focus on.
 
-下图展示了三个函数逐级调用时内存中函数参数和返回值的布局：
+The following figure shows the layout of in-memory function parameters and return values ​​when three functions are called step by step:
 
 ![](../images/ch3-12-func-call-frame-01.ditaa.png)
 
-*图 3-12 函数帧*
+*Figure 3-12 Function Frame*
 
 
-为了便于理解，我们对真实的内存布局进行了简化。要记住的是调用函数时，被调用函数的参数和返回值内存空间都必须由调用者提供。因此函数的局部变量和为调用其它函数准备的栈空间总和就确定了函数帧的大小。调用其它函数前调用方要选择保存相关寄存器到栈中，并在调用函数返回后选择要恢复的寄存器进行保存。最终通过CALL指令调用函数的过程和调用我们熟悉的调用println函数输出的过程类似。
+For ease of understanding, we have simplified the real memory layout. The thing to remember is that when calling a function, the parameters of the called function and the return value memory space must be provided by the caller. Therefore, the size of the function frame is determined by the local variables of the function and the total stack space prepared for calling other functions. Before calling other functions, the caller should choose to save the relevant registers to the stack, and select the registers to be restored for saving after the callback function returns. The process of calling a function through the CALL instruction is similar to calling the familiar output of the println function.
 
-Go语言中函数调用是一个复杂的问题，因为Go函数不仅仅要了解函数调用参数的布局，还会涉及到栈的跳转，栈上局部变量的生命周期管理。本节只是简单了解函数调用参数的布局规则，在后续的章节中会更详细的讨论函数的细节。
+The function call in the Go language is a complicated problem, because the Go function not only needs to understand the layout of the function call parameters, but also involves the jump of the stack and the lifecycle management of the local variables on the stack. This section is just a simple understanding of the layout rules for function call parameters. The details of the function are discussed in more detail in the following sections.
 
-## 3.4.6 宏函数
+## 3.4.6 Macro function
 
-宏函数并不是Go汇编语言所定义，而是Go汇编引入的预处理特性自带的特性。
+Macro functions are not defined by Go assembly language, but are inherent in the preprocessing features introduced by Go assembly.
 
-在C语言中我们可以通过带参数的宏定义一个交换2个数的宏函数：
+In C, we can define a macro function that exchanges 2 numbers with a macro with parameters:
 
 ```c
 #define SWAP(x, y) do{ int t = x; x = y; y = t; }while(0)
 ```
 
-我们可以用类似的方式定义一个交换两个寄存器的宏：
+We can define a macro that exchanges two registers in a similar way:
 
 ```c
 #define SWAP(x, y, t) MOVQ x, t; MOVQ y, x; MOVQ t, y
 ```
 
-因为汇编语言中无法定义临时变量，我们增加一个参数用于临时寄存器。下面是通过SWAP宏函数交换AX和BX寄存器的值，然后返回结果：
+Because temporary variables cannot be defined in assembly language, we add a parameter to the temporary register. The following is the exchange of the values ​​of the AX and BX registers through the SWAP macro function, and then returns the result:
 
 ```
 // func Swap(a, b int) (int, int)
-TEXT ·Swap(SB), $0-32
-	MOVQ a+0(FP), AX // AX = a
-	MOVQ b+8(FP), BX // BX = b
+TEXT · Swap(SB), $0-32
+MOVQ a+0(FP), AX // AX = a
+MOVQ b+8(FP), BX // BX = b
 
-	SWAP(AX, BX, CX)     // AX, BX = b, a
+SWAP(AX, BX, CX) // AX, BX = b, a
 
-	MOVQ AX, ret0+16(FP) // return
-	MOVQ BX, ret1+24(FP) //
-	RET
+MOVQ AX, ret0+16(FP) // return
+MOVQ BX, ret1+24(FP) //
+RET
 ```
 
-因为预处理器可以通过条件编译针对不同的平台定义宏的实现，这样可以简化平台带来的差异。
-
+Because the preprocessor can conditionally compile macros for different platforms, this simplifies the differences that the platform brings.

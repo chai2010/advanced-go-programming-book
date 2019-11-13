@@ -1,12 +1,12 @@
-# 3.7 汇编语言的威力
+# 3.7 The power of assembly language
 
-汇编语言的真正威力来自两个维度：一是突破框架限制，实现看似不可能的任务；二是突破指令限制，通过高级指令挖掘极致的性能。对于第一个问题，我们将演示如何通过Go汇编语言直接访问系统调用，和直接调用C语言函数。对于第二个问题，我们将演示X64指令中AVX等高级指令的简单用法。
+The true power of assembly language comes from two dimensions: one is to break through the framework constraints and achieve seemingly impossible tasks; the other is to break through the instruction limits and mine the ultimate performance through advanced instructions. For the first question, we will demonstrate how to directly access system calls through Go assembly language, and directly call C language functions. For the second question, we will demonstrate the simple use of advanced instructions such as AVX in X64 instructions.
 
-## 3.7.1 系统调用
+## 3.7.1 System Call
 
-系统调用是操作系统为外提供的公共接口。因为操作系统彻底接管了各种底层硬件设备，因此操作系统提供的系统调用成了实现某些操作的唯一方法。从另一个角度看，系统调用更像是一个RPC远程过程调用，不过信道是寄存器和内存。在系统调用时，我们向操作系统发送调用的编号和对应的参数，然后阻塞等待系统调用地返回。因为涉及到阻塞等待，因此系统调用期间的CPU利用率一般是可以忽略的。另一个和RPC地远程调用类似的地方是，操作系统内核处理系统调用时不会依赖用户的栈空间，一般不会导致爆栈发生。因此系统调用是最简单安全的一种调用了。
+A system call is a public interface provided by the operating system. Because the operating system completely takes over the various underlying hardware devices, the system calls provided by the operating system are the only way to do something. From another perspective, the system call is more like an RPC remote procedure call, but the channel is a register and memory. When the system is called, we send the caller's number and corresponding parameters to the operating system, and then block the wait for the system call to return. CPU utilization during system calls is generally negligible because of blocking waits. Another similarity to RPC remote calls is that the operating system kernel does not rely on the user's stack space when processing system calls, and generally does not cause a burst to occur. So system calls are the simplest and safest kind of call.
 
-系统调用虽然简单，但是它是操作系统对外的接口，因此不同的操作系统调用规范可能有很大地差异。我们先看看Linux在AMD64架构上的系统调用规范，在`syscall/asm_linux_amd64.s`文件中有注释说明：
+Although the system call is simple, it is the external interface of the operating system, so different operating system call specifications may vary greatly. Let's take a look at Linux's system call specification on the AMD64 architecture. There are comments in the `syscall/asm_linux_amd64.s` file:
 
 ```go
 //
@@ -19,189 +19,188 @@
 // would pass 4th arg in CX, not R10.
 ```
 
-这是`syscall.Syscall`函数的内部注释，简要说明了Linux系统调用的规范。系统调用的前6个参数直接由DI、SI、DX、R10、R8和R9寄存器传输，结果由AX和DX寄存器返回。macOS等类UINX系统调用的参数传输大多数都采用类似的规则。
+This is an internal comment for the `syscall.Syscall` function, which briefly describes the specification of the Linux system call. The first six parameters of the system call are transferred directly from the DI, SI, DX, R10, R8, and R9 registers, and the result is returned by the AX and DX registers. Most of the parameter transmissions of UINX system calls such as macOS use similar rules.
 
-macOS的系统调用编号在`/usr/include/sys/syscall.h`头文件，Linux的系统调用号在`/usr/include/asm/unistd.h`头文件。虽然在UNIX家族中是系统调用的参数和返回值的传输规则类似，但是不同操作系统提供的系统调用却不是完全相同的，因此系统调用编号也有很大的差异。以UNIX系统中著名的write系统调用为例，在macOS的系统调用编号为4，而在Linux的系统调用编号却是1。
+The system call number of macOS is in the `/usr/include/sys/syscall.h` header file, and the Linux system call number is in the `/usr/include/asm/unistd.h` header file. Although the parameters of the system call parameters and return values ​​are similar in the UNIX family, the system calls provided by different operating systems are not identical, so the system call numbers are also very different. Take the well-known write system call in UNIX system as an example. The system call number in macOS is 4, while the system call number in Linux is 1.
 
-我们将基于write系统调用包装一个字符串输出函数。下面的代码是macOS版本：
+We will wrap a string output function based on the write system call. The following code is the macOS version:
 
 ```
 // func SyscallWrite_Darwin(fd int, msg string) int
 TEXT ·SyscallWrite_Darwin(SB), NOSPLIT, $0
-	MOVQ $(0x2000000+4), AX // #define SYS_write 4
-	MOVQ fd+0(FP),       DI
-	MOVQ msg_data+8(FP), SI
-	MOVQ msg_len+16(FP), DX
-	SYSCALL
-	MOVQ AX, ret+0(FP)
-	RET
+MOVQ $(0x2000000+4), AX // #define SYS_write 4
+MOVQ fd+0(FP), DI
+MOVQ msg_data+8(FP), SI
+MOVQ msg_len+16(FP), DX
+SYSCALL
+MOVQ AX, ret+0(FP)
+RET
 ```
 
-其中第一个参数是输出文件的文件描述符编号，第二个参数是字符串的头部。字符串头部是由reflect.StringHeader结构定义，第一成员是8字节的数据指针，第二个成员是8字节的数据长度。在macOS系统中，执行系统调用时还需要将系统调用的编号加上0x2000000后再行传入AX。然后再将fd、数据地址和长度作为write系统调用的三个参数输入，分别对应DI、SI和DX三个寄存器。最后通过SYSCALL指令执行系统调用，系统调用返回后从AX获取返回值。
+The first parameter is the file descriptor number of the output file, and the second parameter is the head of the string. The string header is defined by the reflect.StringHeader structure, the first member is an 8-byte data pointer, and the second member is an 8-byte data length. In the macOS system, when executing the system call, you need to add 0x2000000 to the system call number and then pass it to AX. Then fd, data address and length are input as three parameters of the write system call, corresponding to three registers of DI, SI and DX. Finally, the system call is executed by the SYSCALL instruction, and the return value is obtained from AX after the system call returns.
 
-这样我们就基于系统调用包装了一个定制的输出函数。在UNIX系统中，标准输入stdout的文件描述符编号是1，因此我们可以用1作为参数实现字符串的输出：
+This way we wrap a custom output function based on the system call. In UNIX systems, the file descriptor number for standard input stdout is 1, so we can use 1 as a parameter to implement the output of the string:
 
 ```go
-func SyscallWrite_Darwin(fd int, msg string) int
+Func SyscallWrite_Darwin(fd int, msg string) int
 
-func main() {
-	if runtime.GOOS == "darwin" {
-		SyscallWrite_Darwin(1, "hello syscall!\n")
-	}
+Func main() {
+If runtime.GOOS == "darwin" {
+SyscallWrite_Darwin(1, "hello syscall!\n")
+}
 }
 ```
 
-如果是Linux系统，只需要将编号改为write系统调用对应的1即可。而Windows的系统调用则有另外的参数传输规则。在X64环境Windows的系统调用参数传输规则和默认的C语言规则非常相似，在后续的直接调用C函数部分再行讨论。
+If it is a Linux system, just change the number to the corresponding 1 of the write system call. Windows system calls have additional parameter transfer rules. In the X64 environment, Windows system call parameter transfer rules are very similar to the default C language rules, and will be discussed in the subsequent direct call to the C function part.
 
 
-## 3.7.2 直接调用C函数
+## 3.7.2 Call C function directly
 
-在计算机的发展的过程中，C语言和UNIX操作系统有着不可替代的作用。因此操作系统的系统调用、汇编语言和C语言函数调用规则几个技术是密切相关的。
+In the development of computers, C language and UNIX operating system have an irreplaceable role. Therefore, the system calls, assembly language and C language function calling rules of the operating system are closely related.
 
-在X86的32位系统时代，C语言一般默认的是用栈传递参数并用AX寄存器返回结果，称为cdecl调用约定。Go语言函数和cdecl调用约定非常相似，它们都是以栈来传递参数并且返回地址和BP寄存器的布局都是类似的。但是Go语言函数将返回值也通过栈返回，因此Go语言函数可以支持多个返回值。我们可以将Go语言函数看作是没有返回值的C语言函数，同时将Go语言函数中的返回值挪到C语言函数参数的尾部，这样栈不仅仅用于传入参数也用于返回多个结果。
+In the era of 32-bit systems in X86, the C language defaults to passing parameters with the stack and returning results with the AX register, called the cdecl calling convention. The Go language function is very similar to the cdecl calling convention. They all pass arguments on the stack and the return address and BP register layout are similar. But the Go language function returns the return value through the stack, so the Go language function can support multiple return values. We can think of the Go language function as a C language function with no return value, and move the return value in the Go language function to the end of the C language function parameter, so that the stack is used not only for passing parameters but also for returning multiple result.
 
-在X64时代，AMD架构增加了8个通用寄存器，为了提高效率C语言也默认改用寄存器来传递参数。在X64系统，默认有System V AMD64 ABI和Microsoft x64两种C语言函数调用规范。其中System V的规范适用于Linux、FreeBSD、macOS等诸多类UNIX系统，而Windows则是用自己特有的调用规范。
+In the X64 era, the AMD architecture added eight general-purpose registers. In order to improve efficiency, the C language also uses registers to pass parameters by default. On X64 systems, there are two C language function call specifications, System V AMD64 ABI and Microsoft x64. The System V specification applies to many UNIX-like systems such as Linux, FreeBSD, and macOS, while Windows uses its own unique calling specification.
 
-在理解了C语言函数的调用规范之后，汇编代码就可以绕过CGO技术直接调用C语言函数。为了便于演示，我们先用C语言构造一个简单的加法函数myadd：
+After understanding the calling specification of the C language function, the assembly code can bypass the CGO technique and directly call the C language function. For the sake of demonstration, let's construct a simple addition function myadd in C:
 
 ```c
 #include <stdint.h>
 
-int64_t myadd(int64_t a, int64_t b) {
-	return a+b;
+Int64_t myadd(int64_t a, int64_t b) {
+Return a+b;
 }
 ```
 
-然后我们需要实现一个asmCallCAdd函数：
+Then we need to implement an asmCallCAdd function:
 
 ```go
-func asmCallCAdd(cfun uintptr, a, b int64) int64
+Func asmCallCAdd(cfun uintptr, a, b int64) int64
 ```
 
-因为Go汇编语言和CGO特性不能同时在一个包中使用（因为CGO会调用gcc，而gcc会将Go汇编语言当做普通的汇编程序处理，从而导致错误），我们通过一个参数传入C语言myadd函数的地址。asmCallCAdd函数的其余参数和C语言myadd函数的参数保持一致。
+Because Go assembly language and CGO features can't be used in a package at the same time (because CGO will call gcc, and gcc will treat Go assembly language as a normal assembler, causing errors), we pass the C language myadd function through a parameter. the address of. The remaining parameters of the asmCallCAdd function are consistent with the parameters of the C language myadd function.
 
-我们只实现System V AMD64 ABI规范的版本。在System V版本中，寄存器可以最多传递六个参数，分别对应DI、SI、DX、CX、R8和R9六个寄存器（如果是浮点数则需要通过XMM寄存器传送），返回值依然通过AX返回。通过对比系统调用的规范可以发现，系统调用的第四个参数是用R10寄存器传递，而C语言函数的第四个参数是用CX传递。
+We only implement the version of the System V AMD64 ABI specification. In the System V version, the register can pass up to six parameters, corresponding to the three registers DI, SI, DX, CX, R8, and R9 (if floating point numbers need to be transmitted through the XMM register), the return value is still returned by AX. By comparing the specifications of the system call, it can be found that the fourth parameter of the system call is passed in the R10 register, and the fourth parameter of the C language function is passed in CX.
 
-下面是System V AMD64 ABI规范的asmCallCAdd函数的实现：
+The following is the implementation of the asmCallCAdd function of the System V AMD64 ABI specification:
 
 ```
 // System V AMD64 ABI
 // func asmCallCAdd(cfun uintptr, a, b int64) int64
-TEXT ·asmCallCAdd(SB), NOSPLIT, $0
-	MOVQ cfun+0(FP), AX // cfun
-	MOVQ a+8(FP),    DI // a
-	MOVQ b+16(FP),   SI // b
-	CALL AX
-	MOVQ AX, ret+24(FP)
-	RET
+TEXT · asmCallCAdd(SB), NOSPLIT, $0
+MOVQ cfun+0(FP), AX // cfun
+MOVQ a+8(FP), DI // a
+MOVQ b+16(FP), SI // b
+CALL AX
+MOVQ AX, ret+24(FP)
+RET
 ```
 
-首先是将第一个参数表示的C函数地址保存到AX寄存器便于后续调用。然后分别将第二和第三个参数加载到DI和SI寄存器。然后CALL指令通过AX中保持的C语言函数地址调用C函数。最后从AX寄存器获取C函数的返回值，并通过asmCallCAdd函数返回。
+The first is to save the C function address indicated by the first parameter to the AX register for subsequent calls. The second and third parameters are then loaded into the DI and SI registers, respectively. The CALL instruction then calls the C function via the C language function address held in AX. Finally, the return value of the C function is obtained from the AX register and returned by the asmCallCAdd function.
 
-Win64环境的C语言调用规范类似。不过Win64规范中只有CX、DX、R8和R9四个寄存器传递参数（如果是浮点数则需要通过XMM寄存器传送），返回值依然通过AX返回。虽然是可以通过寄存器传输参数，但是调用这依然要为前四个参数准备栈空间。需要注意的是，Windows x64的系统调用和C语言函数可能是采用相同的调用规则。因为没有Windows测试环境，我们这里就不提供了Windows版本的代码实现了，Windows用户可以自己尝试实现类似功能。
+The C language calling specification for Win64 environments is similar. However, in the Win64 specification, only the CX, DX, R8, and R9 four registers pass parameters (if floating point numbers need to be transferred through the XMM register), the return value is still returned by AX. Although it is possible to transfer parameters through registers, it is still necessary to prepare stack space for the first four parameters. It should be noted that Windows x64 system calls and C language functions may use the same calling rules. Because there is no Windows test environment, we do not provide the Windows version of the code implementation here, Windows users can try to achieve similar functions.
 
-然后我们就可以使用asmCallCAdd函数直接调用C函数了：
+Then we can call the C function directly using the asmCallCAdd function:
 
 ```go
 /*
 #include <stdint.h>
 
-int64_t myadd(int64_t a, int64_t b) {
-	return a+b;
+Int64_t myadd(int64_t a, int64_t b) {
+Return a+b;
 }
 */
-import "C"
+Import "C"
 
-import (
-	asmpkg "path/to/asm"
+Import (
+Asmpkg "path/to/asm"
 )
 
-func main() {
-	if runtime.GOOS != "windows" {
-		println(asmpkg.asmCallCAdd(
-			uintptr(unsafe.Pointer(C.myadd)),
-			123, 456,
-		))
-	}
+Func main() {
+If runtime.GOOS != "windows" {
+Println(asmpkg.asmCallCAdd(
+Uintptr(unsafe.Pointer(C.myadd)),
+123, 456,
+))
+}
 }
 ```
 
-在上面的代码中，通过`C.myadd`获取C函数的地址，然后转换为合适的类型再传人asmCallCAdd函数。在这个例子中，汇编函数假设调用的C语言函数需要的栈很小，可以直接复用Go函数中多余的空间。如果C语言函数可能需要较大的栈，可以尝试像CGO那样切换到系统线程的栈上运行。
+In the above code, get the address of the C function by `C.myadd`, then convert it to the appropriate type and pass the asmCallCAdd function. In this example, the assembly function assumes that the called C language function requires a small stack and can directly reuse the extra space in the Go function. If the C language function may require a larger stack, try switching to the system thread's stack like CGO.
 
 
-## 3.7.3 AVX指令
+## 3.7.3 AVX Instructions
 
-从Go1.11开始，Go汇编语言引入了AVX512指令的支持。AVX指令集是属于Intel家的SIMD指令集中的一部分。AVX512的最大特点是数据有512位宽度，可以一次计算8个64位数或者是等大小的数据。因此AVX指令可以用于优化矩阵或图像等并行度很高的算法。不过并不是每个X86体系的CPU都支持了AVX指令，因此首要的任务是如何判断CPU支持了哪些高级指令。
+Since Go1.11, Go assembly language has introduced support for AVX512 instructions. The AVX instruction set is part of the Intel family's SIMD instruction set. The biggest feature of the AVX512 is that the data has a width of 512 bits and can calculate 8 64-bit numbers or the same size data at a time. Therefore, the AVX instruction can be used to optimize algorithms with high degree of parallelism such as matrix or image. However, not every CPU of the X86 system supports the AVX instruction, so the first task is to determine which advanced instructions the CPU supports.
 
-在Go语言标准库的`internal/cpu`包提供了CPU是否支持某些高级指令的基本信息，但是只有标准库才能引用这个包（因为internal路径的限制）。该包底层是通过X86提供的CPUID指令来识别处理器的详细信息。最简便的方法是直接将`internal/cpu`包克隆一份。不过这个包为了避免复杂的依赖没有使用init函数自动初始化，因此需要根据情况手工调整代码执行doinit函数初始化。
+The `internal/cpu` package in the Go language standard library provides basic information on whether the CPU supports certain advanced instructions, but only the standard library can reference this package (because of the limitations of the internal path). The bottom layer of the package is the CPUID instruction provided by X86 to identify the details of the processor. The easiest way is to clone the `internal/cpu` package directly. However, in order to avoid complex dependencies, this package does not use the init function to automatically initialize, so you need to manually adjust the code to perform the doinit function initialization according to the situation.
 
-`internal/cpu`包针对X86处理器提供了以下特性检测：
+The `internal/cpu` package provides the following feature detection for X86 processors:
 
 ```go
-package cpu
+Package cpu
 
-var X86 x86
+Var X86 x86
 
 // The booleans in x86 contain the correspondingly named cpuid feature bit.
 // HasAVX and HasAVX2 are only set if the OS does support XMM and YMM registers
 // in addition to the cpuid feature bit being set.
 // The struct is padded to avoid false sharing.
-type x86 struct {
-	HasAES       bool
-	HasADX       bool
-	HasAVX       bool
-	HasAVX2      bool
-	HasBMI1      bool
-	HasBMI2      bool
-	HasERMS      bool
-	HasFMA       bool
-	HasOSXSAVE   bool
-	HasPCLMULQDQ bool
-	HasPOPCNT    bool
-	HasSSE2      bool
-	HasSSE3      bool
-	HasSSSE3     bool
-	HasSSE41     bool
-	HasSSE42     bool
+Type x86 struct {
+HasAES bool
+HasADX bool
+HasAVX bool
+HasAVX2 bool
+HasBMI1 bool
+HasBMI2 bool
+HasERMS bool
+HasFMA bool
+HasOSXSAVE bool
+HasPCLMULQDQ bool
+HasPOPCNT bool
+HasSSE2 bool
+HasSSE3 bool
+HasSSSE3 bool
+HasSSE41 bool
+HasSSE42 bool
 }
 ```
 
-因此我们可以用以下的代码测试运行时的CPU是否支持AVX2指令集：
+So we can use the following code to test whether the runtime CPU supports the AVX2 instruction set:
 
 ```go
-import (
-	cpu "path/to/cpu"
+Import (
+Cpu "path/to/cpu"
 )
 
-func main() {
-	if cpu.X86.HasAVX2 {
-		// support AVX2
-	}
+Func main() {
+If cpu.X86.HasAVX2 {
+// support AVX2
+}
 }
 ```
 
-AVX512是比较新的指令集，只有高端的CPU才会提供支持。为了主流的CPU也能运行代码测试，我们选择AVX2指令来构造例子。AVX2指令每次可以处理32字节的数据，可以用来提升数据复制的工作的效率。
+The AVX512 is a relatively new instruction set that is only supported by high-end CPUs. In order to run the code test for the mainstream CPU, we chose the AVX2 instruction to construct the example. The AVX2 instruction can process 32 bytes of data at a time and can be used to improve the efficiency of data copying.
 
-下面的例子是用AVX2指令复制数据，每次复制数据32字节倍数大小的数据：
+The following example uses the AVX2 instruction to copy data, each time copying data in multiples of 32 bytes:
 
 ```
 // func CopySlice_AVX2(dst, src []byte, len int)
 TEXT ·CopySlice_AVX2(SB), NOSPLIT, $0
-	MOVQ dst_data+0(FP),  DI
-	MOVQ src_data+24(FP), SI
-	MOVQ len+32(FP),      BX
-	MOVQ $0,              AX
+MOVQ dst_data+0(FP), DI
+MOVQ src_data+24(FP), SI
+MOVQ len+32(FP), BX
+MOVQ $0, AX
 
 LOOP:
-	VMOVDQU 0(SI)(AX*1), Y0
-	VMOVDQU Y0, 0(DI)(AX*1)
-	ADDQ $32, AX
-	CMPQ AX, BX
-	JL   LOOP
-	RET
+VMOVDQU 0(SI)(AX*1), Y0
+VMOVDQU Y0, 0(DI)(AX*1)
+ADDQ $32, AX
+CMPQ AX, BX
+JL LOOP
+RET
 ```
 
-其中VMOVDQU指令先将`0(SI)(AX*1)`地址开始的32字节数据复制到Y0寄存器中，然后再复制到`0(DI)(AX*1)`对应的目标内存中。VMOVDQU指令操作的数据地址可以不用对齐。
+The VMOVDQU instruction first copies the 32-byte data starting at the address of `0(SI)(AX*1)` into the Y0 register, and then copies it to the target memory corresponding to `0(DI)(AX*1)`. The data address of the VMOVDQU instruction operation can be omitted.
 
-AVX2共有16个Y寄存器，每个寄存器有256bit位。如果要复制的数据很多，可以多个寄存器同时复制，这样可以利用更高效的流水特性优化性能。
-
+The AVX2 has a total of 16 Y registers, each with 256 bits. If you have a lot of data to copy, you can copy multiple registers at the same time, which can optimize performance with more efficient pipeline features.
