@@ -32,8 +32,10 @@ fork
 	return sum(2, 3)
 };
 
-|#AntiqueWhite|_cgo_export.c|
-:sum(2, 3);
+|#AntiqueWhite|main.cgo2.c|
+: int sum(int a, int b) {
+	return a+b
+};
 
 endfork
 
