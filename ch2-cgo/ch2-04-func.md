@@ -1,191 +1,190 @@
-# 2.4 函数调用
+# 2.4 Function Call
 
-函数是C语言编程的核心，通过CGO技术我们不仅仅可以在Go语言中调用C语言函数，也可以将Go语言函数导出为C语言函数。
+The function is the core of C language programming. Through CGO technology, we can not only call C language function in Go language, but also export Go language function as C language function.
 
-## 2.4.1 Go调用C函数
+## 2.4.1 Go calls C function
 
-对于一个启用CGO特性的程序，CGO会构造一个虚拟的C包。通过这个虚拟的C包可以调用C语言函数。
-
-```go
-/*
-static int add(int a, int b) {
-	return a+b;
-}
-*/
-import "C"
-
-func main() {
-	C.add(1, 1)
-}
-```
-
-以上的CGO代码首先定义了一个当前文件内可见的add函数，然后通过`C.add`。
-
-## 2.4.2 C函数的返回值
-
-对于有返回值的C函数，我们可以正常获取返回值。
+For a program that enables CGO features, CGO constructs a virtual C package. The C language function can be called by this virtual C package.
 
 ```go
 /*
-static int div(int a, int b) {
-	return a/b;
+Static int add(int a, int b) {
+Return a+b;
 }
 */
-import "C"
-import "fmt"
+Import "C"
 
-func main() {
-	v := C.div(6, 3)
-	fmt.Println(v)
+Func main() {
+C.add(1, 1)
 }
 ```
 
-上面的div函数实现了一个整数除法的运算，然后通过返回值返回除法的结果。
+The above CGO code first defines an add function visible in the current file, and then passes `C.add`.
 
-不过对于除数为0的情形并没有做特殊处理。如果希望在除数为0的时候返回一个错误，其他时候返回正常的结果。因为C语言不支持返回多个结果，因此`<errno.h>`标准库提供了一个`errno`宏用于返回错误状态。我们可以近似地将`errno`看成一个线程安全的全局变量，可以用于记录最近一次错误的状态码。
+## 2.4.2 Return value of C function
 
-改进后的div函数实现如下：
+For a C function with a return value, we can get the return value normally.
+
+```go
+/*
+Static int div(int a, int b) {
+Return a/b;
+}
+*/
+Import "C"
+Import "fmt"
+
+Func main() {
+v := C.div(6, 3)
+fmt.Println(v)
+}
+```
+
+The above div function implements an integer division operation and returns the result of the division by the return value.
+
+However, there is no special treatment for the case where the divisor is zero. If you want to return an error when the divisor is 0, other times return normal results. Because the C language does not support returning multiple results, the `<errno.h>` standard library provides an `errno` macro for returning error status. We can approximate `errno` as a thread-safe global variable that can be used to record the status code of the most recent error.
+
+The improved div function is implemented as follows:
 
 ```c
 #include <errno.h>
 
-int div(int a, int b) {
-	if(b == 0) {
-		errno = EINVAL;
-		return 0;
-	}
-	return a/b;
+Int div(int a, int b) {
+If(b == 0) {
+Errno = EINVAL;
+Return 0;
+}
+Return a/b;
 }
 ```
 
-CGO也针对`<errno.h>`标准库的`errno`宏做的特殊支持：在CGO调用C函数时如果有两个返回值，那么第二个返回值将对应`errno`错误状态。
+CGO also has special support for the `errno` macro of the `errno.h>` standard library: if there are two return values ​​when CGO calls a C function, the second return value will correspond to the `errno` error state.
 
 ```go
 /*
 #include <errno.h>
 
-static int div(int a, int b) {
-	if(b == 0) {
-		errno = EINVAL;
-		return 0;
-	}
-	return a/b;
+Static int div(int a, int b) {
+If(b == 0) {
+Errno = EINVAL;
+Return 0;
+}
+Return a/b;
 }
 */
-import "C"
-import "fmt"
+Import "C"
+Import "fmt"
 
-func main() {
-	v0, err0 := C.div(2, 1)
-	fmt.Println(v0, err0)
+Func main() {
+V0, err0 := C.div(2, 1)
+fmt.Println(v0, err0)
 
-	v1, err1 := C.div(1, 0)
-	fmt.Println(v1, err1)
+V1, err1 := C.div(1, 0)
+fmt.Println(v1, err1)
 }
 ```
 
-运行这个代码将会产生以下输出：
+Running this code will produce the following output:
 
 ```
 2 <nil>
 0 invalid argument
 ```
 
-我们可以近似地将div函数看作为以下类型的函数：
+We can approximate the div function as a function of the following types:
 
 ```go
-func C.div(a, b C.int) (C.int, [error])
+Func C.div(a, b C.int) (C.int, [error])
 ```
 
-第二个返回值是可忽略的error接口类型，底层对应 `syscall.Errno` 错误类型。
+The second return value is a negligible error interface type, and the underlying corresponds to the `syscall.Errno` error type.
 
-## 2.4.3 void函数的返回值
+## 2.4.3 Return value of void function
 
-C语言函数还有一种没有返回值类型的函数，用void表示返回值类型。一般情况下，我们无法获取void类型函数的返回值，因为没有返回值可以获取。前面的例子中提到，cgo对errno做了特殊处理，可以通过第二个返回值来获取C语言的错误状态。对于void类型函数，这个特性依然有效。
+C language functions also have a function that does not return a value type, and void refers to the return value type. In general, we can't get the return value of a void type function, because there is no return value to get. As mentioned in the previous example, cgo does a special treatment for errno, and can get the error state of C language through the second return value. This feature is still valid for void type functions.
 
-以下的代码是获取没有返回值函数的错误状态码：
-
-```go
-//static void noreturn() {}
-import "C"
-import "fmt"
-
-func main() {
-	_, err := C.noreturn()
-	fmt.Println(err)
-}
-```
-
-此时，我们忽略了第一个返回值，只获取第二个返回值对应的错误码。
-
-我们也可以尝试获取第一个返回值，它对应的是C语言的void对应的Go语言类型：
+The following code is to get an error status code with no return value function:
 
 ```go
 //static void noreturn() {}
-import "C"
-import "fmt"
+Import "C"
+Import "fmt"
 
-func main() {
-	v, _ := C.noreturn()
-	fmt.Printf("%#v", v)
+Func main() {
+_, err := C.noreturn()
+fmt.Println(err)
 }
 ```
 
-运行这个代码将会产生以下输出：
+At this point, we ignore the first return value and only get the error code corresponding to the second return value.
+
+We can also try to get the first return value, which corresponds to the Go language type corresponding to the C language void:
+
+```go
+//static void noreturn() {}
+Import "C"
+Import "fmt"
+
+Func main() {
+v, _ := C.noreturn()
+fmt.Printf("%#v", v)
+}
+```
+
+Running this code will produce the following output:
 
 ```
 main._Ctype_void{}
 ```
 
-我们可以看出C语言的void类型对应的是当前的main包中的`_Ctype_void`类型。其实也将C语言的noreturn函数看作是返回`_Ctype_void`类型的函数，这样就可以直接获取void类型函数的返回值：
+We can see that the void type of C language corresponds to the `_Ctype_void` type in the current main package. In fact, the C language noreturn function is also considered to return a function of type `_Ctype_void`, so that you can directly get the return value of the void type function:
 
 ```go
 //static void noreturn() {}
-import "C"
-import "fmt"
+Import "C"
+Import "fmt"
 
-func main() {
-	fmt.Println(C.noreturn())
+Func main() {
+fmt.Println(C.noreturn())
 }
 ```
 
-运行这个代码将会产生以下输出：
+Running this code will produce the following output:
 
 ```
 []
 ```
 
-其实在CGO生成的代码中，`_Ctype_void`类型对应一个0长的数组类型`[0]byte`，因此`fmt.Println`输出的是一个表示空数值的方括弧。
+In fact, in the CGO generated code, the `_Ctype_void` type corresponds to a 0 long array type `[0]byte`, so `fmt.Println` outputs a square bracket representing a null value.
 
-以上有效特性虽然看似有些无聊，但是通过这些例子我们可以精确掌握CGO代码的边界，可以从更深层次的设计的角度来思考产生这些奇怪特性的原因。
+Although the above effective features may seem boring, we can accurately grasp the boundaries of CGO code through these examples, and we can think about the reasons for these strange features from a deeper design perspective.
 
 
-## 2.4.4 C调用Go导出函数
+## 2.4.4 C calls the Go export function
 
-CGO还有一个强大的特性：将Go函数导出为C语言函数。这样的话我们可以定义好C语言接口，然后通过Go语言实现。在本章的第一节快速入门部分我们已经展示过Go语言导出C语言函数的例子。
+CGO also has a powerful feature: exporting Go functions as C language functions. In this case, we can define the C language interface and then implement it through the Go language. In the first section of this chapter, we have shown examples of Go language export C language functions.
 
-下面是用Go语言重新实现本节开始的add函数：
+Here's the re-implementation of the add function starting with this section in Go:
 
 ```go
-import "C"
+Import "C"
 
 //export add
-func add(a, b C.int) C.int {
-	return a+b
+Func add(a, b C.int) C.int {
+Return a+b
 }
 ```
 
-add函数名以小写字母开头，对于Go语言来说是包内的私有函数。但是从C语言角度来看，导出的add函数是一个可全局访问的C语言函数。如果在两个不同的Go语言包内，都存在一个同名的要导出为C语言函数的add函数，那么在最终的链接阶段将会出现符号重名的问题。
+The add function name begins with a lowercase letter and is a private function in the package for the Go language. But from the perspective of C language, the exported add function is a C language function that can be accessed globally. If there is an add function of the same name to be exported as a C language function in two different Go language packages, the problem of symbolic double name will occur in the final link phase.
 
-CGO生成的 `_cgo_export.h` 文件会包含导出后的C语言函数的声明。我们可以在纯C源文件中包含 `_cgo_export.h` 文件来引用导出的add函数。如果希望在当前的CGO文件中马上使用导出的C语言add函数，则无法引用 `_cgo_export.h` 文件。因为`_cgo_export.h` 文件的生成需要依赖当前文件可以正常构建，而如果当前文件内部循环依赖还未生成的`_cgo_export.h` 文件将会导致cgo命令错误。
+The `_cgo_export.h` file generated by CGO will contain the declaration of the exported C language function. We can include the `_cgo_export.h` file in the pure C source file to reference the exported add function. If you want to use the exported C language add function in the current CGO file, you can't reference the `_cgo_export.h` file. Because the generation of the `_cgo_export.h` file depends on the current file to build properly, and if the current file internal loop depends on the `_cgo_export.h` file that has not been generated, the cgo command will be incorrect.
 
 ```c
 #include "_cgo_export.h"
 
-void foo() {
-	add(1, 1);
+Void foo() {
+Add(1, 1);
 }
 ```
 
-当导出C语言接口时，需要保证函数的参数和返回值类型都是C语言友好的类型，同时返回值不得直接或间接包含Go语言内存空间的指针。
-
+When exporting the C language interface, you need to ensure that the function parameters and return value types are C-friendly types, and the return value must not directly or indirectly contain pointers to the Go language memory space.

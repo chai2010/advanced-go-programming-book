@@ -1,6 +1,5 @@
-## 2.11 补充说明
+## 2.11 Additional instructions
 
-CGO是C语言和Go语言混合编程的技术，因此要想熟练地使用CGO需要了解这两门语言。C语言推荐两本书：第一本是C语言之父编写的《C程序设计语言》；第二本是讲述C语言模块化编程的《C语言接口与实现:创建可重用软件的技术》。Go语言推荐官方出版的《The Go Programming Language》和Go语言自带的全部文档和全部代码。
+CGO is a hybrid programming technique between C and Go, so you need to know both languages ​​to be proficient in using CGO. The C language recommends two books: the first is the C programming language written by the father of the C language; the second is the C language interface and implementation of the C language modular programming: the technology to create reusable software. The Go language recommends the officially published "The Go Programming Language" and all the documentation and all the code that comes with the Go language.
 
-为何要话费巨大的精力学习CGO是一个问题。任何技术和语言都有它自身的优点和不足，Go语言不是银弹，它无法解决全部问题。而通过CGO可以继承C/C++将近半个世纪的软件遗产，通过CGO可以用Go给其它系统写C接口的共享库，通过CGO技术可以让Go语言编写的代码可以很好地融入现有的软件生态——而现在的软件正式建立在C/C++语言之上的。因此说CGO是一个保底的后备技术，它是Go的一个重量级的替补技术，值得任何一个严肃的Go语言开发人员学习。
-
+Why do you have to spend a lot of energy to learn CGO is a problem. Any technology and language has its own advantages and disadvantages. Go is not a silver bullet, it can't solve all the problems. Through CGO, you can inherit the software heritage of C/C++ for nearly half a century. Through CGO, you can use Go to write shared libraries of C interfaces to other systems. Through CGO technology, the code written by Go can be well integrated into existing software. Ecology - and now the software is officially built on top of the C/C++ language. Therefore, CGO is a backup technology. It is a heavyweight replacement technology for Go and deserves to be studied by any serious Go language developer.

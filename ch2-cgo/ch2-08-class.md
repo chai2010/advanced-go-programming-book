@@ -1,251 +1,251 @@
-# 2.8 C++ 类包装
+# 2.8 C++ class packaging
 
-CGO是C语言和Go语言之间的桥梁，原则上无法直接支持C++的类。CGO不支持C++语法的根本原因是C++至今为止还没有一个二进制接口规范(ABI)。一个C++类的构造函数在编译为目标文件时如何生成链接符号名称、方法在不同平台甚至是C++的不同版本之间都是不一样的。但是C++是兼容C语言，所以我们可以通过增加一组C语言函数接口作为C++类和CGO之间的桥梁，这样就可以间接地实现C++和Go之间的互联。当然，因为CGO只支持C语言中值类型的数据类型，所以我们是无法直接使用C++的引用参数等特性的。
+CGO is a bridge between C and Go. In principle, C++ classes cannot be directly supported. The root cause of CGO's lack of support for C++ syntax is that C++ has not yet had a Binary Interface Specification (ABI). How a C++ class constructor generates link symbol names when compiled into object files, methods are different between different platforms and even different versions of C++. But C++ is compatible with C language, so we can add a set of C language function interface as a bridge between C++ class and CGO, so that the interconnection between C++ and Go can be realized indirectly. Of course, because CGO only supports data types of C language median types, we can't directly use C++ reference parameters and other features.
 
-## 2.8.1 C++ 类到 Go 语言对象
+## 2.8.1 C++ class to Go language object
 
-实现C++类到Go语言对象的包装需要经过以下几个步骤：首先是用纯C函数接口包装该C++类；其次是通过CGO将纯C函数接口映射到Go函数；最后是做一个Go包装对象，将C++类到方法用Go对象的方法实现。
+Implementing the packaging of a C++ class to a Go language object requires the following steps: first, the C++ class is wrapped with a pure C function interface; secondly, the pure C function interface is mapped to the Go function by CGO; finally, a Go wrapper object is created. Implement C++ classes into methods using Go objects.
 
-### 2.8.1.1 准备一个 C++ 类
+### 2.8.1.1 Preparing a C++ Class
 
-为了演示简单，我们基于`std::string`做一个最简单的缓存类MyBuffer。除了构造函数和析构函数之外，只有两个成员函数分别是返回底层的数据指针和缓存的大小。因为是二进制缓存，所以我们可以在里面中放置任意数据。
+For the sake of simplicity, we make a simple cache class, MyBuffer, based on `std::string`. In addition to the constructor and destructor, only two member functions return the underlying data pointer and the size of the cache. Because it is a binary cache, we can place arbitrary data in it.
 
 ```c++
 // my_buffer.h
 #include <string>
 
-struct MyBuffer {
-	std::string* s_;
+Struct MyBuffer {
+Std::string* s_;
 
-	MyBuffer(int size) {
-		this->s_ = new std::string(size, char('\0'));
-	}
-	~MyBuffer() {
-		delete this->s_;
-	}
+MyBuffer(int size) {
+This->s_ = new std::string(size, char('\0'));
+}
+~MyBuffer() {
+Delete this->s_;
+}
 
-	int Size() const {
-		return this->s_->size();
-	}
-	char* Data() {
-		return (char*)this->s_->data();
-	}
+Int Size() const {
+Return this->s_->size();
+}
+Char* Data() {
+Return (char*)this->s_->data();
+}
 };
 ```
 
-我们在构造函数中指定缓存的大小并分配空间，在使用完之后通过析构函数释放内部分配的内存空间。下面是简单的使用方式：
+We specify the size of the cache and allocate space in the constructor, and release the internally allocated memory space through the destructor after use. Here's how to use it:
 
 ```c++
-int main() {
-	auto pBuf = new MyBuffer(1024);
+Int main() {
+Auto pBuf = new MyBuffer(1024);
 
-	auto data = pBuf->Data();
-	auto size = pBuf->Size();
+Auto data = pBuf->Data();
+Auto size = pBuf->Size();
 
-	delete pBuf;
+Delete pBuf;
 }
 ```
 
-为了方便向C语言接口过渡，在此处我们故意没有定义C++的拷贝构造函数。我们必须以new和delete来分配和释放缓存对象，而不能以值风格的方式来使用。
+In order to facilitate the transition to the C language interface, here we deliberately did not define the C++ copy constructor. We must allocate and release cached objects with new and delete, not in a value-style way.
 
-### 2.8.1.2 用纯C函数接口封装 C++ 类
+### 2.8.1.2 Encapsulating C++ classes with pure C function interfaces
 
-如果要将上面的C++类用C语言函数接口封装，我们可以从使用方式入手。我们可以将new和delete映射为C语言函数，将对象的方法也映射为C语言函数。
+If you want to wrap the above C++ class with a C language function interface, we can start with the usage. We can map new and delete to C language functions, and map object methods to C language functions.
 
-在C语言中我们期望MyBuffer类可以这样使用：
+In the C language we expect the MyBuffer class to be used like this:
 
 ```c
-int main() {
-	MyBuffer* pBuf = NewMyBuffer(1024);
+Int main() {
+MyBuffer* pBuf = NewMyBuffer(1024);
 
-	char* data = MyBuffer_Data(pBuf);
-	auto size = MyBuffer_Size(pBuf);
+Char* data = MyBuffer_Data(pBuf);
+Auto size = MyBuffer_Size(pBuf);
 
-	DeleteMyBuffer(pBuf);
+DeleteMyBuffer(pBuf);
 }
 ```
 
-先从C语言接口用户的角度思考需要什么样的接口，然后创建 `my_buffer_capi.h` 头文件接口规范：
+First think about what interface you need from the perspective of the C language interface user, and then create the `my_buffer_capi.h` header file interface specification:
 
 ```c++
 // my_buffer_capi.h
-typedef struct MyBuffer_T MyBuffer_T;
+Typedef struct MyBuffer_T MyBuffer_T;
 
 MyBuffer_T* NewMyBuffer(int size);
-void DeleteMyBuffer(MyBuffer_T* p);
+Void DeleteMyBuffer(MyBuffer_T* p);
 
-char* MyBuffer_Data(MyBuffer_T* p);
-int MyBuffer_Size(MyBuffer_T* p);
+Char* MyBuffer_Data(MyBuffer_T* p);
+Int MyBuffer_Size(MyBuffer_T* p);
 ```
 
-然后就可以基于C++的MyBuffer类定义这些C语言包装函数。我们创建对应的`my_buffer_capi.cc`文件如下：
+Then you can define these C language wrapper functions based on the C++ MyBuffer class. We create the corresponding `my_buffer_capi.cc` file as follows:
 
 ```c++
 // my_buffer_capi.cc
 
 #include "./my_buffer.h"
 
-extern "C" {
-	#include "./my_buffer_capi.h"
+Extern "C" {
+#include "./my_buffer_capi.h"
 }
 
-struct MyBuffer_T: MyBuffer {
-	MyBuffer_T(int size): MyBuffer(size) {}
-	~MyBuffer_T() {}
+Struct MyBuffer_T: MyBuffer {
+MyBuffer_T(int size): MyBuffer(size) {}
+~MyBuffer_T() {}
 };
 
 MyBuffer_T* NewMyBuffer(int size) {
-	auto p = new MyBuffer_T(size);
-	return p;
+Auto p = new MyBuffer_T(size);
+Return p;
 }
-void DeleteMyBuffer(MyBuffer_T* p) {
-	delete p;
+Void DeleteMyBuffer(MyBuffer_T* p) {
+Delete p;
 }
 
-char* MyBuffer_Data(MyBuffer_T* p) {
-	return p->Data();
+Char* MyBuffer_Data(MyBuffer_T* p) {
+Return p->Data();
 }
-int MyBuffer_Size(MyBuffer_T* p) {
-	return p->Size();
+Int MyBuffer_Size(MyBuffer_T* p) {
+Return p->Size();
 }
 ```
 
-因为头文件`my_buffer_capi.h`是用于CGO，必须是采用C语言规范的名字修饰规则。在C++源文件包含时需要用`extern "C"`语句说明。另外MyBuffer_T的实现只是从MyBuffer继承的类，这样可以简化包装代码的实现。同时和CGO通信时必须通过`MyBuffer_T`指针，我们无法将具体的实现暴露给CGO，因为实现中包含了C++特有的语法，CGO无法识别C++特性。
+Because the header file `my_buffer_capi.h` is for CGO, it must be a name modification rule using the C language specification. The `extern "C"` statement is required when the C++ source file is included. In addition, the implementation of MyBuffer_T is just a class that inherits from MyBuffer, which simplifies the implementation of wrapper code. At the same time, when communicating with CGO, we must pass the `MyBuffer_T` pointer. We can't expose the specific implementation to CGO because the implementation contains C++-specific syntax, and CGO does not recognize C++ features.
 
-将C++类包装为纯C接口之后，下一步的工作就是将C函数转为Go函数。
+After wrapping the C++ class as a pure C interface, the next step is to convert the C function to a Go function.
 
-### 2.8.1.3 将纯C接口函数转为Go函数
+### 2.8.1.3 Converting a pure C interface function to a Go function
 
-将纯C函数包装为对应的Go函数的过程比较简单。需要注意的是，因为我们的包中包含C++11的语法，因此需要通过`#cgo CXXFLAGS: -std=c++11`打开C++11的选项。
+The process of wrapping a pure C function into a corresponding Go function is relatively simple. Note that because our package contains the C++11 syntax, we need to open the C++11 option with `#cgo CXXFLAGS: -std=c++11`.
 
 ```go
 // my_buffer_capi.go
 
-package main
+Package main
 
 /*
 #cgo CXXFLAGS: -std=c++11
 
 #include "my_buffer_capi.h"
 */
-import "C"
+Import "C"
 
-type cgo_MyBuffer_T C.MyBuffer_T
+Type cgo_MyBuffer_T C.MyBuffer_T
 
-func cgo_NewMyBuffer(size int) *cgo_MyBuffer_T {
-	p := C.NewMyBuffer(C.int(size))
-	return (*cgo_MyBuffer_T)(p)
+Func cgo_NewMyBuffer(size int) *cgo_MyBuffer_T {
+p := C.NewMyBuffer(C.int(size))
+Return (*cgo_MyBuffer_T)(p)
 }
 
-func cgo_DeleteMyBuffer(p *cgo_MyBuffer_T) {
-	C.DeleteMyBuffer((*C.MyBuffer_T)(p))
+Func cgo_DeleteMyBuffer(p *cgo_MyBuffer_T) {
+C.DeleteMyBuffer((*C.MyBuffer_T)(p))
 }
 
-func cgo_MyBuffer_Data(p *cgo_MyBuffer_T) *C.char {
-	return C.MyBuffer_Data((*C.MyBuffer_T)(p))
+Func cgo_MyBuffer_Data(p *cgo_MyBuffer_T) *C.char {
+Return C.MyBuffer_Data((*C.MyBuffer_T)(p))
 }
 
-func cgo_MyBuffer_Size(p *cgo_MyBuffer_T) C.int {
-	return C.MyBuffer_Size((*C.MyBuffer_T)(p))
+Func cgo_MyBuffer_Size(p *cgo_MyBuffer_T) C.int {
+Return C.MyBuffer_Size((*C.MyBuffer_T)(p))
 }
 ```
 
-为了区分，我们在Go中的每个类型和函数名称前面增加了`cgo_`前缀，比如cgo_MyBuffer_T是对应C中的MyBuffer_T类型。
+To distinguish, we add a `cgo_` prefix to each type and function name in Go. For example, cgo_MyBuffer_T is the type of MyBuffer_T in C.
 
-为了处理简单，在包装纯C函数到Go函数时，除了cgo_MyBuffer_T类型外，对输入参数和返回值的基础类型，我们依然是用的C语言的类型。
+For the sake of simplicity, when packaging a pure C function to a Go function, in addition to the cgo_MyBuffer_T type, we still use the C language type for the underlying types of input parameters and return values.
 
-### 2.8.1.4 包装为Go对象
+### 2.8.1.4 Wrapper as a Go object
 
-在将纯C接口包装为Go函数之后，我们就可以很容易地基于包装的Go函数构造出Go对象来。因为cgo_MyBuffer_T是从C语言空间导入的类型，它无法定义自己的方法，因此我们构造了一个新的MyBuffer类型，里面的成员持有cgo_MyBuffer_T指向的C语言缓存对象。
+After wrapping the pure C interface as a Go function, we can easily construct a Go object based on the wrapped Go function. Because cgo_MyBuffer_T is a type imported from C language space, it can't define its own method, so we construct a new MyBuffer type, which holds the C language cache object pointed to by cgo_MyBuffer_T.
 
 ```go
 // my_buffer.go
 
-package main
+Package main
 
-import "unsafe"
+Import "unsafe"
 
-type MyBuffer struct {
-	cptr *cgo_MyBuffer_T
+Type MyBuffer struct {
+Cptr *cgo_MyBuffer_T
 }
 
-func NewMyBuffer(size int) *MyBuffer {
-	return &MyBuffer{
-		cptr: cgo_NewMyBuffer(size),
-	}
+Func NewMyBuffer(size int) *MyBuffer {
+Return &MyBuffer{
+Cptr: cgo_NewMyBuffer(size),
+}
 }
 
-func (p *MyBuffer) Delete() {
-	cgo_DeleteMyBuffer(p.cptr)
+Func (p *MyBuffer) Delete() {
+cgo_DeleteMyBuffer(p.cptr)
 }
 
-func (p *MyBuffer) Data() []byte {
-	data := cgo_MyBuffer_Data(p.cptr)
-	size := cgo_MyBuffer_Size(p.cptr)
-	return ((*[1 << 31]byte)(unsafe.Pointer(data)))[0:int(size):int(size)]
+Func (p *MyBuffer) Data() []byte {
+Data := cgo_MyBuffer_Data(p.cptr)
+Size := cgo_MyBuffer_Size(p.cptr)
+Return ((*[1 << 31]byte)(unsafe.Pointer(data)))[0:int(size):int(size)]
 }
 ```
 
-同时，因为Go语言的切片本身含有长度信息，我们将cgo_MyBuffer_Data和cgo_MyBuffer_Size两个函数合并为`MyBuffer.Data`方法，它返回一个对应底层C语言缓存空间的切片。
+At the same time, because the Go language slice itself contains length information, we merge the cgo_MyBuffer_Data and cgo_MyBuffer_Size functions into the `MyBuffer.Data` method, which returns a slice corresponding to the underlying C language cache space.
 
-现在我们就可以很容易在Go语言中使用包装后的缓存对象了（底层是基于C++的`std::string`实现）：
+Now we can easily use the wrapped cache object in the Go language (the underlying is based on C++'s `std::string` implementation):
 
 ```go
-package main
+Package main
 
 //#include <stdio.h>
-import "C"
-import "unsafe"
+Import "C"
+Import "unsafe"
 
-func main() {
-	buf := NewMyBuffer(1024)
-	defer buf.Delete()
+Func main() {
+Buf := NewMyBuffer(1024)
+Defer buf.Delete()
 
-	copy(buf.Data(), []byte("hello\x00"))
-	C.puts((*C.char)(unsafe.Pointer(&(buf.Data()[0]))))
+Copy(buf.Data(), []byte("hello\x00"))
+C.puts((*C.char)(unsafe.Pointer(&(buf.Data()[0])))))
 }
 ```
 
-例子中，我们创建了一个1024字节大小的缓存，然后通过copy函数向缓存填充了一个字符串。为了方便C语言字符串函数处理，我们在填充字符串的默认用'\0'表示字符串结束。最后我们直接获取缓存的底层数据指针，用C语言的puts函数打印缓存的内容。
+In the example, we created a 1024-byte cache and then populated a string with the copy function. In order to facilitate the processing of C language string functions, we default to the end of the string with '\0' in the filled string. Finally, we directly get the underlying data pointer of the cache, and print the contents of the cache using the C language puts function.
 
-## 2.8.2 Go 语言对象到 C++ 类
+## 2.8.2 Go language objects to C++ classes
 
-要实现Go语言对象到C++类的包装需要经过以下几个步骤：首先是将Go对象映射为一个id；然后基于id导出对应的C接口函数；最后是基于C接口函数包装为C++对象。
+To implement the packaging of Go language objects into C++ classes, the following steps are required: first, map the Go object to an id; then export the corresponding C interface function based on the id; finally, package the C++ object based on the C interface function.
 
-### 2.8.2.1 构造一个Go对象
+### 2.8.2.1 Constructing a Go object
 
-为了便于演示，我们用Go语言构建了一个Person对象，每个Person可以有名字和年龄信息：
+For the sake of demonstration, we built a Person object in Go, each of which can have name and age information:
 
 ```go
-package main
+Package main
 
-type Person struct {
-	name string
-	age  int
+Type Person struct {
+Name string
+Age int
 }
 
-func NewPerson(name string, age int) *Person {
-	return &Person{
-		name: name,
-		age:  age,
-	}
+Func NewPerson(name string, age int) *Person {
+Return &Person{
+Name: name,
+Age: age,
+}
 }
 
-func (p *Person) Set(name string, age int) {
-	p.name = name
-	p.age = age
+Func (p *Person) Set(name string, age int) {
+P.name = name
+P.age = age
 }
 
-func (p *Person) Get() (name string, age int) {
-	return p.name, p.age
+Func (p *Person) Get() (name string, age int) {
+Return p.name, p.age
 }
 ```
 
-Person对象如果想要在C/C++中访问，需要通过cgo导出C接口来访问。
+If the Person object wants to be accessed in C/C++, it needs to be accessed via the cgo export C interface.
 
-### 2.8.2.2 导出C接口
+### 2.8.2.2 Export C interface
 
-我们前面仿照C++对象到C接口的过程，也抽象一组C接口描述Person对象。创建一个`person_capi.h`文件，对应C接口规范文件：
+We modeled the C++ object to the C interface process, and abstracted a set of C interfaces to describe the Person object. Create a `person_capi.h` file that corresponds to the C interface specification file:
 
 ```c
 // person_capi.h
@@ -253,224 +253,224 @@ Person对象如果想要在C/C++中访问，需要通过cgo导出C接口来访�
 
 typedef uintptr_t person_handle_t;
 
-person_handle_t person_new(char* name, int age);
-void person_delete(person_handle_t p);
+Person_handle_t person_new(char* name, int age);
+Void person_delete(person_handle_t p);
 
-void person_set(person_handle_t p, char* name, int age);
-char* person_get_name(person_handle_t p, char* buf, int size);
-int person_get_age(person_handle_t p);
+Void person_set(person_handle_t p, char* name, int age);
+Char* person_get_name(person_handle_t p, char* buf, int size);
+Int person_get_age(person_handle_t p);
 ```
 
-然后是在Go语言中实现这一组C函数。
+Then this set of C functions is implemented in the Go language.
 
-需要注意的是，通过CGO导出C函数时，输入参数和返回值类型都不支持const修饰，同时也不支持可变参数的函数类型。同时如内存模式一节所述，我们无法在C/C++中直接长期访问Go内存对象。因此我们使用前一节所讲述的技术将Go对象映射为一个整数id。
+It should be noted that when exporting C functions through CGO, both input parameters and return value types do not support const modification, and also do not support variable parameter function types. At the same time, as described in the Memory Mode section, we cannot directly access Go memory objects in C/C++ for a long time. So we used the technique described in the previous section to map the Go object to an integer id.
 
-下面是`person_capi.go`文件，对应C接口函数的实现：
+The following is the `person_capi.go` file, which corresponds to the implementation of the C interface function:
 
 ```go
 // person_capi.go
-package main
+Package main
 
 //#include "./person_capi.h"
-import "C"
-import "unsafe"
+Import "C"
+Import "unsafe"
 
 //export person_new
-func person_new(name *C.char, age C.int) C.person_handle_t {
-	id := NewObjectId(NewPerson(C.GoString(name), int(age)))
-	return C.person_handle_t(id)
+Func person_new(name *C.char, age C.int) C.person_handle_t {
+Id := NewObjectId(NewPerson(C.GoString(name), int(age)))
+Return C.person_handle_t(id)
 }
 
 //export person_delete
-func person_delete(h C.person_handle_t) {
-	ObjectId(h).Free()
+Func person_delete(h C.person_handle_t) {
+ObjectId(h).Free()
 }
 
 //export person_set
-func person_set(h C.person_handle_t, name *C.char, age C.int) {
-	p := ObjectId(h).Get().(*Person)
-	p.Set(C.GoString(name), int(age))
+Func person_set(h C.person_handle_t, name *C.char, age C.int) {
+p := ObjectId(h).Get().(*Person)
+p.Set(C.GoString(name), int(age))
 }
 
 //export person_get_name
-func person_get_name(h C.person_handle_t, buf *C.char, size C.int) *C.char {
-	p := ObjectId(h).Get().(*Person)
-	name, _ := p.Get()
+Func person_get_name(h C.person_handle_t, buf *C.char, size C.int) *C.char {
+p := ObjectId(h).Get().(*Person)
+Name, _ := p.Get()
 
-	n := int(size) - 1
-	bufSlice := ((*[1 << 31]byte)(unsafe.Pointer(buf)))[0:n:n]
-	n = copy(bufSlice, []byte(name))
-	bufSlice[n] = 0
+n := int(size) - 1
+bufSlice := ((*[1 << 31]byte)(unsafe.Pointer(buf)))[0:n:n]
+n = copy(bufSlice, []byte(name))
+bufSlice[n] = 0
 
-	return buf
+Return buf
 }
 
 //export person_get_age
-func person_get_age(h C.person_handle_t) C.int {
-	p := ObjectId(h).Get().(*Person)
-	_, age := p.Get()
-	return C.int(age)
+Func person_get_age(h C.person_handle_t) C.int {
+p := ObjectId(h).Get().(*Person)
+_, age := p.Get()
+Return C.int(age)
 }
 ```
 
-在创建Go对象后，我们通过NewObjectId将Go对应映射为id。然后将id强制转义为person_handle_t类型返回。其它的接口函数则是根据person_handle_t所表示的id，让根据id解析出对应的Go对象。
+After creating the Go object, we map the Go correspondence to id via NewObjectId. Then force the id to be escaped as the person_handle_t type. The other interface functions are based on the id represented by person_handle_t, so that the corresponding Go object is parsed according to the id.
 
-### 2.8.2.3 封装C++对象
+### 2.8.2.3 Encapsulating C++ objects
 
-有了C接口之后封装C++对象就比较简单了。常见的做法是新建一个Person类，里面包含一个person_handle_t类型的成员对应真实的Go对象，然后在Person类的构造函数中通过C接口创建Go对象，在析构函数中通过C接口释放Go对象。下面是采用这种技术的实现：
+Encapsulating C++ objects with the C interface is relatively straightforward. A common practice is to create a new Person class, which contains a member of type person_handle_t corresponding to the real Go object, and then create a Go object through the C interface in the constructor of the Person class, and release the Go object through the C interface in the destructor. Here's an implementation using this technique:
 
 ```c++
-extern "C" {
-	#include "./person_capi.h"
+Extern "C" {
+#include "./person_capi.h"
 }
 
-struct Person {
-	person_handle_t goobj_;
+Struct Person {
+Person_handle_t goobj_;
 
-	Person(const char* name, int age) {
-		this->goobj_ = person_new((char*)name, age);
-	}
-	~Person() {
-		person_delete(this->goobj_);
-	}
+Person(const char* name, int age) {
+This->goobj_ = person_new((char*)name, age);
+}
+~Person() {
+Person_delete(this->goobj_);
+}
 
-	void Set(char* name, int age) {
-		person_set(this->goobj_, name, age);
-	}
-	char* GetName(char* buf, int size) {
-		return person_get_name(this->goobj_ buf, size);
-	}
-	int GetAge() {
-		return person_get_age(this->goobj_);
-	}
+Void Set(char* name, int age) {
+Person_set(this->goobj_, name, age);
+}
+Char* GetName(char* buf, int size) {
+Return person_get_name(this->goobj_ buf, size);
+}
+Int GetAge() {
+Return person_get_age(this->goobj_);
+}
 }
 ```
 
-包装后我们就可以像普通C++类那样使用了：
+After packaging, we can use it like a normal C++ class:
 
 ```c++
 #include "person.h"
 
 #include <stdio.h>
 
-int main() {
-	auto p = new Person("gopher", 10);
+Int main() {
+Auto p = new Person("gopher", 10);
 
-	char buf[64];
-	char* name = p->GetName(buf, sizeof(buf)-1);
-	int age = p->GetAge();
+Char buf[64];
+Char* name = p->GetName(buf, sizeof(buf)-1);
+Int age = p->GetAge();
 
-	printf("%s, %d years old.\n", name, age);
-	delete p;
+Printf("%s, %d years old.\n", name, age);
+Delete p;
 
-	return 0;
+Return 0;
 }
 ```
 
-### 2.8.2.4 封装C++对象改进
+### 2.8.2.4 Packaging C++ Object Improvements
 
-在前面的封装C++对象的实现中，每次通过new创建一个Person实例需要进行两次内存分配：一次是针对C++版本的Person，再一次是针对Go语言版本的Person。其实C++版本的Person内部只有一个person_handle_t类型的id，用于映射Go对象。我们完全可以将person_handle_t直接当中C++对象来使用。
+In the previous implementation of encapsulating C++ objects, each time you create a Person instance via new, you need to do two memory allocations: once for the C++ version of Person, and once again for the Go language version of Person. In fact, the C++ version of Person has only one id of person_handle_t type, which is used to map Go objects. We can use person_handle_t directly in the C++ object.
 
-下面时改进后的包装方式：
+The following improved packaging methods:
 
 ```c++
-extern "C" {
-	#include "./person_capi.h"
+Extern "C" {
+#include "./person_capi.h"
 }
 
-struct Person {
-	static Person* New(const char* name, int age) {
-		return (Person*)person_new((char*)name, age);
-	}
-	void Delete() {
-		person_delete(person_handle_t(this));
-	}
+Struct Person {
+Static Person* New(const char* name, int age) {
+Return (Person*)person_new((char*)name, age);
+}
+Void Delete() {
+Person_delete(person_handle_t(this));
+}
 
-	void Set(char* name, int age) {
-		person_set(person_handle_t(this), name, age);
-	}
-	char* GetName(char* buf, int size) {
-		return person_get_name(person_handle_t(this), buf, size);
-	}
-	int GetAge() {
-		return person_get_age(person_handle_t(this));
-	}
+Void Set(char* name, int age) {
+Person_set(person_handle_t(this), name, age);
+}
+Char* GetName(char* buf, int size) {
+Return person_get_name(person_handle_t(this), buf, size);
+}
+Int GetAge() {
+Return person_get_age(person_handle_t(this));
+}
 };
 ```
 
-我们在Person类中增加了一个叫New静态成员函数，用于创建新的Person实例。在New函数中通过调用person_new来创建Person实例，返回的是`person_handle_t`类型的id，我们将其强制转型作为`Person*`类型指针返回。在其它的成员函数中，我们通过将this指针再反向转型为`person_handle_t`类型，然后通过C接口调用对应的函数。
+We added a new static member function to the Person class to create a new Person instance. In the New function, the Person instance is created by calling person_new, and the id of the `person_handle_t` type is returned. We cast it as a pointer to the `Person*` type. In other member functions, we reverse the transformation of the this pointer to the `person_handle_t` type, and then call the corresponding function through the C interface.
 
-到此，我们就达到了将Go对象导出为C接口，然后基于C接口再包装为C++对象以便于使用的目的。
+At this point, we have reached the goal of exporting the Go object as a C interface, and then re-packaging it as a C++ object based on the C interface.
 
-## 2.8.3 彻底解放C++的this指针
+## 2.8.3 Completely liberating C++'s this pointer
 
-熟悉Go语言的用法会发现Go语言中方法是绑定到类型的。比如我们基于int定义一个新的Int类型，就可以有自己的方法：
+Familiarity with the usage of the Go language will reveal that methods in the Go language are bound to types. For example, if we define a new Int type based on int, we can have our own method:
 
 ```go
-type Int int
+Type Int int
 
-func (p Int) Twice() int {
-	return int(p)*2
+Func (p Int) Twice() int {
+Return int(p)*2
 }
 
-func main() {
-	var x = Int(42)
-	fmt.Println(int(x))
-	fmt.Println(x.Twice())
+Func main() {
+Var x = Int(42)
+fmt.Println(int(x))
+fmt.Println(x.Twice())
 }
 ```
 
-这样就可以在不改变原有数据底层内存结构的前提下，自由切换int和Int类型来使用变量。
+This allows you to freely switch int and Int types to use variables without changing the underlying memory structure of the original data.
 
-而在C++中要实现类似的特性，一般会采用以下实现：
+To achieve similar features in C++, the following implementations are generally used:
 
 ```c++
-class Int {
-	int v_;
+Class Int {
+Int v_;
 
-	Int(v int) { this.v_ = v; }
-	int Twice() const{ return this.v_*2; }
+Int(v int) { this.v_ = v; }
+Int Twice() const{ return this.v_*2; }
 };
 
-int main() {
-	Int v(42);
+Int main() {
+Int v(42);
 
-	printf("%d\n", v); // error
-	printf("%d\n", v.Twice());
+Printf("%d\n", v); // error
+Printf("%d\n", v.Twice());
 }
 ```
 
-新包装后的Int类虽然增加了Twice方法，但是失去了自由转回int类型的权利。这时候不仅连printf都无法输出Int本身的值，而且也失去了int类型运算的所有特性。这就是C++构造函数的邪恶之处：以失去原有的一切特性的代价换取class的施舍。
+The newly wrapped Int class adds the Twice method but loses the right to freely switch back to the int type. At this time, not only printf can not output the value of Int itself, but also lose all the features of the int type operation. This is the evil of the C++ constructor: in exchange for the charity of the class at the cost of losing all of its original features.
 
-造成这个问题的根源是C++中this被固定为class的指针类型了。我们重新回顾下this在Go语言中的本质：
+The root cause of this problem is the pointer type that is fixed to class in C++. We revisit the essence of this in the Go language:
 
 ```go
-func (this Int) Twice() int
-func Int_Twice(this Int) int
+Func (this Int) Twice() int
+Func Int_Twice(this Int) int
 ```
 
-在Go语言中，和this有着相似功能的类型接收者参数其实只是一个普通的函数参数，我们可以自由选择值或指针类型。
+In Go, the type receiver parameter that has a similar function to this is just a normal function parameter. We can freely choose the value or pointer type.
 
-如果以C语言的角度来思考，this也只是一个普通的`void*`类型的指针，我们可以随意自由地将this转换为其它类型。
+If you think in terms of C, this is just a pointer to the normal `void*` type, and we can freely convert this to other types.
 
 ```c++
-struct Int {
-	int Twice() {
-		const int* p = (int*)(this);
-		return (*p) * 2;
-	}
+Struct Int {
+Int Twice() {
+Const int* p = (int*)(this);
+Return (*p) * 2;
+}
 };
-int main() {
-	int x = 42;
-	printf("%d\n", x);
-	printf("%d\n", ((Int*)(&x))->Twice());
-	return 0;
+Int main() {
+Int x = 42;
+Printf("%d\n", x);
+Printf("%d\n", ((Int*)(&x))->Twice());
+Return 0;
 }
 ```
 
-这样我们就可以通过将int类型指针强制转为Int类型指针，代替通过默认的构造函数后new来构造Int对象。
-在Twice函数的内部，以相反的操作将this指针转回int类型的指针，就可以解析出原有的int类型的值了。
-这时候Int类型只是编译时的一个壳子，并不会在运行时占用额外的空间。
+This way we can construct an Int object by forcing the int type pointer to an Int type pointer instead of the default constructor.
+Inside the Twice function, by rotating the this pointer back to the int pointer in the opposite operation, the original int type value can be parsed.
+At this time, the Int type is just a shell at compile time and does not take up extra space at runtime.
 
-因此C++的方法其实也可以用于普通非 class 类型，C++到普通成员函数其实也是可以绑定到类型的。
-只有纯虚方法是绑定到对象，那就是接口。
+Therefore, the C++ method can also be used for ordinary non-class types. C++ to ordinary member functions can also be bound to types.
+Only pure virtual methods are bound to objects, and that is the interface.

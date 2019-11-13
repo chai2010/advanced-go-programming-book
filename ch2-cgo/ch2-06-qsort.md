@@ -1,21 +1,21 @@
-# 2.6 实战: 封装qsort
+# 2.6 Actual combat: encapsulation qsort
 
-qsort快速排序函数是C语言的高阶函数，支持用于自定义排序比较函数，可以对任意类型的数组进行排序。本节我们尝试基于C语言的qsort函数封装一个Go语言版本的qsort函数。
+The qsort quick sort function is a high-order function of the C language. It supports the use of custom sort comparison functions and can sort any type of array. In this section we try to encapsulate a Go language version of the qsort function based on the C language qsort function.
 
-## 2.6.1 认识qsort函数
+## 2.6.1 Understanding the qsort function
 
-qsort快速排序函数有`<stdlib.h>`标准库提供，函数的声明如下：
+The qsort quick sort function is provided by the `<stdlib.h>` standard library. The function declaration is as follows:
 
 ```c
-void qsort(
-	void* base, size_t num, size_t size,
-	int (*cmp)(const void*, const void*)
+Void qsort(
+Void* base, size_t num, size_t size,
+Int (*cmp)(const void*, const void*)
 );
 ```
 
-其中base参数是要排序数组的首个元素的地址，num是数组中元素的个数，size是数组中每个元素的大小。最关键是cmp比较函数，用于对数组中任意两个元素进行排序。cmp排序函数的两个指针参数分别是要比较的两个元素的地址，如果第一个参数对应元素大于第二个参数对应的元素将返回结果大于0，如果两个元素相等则返回0，如果第一个元素小于第二个元素则返回结果小于0。
+The base parameter is the address of the first element of the array to be sorted, num is the number of elements in the array, and size is the size of each element in the array. The key is the cmp comparison function, which is used to sort any two elements in the array. The two pointer parameters of the cmp sort function are the addresses of the two elements to be compared. If the corresponding element of the first parameter is larger than the corresponding element of the second parameter, the result is greater than 0. If the two elements are equal, 0 is returned. The first element is less than the second element and returns a result less than zero.
 
-下面的例子是用C语言的qsort对一个int类型的数组进行排序：
+The following example sorts an array of type int with qsort in C:
 
 ```c
 #include <stdio.h>
@@ -23,335 +23,334 @@ void qsort(
 
 #define DIM(x) (sizeof(x)/sizeof((x)[0]))
 
-static int cmp(const void* a, const void* b) {
-	const int* pa = (int*)a;
-	const int* pb = (int*)b;
-	return *pa - *pb;
+Static int cmp(const void* a, const void* b) {
+Const int* pa = (int*)a;
+Const int* pb = (int*)b;
+Return *pa - *pb;
 }
 
-int main() {
-	int values[] = { 42, 8, 109, 97, 23, 25 };
-	int i;
+Int main() {
+Int values[] = { 42, 8, 109, 97, 23, 25 };
+Int i;
 
-	qsort(values, DIM(values), sizeof(values[0]), cmp);
+Qsort(values, DIM(values), sizeof(values[0]), cmp);
 
-	for(i = 0; i < DIM(values); i++) {
-		printf ("%d ",values[i]);
-	}
-	return 0;
+For(i = 0; i < DIM(values); i++) {
+Printf ("%d ", valuess[i]);
+}
+Return 0;
 }
 ```
 
-其中`DIM(values)`宏用于计算数组元素的个数，`sizeof(values[0])`用于计算数组元素的大小。
-cmp是用于排序时比较两个元素大小的回调函数。为了避免对全局名字空间的污染，我们将cmp回调函数定义为仅当前文件内可访问的静态函数。
+The `DIM(values)` macro is used to calculate the number of array elements, and `sizeof(values[0])` is used to calculate the size of array elements.
+Cmp is a callback function that compares the size of two elements when sorting. To avoid contamination of the global namespace, we define the cmp callback function as a static function that is only accessible within the current file.
 
-## 2.6.2 将qsort函数从Go包导出
+## 2.6.2 Exporting the qsort function from the Go package
 
-为了方便Go语言的非CGO用户使用qsort函数，我们需要将C语言的qsort函数包装为一个外部可以访问的Go函数。
+In order to facilitate the non-CGO user of the Go language to use the qsort function, we need to wrap the C language qsort function as an externally accessible Go function.
 
-用Go语言将qsort函数重新包装为`qsort.Sort`函数：
+Repack the qsort function as a `qsort.Sort` function in Go:
 
 ```go
-package qsort
+Package qsort
 
 //typedef int (*qsort_cmp_func_t)(const void* a, const void* b);
-import "C"
-import "unsafe"
+Import "C"
+Import "unsafe"
 
-func Sort(
-	base unsafe.Pointer, num, size C.size_t,
-	cmp C.qsort_cmp_func_t,
+Func Sort(
+Base unsafe.Pointer, num, size C.size_t,
+Cmp C.qsort_cmp_func_t,
 ) {
-	C.qsort(base, num, size, cmp)
+C.qsort(base, num, size, cmp)
 }
 ```
 
-因为Go语言的CGO语言不好直接表达C语言的函数类型，因此在C语言空间将比较函数类型重新定义为一个`qsort_cmp_func_t`类型。
+Because the Go language CGO language does not directly express the C language function type, the comparison function type is redefined as a `qsort_cmp_func_t` type in the C language space.
 
-虽然Sort函数已经导出了，但是对于qsort包之外的用户依然不能直接使用该函数——Sort函数的参数还包含了虚拟的C包提供的类型。
-在CGO的内部机制一节中我们已经提过，虚拟的C包下的任何名称其实都会被映射为包内的私有名字。比如`C.size_t`会被展开为`_Ctype_size_t`，`C.qsort_cmp_func_t`类型会被展开为`_Ctype_qsort_cmp_func_t`。
+Although the Sort function has been exported, the function is not directly available to users outside the qsort package. The parameters of the Sort function also contain the types provided by the virtual C package.
+As we mentioned in the CGO Internal Mechanisms section, any name under the virtual C package will actually be mapped to a private name within the package. For example, `C.size_t` will be expanded to `_Ctype_size_t`, and the `C.qsort_cmp_func_t` type will be expanded to `_Ctype_qsort_cmp_func_t`.
 
-被CGO处理后的Sort函数的类型如下：
+The types of Sort functions processed by CGO are as follows:
 
 ```go
-func Sort(
-	base unsafe.Pointer, num, size _Ctype_size_t,
-	cmp _Ctype_qsort_cmp_func_t,
+Func Sort(
+Base unsafe.Pointer, num, size _Ctype_size_t,
+Cmp _Ctype_qsort_cmp_func_t,
 )
 ```
 
-这样将会导致包外部用于无法构造`_Ctype_size_t`和`_Ctype_qsort_cmp_func_t`类型的参数而无法使用Sort函数。因此，导出的Sort函数的参数和返回值要避免对虚拟C包的依赖。
+This will cause the package to be used externally for parameters that cannot construct `_Ctype_size_t` and `_Ctype_qsort_cmp_func_t` types and cannot use the Sort function. Therefore, the parameters and return values ​​of the exported Sort function should avoid dependencies on the virtual C package.
 
-重新调整Sort函数的参数类型和实现如下：
+Re-adjust the parameter type and implementation of the Sort function as follows:
 
 ```go
 /*
 #include <stdlib.h>
 
-typedef int (*qsort_cmp_func_t)(const void* a, const void* b);
+Typedef int (*qsort_cmp_func_t)(const void* a, const void* b);
 */
-import "C"
-import "unsafe"
+Import "C"
+Import "unsafe"
 
-type CompareFunc C.qsort_cmp_func_t
+Type CompareFunc C.qsort_cmp_func_t
 
-func Sort(base unsafe.Pointer, num, size int, cmp CompareFunc) {
-	C.qsort(base, C.size_t(num), C.size_t(size), C.qsort_cmp_func_t(cmp))
+Func Sort(base unsafe.Pointer, num, size int, cmp CompareFunc) {
+C.qsort(base, C.size_t(num), C.size_t(size), C.qsort_cmp_func_t(cmp))
 }
 ```
 
-我们将虚拟C包中的类型通过Go语言类型代替，在内部调用C函数时重新转型为C函数需要的类型。因此外部用户将不再依赖qsort包内的虚拟C包。
+We replace the type in the virtual C package with the Go language type, and re-transform to the type required by the C function when calling the C function internally. Therefore, external users will no longer rely on virtual C packages in the qsort package.
 
-以下代码展示的Sort函数的使用方式：
+The following code shows how to use the Sort function:
 
 ```go
-package main
+Package main
 
 //extern int go_qsort_compare(void* a, void* b);
-import "C"
+Import "C"
 
-import (
-	"fmt"
-	"unsafe"
+Import (
+"fmt"
+"unsafe"
 
-	qsort "."
+Qsort "."
 )
 
 //export go_qsort_compare
-func go_qsort_compare(a, b unsafe.Pointer) C.int {
-	pa, pb := (*C.int)(a), (*C.int)(b)
-	return C.int(*pa - *pb)
+Func go_qsort_compare(a, b unsafe.Pointer) C.int {
+Pa, pb := (*C.int)(a), (*C.int)(b)
+Return C.int(*pa - *pb)
 }
 
-func main() {
-	values := []int32{42, 9, 101, 95, 27, 25}
+Func main() {
+Values ​​:= []int32{42, 9, 101, 95, 27, 25}
 
-	qsort.Sort(unsafe.Pointer(&values[0]),
-		len(values), int(unsafe.Sizeof(values[0])),
-		qsort.CompareFunc(C.go_qsort_compare),
-	)
-	fmt.Println(values)
-}
-```
-
-为了使用Sort函数，我们需要将Go语言的切片取首地址、元素个数、元素大小等信息作为调用参数，同时还需要提供一个C语言规格的比较函数。
-其中go_qsort_compare是用Go语言实现的，并导出到C语言空间的函数，用于qsort排序时的比较函数。
-
-目前已经实现了对C语言的qsort初步包装，并且可以通过包的方式被其它用户使用。但是`qsort.Sort`函数已经有很多不便使用之处：用户要提供C语言的比较函数，这对许多Go语言用户是一个挑战。下一步我们将继续改进qsort函数的包装函数，尝试通过闭包函数代替C语言的比较函数。
-
-消除用户对CGO代码的直接依赖。
-
-## 2.6.3 改进：闭包函数作为比较函数
-
-在改进之前我们先回顾下Go语言sort包自带的排序函数的接口：
-
-```go
-func Slice(slice interface{}, less func(i, j int) bool)
-```
-
-标准库的sort.Slice因为支持通过闭包函数指定比较函数，对切片的排序非常简单：
-
-```go
-import "sort"
-
-func main() {
-	values := []int32{42, 9, 101, 95, 27, 25}
-
-	sort.Slice(values, func(i, j int) bool {
-		return values[i] < values[j]
-	})
-
-	fmt.Println(values)
+qsort.Sort(unsafe.Pointer(&values[0]),
+Len(values), int(unsafe.Sizeof(values[0])),
+qsort.CompareFunc(C.go_qsort_compare),
+)
+fmt.Println(values)
 }
 ```
 
-我们也尝试将C语言的qsort函数包装为以下格式的Go语言函数：
+In order to use the Sort function, we need to take the information of the first address, the number of elements, the size of the element in the Go language as the calling parameter, and also provide a comparison function of the C language specification.
+Where go_qsort_compare is implemented in Go language and exported to the C language space function for the comparison function of qsort sorting.
+
+The initial packaging of the qsort for the C language has been implemented and can be used by other users through the package. But the `qsort.Sort` function has a lot of inconveniences: users need to provide C language comparison functions, which is a challenge for many Go language users. Next we will continue to improve the wrapper function of the qsort function, trying to replace the C language comparison function with the closure function.
+
+Eliminate users' direct dependence on CGO code.
+
+## 2.6.3 Improvement: Closure function as comparison function
+
+Before the improvement, we will review the interface of the sort function that comes with the Go language sort package:
 
 ```go
-package qsort
-
-func Sort(base unsafe.Pointer, num, size int, cmp func(a, b unsafe.Pointer) int)
+Func Slice(slice interface{}, less func(i, j int) bool)
 ```
 
-闭包函数无法导出为C语言函数，因此无法直接将闭包函数传入C语言的qsort函数。
-为此我们可以用Go构造一个可以导出为C语言的代理函数，然后通过一个全局变量临时保存当前的闭包比较函数。
-
-代码如下：
+The sort.Slice of the standard library is very simple to sort the slices because it supports the comparison function specified by the closure function:
 
 ```go
-var go_qsort_compare_info struct {
-	fn func(a, b unsafe.Pointer) int
-	sync.Mutex
+Import "sort"
+
+Func main() {
+Values ​​:= []int32{42, 9, 101, 95, 27, 25}
+
+sort.Slice(values, func(i, j int) bool {
+Return values[i] < values[j]
+})
+
+fmt.Println(values)
+}
+```
+
+We also try to wrap the C language qsort function as a Go language function in the following format:
+
+```go
+Package qsort
+
+Func Sort(base unsafe.Pointer, num, size int, cmp func(a, b unsafe.Pointer) int)
+```
+
+The closure function cannot be exported as a C language function, so the closure function cannot be directly passed to the C language qsort function.
+To do this, we can construct a proxy function that can be exported to C using Go, and then temporarily save the current closure comparison function through a global variable.
+
+code show as below:
+
+```go
+Var go_qsort_compare_info struct {
+Fn func(a, b unsafe.Pointer) int
+sync.Mutex
 }
 
 //export _cgo_qsort_compare
-func _cgo_qsort_compare(a, b unsafe.Pointer) C.int {
-	return C.int(go_qsort_compare_info.fn(a, b))
+Func _cgo_qsort_compare(a, b unsafe.Pointer) C.int {
+Return C.int(go_qsort_compare_info.fn(a, b))
 }
 ```
 
-其中导出的C语言函数`_cgo_qsort_compare`是公用的qsort比较函数，内部通过`go_qsort_compare_info.fn`来调用当前的闭包比较函数。
+The exported C language function `_cgo_qsort_compare` is a public qsort comparison function, and the current closure comparison function is called internally by `go_qsort_compare_info.fn`.
 
-新的Sort包装函数实现如下：
+The new Sort wrapper function is implemented as follows:
 
 ```go
 /*
 #include <stdlib.h>
 
-typedef int (*qsort_cmp_func_t)(const void* a, const void* b);
-extern int _cgo_qsort_compare(void* a, void* b);
+Typedef int (*qsort_cmp_func_t)(const void* a, const void* b);
+Extern int _cgo_qsort_compare(void* a, void* b);
 */
-import "C"
+Import "C"
 
-func Sort(base unsafe.Pointer, num, size int, cmp func(a, b unsafe.Pointer) int) {
-	go_qsort_compare_info.Lock()
-	defer go_qsort_compare_info.Unlock()
+Func Sort(base unsafe.Pointer, num, size int, cmp func(a, b unsafe.Pointer) int) {
+go_qsort_compare_info.Lock()
+Defer go_qsort_compare_info.Unlock()
 
-	go_qsort_compare_info.fn = cmp
+Go_qsort_compare_info.fn = cmp
 
-	C.qsort(base, C.size_t(num), C.size_t(size),
-		C.qsort_cmp_func_t(C._cgo_qsort_compare),
-	)
+C.qsort(base, C.size_t(num), C.size_t(size),
+C.qsort_cmp_func_t(C._cgo_qsort_compare),
+)
 }
 ```
 
-每次排序前，对全局的go_qsort_compare_info变量加锁，同时将当前的闭包函数保存到全局变量，然后调用C语言的qsort函数。
+Before each sorting, lock the global go_qsort_compare_info variable, save the current closure function to the global variable, and then call the C language qsort function.
 
-基于新包装的函数，我们可以简化之前的排序代码：
+Based on the newly wrapped function, we can simplify the previous sorting code:
 
 ```go
-func main() {
-	values := []int32{42, 9, 101, 95, 27, 25}
+Func main() {
+Values ​​:= []int32{42, 9, 101, 95, 27, 25}
 
-	qsort.Sort(unsafe.Pointer(&values[0]), len(values), int(unsafe.Sizeof(values[0])),
-		func(a, b unsafe.Pointer) int {
-			pa, pb := (*int32)(a), (*int32)(b)
-			return int(*pa - *pb)
-		},
-	)
+qsort.Sort(unsafe.Pointer(&values[0]), len(values), int(unsafe.Sizeof(values[0])),
+Func(a, b unsafe.Pointer) int {
+Pa, pb := (*int32)(a), (*int32)(b)
+Return int(*pa - *pb)
+},
+)
 
-	fmt.Println(values)
+fmt.Println(values)
 }
 ```
 
-现在排序不再需要通过CGO实现C语言版本的比较函数了，可以传入Go语言闭包函数作为比较函数。
-但是导入的排序函数依然依赖unsafe包，这是违背Go语言编程习惯的。
+Now sorting no longer needs to implement the C language version of the comparison function through CGO, you can pass the Go language closure function as a comparison function.
+But the imported sort function still relies on the unsafe package, which is against the Go language programming habits.
 
-## 2.6.4 改进：消除用户对unsafe包的依赖
+## 2.6.4 Improvement: Eliminate user dependence on unsafe packages
 
-前一个版本的qsort.Sort包装函数已经比最初的C语言版本的qsort易用很多，但是依然保留了很多C语言底层数据结构的细节。
-现在我们将继续改进包装函数，尝试消除对unsafe包的依赖，并实现一个类似标准库中sort.Slice的排序函数。
+The previous version of the qsort.Sort wrapper function has been much easier to use than the original C language version of qsort, but still retains a lot of the details of the C language underlying data structure.
+Now we will continue to improveWrap the function, try to eliminate the dependency on the unsafe package, and implement a sort function similar to the sort.Slice in the standard library.
 
-新的包装函数声明如下：
+The new wrapper function is declared as follows:
 
 ```go
-package qsort
+Package qsort
 
-func Slice(slice interface{}, less func(a, b int) bool)
+Func Slice(slice interface{}, less func(a, b int) bool)
 ```
 
-首先，我们将slice作为接口类型参数传入，这样可以适配不同的切片类型。
-然后切片的首个元素的地址、元素个数和元素大小可以通过reflect反射包从切片中获取。
+First, we pass the slice as an interface type parameter so that we can adapt to different slice types.
+Then the address, the number of elements, and the element size of the first element of the slice can be obtained from the slice by the reflect reflection packet.
 
-为了保存必要的排序上下文信息，我们需要在全局包变量增加要排序数组的地址、元素个数和元素大小等信息，比较函数改为less：
+In order to save the necessary sort context information, we need to increase the address of the array to be sorted, the number of elements and the size of the element in the global package variable. The comparison function is changed to less:
 
 ```go
-var go_qsort_compare_info struct {
-	base     unsafe.Pointer
-	elemnum  int
-	elemsize int
-	less     func(a, b int) bool
-	sync.Mutex
+Var go_qsort_compare_info struct {
+Base unsafe.Pointer
+Elemnum int
+Elemsize int
+Less func(a, b int) bool
+sync.Mutex
 }
 ```
 
-同样比较函数需要根据元素指针、排序数组的开始地址和元素的大小计算出元素对应数组的索引下标，
-然后根据less函数的比较结果返回qsort函数需要格式的比较结果。
+The same comparison function needs to calculate the index subscript of the corresponding array of elements according to the element pointer, the start address of the sorted array, and the size of the element.
+Then according to the comparison result of the less function, the comparison result of the format required by the qsort function is returned.
 
 ```go
 //export _cgo_qsort_compare
-func _cgo_qsort_compare(a, b unsafe.Pointer) C.int {
-	var (
-		// array memory is locked
-		base     = uintptr(go_qsort_compare_info.base)
-		elemsize = uintptr(go_qsort_compare_info.elemsize)
-	)
-
-	i := int((uintptr(a) - base) / elemsize)
-	j := int((uintptr(b) - base) / elemsize)
-
-	switch {
-	case go_qsort_compare_info.less(i, j): // v[i] < v[j]
-		return -1
-	case go_qsort_compare_info.less(j, i): // v[i] > v[j]
-		return +1
-	default:
-		return 0
-	}
-}
-```
-
-新的Slice函数的实现如下：
-
-```go
-
-func Slice(slice interface{}, less func(a, b int) bool) {
-	sv := reflect.ValueOf(slice)
-	if sv.Kind() != reflect.Slice {
-		panic(fmt.Sprintf("qsort called with non-slice value of type %T", slice))
-	}
-	if sv.Len() == 0 {
-		return
-	}
-
-	go_qsort_compare_info.Lock()
-	defer go_qsort_compare_info.Unlock()
-
-	defer func() {
-		go_qsort_compare_info.base = nil
-		go_qsort_compare_info.elemnum = 0
-		go_qsort_compare_info.elemsize = 0
-		go_qsort_compare_info.less = nil
-	}()
-
-	// baseMem = unsafe.Pointer(sv.Index(0).Addr().Pointer())
-	// baseMem maybe moved, so must saved after call C.fn
-	go_qsort_compare_info.base = unsafe.Pointer(sv.Index(0).Addr().Pointer())
-	go_qsort_compare_info.elemnum = sv.Len()
-	go_qsort_compare_info.elemsize = int(sv.Type().Elem().Size())
-	go_qsort_compare_info.less = less
-
-	C.qsort(
-		go_qsort_compare_info.base,
-		C.size_t(go_qsort_compare_info.elemnum),
-		C.size_t(go_qsort_compare_info.elemsize),
-		C.qsort_cmp_func_t(C._cgo_qsort_compare),
-	)
-}
-```
-
-首先需要判断传入的接口类型必须是切片类型。然后通过反射获取qsort函数需要的切片信息，并调用C语言的qsort函数。
-
-基于新包装的函数我们可以采用和标准库相似的方式排序切片：
-
-```go
-import (
-	"fmt"
-
-	qsort "."
+Func _cgo_qsort_compare(a, b unsafe.Pointer) C.int {
+Var (
+// array memory is locked
+Base = uintptr(go_qsort_compare_info.base)
+Elemsize = uintptr(go_qsort_compare_info.elemsize)
 )
 
-func main() {
-	values := []int64{42, 9, 101, 95, 27, 25}
+i := int((uintptr(a) - base) / elemsize)
+j := int((uintptr(b) - base) / elemsize)
 
-	qsort.Slice(values, func(i, j int) bool {
-		return values[i] < values[j]
-	})
-
-	fmt.Println(values)
+Switch {
+Case go_qsort_compare_info.less(i, j): // v[i] < v[j]
+Return -1
+Case go_qsort_compare_info.less(j, i): // v[i] > v[j]
+Return +1
+Default:
+Return 0
+}
 }
 ```
 
-为了避免在排序过程中，排序数组的上下文信息`go_qsort_compare_info`被修改，我们进行了全局加锁。
-因此目前版本的qsort.Slice函数是无法并发执行的，读者可以自己尝试改进这个限制。
+The implementation of the new Slice function is as follows:
 
+```go
+
+Func Slice(slice interface{}, less func(a, b int) bool) {
+Sv := reflect.ValueOf(slice)
+If sv.Kind() != reflect.Slice {
+Panic(fmt.Sprintf("qsort called with non-slice value of type %T", slice))
+}
+If sv.Len() == 0 {
+Return
+}
+
+go_qsort_compare_info.Lock()
+Defer go_qsort_compare_info.Unlock()
+
+Defer func() {
+Go_qsort_compare_info.base = nil
+Go_qsort_compare_info.elemnum = 0
+Go_qsort_compare_info.elemsize = 0
+Go_qsort_compare_info.less = nil
+}()
+
+// baseMem = unsafe.Pointer(sv.Index(0).Addr().Pointer())
+// baseMem maybe moved, so must saved after call C.fn
+Go_qsort_compare_info.base = unsafe.Pointer(sv.Index(0).Addr().Pointer())
+Go_qsort_compare_info.elemnum = sv.Len()
+Go_qsort_compare_info.elemsize = int(sv.Type().Elem().Size())
+Go_qsort_compare_info.less = less
+
+C.qsort(
+Go_qsort_compare_info.base,
+C.size_t(go_qsort_compare_info.elemnum),
+C.size_t(go_qsort_compare_info.elemsize),
+C.qsort_cmp_func_t(C._cgo_qsort_compare),
+)
+}
+```
+
+First you need to determine that the type of interface passed in must be a slice type. Then get the slice information needed by the qsort function through reflection and call the qsort function of C language.
+
+Based on the newly wrapped function we can sort the slices in a similar way to the standard library:
+
+```go
+Import (
+"fmt"
+
+Qsort "."
+)
+
+Func main() {
+Values ​​:= []int64{42, 9, 101, 95, 27, 25}
+
+qsort.Slice(values, func(i, j int) bool {
+Return values[i] < values[j]
+})
+
+fmt.Println(values)
+}
+```
+
+In order to avoid the sorting array's context information `go_qsort_compare_info` being modified during the sorting process, we have global locking.
+Therefore, the current version of the qsort.Slice function cannot be executed concurrently, and the reader can try to improve this limitation by himself.
