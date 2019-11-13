@@ -1,178 +1,178 @@
-# 6.5 负载均衡
+# 6.5 Load Balancing
 
-本节将会讨论常见的分布式系统负载均衡手段。
+This section will discuss common distributed system load balancing methods.
 
-## 6.5.1 常见的负载均衡思路
+## 6.5.1 Common Load Balancing Ideas
 
-如果我们不考虑均衡的话，现在有n个服务节点，我们完成业务流程只需要从这n个中挑出其中的一个。有几种思路:
+If we don't consider the equilibrium, there are now n service nodes, and we only need to pick one of the n from the business process. There are several ideas:
 
-1. 按顺序挑: 例如上次选了第一台，那么这次就选第二台，下次第三台，如果已经到了最后一台，那么下一次从第一台开始。这种情况下我们可以把服务节点信息都存储在数组中，每次请求完成下游之后，将一个索引后移即可。在移到尽头时再移回数组开头处。
+1. Pick in order: For example, the last time you selected the first one, then this time you choose the second one, the next one, if you have already reached the last one, then the next one starts from the first one. In this case, we can store the service node information in an array. After each request is completed downstream, we can move an index back. Move back to the beginning of the array when you move to the end.
 
-2. 随机挑一个: 每次都随机挑，真随机伪随机均可。假设选择第 x 台机器，那么x可描述为`rand.Intn()%n`。
+2. Pick one randomly: Pick each time randomly, and be random and pseudo-random. Assuming that the xth machine is selected, then x can be described as `rand.Intn()%n`.
 
-3. 根据某种权重，对下游节点进行排序，选择权重最大/小的那一个。
+3. Sort the downstream nodes according to a certain weight and select the one with the largest/small weight.
 
-当然了，实际场景我们不可能无脑轮询或者无脑随机，如果对下游请求失败了，我们还需要某种机制来进行重试，如果纯粹的随机算法，存在一定的可能性使你在下一次仍然随机到这次的问题节点。
+Of course, the actual scenario we can't have no brain polling or no brain randomness. If the downstream request fails, we still need some mechanism to retry. If there is a pure random algorithm, there is a certain possibility that you will be next time. Still random to this problem node.
 
-我们来看一个生产环境的负载均衡案例。
+Let's look at a load balancing case for a production environment.
 
-## 6.5.2 基于洗牌算法的负载均衡
+## 6.5.2 Load Balancing Based on Shuffle Algorithm
 
-考虑到我们需要随机选取每次发送请求的节点，同时在遇到下游返回错误时换其它节点重试。所以我们设计一个大小和节点数组大小一致的索引数组，每次来新的请求，我们对索引数组做洗牌，然后取第一个元素作为选中的服务节点，如果请求失败，那么选择下一个节点重试，以此类推:
+Considering that we need to randomly select the node that sends the request each time, and try to retry the other nodes when it encounters a downstream return error. So we design an index array with the same size and node array size. Every time we come to a new request, we shuffle the index array, then take the first element as the selected service node. If the request fails, then select the next node. Try again, and so on:
 
 ```go
-var endpoints = []string {
-	"100.69.62.1:3232",
-	"100.69.62.32:3232",
-	"100.69.62.42:3232",
-	"100.69.62.81:3232",
-	"100.69.62.11:3232",
-	"100.69.62.113:3232",
-	"100.69.62.101:3232",
+Var endpoints = []string {
+"100.69.62.1:3232",
+"100.69.62.32: 3232",
+"100.69.62.42: 3232",
+"100.69.62.81:3232",
+"100.69.62.11:3232",
+"100.69.62.113:3232",
+"100.69.62.101:3232",
 }
 
-// 重点在这个 shuffle
-func shuffle(slice []int) {
-	for i := 0; i < len(slice); i++ {
-		a := rand.Intn(len(slice))
-		b := rand.Intn(len(slice))
-		slice[a], slice[b] = slice[b], slice[a]
-	}
+// focus on this shuffle
+Func shuffle(slice []int) {
+For i := 0; i < len(slice); i++ {
+a := rand.Intn(len(slice))
+b := rand.Intn(len(slice))
+Slice[a], slice[b] = slice[b], slice[a]
+}
 }
 
-func request(params map[string]interface{}) error {
-	var indexes = []int {0,1,2,3,4,5,6}
-	var err error
+Func request(params map[string]interface{}) error {
+Var indexes = []int {0,1,2,3,4,5,6}
+Var err error
 
-	shuffle(indexes)
-	maxRetryTimes := 3
+Shuffle(indexes)
+maxRetryTimes := 3
 
-	idx := 0
-	for i := 0; i < maxRetryTimes; i++ {
-		err = apiRequest(params, indexes[idx])
-		if err == nil {
-			break
-		}
-		idx++
-	}
+Idx := 0
+For i := 0; i < maxRetryTimes; i++ {
+Err = apiRequest(params, indexes[idx])
+If err == nil {
+Break
+}
+Idx++
+}
 
-	if err != nil {
-		// logging
-		return err
-	}
+If err != nil {
+// logging
+Return err
+}
 
-	return nil
+Return nil
 }
 ```
 
-我们循环一遍slice，两两交换，这个和我们平常打牌时常用的洗牌方法类似。看起来没有什么问题。
+We loop through the slices, swapping them in pairs, which is similar to the shuffling method we usually use when playing cards. It looks like there is no problem.
 
-### 6.5.2.1 错误的洗牌导致的负载不均衡
+### 6.5.2.1 Unbalanced load caused by incorrect shuffling
 
-真的没有问题么？还是有问题的。这段简短的程序里有两个隐藏的隐患:
+Really no problem? Still have problems. There are two hidden pitfalls in this short program:
 
-1. 没有随机种子。在没有随机种子的情况下，`rand.Intn()`返回的伪随机数序列是固定的。
+1. There are no random seeds. In the absence of a random seed, the sequence of pseudo-random numbers returned by `rand.Intn()` is fixed.
 
-2. 洗牌不均匀，会导致整个数组第一个节点有大概率被选中，并且多个节点的负载分布不均衡。
+2. Uneven shuffle, which will cause the first node of the entire array to have a high probability of being selected, and the load distribution of multiple nodes is not balanced.
 
-第一点比较简单，应该不用在这里给出证明了。关于第二点，我们可以用概率知识来简单证明一下。假设每次挑选都是真随机，我们假设第一个位置的节点在`len(slice)`次交换中都不被选中的概率是`((6/7)*(6/7))^7 ≈ 0.34`。而分布均匀的情况下，我们肯定希望被第一个元素在任意位置上分布的概率均等，所以其被随机选到的概率应该约等于`1/7≈0.14`。
+The first point is relatively simple and should not be given proof here. Regarding the second point, we can use the knowledge of probability to simply prove it. Assuming that each selection is truly random, we assume that the probability that the node at the first position is not selected in the `len(slice)` exchange is `((6/7)*(6/7))^7 ≈ 0.34`. In the case of uniform distribution, we definitely want the probability that the first element is distributed at any position is equal, so the probability of being randomly selected should be approximately equal to `1/7≈0.14`.
 
-显然，这里给出的洗牌算法对于任意位置的元素来说，有30%的概率不对其进行交换操作。所以所有元素都倾向于留在原来的位置。因为我们每次对`shuffle`数组输入的都是同一个序列，所以第一个元素有更大的概率会被选中。在负载均衡的场景下，也就意味着节点数组中的第一台机器负载会比其它机器高不少(这里至少是3倍以上)。
+Obviously, the shuffling algorithm given here has a 30% probability of not swapping elements for any position. So all elements tend to stay in their original position. Because every time we input the same sequence for the `shuffle` array, the first element has a higher probability of being selected. In the case of load balancing, it means that the first machine load in the node array will be much higher than other machines (at least 3 times more).
 
-### 6.5.2.2 修正洗牌算法
+### 6.5.2.2 Correcting the shuffling algorithm
 
-从数学上得到过证明的还是经典的fisher-yates算法，主要思路为每次随机挑选一个值，放在数组末尾。然后在n-1个元素的数组中再随机挑选一个值，放在数组末尾，以此类推。
+The mathematically proven fisher-yates algorithm is the main idea of ​​picking a value at random and placing it at the end of the array. Then randomly pick a value in the array of n-1 elements, put it at the end of the array, and so on.
 
 ```go
-func shuffle(indexes []int) {
-	for i:=len(indexes); i>0; i-- {
-		lastIdx := i - 1
-		idx := rand.Int(i)
-		indexes[lastIdx], indexes[idx] = indexes[idx], indexes[lastIdx]
-	}
+Func shuffle(indexes []int) {
+For i:=len(indexes); i>0; i-- {
+lastIdx := i - 1
+Idx := rand.Int(i)
+Indexes[lastIdx], indexes[idx] = indexes[idx], indexes[lastIdx]
+}
 }
 ```
 
-在Go的标准库中已经为我们内置了该算法:
+The algorithm has been built for us in Go's standard library:
 
 ```go
-func shuffle(n int) []int {
-	b := rand.Perm(n)
-	return b
+Func shuffle(n int) []int {
+b := rand.Perm(n)
+Return b
 }
 ```
 
-在当前的场景下，我们只要用`rand.Perm`就可以得到我们想要的索引数组了。
+In the current scenario, we can use `rand.Perm` to get the index array we want.
 
-## 6.5.3 ZooKeeper 集群的随机节点挑选问题
+## 6.5.3 Random node selection problem for ZooKeeper cluster
 
-本节中的场景是从N个节点中选择一个节点发送请求，初始请求结束之后，后续的请求会重新对数组洗牌，所以每两个请求之间没有什么关联关系。因此我们上面的洗牌算法，理论上不初始化随机库的种子也是不会出什么问题的。
+The scenario in this section is to select a node from N nodes to send a request. After the initial request is over, subsequent requests will reshuffle the array, so there is no relationship between every two requests. Therefore, our shuffling algorithm above does not theoretically initialize the seeds of the random library.
 
-但在一些特殊的场景下，例如使用ZooKeeper时，客户端初始化从多个服务节点中挑选一个节点后，是会向该节点建立长连接的。之后客户端请求都会发往该节点去。直到该节点不可用，才会在节点列表中挑选下一个节点。在这种场景下，我们的初始连接节点选择就要求必须是“真”随机了。否则，所有客户端起动时，都会去连接同一个ZooKeeper的实例，根本无法起到负载均衡的目的。如果在日常开发中，你的业务也是类似的场景，也务必考虑一下是否会发生类似的情况。为rand库设置种子的方法:
+However, in some special scenarios, such as when using ZooKeeper, when the client initiates a node selection from multiple service nodes, a long connection is established to the node. The client request is then sent to the node. The next node is selected in the node list until the node is unavailable. In this scenario, our initial connection node selection requires that it be "true" random. Otherwise, all clients will connect to the same instance of ZooKeeper when they start, and they will not be able to load balance. If your business is similar in your daily development, it's important to consider whether a similar situation will occur. How to set the seed for the rand library:
 
 ```go
 rand.Seed(time.Now().UnixNano())
 ```
 
-之所以会有上面这些结论，是因为某个使用较广泛的开源ZooKeeper库的早期版本就犯了上述错误，直到2016年早些时候，这个问题才被修正。
+The reason for these conclusions is that the earlier version of a widely used open source ZooKeeper library made the above mistakes, and it was not until early 2016 that the problem was fixed.
 
-## 6.5.4 负载均衡算法效果验证
+## 6.5.4 Load balancing algorithm effect verification
 
-我们这里不考虑加权负载均衡的情况，既然名字是负载“均衡”。那么最重要的就是均衡。我们把开篇中的shuffle算法，和之后的fisher yates算法的结果进行简单地对比：
+We do not consider the case of weighted load balancing here, since the name is the load "equalization". Then the most important thing is balance. We simply compare the shuffle algorithm in the opening with the results of the fisher yates algorithm:
 
 ```go
-package main
+Package main
 
-import (
-	"fmt"
-	"math/rand"
-	"time"
+Import (
+"fmt"
+"math/rand"
+"time"
 )
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
+Func init() {
+rand.Seed(time.Now().UnixNano())
 }
 
-func shuffle1(slice []int) {
-	for i := 0; i < len(slice); i++ {
-		a := rand.Intn(len(slice))
-		b := rand.Intn(len(slice))
-		slice[a], slice[b] = slice[b], slice[a]
-	}
+Func shuffle1(slice []int) {
+For i := 0; i < len(slice); i++ {
+a := rand.Intn(len(slice))
+b := rand.Intn(len(slice))
+Slice[a], slice[b] = slice[b], slice[a]
+}
 }
 
-func shuffle2(indexes []int) {
-	for i := len(indexes); i > 0; i-- {
-		lastIdx := i - 1
-		idx := rand.Intn(i)
-		indexes[lastIdx], indexes[idx] = indexes[idx], indexes[lastIdx]
-	}
+Func shuffle2(indexes []int) {
+For i := len(indexes); i > 0; i-- {
+lastIdx := i - 1
+Idx := rand.Intn(i)
+Indexes[lastIdx], indexes[idx] = indexes[idx], indexes[lastIdx]
+}
 }
 
-func main() {
-	var cnt1 = map[int]int{}
-	for i := 0; i < 1000000; i++ {
-		var sl = []int{0, 1, 2, 3, 4, 5, 6}
-		shuffle1(sl)
-		cnt1[sl[0]]++
-	}
+Func main() {
+Var cnt1 = map[int]int{}
+For i := 0; i < 1000000; i++ {
+Var sl = []int{0, 1, 2, 3, 4, 5, 6}
+Shuffle1(sl)
+Cnt1[sl[0]]++
+}
 
-	var cnt2 = map[int]int{}
-	for i := 0; i < 1000000; i++ {
-		var sl = []int{0, 1, 2, 3, 4, 5, 6}
-		shuffle2(sl)
-		cnt2[sl[0]]++
-	}
+Var cnt2 = map[int]int{}
+For i := 0; i < 1000000; i++ {
+Var sl = []int{0, 1, 2, 3, 4, 5, 6}
+Shuffle2(sl)
+Cnt2[sl[0]]++
+}
 
-	fmt.Println(cnt1, "\n", cnt2)
+fmt.Println(cnt1, "\n", cnt2)
 }
 ```
 
-输出：
+Output:
 
 ```shell
-map[0:224436 1:128780 5:129310 6:129194 2:129643 3:129384 4:129253]
-map[6:143275 5:143054 3:143584 2:143031 1:141898 0:142631 4:142527]
+Map[0:224436 1:128780 5:129310 6:129194 2:129643 3:129384 4:129253]
+Map[6:143275 5:143054 3:143584 2:143031 1:141898 0:142631 4:142527]
 ```
 
-分布结果和我们推导出的结论是一致的。
+The distribution results are consistent with the conclusions we have derived.
