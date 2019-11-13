@@ -1,440 +1,440 @@
-# 附录A：Go语言常见坑
+# Appendix A: Go language common pit
 
-这里列举的Go语言常见坑都是符合Go语言语法的，可以正常的编译，但是可能是运行结果错误，或者是有资源泄漏的风险。
+The Go pits listed here are all in accordance with the Go language syntax and can be compiled normally, but may be the result of running errors or the risk of resource leaks.
 
-## 可变参数是空接口类型
+## Variable parameter is an empty interface type
 
-当参数的可变参数是空接口类型时，传入空接口的切片时需要注意参数展开的问题。
+When the variable parameter of the parameter is a null interface type, you need to pay attention to the parameter expansion when you import the slice of the empty interface.
 
 ```go
-func main() {
-	var a = []interface{}{1, 2, 3}
+Func main() {
+Var a = []interface{}{1, 2, 3}
 
-	fmt.Println(a)
-	fmt.Println(a...)
+fmt.Println(a)
+fmt.Println(a...)
 }
 ```
 
-不管是否展开，编译器都无法发现错误，但是输出是不同的：
+The compiler can't find the error, regardless of whether it is expanded, but the output is different:
 
 ```
 [1 2 3]
 1 2 3
 ```
 
-## 数组是值传递
+## Array is value passing
 
-在函数调用参数中，数组是值传递，无法通过修改数组类型的参数返回结果。
+In the function call argument, the array is a value passed, and the result cannot be returned by modifying the argument of the array type.
 
 ```go
-func main() {
-	x := [3]int{1, 2, 3}
+Func main() {
+x := [3]int{1, 2, 3}
 
-	func(arr [3]int) {
-		arr[0] = 7
-		fmt.Println(arr)
-	}(x)
+Func(arr [3]int) {
+Arr[0] = 7
+fmt.Println(arr)
+}(x)
 
-	fmt.Println(x)
+fmt.Println(x)
 }
 ```
 
-必要时需要使用切片。
+Slices are required if necessary.
 
-## map遍历是顺序不固定
+## map traversal is not fixed in order
 
-map是一种hash表实现，每次遍历的顺序都可能不一样。
+Map is a hash table implementation, and the order of each traversal may be different.
 
 ```go
-func main() {
-	m := map[string]string{
-		"1": "1",
-		"2": "2",
-		"3": "3",
-	}
+Func main() {
+m := map[string]string{
+"1": "1",
+		"twenty two",
+"3": "3",
+}
 
-	for k, v := range m {
-		println(k, v)
-	}
+For k, v := range m {
+Println(k, v)
+}
 }
 ```
 
-## 返回值被屏蔽
+## Return value is blocked
 
-在局部作用域中，命名的返回值内同名的局部变量屏蔽：
+In the local scope, the local variable of the same name within the named return value is masked:
 
 ```go
-func Foo() (err error) {
-	if err := Bar(); err != nil {
-		return
-	}
-	return
+Func Foo() (err error) {
+If err := Bar(); err != nil {
+Return
+}
+Return
 }
 ```
 
-## recover必须在defer函数中运行
+## recover must be run in the defer function
 
-recover捕获的是祖父级调用时的异常，直接调用时无效：
+Recover captures the exception when the grandfather calls, invalid when called directly:
 
 ```go
-func main() {
-	recover()
-	panic(1)
+Func main() {
+Recover()
+Panic(1)
 }
 ```
 
-直接defer调用也是无效：
+Direct defer calls are also invalid:
 
 ```go
-func main() {
-	defer recover()
-	panic(1)
+Func main() {
+Defer recover()
+Panic(1)
 }
 ```
 
-defer调用时多层嵌套依然无效：
+Multi-level nesting is still invalid when defer is called:
 
 ```go
-func main() {
-	defer func() {
-		func() { recover() }()
-	}()
-	panic(1)
+Func main() {
+Defer func() {
+Func() { recover() }()
+}()
+Panic(1)
 }
 ```
 
-必须在defer函数中直接调用才有效：
+Must be called directly in the defer function to be valid:
 
 ```go
-func main() {
-	defer func() {
-		recover()
-	}()
-	panic(1)
+Func main() {
+Defer func() {
+Recover()
+}()
+Panic(1)
 }
 ```
 
-## main函数提前退出
+## main function exit early
 
-后台Goroutine无法保证完成任务。
+Goroutine is not guaranteed to complete the task.
 
 ```go
-func main() {
-	go println("hello")
+Func main() {
+Go println("hello")
 }
 ```
 
-## 通过Sleep来回避并发中的问题
+## Avoiding problems in concurrency through Sleep
 
-休眠并不能保证输出完整的字符串：
+Hibernate does not guarantee the output of a complete string:
 
 ```go
-func main() {
-	go println("hello")
-	time.Sleep(time.Second)
+Func main() {
+Go println("hello")
+time.Sleep(time.Second)
 }
 ```
 
-类似的还有通过插入调度语句：
+Similarly, by inserting a dispatch statement:
 
 ```go
-func main() {
-	go println("hello")
-	runtime.Gosched()
+Func main() {
+Go println("hello")
+runtime.Gosched()
 }
 ```
 
-## 独占CPU导致其它Goroutine饿死
+## Exclusive CPU causes other Goroutine to starve
 
-Goroutine是协作式抢占调度，Goroutine本身不会主动放弃CPU：
+Goroutine is a collaborative preemptive schedule, and Goroutine itself does not actively give up the CPU:
 
 ```go
-func main() {
-	runtime.GOMAXPROCS(1)
+Func main() {
+runtime.GOMAXPROCS(1)
 
-	go func() {
-		for i := 0; i < 10; i++ {
-			fmt.Println(i)
-		}
-	}()
+Go func() {
+For i := 0; i < 10; i++ {
+fmt.Println(i)
+}
+}()
 
-	for {} // 占用CPU
+For {} // occupy CPU
 }
 ```
 
-解决的方法是在for循环加入runtime.Gosched()调度函数：
+The solution is to add the runtime.Gosched() dispatch function to the for loop:
 
 ```go
-func main() {
-	runtime.GOMAXPROCS(1)
+Func main() {
+runtime.GOMAXPROCS(1)
 
-	go func() {
-		for i := 0; i < 10; i++ {
-			fmt.Println(i)
-		}
-	}()
+Go func() {
+For i := 0; i < 10; i++ {
+fmt.Println(i)
+}
+}()
 
-	for {
-		runtime.Gosched()
-	}
+For {
+runtime.Gosched()
+}
 }
 ```
 
-或者是通过阻塞的方式避免CPU占用：
+Or avoid CPU usage by blocking:
 
 ```go
-func main() {
-	runtime.GOMAXPROCS(1)
+Func main() {
+runtime.GOMAXPROCS(1)
 
-	go func() {
-		for i := 0; i < 10; i++ {
-			fmt.Println(i)
-		}
-		os.Exit(0)
-	}()
+Go func() {
+For i := 0; i < 10; i++ {
+fmt.Println(i)
+}
+os.Exit(0)
+}()
 
-	select{}
+Select{}
 }
 ```
 
-## 不同Goroutine之间不满足顺序一致性内存模型
+## Different Goroutine does not satisfy the orderly consistent memory model
 
-因为在不同的Goroutine，main函数中无法保证能打印出`hello, world`:
+Because in different Goroutine, the main function cannot guarantee to print out `hello, world`:
 
 ```go
-var msg string
-var done bool
+Var msg string
+Var done bool
 
-func setup() {
-	msg = "hello, world"
-	done = true
+Func setup() {
+Msg = "hello, world"
+Done = true
 }
 
-func main() {
-	go setup()
-	for !done {
-	}
-	println(msg)
+Func main() {
+Go setup()
+For !done {
+}
+Println(msg)
 }
 ```
 
-解决的办法是用显式同步：
+The solution is to use explicit synchronization:
 
 ```go
-var msg string
-var done = make(chan bool)
+Var msg string
+Var done = make(chan bool)
 
-func setup() {
-	msg = "hello, world"
-	done <- true
+Func setup() {
+Msg = "hello, world"
+Done <- true
 }
 
-func main() {
-	go setup()
-	<-done
-	println(msg)
-}
-```
-msg的写入是在channel发送之前，所以能保证打印`hello, world`
-
-## 闭包错误引用同一个变量
-
-```go
-func main() {
-	for i := 0; i < 5; i++ {
-		defer func() {
-			println(i)
-		}()
-	}
+Func main() {
+Go setup()
+<-done
+Println(msg)
 }
 ```
+The msg write is before the channel is sent, so it can guarantee to print `hello, world`
 
-改进的方法是在每轮迭代中生成一个局部变量：
+## Closure error references the same variable
 
 ```go
-func main() {
-	for i := 0; i < 5; i++ {
-		i := i
-		defer func() {
-			println(i)
-		}()
-	}
+Func main() {
+For i := 0; i < 5; i++ {
+Defer func() {
+Println(i)
+}()
+}
 }
 ```
 
-或者是通过函数参数传入：
+The improved method is to generate a local variable in each iteration:
 
 ```go
-func main() {
-	for i := 0; i < 5; i++ {
-		defer func(i int) {
-			println(i)
-		}(i)
-	}
+Func main() {
+For i := 0; i < 5; i++ {
+i := i
+Defer func() {
+Println(i)
+}()
+}
 }
 ```
 
-## 在循环内部执行defer语句
-
-defer在函数退出时才能执行，在for执行defer会导致资源延迟释放：
+Or pass in via function argument:
 
 ```go
-func main() {
-	for i := 0; i < 5; i++ {
-		f, err := os.Open("/path/to/file")
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer f.Close()
-	}
+Func main() {
+For i := 0; i < 5; i++ {
+Defer func(i int) {
+Println(i)
+}(i)
+}
 }
 ```
 
-解决的方法可以在for中构造一个局部函数，在局部函数内部执行defer：
+## Executing a defer statement inside a loop
+
+Defer can only be executed when the function exits, and executing defer in for will cause the resource to be delayed:
 
 ```go
-func main() {
-	for i := 0; i < 5; i++ {
-		func() {
-			f, err := os.Open("/path/to/file")
-			if err != nil {
-				log.Fatal(err)
-			}
-			defer f.Close()
-		}()
-	}
+Func main() {
+For i := 0; i < 5; i++ {
+f, err := os.Open("/path/to/file")
+If err != nil {
+log.Fatal(err)
+}
+Defer f.Close()
+}
 }
 ```
 
-## 切片会导致整个底层数组被锁定
-
-切片会导致整个底层数组被锁定，底层数组无法释放内存。如果底层数组较大会对内存产生很大的压力。
+The solution can be to construct a local function in for, and execute defer inside the local function:
 
 ```go
-func main() {
-	headerMap := make(map[string][]byte)
-
-	for i := 0; i < 5; i++ {
-		name := "/path/to/file"
-		data, err := ioutil.ReadFile(name)
-		if err != nil {
-			log.Fatal(err)
-		}
-		headerMap[name] = data[:1]
-	}
-
-	// do some thing
+Func main() {
+For i := 0; i < 5; i++ {
+Func() {
+f, err := os.Open("/path/to/file")
+If err != nil {
+log.Fatal(err)
+}
+Defer f.Close()
+}()
+}
 }
 ```
 
-解决的方法是将结果克隆一份，这样可以释放底层的数组：
+## Slices cause the entire underlying array to be locked
+
+Slices cause the entire underlying array to be locked, and the underlying array cannot free memory. If the underlying array is large, it will put a lot of pressure on the memory.
 
 ```go
-func main() {
-	headerMap := make(map[string][]byte)
+Func main() {
+headerMap := make(map[string][]byte)
 
-	for i := 0; i < 5; i++ {
-		name := "/path/to/file"
-		data, err := ioutil.ReadFile(name)
-		if err != nil {
-			log.Fatal(err)
-		}
-		headerMap[name] = append([]byte{}, data[:1]...)
-	}
+For i := 0; i < 5; i++ {
+Name := "/path/to/file"
+Data, err := ioutil.ReadFile(name)
+If err != nil {
+log.Fatal(err)
+}
+headerMap[name] = data[:1]
+}
 
-	// do some thing
+// do some thing
 }
 ```
 
-## 空指针和空接口不等价
-
-比如返回了一个错误指针，但是并不是空的error接口：
+The solution is to clone the result so that the underlying array can be freed:
 
 ```go
-func returnsError() error {
-	var p *MyError = nil
-	if bad() {
-		p = ErrBad
-	}
-	return p // Will always return a non-nil error.
+Func main() {
+headerMap := make(map[string][]byte)
+
+For i := 0; i < 5; i++ {
+Name := "/path/to/file"
+Data, err := ioutil.ReadFile(name)
+If err != nil {
+log.Fatal(err)
+}
+headerMap[name] = append([]byte{}, data[:1]...)
+}
+
+// do some thing
 }
 ```
 
-## 内存地址会变化
+## Empty pointer and empty interface are not equivalent
 
-Go语言中对象的地址可能发生变化，因此指针不能从其它非指针类型的值生成：
+For example, it returns an error pointer, but it is not an empty error interface:
 
 ```go
-func main() {
-	var x int = 42
-	var p uintptr = uintptr(unsafe.Pointer(&x))
-
-	runtime.GC()
-	var px *int = (*int)(unsafe.Pointer(p))
-	println(*px)
+Func returnsError() error {
+Var p *MyError = nil
+If bad() {
+p = ErrBad
+}
+Return p // Will always return a non-nil error.
 }
 ```
 
-当内存发送变化的时候，相关的指针会同步更新，但是非指针类型的uintptr不会做同步更新。
+## Memory address will change
 
-同理CGO中也不能保存Go对象地址。
-
-## Goroutine泄露
-
-Go语言是带内存自动回收的特性，因此内存一般不会泄漏。但是Goroutine确存在泄漏的情况，同时泄漏的Goroutine引用的内存同样无法被回收。
+The address of an object in the Go language may change, so the pointer cannot be generated from other non-pointer types:
 
 ```go
-func main() {
-	ch := func() <-chan int {
-		ch := make(chan int)
-		go func() {
-			for i := 0; ; i++ {
-				ch <- i
-			}
-		} ()
-		return ch
-	}()
+Func main() {
+Var x int = 42
+Var p uintptr = uintptr(unsafe.Pointer(&x))
 
-	for v := range ch {
-		fmt.Println(v)
-		if v == 5 {
-			break
-		}
-	}
+runtime.GC()
+Var px *int = (*int)(unsafe.Pointer(p))
+Println(*px)
 }
 ```
 
-上面的程序中后台Goroutine向管道输入自然数序列，main函数中输出序列。但是当break跳出for循环的时候，后台Goroutine就处于无法被回收的状态了。
+When the memory is sent, the associated pointer will be updated synchronously, but the uintptr of the non-pointer type will not be updated synchronously.
 
-我们可以通过context包来避免这个问题：
+Similarly, the Go object address cannot be saved in CGO.
 
+## Goroutine leaked
+
+The Go language is characterized by automatic memory reclamation, so memory is generally not leaking. However, Goroutine does have a leak, and the memory referenced by the leaked Goroutine cannot be recycled.
 
 ```go
-func main() {
-	ctx, cancel := context.WithCancel(context.Background())
+Func main() {
+Ch := func() <-chan int {
+Ch := make(chan int)
+Go func() {
+For i := 0; ; i++ {
+Ch <- i
+}
+} ()
+Return ch
+}()
 
-	ch := func(ctx context.Context) <-chan int {
-		ch := make(chan int)
-		go func() {
-			for i := 0; ; i++ {
-				select {
-				case <- ctx.Done():
-					return
-				case ch <- i:
-				}
-			}
-		} ()
-		return ch
-	}(ctx)
-
-	for v := range ch {
-		fmt.Println(v)
-		if v == 5 {
-			cancel()
-			break
-		}
-	}
+For v := range ch {
+fmt.Println(v)
+If v == 5 {
+Break
+}
+}
 }
 ```
 
-当main函数在break跳出循环时，通过调用`cancel()`来通知后台Goroutine退出，这样就避免了Goroutine的泄漏。
+In the above program, the background Goroutine inputs the natural number sequence to the pipeline, and the main function outputs the sequence. But when the break jumps out of the for loop, the background Goroutine is in a state where it cannot be recycled.
+
+We can avoid this problem through the context package:
+
+
+```go
+Func main() {
+ctx, cancel := context.WithCancel(context.Background())
+
+ch := func(ctx context.Context) <-chan int {
+ch := make(chan int)
+go func() {
+for i := 0; ; i++ {
+select {
+case <- ctx.Done():
+return
+case ch <- i:
+}
+}
+} ()
+return ch
+}(ctx)
+
+for v := range ch {
+fmt.Println(v)
+if v == 5 {
+Cancel()
+Break
+}
+}
+}
+```
+
+When the main function jumps out of the loop in break, it calls the `cancel()` to notify the background Goroutine to exit, thus avoiding the Goroutine leak.

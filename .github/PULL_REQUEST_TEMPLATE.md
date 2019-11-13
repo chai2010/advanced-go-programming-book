@@ -1,1 +1,1 @@
-提示：解决了什么问题，也可以讲下理由。
+Tip: If you solve the problem, you can also explain the reason.
