@@ -49,7 +49,7 @@ func request(params map[string]interface{}) error {
 
 	idx := 0
 	for i := 0; i < maxRetryTimes; i++ {
-		err = apiRequest(params, indexes[idx])
+		err = apiRequest(params, endpoints[idx])
 		if err == nil {
 			break
 		}
