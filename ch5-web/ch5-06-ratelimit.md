@@ -1,37 +1,37 @@
-# 5.6 Ratelimit 服务流量限制
+# 5.6 Ratelimit Service Flow Limit
 
-计算机程序可依据其瓶颈分为磁盘IO瓶颈型，CPU计算瓶颈型，网络带宽瓶颈型，分布式场景下有时候也会外部系统而导致自身瓶颈。
+The computer program can be divided into the disk IO bottleneck type according to its bottleneck, the CPU calculates the bottleneck type, the network bandwidth bottleneck type, and sometimes the external system causes the bottleneck itself in the distributed scenario.
 
-Web系统打交道最多的是网络，无论是接收，解析用户请求，访问存储，还是把响应数据返回给用户，都是要走网络的。在没有`epoll/kqueue`之类的系统提供的IO多路复用接口之前，多个核心的现代计算机最头痛的是C10k问题，C10k问题会导致计算机没有办法充分利用CPU来处理更多的用户连接，进而没有办法通过优化程序提升CPU利用率来处理更多的请求。
+The most important part of the Web system is the network. Whether it is receiving, parsing user requests, accessing storage, or returning response data to users, it is necessary to go online. Before the IO multiplexing interface provided by the system such as `epoll/kqueue`, the core headache of modern computers with multiple cores is the C10k problem. The C10k problem can cause the computer to not fully utilize the CPU to handle more users. Connect, and there is no way to handle more requests by optimizing the program to increase CPU utilization.
 
-自从Linux实现了`epoll`，FreeBSD实现了`kqueue`，这个问题基本解决了，我们可以借助内核提供的API轻松解决当年的C10k问题，也就是说如今如果你的程序主要是和网络打交道，那么瓶颈一定在用户程序而不在操作系统内核。
+Since Linux implemented `epoll` and FreeBSD implemented `kqueue`, this problem has been basically solved. We can easily solve the C10k problem of the year with the API provided by the kernel, which means that if your program is mainly dealing with the network, then The bottleneck must be in the user program and not in the operating system kernel.
 
-随着时代的发展，编程语言对这些系统调用又进一步进行了封装，如今做应用层开发，几乎不会在程序中看到`epoll`之类的字眼，大多数时候我们就只要聚焦在业务逻辑上就好。Go 的 net 库针对不同平台封装了不同的syscall API，`http`库又是构建在`net`库之上，所以在Go语言中我们可以借助标准库，很轻松地写出高性能的`http`服务，下面是一个简单的`hello world`服务的代码：
+With the development of the times, programming languages ​​have further encapsulated these system calls. Nowadays, application layer development is almost impossible to see words like `epoll` in the program. Most of the time we just focus on business logic. Just fine. Go's net library encapsulates different syscall APIs for different platforms. The `http` library is built on top of the `net` library, so in the Go language we can easily write high-performance `http with standard libraries. `Services, below is a simple `hello world` service code:
 
 ```go
-package main
+Package main
 
-import (
-	"io"
-	"log"
-	"net/http"
+Import (
+"io"
+"log"
+"net/http"
 )
 
-func sayhello(wr http.ResponseWriter, r *http.Request) {
-	wr.WriteHeader(200)
-	io.WriteString(wr, "hello world")
+Func sayhello(wr http.ResponseWriter, r *http.Request) {
+wr.WriteHeader(200)
+io.WriteString(wr, "hello world")
 }
 
-func main() {
-	http.HandleFunc("/", sayhello)
-	err := http.ListenAndServe(":9090", nil)
-	if err != nil {
-		log.Fatal("ListenAndServe:", err)
-	}
+Func main() {
+http.HandleFunc("/", sayhello)
+Err := http.ListenAndServe(":9090", nil)
+If err != nil {
+log.Fatal("ListenAndServe:", err)
+}
 }
 ```
 
-我们需要衡量一下这个Web服务的吞吐量，再具体一些，就是接口的QPS。借助wrk，在家用电脑 Macbook Pro上对这个 `hello world` 服务进行基准测试，Mac的硬件情况如下：
+We need to measure the throughput of this Web service, and then specifically, the QPS of the interface. With wrk, benchmark the `hello world` service on your home Macbook Pro. The hardware of the Mac is as follows:
 
 ```shell
 CPU: Intel(R) Core(TM) i5-5257U CPU @ 2.70GHz
@@ -39,126 +39,126 @@ Core: 2
 Threads: 4
 
 Graphics/Displays:
-	  Chipset Model: Intel Iris Graphics 6100
-		  Resolution: 2560 x 1600 Retina
-	Memory Slots:
-		  Size: 4 GB
-		  Speed: 1867 MHz
-		  Size: 4 GB
-		  Speed: 1867 MHz
+Chipset Model: Intel Iris Graphics 6100
+Resolution: 2560 x 1600 Retina
+Memory Slots:
+Size: 4 GB
+Speed: 1867 MHz
+Size: 4 GB
+Speed: 1867 MHz
 Storage:
-		  Size: 250.14 GB (250,140,319,744 bytes)
-		  Media Name: APPLE SSD SM0256G Media
-		  Size: 250.14 GB (250,140,319,744 bytes)
-		  Medium Type: SSD
+Size: 250.14 GB (250,140,319,744 bytes)
+Media Name: APPLE SSD SM0256G Media
+Size: 250.14 GB (250,140,319,744 bytes)
+Medium Type: SSD
 ```
 
-测试结果：
+Test Results:
 
 ```shell
 ~ ❯❯❯ wrk -c 10 -d 10s -t10 http://localhost:9090
 Running 10s test @ http://localhost:9090
-  10 threads and 10 connections
-  Thread Stats   Avg	  Stdev	 Max   +/- Stdev
-	Latency   339.99us	1.28ms  44.43ms   98.29%
-	Req/Sec	 4.49k   656.81	 7.47k	73.36%
-  449588 requests in 10.10s, 54.88MB read
-Requests/sec:  44513.22
-Transfer/sec:	  5.43MB
+  10 threads and 10 connections
+  Thread Stats Avg Stdev Max +/- Stdev
+Latency 339.99us 1.28ms 44.43ms 98.29%
+Req/Sec 4.49k 656.81 7.47k 73.36%
+  449588 requests in 10.10s, 54.88MB read
+Requests/sec: 44513.22
+Transfer/sec: 5.43MB
 
 ~ ❯❯❯ wrk -c 10 -d 10s -t10 http://localhost:9090
 Running 10s test @ http://localhost:9090
-  10 threads and 10 connections
-  Thread Stats   Avg	  Stdev	 Max   +/- Stdev
-	Latency   334.76us	1.21ms  45.47ms   98.27%
-	Req/Sec	 4.42k   633.62	 6.90k	71.16%
-  443582 requests in 10.10s, 54.15MB read
-Requests/sec:  43911.68
-Transfer/sec:	  5.36MB
+  10 threads and 10 connections
+  Thread Stats Avg Stdev Max +/- Stdev
+Latency 334.76us 1.21ms 45.47ms 98.27%
+Req/Sec 4.42k 633.62 6.90k 71.16%
+  443582 requests in 10.10s, 54.15MB read
+Requests/sec: 43911.68
+Transfer/sec: 5.36MB
 
 ~ ❯❯❯ wrk -c 10 -d 10s -t10 http://localhost:9090
 Running 10s test @ http://localhost:9090
-  10 threads and 10 connections
-  Thread Stats   Avg	  Stdev	 Max   +/- Stdev
-	Latency   379.26us	1.34ms  44.28ms   97.62%
-	Req/Sec	 4.55k   591.64	 8.20k	76.37%
-  455710 requests in 10.10s, 55.63MB read
-Requests/sec:  45118.57
-Transfer/sec:	  5.51MB
+  10 threads and 10 connections
+  Thread Stats Avg Stdev Max +/- Stdev
+Latency 379.26us 1.34ms 44.28ms 97.62%
+Req/Sec 4.55k 591.64 8.20k 76.37%
+  455710 requests in 10.10s, 55.63MB read
+Requests/sec: 45118.57
+Transfer/sec: 5.51MB
 ```
 
-多次测试的结果在4万左右的QPS浮动，响应时间最多也就是40ms左右，对于一个Web程序来说，这已经是很不错的成绩了，我们只是照抄了别人的示例代码，就完成了一个高性能的`hello world`服务器，是不是很有成就感？
+The result of multiple tests is about 40,000 QPS floating, and the response time is about 40ms. For a web application, this is already a very good result. We just copied the sample code of others and completed one. High-performance `hello world` server, is it a great sense of accomplishment?
 
-这还只是家用PC，线上服务器大多都是24核心起，32G内存+，CPU基本都是Intel i7。所以同样的程序在服务器上运行会得到更好的结果。
+This is still only a home PC, online servers are mostly 24 cores, 32G memory +, CPU is basically Intel i7. So the same program running on the server will get better results.
 
-这里的`hello world`服务没有任何业务逻辑。真实环境的程序要复杂得多，有些程序偏网络IO瓶颈，例如一些CDN服务、Proxy服务；有些程序偏CPU/GPU瓶颈，例如登陆校验服务、图像处理服务；有些程序瓶颈偏磁盘，例如专门的存储系统，数据库。不同的程序瓶颈会体现在不同的地方，这里提到的这些功能单一的服务相对来说还算容易分析。如果碰到业务逻辑复杂代码量巨大的模块，其瓶颈并不是三下五除二可以推测出来的，还是需要从压力测试中得到更为精确的结论。
+The `hello world` service here does not have any business logic. The procedures in the real environment are much more complicated. Some programs are biased towards network IO bottlenecks, such as some CDN services and Proxy services. Some programs are biased towards CPU/GPU bottlenecks, such as login verification services and image processing services. Some program bottlenecks are partial to disk, such as specialization. Storage system, database. Different program bottlenecks are reflected in different places, and the single-function services mentioned here are relatively easy to analyze. If you encounter a module with a large amount of business logic and a large amount of code, the bottleneck is not inferred from the three, five, and two, or you need to get more accurate conclusions from the stress test.
 
-对于IO/Network瓶颈类的程序，其表现是网卡/磁盘IO会先于CPU打满，这种情况即使优化CPU的使用也不能提高整个系统的吞吐量，只能提高磁盘的读写速度，增加内存大小，提升网卡的带宽来提升整体性能。而CPU瓶颈类的程序，则是在存储和网卡未打满之前CPU占用率先到达100%，CPU忙于各种计算任务，IO设备相对则较闲。
+For the IO/Network bottleneck class, the performance is that the NIC/disk IO will be full before the CPU. In this case, even if the CPU is optimized, the throughput of the entire system cannot be improved, and the read and write speed of the disk can be increased. The memory size increases the bandwidth of the NIC to improve overall performance. The CPU bottleneck program is that the CPU usage first reaches 100% before the storage and network cards are not full. The CPU is busy with various computing tasks, and the IO devices are relatively idle.
 
-无论哪种类型的服务，在资源使用到极限的时候都会导致请求堆积，超时，系统hang死，最终伤害到终端用户。对于分布式的Web服务来说，瓶颈还不一定总在系统内部，也有可能在外部。非计算密集型的系统往往会在关系型数据库环节失守，而这时候Web模块本身还远远未达到瓶颈。
+Regardless of the type of service, when the resource is used to the limit, the request will accumulate, timeout, system hang, and eventually harm to the end user. For distributed Web services, the bottleneck is not always inside the system, and it may be external. Non-computation-intensive systems tend to fall into the relational database, and at this time the Web module itself is far from reaching the bottleneck.
 
-不管我们的服务瓶颈在哪里，最终要做的事情都是一样的，那就是流量限制。
+No matter where our service bottlenecks are, the final thing to do is the same, that is, traffic restrictions.
 
-## 5.6.1 常见的流量限制手段
+## 5.6.1 Common Traffic Limiting Means
 
-流量限制的手段有很多，最常见的：漏桶、令牌桶两种：
+There are many ways to limit traffic. The most common ones are: leaky buckets and token buckets:
 
-1. 漏桶是指我们有一个一直装满了水的桶，每过固定的一段时间即向外漏一滴水。如果你接到了这滴水，那么你就可以继续服务请求，如果没有接到，那么就需要等待下一滴水。
-2. 令牌桶则是指匀速向桶中添加令牌，服务请求时需要从桶中获取令牌，令牌的数目可以按照需要消耗的资源进行相应的调整。如果没有令牌，可以选择等待，或者放弃。
+1. A leaky bucket means that we have a bucket that has been filled with water and leaks a drop of water every time it has been fixed for a fixed period of time. If you receive this drip, then you can continue the service request, if not received, then you need to wait for the next drop.
+2. The token bucket refers to adding a token to the bucket at a constant speed. When the service request is received, the token needs to be obtained from the bucket. The number of tokens can be adjusted according to the resources that need to be consumed. If you don't have a token, you can choose to wait or give up.
 
-这两种方法看起来很像，不过还是有区别的。漏桶流出的速率固定，而令牌桶只要在桶中有令牌，那就可以拿。也就是说令牌桶是允许一定程度的并发的，比如同一个时刻，有100个用户请求，只要令牌桶中有100个令牌，那么这100个请求全都会放过去。令牌桶在桶中没有令牌的情况下也会退化为漏桶模型。
+These two methods look a lot like, but there are still differences. The rate at which the leaking bucket exits is fixed, and the token bucket can be taken as long as there is a token in the bucket. That is to say, the token bucket allows a certain degree of concurrency. For example, at the same time, there are 100 user requests. As long as there are 100 tokens in the token bucket, all 100 requests will be put forward. The token bucket also degenerates into a leaky bucket model if there is no token in the bucket.
 
 ![token bucket](../images/ch5-token-bucket.png)
 
-*图 5-12 令牌桶*
+*Figure 5-12 Token Bucket*
 
-实际应用中令牌桶应用较为广泛，开源界流行的限流器大多数都是基于令牌桶思想的。并且在此基础上进行了一定程度的扩充，比如`github.com/juju/ratelimit`提供了几种不同特色的令牌桶填充方式：
+In actual applications, token buckets are widely used, and most of the popular current limiters in the open source world are based on token buckets. And on this basis, a certain degree of expansion, such as `github.com/juju/ratelimit` provides several different ways to fill the token bucket:
 
 ```go
-func NewBucket(fillInterval time.Duration, capacity int64) *Bucket
+Func NewBucket(fillInterval time.Duration, capacity int64) *Bucket
 ```
 
-默认的令牌桶，`fillInterval`指每过多长时间向桶里放一个令牌，`capacity`是桶的容量，超过桶容量的部分会被直接丢弃。桶初始是满的。
+The default token bucket, `fillInterval`, means that each time a token is placed in the bucket, `capacity` is the capacity of the bucket, and the portion that exceeds the bucket capacity is discarded directly. The bucket is initially full.
 
 ```go
-func NewBucketWithQuantum(fillInterval time.Duration, capacity, quantum int64) *Bucket
+Func NewBucketWithQuantum(fillInterval time.Duration, capacity, quantum int64) *Bucket
 ```
 
-和普通的`NewBucket()`的区别是，每次向桶中放令牌时，是放`quantum`个令牌，而不是一个令牌。
+The difference from the normal `NewBucket()` is that each time a token is placed in the bucket, a `quantum` token is placed instead of a token.
 
 ```go
-func NewBucketWithRate(rate float64, capacity int64) *Bucket
+Func NewBucketWithRate(rate float64, capacity int64) *Bucket
 ```
 
-这个就有点特殊了，会按照提供的比例，每秒钟填充令牌数。例如`capacity`是100，而`rate`是0.1，那么每秒会填充10个令牌。
+This is a bit special, and the number of tokens per second is filled according to the ratio provided. For example, `capacity` is 100, and `rate` is 0.1, then 10 tokens are filled every second.
 
-从桶中获取令牌也提供了几个API：
+Getting a token from the bucket also provides several APIs:
 
 ```go
-func (tb *Bucket) Take(count int64) time.Duration {}
-func (tb *Bucket) TakeAvailable(count int64) int64 {}
-func (tb *Bucket) TakeMaxDuration(count int64, maxWait time.Duration) (
-	time.Duration, bool,
+Func (tb *Bucket) Take(count int64) time.Duration {}
+Func (tb *Bucket) TakeAvailable(count int64) int64 {}
+Func (tb *Bucket) TakeMaxDuration(count int64, maxWait time.Duration) (
+time.Duration, bool,
 ) {}
-func (tb *Bucket) Wait(count int64) {}
-func (tb *Bucket) WaitMaxDuration(count int64, maxWait time.Duration) bool {}
+Func (tb *Bucket) Wait(count int64) {}
+Func (tb *Bucket) WaitMaxDuration(count int64, maxWait time.Duration) bool {}
 ```
 
-名称和功能都比较直观，这里就不再赘述了。相比于开源界更为有名的Google的Java工具库Guava中提供的ratelimiter，这个库不支持令牌桶预热，且无法修改初始的令牌容量，所以可能个别极端情况下的需求无法满足。但在明白令牌桶的基本原理之后，如果没办法满足需求，相信你也可以很快对其进行修改并支持自己的业务场景。
+The names and functions are relatively straightforward, so I won't go into details here. Compared to the ratelimiter provided by Google's Java tool library Guava, which is more famous in the open source world, this library does not support token bucket warm-up and cannot modify the initial token capacity, so the requirements in individual extreme cases may not be met. However, after understanding the basic principles of the token bucket, if there is no way to meet the demand, I believe that you can also modify it and support your own business scenario.
 
-## 5.6.2 原理
+## 5.6.2 Principle
 
-从功能上来看，令牌桶模型就是对全局计数的加减法操作过程，但使用计数需要我们自己加读写锁，有小小的思想负担。如果我们对Go语言已经比较熟悉的话，很容易想到可以用buffered channel来完成简单的加令牌取令牌操作：
+From the functional point of view, the token bucket model is the addition and subtraction operation process for the global count, but the use of the count requires us to add the read-write lock, which has a small burden of thought. If we are already familiar with the Go language, it is easy to think of a buffered channel to complete a simple token-token operation:
 
 ```go
-var tokenBucket = make(chan struct{}, capacity)
+Var tokenBucket = make(chan struct{}, capacity)
 ```
 
-每过一段时间向`tokenBucket`中添加`token`，如果`bucket`已经满了，那么直接放弃：
+Add `token` to `tokenBucket` every once in a while, and if `bucket` is full, give up:
 
 ```go
 fillToken := func() {
-	ticker := time.NewTicker(fillInterval)
+Ticker := time.NewTicker(fillInterval)
 	for {
 		select {
 		case <-ticker.C:
@@ -172,7 +172,7 @@ fillToken := func() {
 }
 ```
 
-把代码组合起来：
+Combine the code:
 
 ```go
 package main
@@ -207,7 +207,7 @@ func main() {
 
 ```
 
-看看运行结果：
+Look at the results of the run:
 
 ```shell
 current token cnt: 98 2018-06-16 18:17:50.234556981 +0800 CST m=+0.981524018
@@ -221,9 +221,9 @@ current token cnt: 100 2018-06-16 18:17:50.304550145 +0800 CST m=+1.051517182
 current token cnt: 100 2018-06-16 18:17:50.313970334 +0800 CST m=+1.060937371
 ```
 
-在1s钟的时候刚好填满100个，没有太大的偏差。不过这里可以看到，Go的定时器存在大约0.001s的误差，所以如果令牌桶大小在1000以上的填充可能会有一定的误差。对于一般的服务来说，这一点误差无关紧要。
+At the time of 1s, it just filled 100, without much deviation. However, it can be seen here that Go's timer has an error of about 0.001 s, so if the token bucket size is more than 1000, there may be some error. For general services, this error does not matter.
 
-上面的令牌桶的取令牌操作实现起来也比较简单，简化问题，我们这里只取一个令牌：
+The token token operation of the token bucket above is also simpler to implement, simplifying the problem, we only take one token here:
 
 ```go
 func TakeAvailable(block bool) bool{
@@ -245,24 +245,22 @@ func TakeAvailable(block bool) bool{
 	return takenResult
 }
 ```
+Some companies have built their own current-limiting wheels in this way, but if the open source version of the ratelimit is the case, then we have nothing to say. The reality is not like this.
 
-一些公司自己造的限流的轮子就是用上面这种方式来实现的，不过如果开源版 ratelimit 也如此的话，那我们也没什么可说的了。现实并不是这样的。
-
-我们来思考一下，令牌桶每隔一段固定的时间向桶中放令牌，如果我们记下上一次放令牌的时间为 t1，和当时的令牌数k1，放令牌的时间间隔为ti，每次向令牌桶中放x个令牌，令牌桶容量为cap。现在如果有人来调用`TakeAvailable`来取n个令牌，我们将这个时刻记为t2。在t2时刻，令牌桶中理论上应该有多少令牌呢？伪代码如下：
+Let's think about it, the token bucket puts the token into the bucket every fixed time. If we record the last time the token was put, it is t1, and the token number k1 at that time, the token interval is Ti, each time you put x tokens into the token bucket, the token bucket capacity is cap. Now if someone calls `TakeAvailable` to get n tokens, we will record this moment as t2. At t2, how many tokens should there be in the token bucket? The pseudo code is as follows:
 
 ```go
 cur = k1 + ((t2 - t1)/ti) * x
 cur = cur > cap ? cap : cur
 ```
+We use the time difference between two time points, combined with other parameters, theoretically, we can know how many tokens are in the bucket before taking the token. It is theoretically unnecessary to use the operation of filling the token into the channel in front of this section. As long as you make a simple calculation of the number of tokens in the token bucket each time you call `Take`, you can get the correct number of tokens. Is it a lot like the feeling of "inert evaluation"?
 
-我们用两个时间点的时间差，再结合其它的参数，理论上在取令牌之前就完全可以知道桶里有多少令牌了。那劳心费力地像本小节前面向channel里填充token的操作，理论上是没有必要的。只要在每次`Take`的时候，再对令牌桶中的token数进行简单计算，就可以得到正确的令牌数。是不是很像`惰性求值`的感觉？
+After getting the correct number of tokens, then the actual `Take` operation is fine. This `Take` operation only needs to perform a simple subtraction on the number of tokens. Remember to lock to ensure concurrent security. `github.com/juju/ratelimit` This library does just that.
 
-在得到正确的令牌数之后，再进行实际的`Take`操作就好，这个`Take`操作只需要对令牌数进行简单的减法即可，记得加锁以保证并发安全。`github.com/juju/ratelimit`这个库就是这样做的。
+## 5.6.3 Service bottlenecks and QoS
 
-## 5.6.3 服务瓶颈和 QoS
+Earlier we talked about a lot of CPU bottlenecks, IO bottlenecks and other concepts, this performance bottleneck can be located relatively quickly from most companies have monitoring systems, if a system encounters performance problems, then the monitoring chart response It is the fastest.
 
-前面我们说了很多CPU瓶颈、IO瓶颈之类的概念，这种性能瓶颈从大多数公司都有的监控系统中可以比较快速地定位出来，如果一个系统遇到了性能问题，那监控图的反应一般都是最快的。
+While performance metrics are important, the overall QoS of the service should also be considered when providing services to users. The full name of QoS is Quality of Service, as the name suggests is the quality of service. QoS includes metrics such as availability, throughput, latency, delay variation, and loss. In general, we can improve the CPU utilization of Web services by optimizing the system, thereby increasing the throughput of the entire system. But as throughput improves, the user experience is likely to get worse. User-sensitive is more sensitive than latency. Although your system throughput is high, but you can't open the page for a long time, it will cause a lot of user loss. Therefore, in the large company's Web service performance indicators, in addition to the average response delay, the response time of 95 cents, 99 points is also taken out as a performance standard. The average response does not have much impact on improving CPU utilization. The response time of 95-bit and 99-digit may increase dramatically. Then it is worth considering whether the cost of improving these CPU utilization is worthwhile.
 
-虽然性能指标很重要，但对用户提供服务时还应考虑服务整体的QoS。QoS全称是Quality of Service，顾名思义是服务质量。QoS包含有可用性、吞吐量、时延、时延变化和丢失等指标。一般来讲我们可以通过优化系统，来提高Web服务的CPU利用率，从而提高整个系统的吞吐量。但吞吐量提高的同时，用户体验是有可能变差的。用户角度比较敏感的除了可用性之外，还有时延。虽然你的系统吞吐量高，但半天刷不开页面，想必会造成大量的用户流失。所以在大公司的Web服务性能指标中，除了平均响应时延之外，还会把响应时间的95分位，99分位也拿出来作为性能标准。平均响应在提高CPU利用率没受到太大影响时，可能95分位、99分位的响应时间大幅度攀升了，那么这时候就要考虑提高这些CPU利用率所付出的代价是否值得了。
-
-在线系统的机器一般都会保持CPU有一定的余裕。
+Machines in online systems generally keep the CPU at a certain margin.

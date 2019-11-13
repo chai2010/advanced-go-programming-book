@@ -1,8 +1,7 @@
-# 第5章 go 和 Web
+# Chapter 5 go and Web
 
-*不管何种编程语言，适合自己的就是最好的。不管何种编程语言，能稳定实现业务逻辑的就是最好的。世间编程语言千千万，世间程序猿万万千，能做到深入理解并应用的就是最好的。——kenrong*
+* Regardless of the programming language, the best for you is the best. Regardless of the programming language, it is best to be able to implement business logic steadily. There are thousands of programming languages in the world, and there are thousands of programs in the world. It is the best to understand and apply them in depth. ——kenrong*
 
-本章将会阐述Go在Web开发方面的现状，并以几个典型的开源Web框架为例，带大家深入Web框架本身的执行流程。
+This chapter will explain Go's current state of web development, and take several typical open source web frameworks as examples to bring you into the execution flow of the web framework itself.
 
-同时会介绍现代企业级Web开发面临的一些问题，以及在Go中如何面对，并解决这些问题。
-
+At the same time, it will introduce some problems faced by modern enterprise-level Web development, and how to face and solve these problems in Go.

@@ -1,274 +1,274 @@
-# 5.8 接口和表驱动开发
+# 5.8 Interface and Table Driven Development
 
-在Web项目中经常会遇到外部依赖环境的变化，比如：
+In the web project, you will often encounter changes in the external dependency environment, such as:
 
-1. 公司的老存储系统年久失修，现在已经没有人维护了，新的系统上线也没有考虑平滑迁移，但最后通牒已下，要求N天之内迁移完毕。
-2. 平台部门的老用户系统年久失修，现在已经没有人维护了，真是悲伤的故事。新系统上线没有考虑兼容老接口，但最后通牒已下，要求N个月之内迁移完毕。
-3. 公司的老消息队列人走茶凉，年久失修，新来的技术精英们没有考虑向前兼容，但最后通牒已下，要求半年之内迁移完毕。
+1. The company's old storage system has been in disrepair for a long time. Now no one has maintained it. The new system has not been considered for smooth migration. However, the ultimatum has been completed and the migration is required within N days.
+2. The old user system of the platform department has been in disrepair for a long time, and now no one has maintained it. It is a sad story. The new system did not consider compatibility with the old interface, but the ultimatum was already down, requiring migration within N months.
+3. The company's old news queue is cool and has been in disrepair. The new technical elites did not consider forward compatibility, but the ultimatum has been lowered and the migration is required within half a year.
 
-嗯，所以你看到了，我们的外部依赖总是为了自己爽而不断地做升级，且不想做向前兼容，然后来给我们下最后通牒。如果我们的部门工作饱和，领导强势，那么有时候也可以倒逼依赖方来做兼容。但世事不一定如人愿，即使我们的领导强势，读者朋友的领导也还是可能认怂的。
+Well, so you see, our external dependencies are always constantly upgraded for our own sake, and do not want to be forward compatible, and then give us an ultimatum. If our department is saturated and the leadership is strong, then sometimes the relying party can be forced to do compatibility. But the world is not necessarily like people, even if our leadership is strong, the leadership of readers and friends may still be recognized.
 
-我们可以思考一下怎么缓解这个问题。
+We can think about how to alleviate this problem.
 
-## 5.8.1 业务系统的发展过程
+## 5.8.1 Business System Development Process
 
-互联网公司只要可以活过三年，工程方面面临的首要问题就是代码膨胀。系统的代码膨胀之后，可以将系统中与业务本身流程无关的部分做拆解和异步化。什么算是业务无关呢，比如一些统计、反作弊、营销发券、价格计算、用户状态更新等等需求。这些需求往往依赖于主流程的数据，但又只是挂在主流程上的旁支，自成体系。
+As long as Internet companies can live for three years, the primary problem facing engineering is code bloat. After the system's code is inflated, the parts of the system that are not related to the business's own process can be disassembled and asynchronous. What is business-related, such as some statistics, anti-cheating, marketing billing, price calculation, user status update and so on. These requirements often depend on the data of the main process, but they are only the side branches of the main process, and they are self-contained.
 
-这时候我们就可以把这些旁支拆解出去，作为独立的系统来部署、开发以及维护。这些旁支流程的时延如若非常敏感，比如用户在界面上点了按钮，需要立刻返回（价格计算、支付），那么需要与主流程系统进行RPC通信，并且在通信失败时，要将结果直接返回给用户。如果时延不敏感，比如抽奖系统，结果稍后公布的这种，或者非实时的统计类系统，那么就没有必要在主流程里为每一套系统做一套RPC流程。我们只要将下游需要的数据打包成一条消息，传入消息队列，之后的事情与主流程一概无关（当然，与用户的后续交互流程还是要做的）。
+At this time we can dismantle these side branches and deploy, develop and maintain them as independent systems. The delay of these side-by-side processes is very sensitive. For example, if the user clicks a button on the interface and needs to return immediately (price calculation, payment), then RPC communication with the main process system is required, and when the communication fails, the result is directly returned. To the user. If the delay is not sensitive, such as the lottery system, and the results are published later, or non-real-time statistical systems, then there is no need to do an RPC process for each system in the main process. We only need to package the data needed downstream into a message and pass it into the message queue. The subsequent things have nothing to do with the main process (of course, the follow-up process with the user still needs to be done).
 
-通过拆解和异步化虽然解决了一部分问题，但并不能解决所有问题。随着业务发展，单一职责的模块也会变得越来越复杂，这是必然的趋势。一件事情本身变的复杂的话，这时候拆解和异步化就不灵了。我们还是要对事情本身进行一定程度的封装抽象。
+Although some problems have been solved through disassembly and asynchronousization, they cannot solve all problems. As the business develops, the modules of single responsibility will become more and more complex, which is an inevitable trend. If one thing becomes complicated, then disassembly and asynchronousization will not work. We still have to do a certain degree of encapsulation abstraction on the thing itself.
 
-## 5.8.2 使用函数封装业务流程
+## 5.8.2 Using functions to encapsulate business processes
 
-最基本的封装过程，我们把相似的行为放在一起，然后打包成一个一个的函数，让自己杂乱无章的代码变成下面这个样子：
+In the most basic packaging process, we put similar behaviors together, and then package them into a single function, so that our messy code becomes like this:
 
 ```go
-func BusinessProcess(ctx context.Context, params Params) (resp, error){
-	ValidateLogin()
-	ValidateParams()
-	AntispamCheck()
-	GetPrice()
-	CreateOrder()
-	UpdateUserStatus()
-	NotifyDownstreamSystems()
+Func BusinessProcess(ctx context.Context, params Params) (resp, error){
+ValidateLogin()
+ValidateParams()
+AntispamCheck()
+GetPrice()
+CreateOrder()
+UpdateUserStatus()
+NotifyDownstreamSystems()
 }
 ```
 
-不管是多么复杂的业务，系统内的逻辑都是可以分解为`step1 -> step2 -> step3 ...`这样的流程的。
+No matter how complex the business is, the logic within the system can be broken down into processes like `step1 -> step2 -> step3 ...`.
 
-每一个步骤内部也会有复杂的流程，比如：
+There are also complex processes within each step, such as:
 
 ```go
-func CreateOrder() {
-	ValidateDistrict()    // 判断是否是地区限定商品
-	ValidateVIPProduct()  // 检查是否是只提供给 vip 的商品
-	GetUserInfo()         // 从用户系统获取更详细的用户信息
-	GetProductDesc()      // 从商品系统中获取商品在该时间点的详细信息
-	DecrementStorage()    // 扣减库存
-	CreateOrderSnapshot() // 创建订单快照
-	return CreateSuccess
+Func CreateOrder() {
+ValidateDistrict() // Determine if it is a regionally qualified item
+ValidateVIPProduct() // Check if it is only available for vip
+GetUserInfo() // Get more detailed user information from the user system
+GetProductDesc() // Get the details of the item at that point in time from the item system
+DecrementStorage() // deducting inventory
+CreateOrderSnapshot() // Create an order snapshot
+Return CreateSuccess
 }
 ```
 
-在阅读业务流程代码时，我们只要阅读其函数名就能知晓在该流程中完成了哪些操作，如果需要修改细节，那么就继续深入到每一个业务步骤去看具体的流程。写得稀烂的业务流程代码则会将所有过程都堆积在少数的几个函数中，从而导致几百甚至上千行的函数。这种意大利面条式的代码阅读和维护都会非常痛苦。在开发的过程中，一旦有条件应该立即进行类似上面这种方式的简单封装。
+When reading the business process code, we can read the function name to know what has been done in the process. If you need to modify the details, then go to each business step to see the specific process. A well-written business process code will stack all the processes in a few functions, resulting in hundreds or even thousands of rows of functions. This spaghetti-style code reading and maintenance can be very painful. In the development process, a simple package like this one should be performed immediately if there are conditions.
 
-## 5.8.3 使用接口来做抽象
+## 5.8.3 Using interfaces to abstract
 
-业务发展的早期，是不适宜引入接口（interface）的，很多时候业务流程变化很大，过早引入接口会使业务系统本身增加很多不必要的分层，从而导致每次修改几乎都要全盘否定之前的工作。
+In the early stage of business development, it is not suitable to introduce interfaces. In many cases, business processes change greatly. Introducing interfaces too early will increase the business system itself by adding unnecessary stratification, resulting in almost complete negation of each modification. Previous work.
 
-当业务发展到一定阶段，主流程稳定之后，就可以适当地使用接口来进行抽象了。这里的稳定，是指主流程的大部分业务步骤已经确定，即使再进行修改，也不会进行大规模的变动，而只是小修小补，或者只是增加或删除少量业务步骤。
+When the business develops to a certain stage and the main process is stable, the interface can be used for abstraction. The stability here means that most of the business steps of the main process have been determined. Even if the modifications are made, there will be no large-scale changes, but only minor repairs, or just adding or deleting a small number of business steps.
 
-如果我们在开发过程中，已经对业务步骤进行了良好的封装，这时候进行接口抽象化就会变的非常容易，伪代码：
+If we have already packaged the business steps well during the development process, it is very easy to abstract the interface at this time. The pseudo code:
 
 ```go
-// OrderCreator 创建订单流程
-type OrderCreator interface {
-	ValidateDistrict()    // 判断是否是地区限定商品
-	ValidateVIPProduct()  // 检查是否是只提供给 vip 的商品
-	GetUserInfo()         // 从用户系统获取更详细的用户信息
-	GetProductDesc()      // 从商品系统中获取商品在该时间点的详细信息
-	DecrementStorage()    // 扣减库存
-	CreateOrderSnapshot() // 创建订单快照
+// OrderCreator creates an order process
+Type OrderCreator interface {
+ValidateDistrict() // Determine if it is a regionally qualified item
+ValidateVIPProduct() // Check if it is only available for vip
+GetUserInfo() // Get more detailed user information from the user system
+GetProductDesc() // Get the details of the item at that point in time from the item system
+DecrementStorage() // deducting inventory
+CreateOrderSnapshot() // Create an order snapshot
 }
 ```
 
-我们只要把之前写过的步骤函数签名都提到一个接口中，就可以完成抽象了。
+We can complete the abstraction by referring to the step function signatures we have written before.
 
-在进行抽象之前，我们应该想明白的一点是，引入接口对我们的系统本身是否有意义，这是要按照场景去进行分析的。假如我们的系统只服务一条产品线，并且内部的代码只是针对很具体的场景进行定制化开发，那么引入接口是不会带来任何收益的。至于说是否方便测试，这一点我们会在之后的章节来讲。
+Before we abstract, we should understand that the introduction of interfaces makes sense for our system itself, which is to be analyzed according to the scene. If our system only serves one product line, and the internal code is only customized for a very specific scenario, then the introduction of the interface will not bring any benefits. As for whether it is convenient to test, we will talk about this in the following chapters.
 
-如果我们正在做的是平台系统，需要由平台来定义统一的业务流程和业务规范，那么基于接口的抽象就是有意义的。举个例子：
+If we are doing a platform system that requires a platform to define uniform business processes and business specifications, then interface-based abstraction makes sense. for example:
 
 ![interface-impl](../images/ch6-interface-impl.uml.png)
 
-*图 5-19 实现公有的接口*
+*Figure 5-19 Implementing a public interface*
 
-平台需要服务多条业务线，但数据定义需要统一，所以希望都能走平台定义的流程。作为平台方，我们可以定义一套类似上文的接口，然后要求接入方的业务必须将这些接口都实现。如果接口中有其不需要的步骤，那么只要返回`nil`，或者忽略就好。
+The platform needs to serve multiple lines of business, but the data definition needs to be unified, so I hope to follow the platform-defined process. As a platform side, we can define a set of interfaces similar to the above, and then require the access side's business to implement these interfaces. If the interface has its unwanted steps, just return `nil`, or ignore it.
 
-在业务进行迭代时，平台的代码是不用修改的，这样我们便把这些接入业务当成了平台代码的插件（plugin）引入进来了。如果没有接口的话，我们会怎么做？
+When the business is iterating, the platform code is not modified, so we introduce these access services as plugins for platform code. What if we don't have an interface?
 
 ```go
-import (
-	"sample.com/travelorder"
-	"sample.com/marketorder"
+Import (
+"sample.com/travelorder"
+"sample.com/marketorder"
 )
 
-func CreateOrder() {
-	switch businessType {
-	case TravelBusiness:
-		travelorder.CreateOrder()
-	case MarketBusiness:
-		marketorder.CreateOrderForMarket()
-	default:
-		return errors.New("not supported business")
-	}
+Func CreateOrder() {
+Switch businessType {
+Case TravelBusiness:
+travelorder.CreateOrder()
+Case MarketBusiness:
+marketorder.CreateOrderForMarket()
+Default:
+Return errors.New("not supported business")
+}
 }
 
-func ValidateUser() {
-	switch businessType {
-	case TravelBusiness:
-		travelorder.ValidateUserVIP()
-	case MarketBusiness:
-		marketorder.ValidateUserRegistered()
-	default:
-		return errors.New("not supported business")
-	}
+Func ValidateUser() {
+Switch businessType {
+Case TravelBusiness:
+travelorder.ValidateUserVIP()
+Case MarketBusiness:
+marketorder.ValidateUserRegistered()
+Default:
+Return errors.New("not supported business")
+}
 }
 
 // ...
-switch ...
-switch ...
-switch ...
+Switch ...
+Switch ...
+Switch ...
 ```
 
-没错，就是无穷无尽的`switch`，和没完没了的垃圾代码。引入了接口之后，我们的`switch`只需要在业务入口做一次。
+That's right, there is endless `switch`, and endless garbage code. After the introduction of the interface, our `switch` only needs to be done once at the business portal.
 
 ```go
-type BusinessInstance interface {
-	ValidateLogin()
-	ValidateParams()
-	AntispamCheck()
-	GetPrice()
-	CreateOrder()
-	UpdateUserStatus()
-	NotifyDownstreamSystems()
+Type BusinessInstance interface {
+ValidateLogin()
+ValidateParams()
+AntispamCheck()
+GetPrice()
+CreateOrder()
+UpdateUserStatus()
+NotifyDownstreamSystems()
 }
 
-func entry() {
-	var bi BusinessInstance
-	switch businessType {
-		case TravelBusiness:
-			bi = travelorder.New()
-		case MarketBusiness:
-			bi = marketorder.New()
-		default:
-			return errors.New("not supported business")
-	}
+Func entry() {
+Var bi BusinessInstance
+Switch businessType {
+Case TravelBusiness:
+Bi = travelorder.New()
+Case MarketBusiness:
+Bi = marketorder.New()
+Default:
+Return errors.New("not supported business")
+}
 }
 
-func BusinessProcess(bi BusinessInstance) {
-	bi.ValidateLogin()
-	bi.ValidateParams()
-	bi.AntispamCheck()
-	bi.GetPrice()
-	bi.CreateOrder()
-	bi.UpdateUserStatus()
-	bi.NotifyDownstreamSystems()
+Func BusinessProcess(bi BusinessInstance) {
+bi.ValidateLogin()
+bi.ValidateParams()
+bi.AntispamCheck()
+bi.GetPrice()
+bi.CreateOrder()
+bi.UpdateUserStatus()
+bi.NotifyDownstreamSystems()
 }
 ```
 
-面向接口编程，不用关心具体的实现。如果对应的业务在迭代中发生了修改，所有的逻辑对平台方来说也是完全透明的。
+Interface-oriented programming, do not care about the specific implementation. If the corresponding service is modified in the iteration, all logic is completely transparent to the platform side.
 
-## 5.8.4 接口的优缺点
+## 5.8.4 Advantages and Disadvantages of Interface
 
-Go被人称道的最多的地方是其接口设计的正交性，模块之间不需要知晓相互的存在，A模块定义接口，B模块实现这个接口就可以。如果接口中没有A模块中定义的数据类型，那B模块中甚至都不用`import A`。比如标准库中的`io.Writer`：
+The most popular place for Go is the orthogonality of its interface design. Modules do not need to know each other's existence. A module defines the interface, and B module can implement this interface. If there is no data type defined in the A module in the interface, then `import A` is not even used in the B module. For example, `io.Writer` in the standard library:
 
 ```go
-type Writer interface {
-	Write(p []byte) (n int, err error)
+Type Writer interface {
+Write(p []byte) (n int, err error)
 }
 ```
 
-我们可以在自己的模块中实现`io.Writer`接口：
+We can implement the `io.Writer` interface in our own module:
 
 ```go
-type MyType struct {}
+Type MyType struct {}
 
-func (m MyType) Write(p []byte) (n int, err error) {
-	return 0, nil
+Func (m MyType) Write(p []byte) (n int, err error) {
+Return 0, nil
 }
 ```
 
-那么我们就可以把我们自己的`MyType`传给任何使用`io.Writer`作为参数的函数来使用了，比如：
+Then we can pass our own `MyType` to any function that uses `io.Writer` as a parameter, such as:
 
 ```go
-package log
+Package log
 
-func SetOutput(w io.Writer) {
-	output = w
+Func SetOutput(w io.Writer) {
+Output = w
 }
 ```
 
-然后：
+then:
 
 ```go
-package my-business
+Package my-business
 
-import "xy.com/log"
+Import "xy.com/log"
 
-func init() {
-	log.SetOutput(MyType)
+Func init() {
+log.SetOutput(MyType)
 }
 ```
 
-在`MyType`定义的地方，不需要`import "io"`就可以直接实现 `io.Writer`接口，我们还可以随意地组合很多函数，以实现各种类型的接口，同时接口实现方和接口定义方都不用建立import产生的依赖关系。因此很多人认为Go的这种正交是一种很优秀的设计。
+In the place defined by `MyType`, you can directly implement the `io.Writer` interface without `import "io"`. We can also combine many functions at will to implement various types of interfaces, and interface implementers and interfaces. The definition side does not need to establish the dependencies generated by the import. So many people think that this orthogonality of Go is a very good design.
 
-但这种“正交”性也会给我们带来一些麻烦。当我们接手了一个几十万行的系统时，如果看到定义了很多接口，例如订单流程的接口，我们希望能直接找到这些接口都被哪些对象实现了。但直到现在，这个简单的需求也就只有Goland实现了，并且体验尚可。Visual Studio Code则需要对项目进行全局扫描，来看到底有哪些结构体实现了该接口的全部函数。那些显式实现接口的语言，对于IDE的接口查找来说就友好多了。另一方面，我们看到一个结构体，也希望能够立刻知道这个结构体实现了哪些接口，但也有着和前面提到的相同的问题。
+But this "orthogonal" nature will also bring us some trouble. When we take over a system with hundreds of thousands of rows, if we see an interface that defines a lot of interfaces, such as an order process, we hope to find out directly which objects are implemented by those objects. But until now, this simple requirement has only been implemented by Goland, and the experience is acceptable. Visual Studio Code needs to scan the project globally to see which structures implement all the functions of the interface. Languages ​​that explicitly implement interfaces are much more friendly to IDE interface lookups. On the other hand, we see a structure and hope to know the structure immediately. Which interfaces are implemented, but also have the same problems as mentioned earlier.
 
-虽有不便，接口带给我们的好处也是不言而喻的：一是依赖反转，这是接口在大多数语言中对软件项目所能产生的影响，在Go的正交接口的设计场景下甚至可以去除依赖；二是由编译器来帮助我们在编译期就能检查到类似“未完全实现接口”这样的错误，如果业务未实现某个流程，但又将其实例作为接口强行来使用的话：
+Despite the inconvenience, the benefits brought by the interface are self-evident: First, relying on inversion, which is the impact of the interface on software projects in most languages, in the design of Go's orthogonal interface. It is even possible to remove dependencies; the second is that the compiler helps us to check for errors like "not fully implemented interfaces" at compile time, if the business does not implement a process, but uses its instance as an interface forcibly. :
 
 ```go
-package main
+Package main
 
-type OrderCreator interface {
-	ValidateUser()
-	CreateOrder()
+Type OrderCreator interface {
+ValidateUser()
+CreateOrder()
 }
 
-type BookOrderCreator struct{}
+Type BookOrderCreator struct{}
 
-func (boc BookOrderCreator) ValidateUser() {}
+Func (boc BookOrderCreator) ValidateUser() {}
 
-func createOrder(oc OrderCreator) {
-	oc.ValidateUser()
-	oc.CreateOrder()
+Func createOrder(oc OrderCreator) {
+oc.ValidateUser()
+oc.CreateOrder()
 }
 
-func main() {
-	createOrder(BookOrderCreator{})
+Func main() {
+createOrder(BookOrderCreator{})
 }
 ```
 
-会报出下述错误。
+The following error will be reported.
 
 ```shell
 # command-line-arguments
 ./a.go:18:30: cannot use BookOrderCreator literal (type BookOrderCreator) as type OrderCreator in argument to createOrder:
-	BookOrderCreator does not implement OrderCreator (missing CreateOrder method)
+BookOrderCreator does not implement OrderCreator (missing CreateOrder method)
 ```
 
-所以接口也可以认为是一种编译期进行检查的保证类型安全的手段。
+Therefore, the interface can also be considered as a type-safe means of checking at compile time.
 
-## 5.8.5 表驱动开发
+## 5.8.5 Table Driven Development
 
-熟悉开源lint工具的同学应该见到过圈复杂度的说法，在函数中如果有`if`和`switch`的话，会使函数的圈复杂度上升，所以有强迫症的同学即使在入口一个函数中有`switch`，还是想要干掉这个`switch`，有没有什么办法呢？当然有，用表驱动的方式来存储我们需要实例：
+Students who are familiar with open source lint tools should have seen the complexity of the circle. If there are `if` and `switch` in the function, the complexity of the function will increase, so students with obsessive-compulsive disorder have a function at the entrance. There is `switch` in it, or do you want to kill this `switch`, is there any way? Of course, there are table-driven ways to store the examples we need:
 
 ```go
-func entry() {
-	var bi BusinessInstance
-	switch businessType {
-	case TravelBusiness:
-		bi = travelorder.New()
-	case MarketBusiness:
-		bi = marketorder.New()
-	default:
-		return errors.New("not supported business")
-	}
+Func entry() {
+Var bi BusinessInstance
+Switch businessType {
+Case TravelBusiness:
+Bi = travelorder.New()
+Case MarketBusiness:
+Bi = marketorder.New()
+Default:
+Return errors.New("not supported business")
+}
 }
 ```
 
-可以修改为：
+Can be modified to:
 
 ```go
-var businessInstanceMap = map[int]BusinessInstance {
-	TravelBusiness : travelorder.New(),
-	MarketBusiness : marketorder.New(),
+Var businessInstanceMap = map[int]BusinessInstance {
+TravelBusiness : travelorder.New(),
+MarketBusiness : marketorder.New(),
 }
 
-func entry() {
-	bi := businessInstanceMap[businessType]
+Func entry() {
+Bi := businessInstanceMap[businessType]
 }
 ```
 
-表驱动的设计方式，很多设计模式相关的书籍并没有把它作为一种设计模式来讲，但我认为这依然是一种非常重要的帮助我们来简化代码的手段。在日常的开发工作中可以多多思考，哪些不必要的`switch case`可以用一个字典和一行代码就可以轻松搞定。
+Table-driven design, many design-related books do not use it as a design pattern, but I think this is still a very important means to help us simplify the code. In the daily development work, you can think more about which unnecessary `switch case` can be easily solved with a dictionary and a line of code.
 
-当然，表驱动也不是缺点，因为需要对输入`key`计算哈希，在性能敏感的场合，需要多加斟酌。
+Of course, table-driven is not a disadvantage, because you need to calculate the hash of the input `key`, in the case of performance-sensitive, you need to consider more.

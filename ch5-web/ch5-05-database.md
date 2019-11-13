@@ -1,120 +1,120 @@
-# 5.5 Database 和数据库打交道
+# 5.5 Database and database dealings
 
-本节将对`db/sql`官方标准库作一些简单分析，并介绍一些应用比较广泛的开源ORM和SQL Builder。并从企业级应用开发和公司架构的角度来分析哪种技术栈对于现代的企业级应用更为合适。
+This section will do some simple analysis of the `db/sql` official standard library, and introduce some widely used open source ORM and SQL Builder. And from the perspective of enterprise application development and corporate architecture, it is more appropriate to analyze which technology stack is suitable for modern enterprise applications.
 
-## 5.5.1 从 database/sql 讲起
+## 5.5.1 Speaking from database/sql
 
-Go官方提供了`database/sql`包来给用户进行和数据库打交道的工作，`database/sql`库实际只提供了一套操作数据库的接口和规范，例如抽象好的SQL预处理（prepare），连接池管理，数据绑定，事务，错误处理等等。官方并没有提供具体某种数据库实现的协议支持。
+Go officially provides the `database/sql` package to work with the database. The `database/sql` library actually only provides a set of interfaces and specifications for operating the database, such as abstract SQL prep (prepare). Connection pool management, data binding, transactions, error handling, and more. The official does not provide specific protocol support for certain database implementations.
 
-和具体的数据库，例如MySQL打交道，还需要再引入MySQL的驱动，像下面这样：
+To deal with a specific database, such as MySQL, you need to introduce the MySQL driver again, like this:
 
 ```go
-import "database/sql"
-import _ "github.com/go-sql-driver/mysql"
+Import "database/sql"
+Import _ "github.com/go-sql-driver/mysql"
 
-db, err := sql.Open("mysql", "user:password@/dbname")
+Db, err := sql.Open("mysql", "user:password@/dbname")
 ```
 
 ```go
-import _ "github.com/go-sql-driver/mysql"
+Import _ "github.com/go-sql-driver/mysql"
 ```
 
-这条import语句会调用了`mysql`包的`init`函数，做的事情也很简单：
+This import statement will call the `init` function of the `mysql` package, and the things it does are simple:
 
 ```go
-func init() {
-	sql.Register("mysql", &MySQLDriver{})
+Func init() {
+sql.Register("mysql", &MySQLDriver{})
 }
 ```
 
-在`sql`包的全局`map`里把`mysql`这个名字的`driver`注册上。`Driver`在`sql`包中是一个接口：
+Register `driver` with the name `mysql` in the global `map` of the `sql` package. `Driver` is an interface in the `sql` package:
 
 ```go
-type Driver interface {
-	Open(name string) (Conn, error)
+Type Driver interface {
+Open(name string) (Conn, error)
 }
 ```
 
-调用`sql.Open()`返回的`db`对象就是这里的`Conn`。
+The `db` object returned by calling `sql.Open()` is the `Conn` here.
 
 ```go
-type Conn interface {
-	Prepare(query string) (Stmt, error)
-	Close() error
-	Begin() (Tx, error)
+Type Conn interface {
+Prepare(query string) (Stmt, error)
+Close() error
+Begin() (Tx, error)
 }
 ```
 
-也是一个接口。如果你仔细地查看`database/sql/driver/driver.go`的代码会发现，这个文件里所有的成员全都是接口，对这些类型进行操作，还是会调用具体的`driver`里的方法。
+It is also an interface. If you look closely at the `database/sql/driver/driver.go` code, you will find that all the members in this file are all interfaces. If you operate on these types, you will still call the specific `driver` method.
 
-从用户的角度来讲，在使用`database/sql`包的过程中，你能够使用的也就是这些接口里提供的函数。来看一个使用`database/sql`和`go-sql-driver/mysql`的完整的例子：
+From the user's point of view, in the process of using the `database/sql` package, you can use the functions provided in these interfaces. Let's look at a complete example using `database/sql` and `go-sql-driver/mysql`:
 
 ```go
-package main
+Package main
 
-import (
-	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+Import (
+"database/sql"
+_ "github.com/go-sql-driver/mysql"
 )
 
-func main() {
-	// db 是一个 sql.DB 类型的对象
-	// 该对象线程安全，且内部已包含了一个连接池
-	// 连接池的选项可以在 sql.DB 的方法中设置，这里为了简单省略了
-	db, err := sql.Open("mysql",
-		"user:password@tcp(127.0.0.1:3306)/hello")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+Func main() {
+// db is an object of type sql.DB
+// The object is thread safe and contains a connection pool internally
+// The option to connect to the pool can be set in the sql.DB method, which is omitted here for simplicity.
+Db, err := sql.Open("mysql",
+"user:password@tcp(127.0.0.1:3306)/hello")
+If err != nil {
+log.Fatal(err)
+}
+Defer db.Close()
 
-	var (
-		id int
-		name string
-	)
-	rows, err := db.Query("select id, name from users where id = ?", 1)
-	if err != nil {
-		log.Fatal(err)
-	}
+Var (
+Id int
+Name string
+)
+Rows, err := db.Query("select id, name from users where id = ?", 1)
+If err != nil {
+log.Fatal(err)
+}
 
-	defer rows.Close()
+Defer rows.Close()
 
-	// 必须要把 rows 里的内容读完，或者显式调用 Close() 方法，
-	// 否则在 defer 的 rows.Close() 执行之前，连接永远不会释放
-	for rows.Next() {
-		err := rows.Scan(&id, &name)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Println(id, name)
-	}
+/ / must read the contents of the rows, or explicitly call the Close () method,
+// Otherwise the connection will never be released until defer's rows.Close() is executed
+For rows.Next() {
+Err := rows.Scan(&id, &name)
+If err != nil {
+log.Fatal(err)
+}
+log.Println(id, name)
+}
 
-	err = rows.Err()
-	if err != nil {
-		log.Fatal(err)
-	}
+Err = rows.Err()
+If err != nil {
+log.Fatal(err)
+}
 }
 ```
 
-如果读者想了解官方这个`database/sql`库更加详细的用法的话，可以参考`http://go-database-sql.org/`。
+If you want to know more about the official usage of the `database/sql` library, you can refer to `http://go-database-sql.org/`.
 
-包括该库的功能介绍、用法、注意事项和反直觉的一些实现方式（例如同一个goroutine内对`sql.DB`的查询，可能在多个连接上）都有涉及，本章中不再赘述。
+Including the function introduction, usage, precautions and anti-intuitive implementation of the library (for example, the query of `sql.DB` in the same goroutine, may be on multiple connections) is involved, and will not be repeated in this chapter.
 
-聪明如你的话，在上面这段简短的程序中可能已经嗅出了一些不好的味道。官方的`db`库提供的功能这么简单，我们每次去数据库里读取内容岂不是都要去写这么一套差不多的代码？或者如果我们的对象是结构体，把`sql.Rows`绑定到对象的工作就会变得更加得重复而无聊。
+As smart as you are, you may have sniffed some bad tastes in the short procedure above. The function provided by the official `db` library is so simple. Do we have to write such a similar code every time we go to the database to read the content? Or if our object is a struct, the work of binding `sql.Rows` to the object becomes more repetitive and boring.
 
-是的，所以社区才会有各种各样的SQL Builder和ORM百花齐放。
+Yes, so the community will have a variety of SQL Builder and ORM.
 
-## 5.5.2 提高生产效率的ORM和SQL Builder
+## 5.5.2 ORM and SQL Builder to improve production efficiency
 
-在Web开发领域常常提到的ORM是什么？我们先看看万能的维基百科：
+What is the ORM often mentioned in the field of web development? Let's take a look at the omnipotent Wikipedia:
 
 ```
-对象关系映射（英语：Object Relational Mapping，简称ORM，或O/RM，或O/R mapping），
-是一种程序设计技术，用于实现面向对象编程语言里不同类型系统的数据之间的转换。
-从效果上说，它其实是创建了一个可在编程语言里使用的“虚拟对象数据库”。
+Object Relational Mapping (English: Object Relational Mapping, ORM, or O/RM, or O/R mapping),
+A programming technique used to implement the conversion of data between different types of systems in an object-oriented programming language.
+In effect, it actually creates a "virtual object database" that can be used in programming languages.
 ```
 
-最为常见的ORM做的是从db到程序的类或结构体这样的映射。所以你手边的程序可能是从MySQL的表映射你的程序内的类。我们可以先来看看其它的程序语言里的ORM写起来是怎么样的感觉：
+The most common ORM is doing a mapping from db to a program's class or struct. So the program at hand may be mapping the classes inside your program from the MySQL table. Let's first take a look at how the ORM in other programming languages ​​is written:
 
 ```python
 >>> from blog.models import Blog
@@ -122,121 +122,121 @@ func main() {
 >>> b.save()
 ```
 
-完全没有数据库的痕迹，没错，ORM的目的就是屏蔽掉DB层，很多语言的ORM只要把你的类或结构体定义好，再用特定的语法将结构体之间的一对一或者一对多关系表达出来。那么任务就完成了。然后你就可以对这些映射好了数据库表的对象进行各种操作，例如save，create，retrieve，delete。至于ORM在背地里做了什么阴险的勾当，你是不一定清楚的。使用ORM的时候，我们往往比较容易有一种忘记了数据库的直观感受。举个例子，我们有个需求：向用户展示最新的商品列表，我们再假设，商品和商家是1:1的关联关系，我们就很容易写出像下面这样的代码：
+There is no trace of the database at all. Yes, the purpose of the ORM is to shield the DB layer. The ORM of many languages ​​only defines your class or structure, and then uses a specific syntax to make one-to-one or a pair between the structures. Many relationships are expressed. Then the task is complete. Then you can perform various operations on these objects that map the database tables, such as save, create, retrieve, and delete. As for what insidious things the ORM has done in the back, you are not necessarily clear. When using ORM, we tend to have an intuitive feeling of forgetting the database. For example, we have a need: to show users the latest list of products, we assume that the goods and businesses are 1:1 relationship, we can easily write code like this:
 
 ```python
-# 伪代码
+# Fake code
 shopList := []
-for product in productList {
-	shopList = append(shopList, product.GetShop)
+For product in productList {
+shopList = append(shopList, product.GetShop)
 }
 ```
 
-当然了，我们不能批判这样写代码的程序员是偷懒的程序员。因为ORM一类的工具在出发点上就是屏蔽sql，让我们对数据库的操作更接近于人类的思维方式。这样很多只接触过ORM而且又是刚入行的程序员就很容易写出上面这样的代码。
+Of course, we can't criticize programmers who write code like this as lazy programmers. Because the tool like ORM is to shield sql from the starting point, let us operate the database closer to the human way of thinking. So many programmers who have only touched the ORM and are just entering the line can easily write the above code.
 
-这样的代码将对数据库的读请求放大了N倍。也就是说，如果你的商品列表有15个SKU，那么每次用户打开这个页面，至少需要执行1（查询商品列表）+ 15（查询相关的商铺信息）次查询。这里N是16。如果你的列表页很大，比如说有600个条目，那么你就至少要执行1+600次查询。如果说你的数据库能够承受的最大的简单查询是12万QPS，而上述这样的查询正好是你最常用的查询的话，你能对外提供的服务能力是多少呢？是200 qps！互联网系统的忌讳之一，就是这种无端的读放大。
+Such code will magnify the database read request by a factor of N. In other words, if your product list has 15 SKUs, each time the user opens the page, at least 1 (query item list) + 15 (query related shop information) query is required. Here N is 16. If your list page is large, say 600 entries, then you must perform at least 1+600 queries. If the maximum simple query that your database can withstand is 120,000 QPS, and the above query is just your most commonly used query, what is the service capacity that you can provide externally? It is 200 qps! One of the taboos of the Internet system is this unwarranted read amplification.
 
-当然，你也可以说这不是ORM的问题，如果你手写sql你还是可能会写出差不多的程序，那么再来看两个demo：
+Of course, you can also say that this is not an ORM problem. If you write sql you may still write a similar program, then look at two demos:
 
 ```go
 o := orm.NewOrm()
-num, err := o.QueryTable("cardgroup").Filter("Cards__Card__Name", cardName).All(&cardgroups)
+Num, err := o.QueryTable("cardgroup").Filter("Cards__Card__Name", cardName).All(&cardgroups)
 ```
 
-很多ORM都提供了这种Filter类型的查询方式，不过在某些ORM背后可能隐藏了非常难以察觉的细节，比如生成的SQL语句会自动`limit 1000`。
+Many ORMs provide this type of Filter query, but behind some ORMs may hide very difficult details, such as the generated SQL statement will automatically `limit 1000`.
 
-也许喜欢ORM的读者读到这里会反驳了，你是没有认真阅读文档就瞎写。是的，尽管这些ORM工具在文档里说明了All查询在不显式地指定Limit的话会自动limit 1000，但对于很多没有阅读过文档或者看过ORM源码的人，这依然是一个非常难以察觉的“魔鬼”细节。喜欢强类型语言的人一般都不喜欢语言隐式地去做什么事情，例如各种语言在赋值操作时进行的隐式类型转换然后又在转换中丢失了精度的勾当，一定让你非常的头疼。所以一个程序库背地里做的事情还是越少越好，如果一定要做，那也一定要在显眼的地方做。比如上面的例子，去掉这种默认的自作聪明的行为，或者要求用户强制传入limit参数都是更好的选择。
+Perhaps readers who like ORM will refute it when they read it. You did not read the document carefully. Yes, although these ORM tools show in the documentation that All queries automatically limit 1000 without explicitly specifying Limit, this is still very difficult for many people who have not read the documentation or read the ORM source. "Devil" details. People who like strong typing languages ​​generally don't like what the language implicitly does, such as the implicit type conversion of various languages ​​in the assignment operation and then lose the precision in the conversion, which will definitely cause you a headache. . So the less things a library does in the backside, the better. If you must do it, you must do it in a conspicuous place. For example, in the above example, it is better to remove this default self-acting behavior or to force the user to pass the limit parameter.
 
-除了limit的问题，我们再看一遍这个下面的查询：
+In addition to the limit issue, let's take a look at this query below:
 
 ```go
-num, err := o.QueryTable("cardgroup").Filter("Cards__Card__Name", cardName).All(&cardgroups)
+Num, err := o.QueryTable("cardgroup").Filter("Cards__Card__Name", cardName).All(&cardgroups)
 ```
 
-你可以看得出来这个Filter是有表join的操作么？当然了，有深入使用经验的用户还是会觉得这是在吹毛求疵。但这样的分析想证明的是，ORM想从设计上隐去太多的细节。而方便的代价是其背后的运行完全失控。这样的项目在经过几任维护人员之后，将变得面目全非，难以维护。
+Can you see that this Filter is a join operation? Of course, users who have in-depth experience will still feel that this is nitpicking. But such an analysis wants to prove that ORM wants to hide too much detail from the design. The price of convenience is that the operation behind it is completely out of control. Such a project will become unrecognizable and difficult to maintain after several maintenance personnel.
 
-当然，我们不能否认ORM的进步意义，它的设计初衷就是为了让数据的操作和存储的具体实现相剥离。但是在上了规模的公司的人们渐渐达成了一个共识，由于隐藏重要的细节，ORM可能是失败的设计。其所隐藏的重要细节对于上了规模的系统开发来说至关重要。
+Of course, we can't deny the progressive significance of ORM. Its original intention is to separate the specific implementation of data operations and storage. But people at the scale of the company have gradually reached a consensus that ORM may be a failed design because of the hidden important details. The important details hidden are critical to the development of scaled systems.
 
-相比ORM来说，SQL Builder在SQL和项目可维护性之间取得了比较好的平衡。首先sql builder不像ORM那样屏蔽了过多的细节，其次从开发的角度来讲，SQL Builder进行简单封装后也可以非常高效地完成开发，举个例子：
+Compared to ORM, SQL Builder achieves a good balance between SQL and project maintainability. First of all, sql builder does not block too much detail like ORM. Secondly, from the perspective of development, SQL Builder can also complete development very efficiently after simple encapsulation, for example:
 
 ```go
-where := map[string]interface{} {
-	"order_id > ?" : 0,
-	"customer_id != ?" : 0,
+Where := map[string]interface{} {
+"order_id > ?" : 0,
+"customer_id != ?" : 0,
 }
-limit := []int{0,100}
+Limit := []int{0,100}
 orderBy := []string{"id asc", "create_time desc"}
 
-orders := orderModel.GetList(where, limit, orderBy)
+Orders := orderModel.GetList(where, limit, orderBy)
 ```
 
-写SQL Builder的相关代码，或者读懂都不费劲。把这些代码脑内转换为sql也不会太费劲。所以通过代码就可以对这个查询是否命中数据库索引，是否走了覆盖索引，是否能够用上联合索引进行分析了。
+Write the relevant code of SQL Builder, or read it without any difficulty. Converting these code brains into sql is not too much effort. So through the code you can hit the database index on this query, whether to go over the index, whether it can be analyzed with the joint index.
 
-说白了SQL Builder是sql在代码里的一种特殊方言，如果你们没有DBA但研发有自己分析和优化sql的能力，或者你们公司的DBA对于学习这样一些sql的方言没有异议。那么使用SQL Builder是一个比较好的选择，不会导致什么问题。
+To put it plainly, SQL Builder is a special dialect of sql in the code. If you don't have DBA, but R&D has the ability to analyze and optimize sql, or your company's DBA has no objection to learning such sql dialects. Then using SQL Builder is a good choice and will not cause any problems.
 
-另外在一些本来也不需要DBA介入的场景内，使用SQL Builder也是可以的，例如你要做一套运维系统，且将MySQL当作了系统中的一个组件，系统的QPS不高，查询不复杂等等。
+In addition, in some scenarios that do not require DBA intervention, it is also possible to use SQL Builder. For example, if you want to make a set of operation and maintenance system, and treat MySQL as a component in the system, the QPS of the system is not high, the query is not Complex and so on.
 
-一旦你做的是高并发的OLTP在线系统，且想在人员充足分工明确的前提下最大程度控制系统的风险，使用SQL Builder就不合适了。
+Once you're doing a high-concurrency OLTP online system, and you want to maximize the risk of your system with a clear division of labor, using SQL Builder is not appropriate.
 
-## 5.5.3 脆弱的数据库
+## 5.5.3 Fragile database
 
-无论是ORM还是SQL Builder都有一个致命的缺点，就是没有办法进行系统上线的事前sql审核。虽然很多ORM和SQL Builder也提供了运行期打印sql的功能，但只在查询的时候才能进行输出。而SQL Builder和ORM本身提供的功能太过灵活。使得你不可能通过测试枚举出所有可能在线上执行的sql。例如你可能用SQL Builder写出下面这样的代码：
+Both ORM and SQL Builder have a fatal flaw, that is, there is no way to perform pre-sql audits on the system. Although many ORM and SQL Builder also provide the function of printing sql at runtime, it can only be output when querying. The functionality provided by SQL Builder and ORM itself is too flexible. It makes it impossible for you to enumerate all the sql that might be executed online by testing. For example, you might use SQL Builder to write the following code:
 
 ```go
-where := map[string]interface{} {
-	"product_id = ?" : 10,
-	"user_id = ?" : 1232 ,
+Where := map[string]interface{} {
+"product_id = ?" : 10,
+"user_id = ?" : 1232 ,
 }
 
-if order_id != 0 {
-	where["order_id = ?"] = order_id
+If order_id != 0 {
+Where["order_id = ?"] = order_id
 }
 
-res, err := historyModel.GetList(where, limit, orderBy)
+Res, err := historyModel.GetList(where, limit, orderBy)
 ```
 
-你的系统里有大量类似上述样例的`if`的话，就难以通过测试用例来覆盖到所有可能的sql组合了。
+There are a lot of `if`s in your system like the above example, it is difficult to cover all possible SQL combinations through test cases.
 
-这样的系统只要发布，就已经孕育了初期的巨大风险。
+Such a system, as long as it is released, has already given birth to a huge initial risk.
 
-对于现在7乘24服务的互联网公司来说，服务不可用是非常重大的问题。存储层的技术栈虽经历了多年的发展，在整个系统中依然是最为脆弱的一环。系统宕机对于24小时对外提供服务的公司来说，意味着直接的经济损失。个中风险不可忽视。
+For Internet companies that are now 7 by 24 services, service unavailability is a very significant issue. Although the technology stack of the storage layer has undergone many years of development, it is still the most vulnerable part of the whole system. System downtime means direct economic loss for companies that provide services 24 hours a day. The risk can not be ignored.
 
-从行业分工的角度来讲，现今的互联网公司都有专职的DBA。大多数DBA并不一定有写代码的能力，去阅读SQL Builder的相关“拼SQL”代码多多少少还是会有一点障碍。从DBA角度出发，还是希望能够有专门的事前SQL审核机制，并能让其低成本地获取到系统的所有SQL内容，而不是去阅读业务研发编写的SQL Builder的相关代码。
+From the perspective of industry division of labor, today's Internet companies have full-time DBAs. Most DBAs don't necessarily have the ability to write code. There are still a few obstacles to reading the SQL Builder's related "spelling SQL" code. From the DBA point of view, I still hope to have a special ex ante SQL audit mechanism, and let it get all the SQL content of the system at low cost, instead of reading the relevant code of SQL Builder written by the business development.
 
-所以现如今，大型的互联网公司核心线上业务都会在代码中把SQL放在显眼的位置提供给DBA评审，举一个例子：
+So nowadays, the core online business of large Internet companies will provide SQL in a prominent position in the code to the DBA review, for example:
 
 ```go
-const (
-	getAllByProductIDAndCustomerID = `select * from p_orders where product_id in (:product_id) and customer_id=:customer_id`
+Const (
+getAllByProductIDAndCustomerID = `select * from p_orders where product_id in (:product_id) and customer_id=:customer_id`
 )
 
 // GetAllByProductIDAndCustomerID
-// @param driver_id
-// @param rate_date
-// @return []Order, error
-func GetAllByProductIDAndCustomerID(ctx context.Context, productIDs []uint64, customerID uint64) ([]Order, error) {
-	var orderList []Order
+@param driver_id
+@param rate_date
+@return []Order, error
+Func GetAllByProductIDAndCustomerID(ctx context.Context, productIDs []uint64, customerID uint64) ([]Order, error) {
+Var orderList []Order
 
-	params := map[string]interface{}{
-		"product_id" : productIDs,
-		"customer_id": customerID,
-	}
+Params := map[string]interface{}{
+"product_id" : productIDs,
+"customer_id": customerID,
+}
 
-	// getAllByProductIDAndCustomerID 是 const 类型的 sql 字符串
-	sql, args, err := sqlutil.Named(getAllByProductIDAndCustomerID, params)
-	if err != nil {
-		return nil, err
-	}
+// getAllByProductIDAndCustomerID is a sql string of const type
+Sql, args, err := sqlutil.Named(getAllByProductIDAndCustomerID, params)
+If err != nil {
+Return nil, err
+}
 
-	err = dao.QueryList(ctx, sqldbInstance, sql, args, &orderList)
-	if err != nil {
-		return nil, err
-	}
+Err = dao.QueryList(ctx, sqldbInstance, sql, args, &orderList)
+If err != nil {
+Return nil, err
+}
 
-	return orderList, err
+Return orderList, err
 }
 ```
 
-像这样的代码，在上线之前把DAO层的变更集的const部分直接拿给DBA来进行审核，就比较方便了。代码中的 sqlutil.Named 是类似于 sqlx 中的 Named 函数，同时支持 where 表达式中的比较操作符和 in。
+For code like this, it is convenient to take the const part of the DAO layer's change set directly to the DBA for review before going online. The sqlutil.Named in the code is similar to the Named function in sqlx and supports the comparison operators and in in the where expression.
 
-这里为了说明简便，函数写得稍微复杂一些，仔细思考一下的话查询的导出函数还可以进一步进行简化。请读者朋友们自行尝试。
+For the sake of simplicity, the function is written a little more complicated. If you think about it carefully, the exported function of the query can be further simplified. Please readers try it on their own.
