@@ -1,5 +1,5 @@
-# 第4章 RPC和Protobuf
+# Chapter 4 RPC and Protobuf
 
-*学习编程，重要的是什么？多练、多看、多实践！跨语言学习，掌握基础语法和语言的特性之后，实战，效率来的最快！——khlipeng*
+* Learning programming, what is important? Practice more, see more, practice more! After learning cross-language, mastering the basic grammar and language characteristics, the actual combat, the fastest! ——khlipeng*
 
-RPC是远程过程调用的缩写（Remote Procedure Call），通俗地说就是调用远处的一个函数。远处到底有多远呢？可能是同一个文件内的不同函数，也可能是同一个机器的另一个进程的函数，还可能是远在火星好奇号上面的某个秘密方法。因为RPC涉及的函数可能非常之远，远到它们之间说着完全不同的语言，语言就成了两边的沟通障碍。而Protobuf因为支持多种不同的语言（甚至不支持的语言也可以扩展支持），其本身特性也非常方便描述服务的接口（也就是方法列表），因此非常适合作为RPC世界的接口交流语言。本章将讨论RPC的基本用法，如何针对不同场景设计自己的RPC服务，以及围绕Protobuf构造的更为庞大的RPC生态。
+RPC is the abbreviation of Remote Procedure Call. In layman's terms, it is a function called remote. How far is it in the distance? It may be a different function in the same file, or it may be a function of another process on the same machine, or it may be a secret method far above Mars Curiosity. Because the functions involved in RPC can be very far away, as far as they speak completely different languages, language becomes a barrier to communication on both sides. Protobuf supports a variety of different languages ​​(even unsupported languages ​​can also be extended support), its own features are also very convenient to describe the interface of the service (that is, the method list), so it is very suitable as an interface communication language of the RPC world. This chapter will discuss the basic usage of RPC, how to design your own RPC services for different scenarios, and the larger RPC ecosystem built around Protobuf.

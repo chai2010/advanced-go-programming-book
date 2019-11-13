@@ -1,74 +1,73 @@
+# 4.8 grpcurl tool
 
-# 4.8 grpcurl工具
+Protobuf itself has a reflection function that gets the Proto file of the object at runtime. gRPC also provides a reflection package called reflection to provide queries for gRPC services. gRPC officially provides a C++ implementation of the grpc_cli tool, which can be used to query the gRPC list or call the gRPC method. But the C++ version of grpc_cli installation is more complicated, we recommend the grpcurl tool implemented in pure Go language. This section will briefly introduce the use of the grpcurl tool.
 
-Protobuf本身具有反射功能，可以在运行时获取对象的Proto文件。gRPC同样也提供了一个名为reflection的反射包，用于为gRPC服务提供查询。gRPC官方提供了一个C++实现的grpc_cli工具，可以用于查询gRPC列表或调用gRPC方法。但是C++版本的grpc_cli安装比较复杂，我们推荐用纯Go语言实现的grpcurl工具。本节将简要介绍grpcurl工具的用法。
+## 4.8.1 Starting the reflection service
 
-## 4.8.1 启动反射服务
-
-reflection包中只有一个Register函数，用于将grpc.Server注册到反射服务中。reflection包文档给出了简单的使用方法：
+There is only one Register function in the reflection package, which is used to register grpc.Server to the reflection service. The reflection package documentation gives a simple usage:
 
 ```go
-import (
-	"google.golang.org/grpc/reflection"
+Import (
+"google.golang.org/grpc/reflection"
 )
 
-func main() {
-	s := grpc.NewServer()
-	pb.RegisterYourOwnServer(s, &server{})
+Func main() {
+s := grpc.NewServer()
+pb.RegisterYourOwnServer(s, &server{})
 
-	// Register reflection service on gRPC server.
-	reflection.Register(s)
+// Register reflection service on gRPC server.
+reflection.Register(s)
 
-	s.Serve(lis)
+s.Serve(lis)
 }
 ```
 
-如果启动了gprc反射服务，那么就可以通过reflection包提供的反射服务查询gRPC服务或调用gRPC方法。
+If the gprc reflection service is enabled, then the gRPC service can be queried or invoked by the reflection service provided by the reflection package.
 
-## 4.8.2 查看服务列表
+## 4.8.2 Viewing the list of services
 
-grpcurl是Go语言开源社区开发的工具，需要手工安装：
+Grpcurl is a tool developed by the Go language open source community and needs to be installed manually:
 
 ```
 $ go get github.com/fullstorydev/grpcurl
 $ go install github.com/fullstorydev/grpcurl/cmd/grpcurl
 ```
 
-grpcurl中最常使用的是list命令，用于获取服务或服务方法的列表。比如`grpcurl localhost:1234 list`命令将获取本地1234端口上的grpc服务的列表。在使用grpcurl时，需要通过`-cert`和`-key`参数设置公钥和私钥文件，链接启用了tls协议的服务。对于没有没用tls协议的grpc服务，通过`-plaintext`参数忽略tls证书的验证过程。如果是Unix Socket协议，则需要指定`-unix`参数。
+The most commonly used in grpcurl is the list command, which is used to get a list of services or service methods. For example, the `grpcurl localhost:1234 list` command will get a list of grpc services on the local 1234 port. When using grpcurl, you need to set the public and private key files with the `-cert` and `-key` parameters, and link the services that enable the tls protocol. For the grpc service without the tls protocol, the verification process of the tls certificate is ignored by the `-plaintext` parameter. If it is a Unix Socket protocol, you need to specify the `-unix` parameter.
 
-如果没有配置好公钥和私钥文件，也没有忽略证书的验证过程，那么将会遇到类似以下的错误：
+If the public and private key files are not configured and the certificate verification process is not ignored, you will get an error similar to the following:
 
 ```shell
 $ grpcurl localhost:1234 list
 Failed to dial target host "localhost:1234": tls: first record does not \
-look like a TLS handshake
+Look like a TLS handshake
 ```
 
-如果grpc服务正常，但是服务没有启动reflection反射服务，将会遇到以下错误：
+If the grpc service is normal, but the service does not start the reflection reflection service, you will encounter the following error:
 
 ```shell
 $ grpcurl -plaintext localhost:1234 list
 Failed to list services: server does not support the reflection API
 ```
 
-假设grpc服务已经启动了reflection反射服务，服务的Protobuf文件如下：
+Assuming that the grpc service has started the reflection reflection service, the Protobuf file of the service is as follows:
 
 ```protobuf
-syntax = "proto3";
+Syntax = "proto3";
 
-package HelloService;
+Package HelloService;
 
-message String {
-	string value = 1;
+Message String {
+String value = 1;
 }
 
-service HelloService {
-	rpc Hello (String) returns (String);
-	rpc Channel (stream String) returns (stream String);
+Service HelloService {
+Rpc Hello (String) returns (String);
+Rpc Channel (stream String) returns (stream String);
 }
 ```
 
-grpcurl用list命令查看服务列表时将看到以下输出：
+Grpcurl will see the following output when viewing the list of services with the list command:
 
 ```shell
 $ grpcurl -plaintext localhost:1234 list
@@ -76,11 +75,11 @@ HelloService.HelloService
 grpc.reflection.v1alpha.ServerReflection
 ```
 
-其中HelloService.HelloService是在protobuf文件定义的服务。而ServerReflection服务则是reflection包注册的反射服务。通过ServerReflection服务可以查询包括本身在内的全部gRPC服务信息。
+Where HelloService.HelloService is the service defined in the protobuf file. The ServerReflection service is a reflection service registered by the reflection package. Through the ServerReflection service, you can query all gRPC service information including itself.
 
-## 4.8.3 服务的方法列表
+## 4.8.3 List of methods of service
 
-继续使用list子命令还可以查看HelloService服务的方法列表：
+Continue to use the list subcommand to also view the list of methods for the HelloService service:
 
 ```shell
 $ grpcurl -plaintext localhost:1234 list HelloService.HelloService
@@ -88,110 +87,110 @@ Channel
 Hello
 ```
 
-从输出可以看到HelloService服务提供了Channel和Hello两个方法，和Protobuf文件的定义是一致的。
+From the output, you can see that the HelloService service provides two methods, Channel and Hello, which are consistent with the definition of the Protobuf file.
 
-如果还想了解方法的细节，可以使用grpcurl提供的describe子命令查看更详细的描述信息：
+If you want to know the details of the method, you can use the describe subcommand provided by grpcurl to view more detailed descriptions:
 
 ```
 $ grpcurl -plaintext localhost:1234 describe HelloService.HelloService
 HelloService.HelloService is a service:
 {
-  "name": "HelloService",
-  "method": [
-    {
-      "name": "Hello",
-      "inputType": ".HelloService.String",
-      "outputType": ".HelloService.String",
-      "options": {
+  "name": "HelloService",
+  "method": [
+    {
+      "name": "Hello",
+      "inputType": ".HelloService.String",
+      "outputType": ".HelloService.String",
+      "options": {
 
-      }
-    },
-    {
-      "name": "Channel",
-      "inputType": ".HelloService.String",
-      "outputType": ".HelloService.String",
-      "options": {
+      }
+    },
+    {
+      "name": "Channel",
+      "inputType": ".HelloService.String",
+      "outputType": ".HelloService.String",
+      "options": {
 
-      },
-      "clientStreaming": true,
-      "serverStreaming": true
-    }
-  ],
-  "options": {
+      },
+      "clientStreaming": true,
+      "serverStreaming": true
+    }
+  ],
+  "options": {
 
-  }
+  }
 }
 ```
 
-输出列出了服务的每个方法，每个方法输入参数和返回值对应的类型。
+The output lists each method of the service, each method input parameter and the type corresponding to the return value.
 
 
-## 4.8.4 获取类型信息
+## 4.8.4 Get Type Information
 
-在获取到方法的参数和返回值类型之后，还可以继续查看类型的信息。下面是用describe命令查看参数HelloService.String类型的信息：
+After you get the parameters of the method and the type of the return value, you can continue to view the type information. The following is to use the describe command to view the information of the parameter HelloService.String:
 
 ```shell
 $ grpcurl -plaintext localhost:1234 describe HelloService.String
 HelloService.String is a message:
 {
-  "name": "String",
-  "field": [
-    {
-      "name": "value",
-      "number": 1,
-      "label": "LABEL_OPTIONAL",
-      "type": "TYPE_STRING",
-      "options": {
+  "name": "String",
+  "field": [
+    {
+      "name": "value",
+      "number": 1,
+      "label": "LABEL_OPTIONAL",
+      "type": "TYPE_STRING",
+      "options": {
 
-      },
-      "jsonName": "value"
-    }
-  ],
-  "options": {
+      },
+      "jsonName": "value"
+    }
+  ],
+  "options": {
 
-  }
+  }
 }
 ```
 
-json信息对应HelloService.String类型在Protobuf中的定义如下：
+The json information corresponding to the HelloService.String type is defined in Protobuf as follows:
 
 ```protobuf
-message String {
-	string value = 1;
+Message String {
+String value = 1;
 }
 ```
 
-输出的json数据只不过是Protobuf文件的另一种表示形式。
+The output of json data is just another representation of a Protobuf file.
 
-## 4.8.5 调用方法
+## 4.8.5 Calling method
 
-在获取gRPC服务的详细信息之后就可以json调用gRPC方法了。
+After getting the details of the gRPC service, you can json call the gRPC method.
 
-下面命令通过`-d`参数传入一个json字符串作为输入参数，调用的是HelloService服务的Hello方法：
+The following command passes a json string as an input parameter via the `-d` parameter, calling the Hello method of the HelloService service:
 
 ```shell
 $ grpcurl -plaintext -d '{"value": "gopher"}' \
-	localhost:1234 HelloService.HelloService/Hello
+Localhost:1234 HelloService.HelloService/Hello
 {
-  "value": "hello:gopher"
+  "value": "hello:gopher"
 }
 ```
 
-如果`-d`参数是`@`则表示从标准输入读取json输入参数，这一般用于比较输入复杂的json数据，也可以用于测试流方法。
+If the `-d` parameter is `@`, it means reading the json input parameter from the standard input. This is generally used to compare the input json data, or it can be used to test the stream method.
 
-下面命令是链接Channel流方法，通过从标准输入读取输入流参数：
+The following command is a link to the Channel stream method by reading the input stream parameters from standard input:
 
 ```shell
 $ grpcurl -plaintext -d @ localhost:1234 HelloService.HelloService/Channel
 {"value": "gopher"}
 {
-  "value": "hello:gopher"
+  "value": "hello:gopher"
 }
 
 {"value": "wasm"}
 {
-  "value": "hello:wasm"
+  "value": "hello:wasm"
 }
 ```
 
-通过grpcurl工具，我们可以在没有客户端代码的环境下测试gRPC服务。
+With the grpcurl tool, we can test the gRPC service in an environment without client code.

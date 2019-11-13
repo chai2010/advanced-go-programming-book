@@ -1,388 +1,387 @@
 # 4.2 Protobuf
 
-Protobuf是Protocol Buffers的简称，它是Google公司开发的一种数据描述语言，并于2008年对外开源。Protobuf刚开源时的定位类似于XML、JSON等数据描述语言，通过附带工具生成代码并实现将结构化数据序列化的功能。但是我们更关注的是Protobuf作为接口规范的描述语言，可以作为设计安全的跨语言PRC接口的基础工具。
+Protobuf is short for Protocol Buffers, a data description language developed by Google and opened to the public in 2008. Protobuf's positioning when it was just open source is similar to XML, JSON and other data description languages. It generates code and provides serialization of structured data through the accompanying tools. But we are more concerned about Protobuf as the description language of the interface specification, which can be used as the basic tool for designing a secure cross-language PRC interface.
 
-## 4.2.1 Protobuf入门
+## 4.2.1 Getting Started with Protobuf
 
-对于没有用过Protobuf的读者，建议先从官网了解下基本用法。这里我们尝试将Protobuf和RPC结合在一起使用，通过Protobuf来最终保证RPC的接口规范和安全。Protobuf中最基本的数据单元是message，是类似Go语言中结构体的存在。在message中可以嵌套message或其它的基础数据类型的成员。
+For readers who have not used Protobuf, it is recommended to understand the basic usage from the official website. Here we try to combine Protobuf and RPC, and finally guarantee the interface specification and security of RPC through Protobuf. The most basic unit of data in Protobuf is the message, which is similar to the structure of the Go language. Members of the message or other underlying data types can be nested in the message.
 
-首先创建hello.proto文件，其中包装HelloService服务中用到的字符串类型：
+First create a hello.proto file that wraps the string type used in the HelloService service:
 
 ```protobuf
-syntax = "proto3";
+Syntax = "proto3";
 
-package main;
+Package main;
 
-message String {
-	string value = 1;
+Message String {
+String value = 1;
 }
 ```
 
-开头的syntax语句表示采用proto3的语法。第三版的Protobuf对语言进行了提炼简化，所有成员均采用类似Go语言中的零值初始化（不再支持自定义默认值），因此消息成员也不再需要支持required特性。然后package指令指明当前是main包（这样可以和Go的包名保持一致，简化例子代码），当然用户也可以针对不同的语言定制对应的包路径和名称。最后message关键字定义一个新的String类型，在最终生成的Go语言代码中对应一个String结构体。String类型中只有一个字符串类型的value成员，该成员编码时用1编号代替名字。
+The syntax statement at the beginning indicates the syntax of proto3. The third version of Protobuf simplifies the language, and all members are initialized with zero values ​​like Go (no custom defaults are supported), so message members no longer need to support the required attribute. Then the package directive indicates that it is currently the main package (this can be consistent with the Go package name, simplifying the example code), of course, the user can also customize the corresponding package path and name for different languages. Finally, the message keyword defines a new String type, which corresponds to a String structure in the final generated Go language code. There is only one value member of the string type in the String type, and the member is encoded with a number instead of the name.
 
-在XML或JSON等数据描述语言中，一般通过成员的名字来绑定对应的数据。但是Protobuf编码却是通过成员的唯一编号来绑定对应的数据，因此Protobuf编码后数据的体积会比较小，但是也非常不便于人类查阅。我们目前并不关注Protobuf的编码技术，最终生成的Go结构体可以自由采用JSON或gob等编码格式，因此大家可以暂时忽略Protobuf的成员编码部分。
+In a data description language such as XML or JSON, the corresponding data is generally bound by the name of the member. However, Protobuf encoding binds the corresponding data by the unique number of the member, so the volume of the Protobuf encoded data will be small, but it is also very inconvenient for humans to consult. We are not currently concerned with Protobuf's encoding technology. The resulting Go structure can be freely encoded in JSON or gob, so you can temporarily ignore the member encoding part of Protobuf.
 
-Protobuf核心的工具集是C++语言开发的，在官方的protoc编译器中并不支持Go语言。要想基于上面的hello.proto文件生成相应的Go代码，需要安装相应的插件。首先是安装官方的protoc工具，可以从 https://github.com/google/protobuf/releases 下载。然后是安装针对Go语言的代码生成插件，可以通过`go get github.com/golang/protobuf/protoc-gen-go`命令安装。
+The Protobuf core toolset is developed in the C++ language and does not support the Go language in the official protoc compiler. To generate the corresponding Go code based on the hello.proto file above, you need to install the appropriate plugin. The first is to install the official protoc tool, which can be downloaded from https://github.com/google/protobuf/releases. Then install the code generation plugin for Go, which can be installed via the `go get github.com/golang/protobuf/protoc-gen-go` command.
 
-然后通过以下命令生成相应的Go代码：
+Then generate the corresponding Go code with the following command:
 
 ```
 $ protoc --go_out=. hello.proto
 ```
 
-其中`go_out`参数告知protoc编译器去加载对应的protoc-gen-go工具，然后通过该工具生成代码，生成代码放到当前目录。最后是一系列要处理的protobuf文件的列表。
+The `go_out` parameter tells the protoc compiler to load the corresponding protoc-gen-go tool, then generate the code through the tool and generate the code into the current directory. Finally, there is a list of a series of protobuf files to process.
 
-这里只生成了一个hello.pb.go文件，其中String结构体内容如下：
+Here only a hello.pb.go file is generated, where the String structure is as follows:
 
 ```go
-type String struct {
-	Value string `protobuf:"bytes,1,opt,name=value" json:"value,omitempty"`
+Type String struct {
+Value string `protobuf:"bytes,1,opt,name=value" json:"value,omitempty"`
 }
 
-func (m *String) Reset()         { *m = String{} }
-func (m *String) String() string { return proto.CompactTextString(m) }
-func (*String) ProtoMessage()    {}
-func (*String) Descriptor() ([]byte, []int) {
-	return fileDescriptor_hello_069698f99dd8f029, []int{0}
+Func (m *String) Reset() { *m = String{} }
+Func (m *String) String() string { return proto.CompactTextString(m) }
+Func (*String) ProtoMessage() {}
+Func (*String) Descriptor() ([]byte, []int) {
+Return fileDescriptor_hello_069698f99dd8f029, []int{0}
 }
 
-func (m *String) GetValue() string {
-	if m != nil {
-		return m.Value
-	}
-	return ""
+Func (m *String) GetValue() string {
+If m != nil {
+Return m.Value
+}
+Return ""
 }
 ```
 
-生成的结构体中还会包含一些以`XXX_`为名字前缀的成员，我们已经隐藏了这些成员。同时String类型还自动生成了一组方法，其中ProtoMessage方法表示这是一个实现了proto.Message接口的方法。此外Protobuf还为每个成员生成了一个Get方法，Get方法不仅可以处理空指针类型，而且可以和Protobuf第二版的方法保持一致（第二版的自定义默认值特性依赖这类方法）。
+The generated structure will also contain some members prefixed with the name `XXX_`, which we have hidden. At the same time, the String type also automatically generates a set of methods, in which the ProtoMessage method indicates that this is a method that implements the proto.Message interface. In addition, Protobuf generates a Get method for each member. The Get method can handle not only the null pointer type, but also the Protobuf version 2 method (the second version of the custom default feature depends on this method).
 
-基于新的String类型，我们可以重新实现HelloService服务：
+Based on the new String type, we can reimplement the HelloService service:
 
 ```go
-type HelloService struct{}
+Type HelloService struct{}
 
-func (p *HelloService) Hello(request *String, reply *String) error {
-	reply.Value = "hello:" + request.GetValue()
-	return nil
+Func (p *HelloService) Hello(request *String, reply *String) error {
+reply.Value = "hello:" + request.GetValue()
+Return nil
 }
 ```
 
-其中Hello方法的输入参数和输出的参数均改用Protobuf定义的String类型表示。因为新的输入参数为结构体类型，因此改用指针类型作为输入参数，函数的内部代码同时也做了相应的调整。
+The input parameters and output parameters of the Hello method are all represented by the String type defined by Protobuf. Because the new input parameter is a structure type, the pointer type is used as the input parameter, and the internal code of the function is also adjusted accordingly.
 
-至此，我们初步实现了Protobuf和RPC组合工作。在启动RPC服务时，我们依然可以选择默认的gob或手工指定json编码，甚至可以重新基于protobuf编码实现一个插件。虽然做了这么多工作，但是似乎并没有看到什么收益！
+So far, we have initially realized the combination of Protobuf and RPC. When starting the RPC service, we can still choose the default gob or manually specify the json code, and even re-implement a plugin based on the protobuf code. Although I have done so much work, it seems that I have not seen any gains!
 
-回顾第一章中更安全的RPC接口部分的内容，当时我们花费了极大的力气去给RPC服务增加安全的保障。最终得到的更安全的RPC接口的代码本身就非常繁琐的使用手工维护，同时全部安全相关的代码只适用于Go语言环境！既然使用了Protobuf定义的输入和输出参数，那么RPC服务接口是否也可以通过Protobuf定义呢？其实用Protobuf定义语言无关的RPC服务接口才是它真正的价值所在！
+Looking back at the more secure RPC interface part of Chapter 1, we spent a great deal of effort to add security to RPC services. The resulting code for the more secure RPC interface itself is very cumbersome to use manual maintenance, while all security-related code is only available for the Go language environment! Since the input and output parameters defined by Protobuf are used, can the RPC service interface be defined by Protobuf? Its practical Protobuf defines the language-independent RPC service interface is its real value!
 
-下面更新hello.proto文件，通过Protobuf来定义HelloService服务：
+Update the hello.proto file below to define the HelloService service via Protobuf:
 
 ```protobuf
-service HelloService {
-	rpc Hello (String) returns (String);
+Service HelloService {
+Rpc Hello (String) returns (String);
 }
 ```
 
-但是重新生成的Go代码并没有发生变化。这是因为世界上的RPC实现有千万种，protoc编译器并不知道该如何为HelloService服务生成代码。
+But the regenerated Go code hasn't changed. This is because there are millions of RPC implementations in the world, and the protoc compiler does not know how to generate code for the HelloService service.
 
-不过在protoc-gen-go内部已经集成了一个名字为`grpc`的插件，可以针对gRPC生成代码：
+However, a plugin named `grpc` has been integrated inside protoc-gen-go to generate code for gRPC:
 
 ```
 $ protoc --go_out=plugins=grpc:. hello.proto
 ```
 
-在生成的代码中多了一些类似HelloServiceServer、HelloServiceClient的新类型。这些类型是为gRPC服务的，并不符合我们的RPC要求。
+In the generated code, there are some new types like HelloServiceServer and HelloServiceClient. These types are for gRPC and do not meet our RPC requirements.
 
-不过gRPC插件为我们提供了改进的思路，下面我们将探索如何为我们的RPC生成安全的代码。
+However, the gRPC plugin provides us with an improved idea. Below we will explore how to generate secure code for our RPC.
 
 
-## 4.2.2 定制代码生成插件
+## 4.2.2 Custom Code Generation Plugin
 
-Protobuf的protoc编译器是通过插件机制实现对不同语言的支持。比如protoc命令出现`--xxx_out`格式的参数，那么protoc将首先查询是否有内置的xxx插件，如果没有内置的xxx插件那么将继续查询当前系统中是否存在protoc-gen-xxx命名的可执行程序，最终通过查询到的插件生成代码。对于Go语言的protoc-gen-go插件来说，里面又实现了一层静态插件系统。比如protoc-gen-go内置了一个gRPC插件，用户可以通过`--go_out=plugins=grpc`参数来生成gRPC相关代码，否则只会针对message生成相关代码。
+Protobuf's protoc compiler implements support for different languages ​​through a plugin mechanism. For example, if the protoc command has the parameter of `--xxx_out` format, then protoc will first query whether there is a built-in xxx plugin. If there is no built-in xxx plugin, it will continue to query whether there is a protoc-gen-xxx named executable in the current system. Finally, the code is generated by the plugin that is queried. For the Protoc-gen-go plugin for Go, there is a layer of static plugin system. For example, protoc-gen-go has a built-in gRPC plugin. Users can generate gRPC related code through the `--go_out=plugins=grpc` parameter. Otherwise, only relevant code will be generated for the message.
 
-参考gRPC插件的代码，可以发现generator.RegisterPlugin函数可以用来注册插件。插件是一个generator.Plugin接口：
+Referring to the code of the gRPC plugin, you can find that the generator.RegisterPlugin function can be used to register the plugin. The plugin is a generator.Plugin interface:
 
 ```go
 // A Plugin provides functionality to add to the output during
 // Go code generation, such as to produce RPC stubs.
-type Plugin interface {
-	// Name identifies the plugin.
-	Name() string
-	// Init is called once after data structures are built but before
-	// code generation begins.
-	Init(g *Generator)
-	// Generate produces the code generated by the plugin for this file,
-	// except for the imports, by calling the generator's methods P, In,
-	// and Out.
-	Generate(file *FileDescriptor)
-	// GenerateImports produces the import declarations for this file.
-	// It is called after Generate.
-	GenerateImports(file *FileDescriptor)
+Type Plugin interface {
+// Name identifies the plugin.
+Name() string
+// Init is called once after data structures are built but before
+// code generation begins.
+Init(g *Generator)
+// Generate produces the code generated by the plugin for this file,
+//except for the imports, by calling the generator's methods P, In,
+// and Out.
+Generate(file *FileDescriptor)
+// GenerateImports produces the import declarations for this file.
+// It is called after Generate.
+GenerateImports(file *FileDescriptor)
 }
 ```
 
-其中Name方法返回插件的名字，这是Go语言的Protobuf实现的插件体系，和protoc插件的名字并无关系。然后Init函数是通过g参数对插件进行初始化，g参数中包含Proto文件的所有信息。最后的Generate和GenerateImports方法用于生成主体代码和对应的导入包代码。
+The Name method returns the name of the plugin. This is the plugin system for the Protobuf implementation of the Go language. It has nothing to do with the name of the protoc plugin. Then the Init function initializes the plugin with the g parameter, which contains all the information about the Proto file. The final Generate and GenerateImports methods are used to generate the body code and the corresponding import package code.
 
-因此我们可以设计一个netrpcPlugin插件，用于为标准库的RPC框架生成代码：
+So we can design a netrpcPlugin plugin to generate code for the standard library's RPC framework:
 
 ```go
-import (
-	"github.com/golang/protobuf/protoc-gen-go/generator"
+Import (
+"github.com/golang/protobuf/protoc-gen-go/generator"
 )
 
-type netrpcPlugin struct{ *generator.Generator }
+Type netrpcPlugin struct{ *generator.Generator }
 
-func (p *netrpcPlugin) Name() string                { return "netrpc" }
-func (p *netrpcPlugin) Init(g *generator.Generator) { p.Generator = g }
+Func (p *netrpcPlugin) Name() string { return "netrpc" }
+Func (p *netrpcPlugin) Init(g *generator.Generator) { p.Generator = g }
 
-func (p *netrpcPlugin) GenerateImports(file *generator.FileDescriptor) {
-	if len(file.Service) > 0 {
-		p.genImportCode(file)
-	}
+Func (p *netrpcPlugin) GenerateImports(file *generator.FileDescriptor) {
+If len(file.Service) > 0 {
+p.genImportCode(file)
+}
 }
 
-func (p *netrpcPlugin) Generate(file *generator.FileDescriptor) {
-	for _, svc := range file.Service {
-		p.genServiceCode(svc)
-	}
+Func (p *netrpcPlugin) Generate(file *generator.FileDescriptor) {
+For _, svc := range file.Service {
+p.genServiceCode(svc)
 }
-```
-
-首先Name方法返回插件的名字。netrpcPlugin插件内置了一个匿名的`*generator.Generator`成员，然后在Init初始化的时候用参数g进行初始化，因此插件是从g参数对象继承了全部的公有方法。其中GenerateImports方法调用自定义的genImportCode函数生成导入代码。Generate方法调用自定义的genServiceCode方法生成每个服务的代码。
-
-目前，自定义的genImportCode和genServiceCode方法只是输出一行简单的注释：
-
-```go
-func (p *netrpcPlugin) genImportCode(file *generator.FileDescriptor) {
-	p.P("// TODO: import code")
-}
-
-func (p *netrpcPlugin) genServiceCode(svc *descriptor.ServiceDescriptorProto) {
-	p.P("// TODO: service code, Name = " + svc.GetName())
 }
 ```
 
-要使用该插件需要先通过generator.RegisterPlugin函数注册插件，可以在init函数中完成：
+First the Name method returns the name of the plugin. The netrpc Plugin has an anonymous `*generator.Generator` member built in, and then initialized with the parameter g when Init is initialized, so the plugin inherits all public methods from the g parameter object. The GenerateImports method calls the custom genImportCode function to generateImport the code. The Generate method calls the custom genServiceCode method to generate the code for each service.
+
+Currently, the custom genImportCode and genServiceCode methods simply output a simple comment:
 
 ```go
-func init() {
-	generator.RegisterPlugin(new(netrpcPlugin))
+Func (p *netrpcPlugin) genImportCode(file *generator.FileDescriptor) {
+p.P("// TODO: import code")
+}
+
+Func (p *netrpcPlugin) genServiceCode(svc *descriptor.ServiceDescriptorProto) {
+p.P("// TODO: service code, Name = " + svc.GetName())
 }
 ```
 
-因为Go语言的包只能静态导入，我们无法向已经安装的protoc-gen-go添加我们新编写的插件。我们将重新克隆protoc-gen-go对应的main函数：
+To use the plugin, you need to register the plugin with the generator.RegisterPlugin function, which can be done in the init function:
 
 ```go
-package main
+Func init() {
+generator.RegisterPlugin(new(netrpcPlugin))
+}
+```
 
-import (
-	"io/ioutil"
-	"os"
+Because the Go language package can only be imported statically, we can't add our newly written plugin to the installed protoc-gen-go. We will re-clone the main function corresponding to protoc-gen-go:
 
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/protoc-gen-go/generator"
+```go
+Package main
+
+Import (
+"io/ioutil"
+"os"
+
+"github.com/golang/protobuf/proto"
+"github.com/golang/protobuf/protoc-gen-go/generator"
 )
 
-func main() {
-	g := generator.New()
+Func main() {
+g := generator.New()
 
-	data, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		g.Error(err, "reading input")
-	}
+Data, err := ioutil.ReadAll(os.Stdin)
+If err != nil {
+g.Error(err, "reading input")
+}
 
-	if err := proto.Unmarshal(data, g.Request); err != nil {
-		g.Error(err, "parsing input proto")
-	}
+If err := proto.Unmarshal(data, g.Request); err != nil {
+g.Error(err, "parsing input proto")
+}
 
-	if len(g.Request.FileToGenerate) == 0 {
-		g.Fail("no files to generate")
-	}
+If len(g.Request.FileToGenerate) == 0 {
+g.Fail("no files to generate")
+}
 
-	g.CommandLineParameters(g.Request.GetParameter())
+g.CommandLineParameters(g.Request.GetParameter())
 
-	// Create a wrapped version of the Descriptors and EnumDescriptors that
-	// point to the file that defines them.
-	g.WrapTypes()
+// Create a wrapped version of the Descriptors and EnumDescriptors that
+// point to the file that defines them.
+g.WrapTypes()
 
-	g.SetPackageNames()
-	g.BuildTypeNameMap()
+g.SetPackageNames()
+g.BuildTypeNameMap()
 
-	g.GenerateAllFiles()
+g.GenerateAllFiles()
 
-	// Send back the results.
-	data, err = proto.Marshal(g.Response)
-	if err != nil {
-		g.Error(err, "failed to marshal output proto")
-	}
-	_, err = os.Stdout.Write(data)
-	if err != nil {
-		g.Error(err, "failed to write output proto")
-	}
+// Send back the results.
+Data, err = proto.Marshal(g.Response)
+If err != nil {
+g.Error(err, "failed to marshal output proto")
+}
+_, err = os.Stdout.Write(data)
+If err != nil {
+g.Error(err, "failed to write output proto")
+}
 }
 ```
 
-为了避免对protoc-gen-go插件造成干扰，我们将我们的可执行程序命名为protoc-gen-go-netrpc，表示包含了netrpc插件。然后用以下命令重新编译hello.proto文件：
+In order to avoid interference with the protoc-gen-go plugin, we named our executable program protoc-gen-go-netrpc, which means that the netrpc plugin is included. Then recompile the hello.proto file with the following command:
 
 ```
 $ protoc --go-netrpc_out=plugins=netrpc:. hello.proto
 ```
 
-其中`--go-netrpc_out`参数告知protoc编译器加载名为protoc-gen-go-netrpc的插件，插件中的`plugins=netrpc`指示启用内部唯一的名为netrpc的netrpcPlugin插件。在新生成的hello.pb.go文件中将包含增加的注释代码。
+The `--go-netrpc_out` parameter tells the protoc compiler to load a plugin named protoc-gen-go-netrpc. The `plugins=netrpc` in the plugin indicates that the internal unique netrpcPlugin plugin named netrpc is enabled. The added comment code will be included in the newly generated hello.pb.go file.
 
-至此，手工定制的Protobuf代码生成插件终于可以工作了。
+At this point, the hand-customized Protobuf code generation plugin is finally working.
 
-## 4.2.3 自动生成完整的RPC代码
+## 4.2.3 Automatically generate complete RPC code
 
-在前面的例子中我们已经构建了最小化的netrpcPlugin插件，并且通过克隆protoc-gen-go的主程序创建了新的protoc-gen-go-netrpc的插件程序。现在开始继续完善netrpcPlugin插件，最终目标是生成RPC安全接口。
+In the previous example we have built the minimal netrpcPlugin plugin and created a new plugin for protoc-gen-go-netrpc by cloning the main program of protoc-gen-go. Now continue to improve the netrpcPlugin plugin, the ultimate goal is to generate an RPC security interface.
 
-首先是自定义的genImportCode方法中生成导入包的代码：
+The first is to generate the code for the import package in the custom genImportCode method:
 
 ```go
-func (p *netrpcPlugin) genImportCode(file *generator.FileDescriptor) {
-	p.P(`import "net/rpc"`)
+Func (p *netrpcPlugin) genImportCode(file *generator.FileDescriptor) {
+p.P(`import "net/rpc"`)
 }
 ```
 
-然后要在自定义的genServiceCode方法中为每个服务生成相关的代码。分析可以发现每个服务最重要的是服务的名字，然后每个服务有一组方法。而对于服务定义的方法，最重要的是方法的名字，还有输入参数和输出参数类型的名字。
+Then generate the relevant code for each service in the custom genServiceCode method. Analysis can find that the most important thing for each service is the name of the service, and then each service has a set of methods. For the service definition method, the most important is the name of the method, as well as the names of the input parameters and output parameter types.
 
-为此我们定义了一个ServiceSpec类型，用于描述服务的元信息：
+For this we define a ServiceSpec type that describes the meta-information of the service:
 
 ```go
-type ServiceSpec struct {
-	ServiceName string
-	MethodList  []ServiceMethodSpec
+Type ServiceSpec struct {
+ServiceName string
+MethodList []ServiceMethodSpec
 }
 
-type ServiceMethodSpec struct {
-	MethodName     string
-	InputTypeName  string
-	OutputTypeName string
+Type ServiceMethodSpec struct {
+MethodName string
+InputTypeName string
+OutputTypeName string
 }
 ```
 
-然后我们新建一个buildServiceSpec方法用来解析每个服务的ServiceSpec元信息：
+Then we create a new buildServiceSpec method to parse the ServiceSpec meta information for each service:
 
 ```go
-func (p *netrpcPlugin) buildServiceSpec(
-	svc *descriptor.ServiceDescriptorProto,
+Func (p *netrpcPlugin) buildServiceSpec(
+Svc *descriptor.ServiceDescriptorProto,
 ) *ServiceSpec {
-	spec := &ServiceSpec{
-		ServiceName: generator.CamelCase(svc.GetName()),
-	}
+Spec := &ServiceSpec{
+ServiceName: generator.CamelCase(svc.GetName()),
+}
 
-	for _, m := range svc.Method {
-		spec.MethodList = append(spec.MethodList, ServiceMethodSpec{
-			MethodName:     generator.CamelCase(m.GetName()),
-			InputTypeName:  p.TypeName(p.ObjectNamed(m.GetInputType())),
-			OutputTypeName: p.TypeName(p.ObjectNamed(m.GetOutputType())),
-		})
-	}
+For _, m := range svc.Method {
+spec.MethodList = append(spec.MethodList, ServiceMethodSpec{
+MethodName: generator.CamelCase(m.GetName()),
+InputTypeName: p.TypeName(p.ObjectNamed(m.GetInputType())),
+OutputTypeName: p.TypeName(p.ObjectNamed(m.GetOutputType())),
+})
+}
 
-	return spec
+Return spec
 }
 ```
 
-其中输入参数是`*descriptor.ServiceDescriptorProto`类型，完整描述了一个服务的所有信息。然后通过`svc.GetName()`就可以获取Protobuf文件中定义的服务的名字。Protobuf文件中的名字转为Go语言的名字后，需要通过`generator.CamelCase`函数进行一次转换。类似的，在for循环中我们通过`m.GetName()`获取方法的名字，然后再转为Go语言中对应的名字。比较复杂的是对输入和输出参数名字的解析：首先需要通过`m.GetInputType()`获取输入参数的类型，然后通过`p.ObjectNamed`获取类型对应的类对象信息，最后获取类对象的名字。
+The input parameter is the `*descriptor.ServiceDescriptorProto` type, which fully describes all the information of a service. Then you can get the name of the service defined in the Protobuf file by `svc.GetName()`. After the name in the Protobuf file is changed to the name of the Go language, a conversion is required through the `generator.CamelCase` function. Similarly, in the for loop we get the name of the method via `m.GetName()` and then the corresponding name in Go. More complicated is the resolution of the input and output parameter names: first you need to get the type of the input parameter through `m.GetInputType()`, then get the class object information corresponding to the type through `p.ObjectNamed`, and finally get the name of the class object. .
 
-然后我们就可以基于buildServiceSpec方法构造的服务的元信息生成服务的代码：
+Then we can generate the code of the service based on the meta information of the service constructed by the buildServiceSpec method:
 
 ```go
-func (p *netrpcPlugin) genServiceCode(svc *descriptor.ServiceDescriptorProto) {
-	spec := p.buildServiceSpec(svc)
+Func (p *netrpcPlugin) genServiceCode(svc *descriptor.ServiceDescriptorProto) {
+Spec := p.buildServiceSpec(svc)
 
-	var buf bytes.Buffer
-	t := template.Must(template.New("").Parse(tmplService))
-	err := t.Execute(&buf, spec)
-	if err != nil {
-		log.Fatal(err)
-	}
+Var buf bytes.Buffer
+t := template.Must(template.New("").Parse(tmplService))
+Err := t.Execute(&buf, spec)
+If err != nil {
+log.Fatal(err)
+}
 
-	p.P(buf.String())
+p.P(buf.String())
 }
 ```
 
-为了便于维护，我们基于Go语言的模板来生成服务代码，其中tmplService是服务的模板。
+For ease of maintenance, we generate service code based on a Go language template, where tmplService is the template for the service.
 
-在编写模板之前，我们先查看下我们期望生成的最终代码大概是什么样子：
+Before writing a template, let's look at what the final code we expect to generate looks like:
 
 ```go
-type HelloServiceInterface interface {
-	Hello(in String, out *String) error
+Type HelloServiceInterface interface {
+Hello(in String, out *String) error
 }
 
-func RegisterHelloService(srv *rpc.Server, x HelloService) error {
-	if err := srv.RegisterName("HelloService", x); err != nil {
-		return err
-	}
-	return nil
+Func RegisterHelloService(srv *rpc.Server, x HelloService) error {
+If err := srv.RegisterName("HelloService", x); err != nil {
+Return err
+}
+Return nil
 }
 
-type HelloServiceClient struct {
-	*rpc.Client
+Type HelloServiceClient struct {
+*rpc.Client
 }
 
-var _ HelloServiceInterface = (*HelloServiceClient)(nil)
+Var _ HelloServiceInterface = (*HelloServiceClient)(nil)
 
-func DialHelloService(network, address string) (*HelloServiceClient, error) {
-	c, err := rpc.Dial(network, address)
-	if err != nil {
-		return nil, err
-	}
-	return &HelloServiceClient{Client: c}, nil
+Func DialHelloService(network, address string) (*HelloServiceClient, error) {
+c, err := rpc.Dial(network, address)
+If err != nil {
+Return nil, err
+}
+Return &HelloServiceClient{Client: c}, nil
 }
 
-func (p *HelloServiceClient) Hello(in String, out *String) error {
-	return p.Client.Call("HelloService.Hello", in, out)
+Func (p *HelloServiceClient) Hello(in String, out *String) error {
+Return p.Client.Call("HelloService.Hello", in, out)
 }
 ```
 
-其中HelloService是服务名字，同时还有一系列的方法相关的名字。
+The HelloService is the name of the service, along with a series of method-related names.
 
-参考最终要生成的代码可以构建如下模板：
+The following template can be built with reference to the final code to be generated:
 
 ```go
-const tmplService = `
+Const tmplService = `
 {{$root := .}}
 
-type {{.ServiceName}}Interface interface {
-	{{- range $_, $m := .MethodList}}
-	{{$m.MethodName}}(*{{$m.InputTypeName}}, *{{$m.OutputTypeName}}) error
-	{{- end}}
+Type {{.ServiceName}}Interface interface {
+{{- range $_, $m := .MethodList}}
+{{$m.MethodName}}(*{{$m.InputTypeName}}, *{{$m.OutputTypeName}}) error
+{{- end}}
 }
 
-func Register{{.ServiceName}}(
-	srv *rpc.Server, x {{.ServiceName}}Interface,
-) error {
-	if err := srv.RegisterName("{{.ServiceName}}", x); err != nil {
-		return err
-	}
-	return nil
+Func Register{{.ServiceName}}(
+Srv *rpc.Server, x {{.ServiceName}}Interface,
+Error {
+If err := srv.RegisterName("{{.ServiceName}}", x); err != nil {
+Return err
+}
+Return nil
 }
 
-type {{.ServiceName}}Client struct {
-	*rpc.Client
+Type {{.ServiceName}}Client struct {
+*rpc.Client
 }
 
-var _ {{.ServiceName}}Interface = (*{{.ServiceName}}Client)(nil)
+Var _ {{.ServiceName}}Interface = (*{{.ServiceName}}Client)(nIl)
 
-func Dial{{.ServiceName}}(network, address string) (
-	*{{.ServiceName}}Client, error,
+Func Dial{{.ServiceName}}(network, address string) (
+*{{.ServiceName}}Client, error,
 ) {
-	c, err := rpc.Dial(network, address)
-	if err != nil {
-		return nil, err
-	}
-	return &{{.ServiceName}}Client{Client: c}, nil
+c, err := rpc.Dial(network, address)
+If err != nil {
+Return nil, err
+}
+Return &{{.ServiceName}}Client{Client: c}, nil
 }
 
 {{range $_, $m := .MethodList}}
-func (p *{{$root.ServiceName}}Client) {{$m.MethodName}}(
-	in *{{$m.InputTypeName}}, out *{{$m.OutputTypeName}},
-) error {
-	return p.Client.Call("{{$root.ServiceName}}.{{$m.MethodName}}", in, out)
+Func (p *{{$root.ServiceName}}Client) {{$m.MethodName}}(
+In *{{$m.InputTypeName}}, out *{{$m.OutputTypeName}},
+Error {
+Return p.Client.Call("{{$root.ServiceName}}.{{$m.MethodName}}", in, out)
 }
 {{end}}
 `
 ```
 
-当Protobuf的插件定制工作完成后，每次hello.proto文件中RPC服务的变化都可以自动生成代码。也可以通过更新插件的模板，调整或增加生成代码的内容。在掌握了定制Protobuf插件技术后，你将彻底拥有这个技术。
-
+When Protobuf's plugin customization work is completed, the code can be automatically generated each time the RPC service changes in the hello.proto file. You can also adjust or increase the content of the generated code by updating the template of the plugin. After mastering the custom Protobuf plugin technology, you will have this technology completely.
