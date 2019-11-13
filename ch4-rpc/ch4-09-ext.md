@@ -1,5 +1,3 @@
-## 4.9 补充说明
+## 4.9 Additional instructions
 
-目前专门讲述RPC的图书比较少。目前Protobuf和gRPC的官网都提供了详细的参考资料和例子。本章重点讲述了Go标准库的RPC和基于Protobuf衍生的gRPC框架，同时也简单展示了如何自己定制一个RPC框架。之所以聚焦在这几个有限的主题，是因为这几个技术都是Go语言团队官方在进行维护，和Go语言契合也最为默契。不过RPC依然是一个庞大的主题，足以单独成书。目前开源世界也有很多富有特色的RPC框架，还有针对分布式系统进行深度定制的RPC系统，用户可以根据自己实际需求选择合适的工具。
-
-
+There are currently fewer books dedicated to RPC. At present, the official website of Protobuf and gRPC provides detailed reference materials and examples. This chapter focuses on the RPC of the Go standard library and the gRPC framework based on the Protobuf derivative. It also shows how to customize an RPC framework yourself. The reason why we focus on these limited topics is that these technologies are officially maintained by the Go language team, and the Go language is also the most tacit. However, RPC is still a huge theme, enough to be a separate book. At present, the open source world also has a lot of distinctive RPC frameworks, as well as an RPC system for deep customization of distributed systems. Users can choose the right tools according to their actual needs.

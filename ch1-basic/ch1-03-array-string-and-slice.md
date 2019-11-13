@@ -1,634 +1,633 @@
-# 1.3 数组、字符串和切片
+# 1.3 Arrays, strings, and slices
 
-在主流的编程语言中数组及其相关的数据结构是使用得最为频繁的，只有在它(们)不能满足时才会考虑链表、hash表（hash表可以看作是数组和链表的混合体）和更复杂的自定义数据结构。
+Arrays and their associated data structures are the most frequently used in mainstream programming languages. Only when they are not satisfied will they consider linked lists and hash tables (hash tables can be thought of as a mixture of arrays and linked lists). And more complex custom data structures.
 
-Go语言中数组、字符串和切片三者是密切相关的数据结构。这三种数据类型，在底层原始数据有着相同的内存结构，在上层，因为语法的限制而有着不同的行为表现。首先，Go语言的数组是一种值类型，虽然数组的元素可以被修改，但是数组本身的赋值和函数传参都是以整体复制的方式处理的。Go语言字符串底层数据也是对应的字节数组，但是字符串的只读属性禁止了在程序中对底层字节数组的元素的修改。字符串赋值只是复制了数据地址和对应的长度，而不会导致底层数据的复制。切片的行为更为灵活，切片的结构和字符串结构类似，但是解除了只读限制。切片的底层数据虽然也是对应数据类型的数组，但是每个切片还有独立的长度和容量信息，切片赋值和函数传参数时也是将切片头信息部分按传值方式处理。因为切片头含有底层数据的指针，所以它的赋值也不会导致底层数据的复制。其实Go语言的赋值和函数传参规则很简单，除了闭包函数以引用的方式对外部变量访问之外，其它赋值和函数传参数都是以传值的方式处理。要理解数组、字符串和切片三种不同的处理方式的原因需要详细了解它们的底层数据结构。
+Arrays, strings, and slices in the Go language are closely related data structures. These three data types have the same memory structure in the underlying raw data, and have different behaviors in the upper layer due to grammatical constraints. First, the Go language array is a value type. Although the elements of the array can be modified, the assignment of the array itself and the function arguments are handled as a whole. The underlying data of the Go language string is also the corresponding byte array, but the read-only property of the string prohibits modification of the elements of the underlying byte array in the program. String assignment simply copies the data address and the corresponding length without causing the underlying data to be copied. Slices are more flexible, and the structure of the slice is similar to the string structure, but the read-only limit is removed. Although the underlying data of the slice is also an array corresponding to the data type, each slice has independent length and capacity information. When the slice assignment and the function pass parameters, the slice header information is also processed by the value. Because the slice header contains a pointer to the underlying data, its assignment does not cause the underlying data to be copied. In fact, the assignment of Go language and the rules of function passing parameters are very simple. Except that the closure function accesses external variables by reference, other assignments and function parameters are processed by value. The reasons for understanding the three different ways of handling arrays, strings, and slices require a detailed understanding of their underlying data structures.
 
-## 1.3.1 数组
+## 1.3.1 Array
 
-数组是一个由固定长度的特定类型元素组成的序列，一个数组可以由零个或多个元素组成。数组的长度是数组类型的组成部分。因为数组的长度是数组类型的一个部分，不同长度或不同类型的数据组成的数组都是不同的类型，因此在Go语言中很少直接使用数组（不同长度的数组因为类型不同无法直接赋值）。和数组对应的类型是切片，切片是可以动态增长和收缩的序列，切片的功能也更加灵活，但是要理解切片的工作原理还是要先理解数组。
+An array is a sequence of fixed-length elements of a particular type, and an array can consist of zero or more elements. The length of the array is part of the array type. Because the length of an array is a part of an array type, arrays of different lengths or different types of data are of different types, so arrays are rarely used directly in the Go language (arrays of different lengths cannot be directly assigned because of different types). The type corresponding to the array is a slice, the slice is a sequence that can grow and shrink dynamically, and the function of the slice is more flexible, but to understand how the slice works, you must first understand the array.
 
-我们先看看数组有哪些定义方式:
+Let's first look at how the array is defined:
 
 ```go
-var a [3]int                    // 定义长度为3的int型数组, 元素全部为0
-var b = [...]int{1, 2, 3}       // 定义长度为3的int型数组, 元素为 1, 2, 3
-var c = [...]int{2: 3, 1: 2}    // 定义长度为3的int型数组, 元素为 0, 2, 3
-var d = [...]int{1, 2, 4: 5, 6} // 定义长度为6的int型数组, 元素为 1, 2, 0, 0, 5, 6
+Var a [3]int // defines an int array of length 3, all elements are 0
+Var b = [...]int{1, 2, 3} // Define an int array of length 3 with elements 1, 2, 3
+Var c = [...]int{2: 3, 1: 2} // Define an int array of length 3 with elements 0, 2, 3
+Var d = [...]int{1, 2, 4: 5, 6} // Define an int array of length 6, with elements 1, 2, 0, 0, 5, 6
 ```
 
-第一种方式是定义一个数组变量的最基本的方式，数组的长度明确指定，数组中的每个元素都以零值初始化。
+The first way is to define the most basic way of an array variable. The length of the array is explicitly specified, and each element in the array is initialized with a zero value.
 
-第二种方式定义数组，可以在定义的时候顺序指定全部元素的初始化值，数组的长度根据初始化元素的数目自动计算。
+The second way is to define an array, which can specify the initialization values ​​of all elements in the order of definition. The length of the array is automatically calculated according to the number of initialization elements.
 
-第三种方式是以索引的方式来初始化数组的元素，因此元素的初始化值出现顺序比较随意。这种初始化方式和`map[int]Type`类型的初始化语法类似。数组的长度以出现的最大的索引为准，没有明确初始化的元素依然用0值初始化。
+The third way is to initialize the elements of the array in an indexed manner, so the initialization values ​​of the elements appear in a random order. This initialization is similar to the initialization syntax of the `map[int]Type` type. The length of the array is based on the largest index that appears, and elements that are not explicitly initialized are still initialized with a value of 0.
 
-第四种方式是混合了第二种和第三种的初始化方式，前面两个元素采用顺序初始化，第三第四个元素零值初始化，第五个元素通过索引初始化，最后一个元素跟在前面的第五个元素之后采用顺序初始化。
+The fourth way is to mix the second and third initialization methods, the first two elements are initialized sequentially, the third and fourth elements are initialized with zero values, the fifth element is initialized by index, and the last element is followed by The fifth element is then initialized in order.
 
-数组的内存结构比较简单。比如下面是一个`[4]int{2,3,5,7}`数组值对应的内存结构：
+The memory structure of an array is relatively simple. For example, the following is a memory structure corresponding to the `[4]int{2,3,5,7}` array value:
 
 ![](../images/ch1-7-array-4int.ditaa.png)
 
-*图 1-7 数组布局*
+*Figure 1-7 Array layout*
 
 
-Go语言中数组是值语义。一个数组变量即表示整个数组，它并不是隐式的指向第一个元素的指针（比如C语言的数组），而是一个完整的值。当一个数组变量被赋值或者被传递的时候，实际上会复制整个数组。如果数组较大的话，数组的赋值也会有较大的开销。为了避免复制数组带来的开销，可以传递一个指向数组的指针，但是数组指针并不是数组。
+Arrays in the Go language are value semantics. An array variable represents the entire array. It is not an implicit pointer to the first element (such as an array of C), but a complete value. When an array variable is assigned or passed, the entire array is actually copied. If the array is large, the assignment of the array will also have a large overhead. To avoid the overhead of copying an array, you can pass a pointer to an array, but the array pointer is not an array.
 
 ```go
-var a = [...]int{1, 2, 3} // a 是一个数组
-var b = &a                // b 是指向数组的指针
+Var a = [...]int{1, 2, 3} // a is an array
+Var b = &a // b is a pointer to an array
 
-fmt.Println(a[0], a[1])   // 打印数组的前2个元素
-fmt.Println(b[0], b[1])   // 通过数组指针访问数组元素的方式和数组类似
+fmt.Println(a[0], a[1]) // Print the first 2 elements of the array
+fmt.Println(b[0], b[1]) // Access array elements through array pointers in a similar way to arrays
 
-for i, v := range b {     // 通过数组指针迭代数组的元素
-	fmt.Println(i, v)
+For i, v := range b { // iterate over the elements of the array by array pointers
+fmt.Println(i, v)
 }
 ```
 
-其中`b`是指向`a`数组的指针，但是通过`b`访问数组中元素的写法和`a`类似的。还可以通过`for range`来迭代数组指针指向的数组元素。其实数组指针类型除了类型和数组不同之外，通过数组指针操作数组的方式和通过数组本身的操作类似，而且数组指针赋值时只会拷贝一个指针。但是数组指针类型依然不够灵活，因为数组的长度是数组类型的组成部分，指向不同长度数组的数组指针类型也是完全不同的。
+Where `b` is a pointer to the `a` array, but the way to access the elements in the array via `b` is similar to `a`. You can also iterate through the array elements pointed to by the array pointer by `for range`. In fact, the array pointer type is different from the type and array. The operation of the array by the array pointer is similar to the operation of the array itself, and only one pointer is copied when the array pointer is assigned. But the array pointer type is still not flexible enough, because the length of the array is part of the array type, and the array pointer type to arrays of different lengths is completely different.
 
-可以将数组看作一个特殊的结构体，结构的字段名对应数组的索引，同时结构体成员的数目是固定的。内置函数`len`可以用于计算数组的长度，`cap`函数可以用于计算数组的容量。不过对于数组类型来说，`len`和`cap`函数返回的结果始终是一样的，都是对应数组类型的长度。
+You can think of an array as a special structure. The field name of the structure corresponds to the index of the array, and the number of structure members is fixed. The built-in function `len` can be used to calculate the length of an array, and the `cap` function can be used to calculate the capacity of an array. However, for array types, the results returned by the `len` and `cap` functions are always the same, and are the length of the corresponding array type.
 
-我们可以用`for`循环来迭代数组。下面常见的几种方式都可以用来遍历数组：
-
-```go
-	for i := range a {
-		fmt.Printf("a[%d]: %d\n", i, a[i])
-	}
-	for i, v := range b {
-		fmt.Printf("b[%d]: %d\n", i, v)
-	}
-	for i := 0; i < len(c); i++ {
-		fmt.Printf("c[%d]: %d\n", i, c[i])
-	}
-```
-
-用`for range`方式迭代的性能可能会更好一些，因为这种迭代可以保证不会出现数组越界的情形，每轮迭代对数组元素的访问时可以省去对下标越界的判断。
-
-用`for range`方式迭代，还可以忽略迭代时的下标:
+We can iterate over the array with a `for` loop. The following common ways can be used to traverse an array:
 
 ```go
-	var times [5][0]int
-	for range times {
-		fmt.Println("hello")
-	}
-```
-
-其中`times`对应一个`[5][0]int`类型的数组，虽然第一维数组有长度，但是数组的元素`[0]int`大小是0，因此整个数组占用的内存大小依然是0。没有付出额外的内存代价，我们就通过`for range`方式实现了`times`次快速迭代。
-
-数组不仅仅可以用于数值类型，还可以定义字符串数组、结构体数组、函数数组、接口数组、管道数组等等：
-
-```go
-// 字符串数组
-var s1 = [2]string{"hello", "world"}
-var s2 = [...]string{"你好", "世界"}
-var s3 = [...]string{1: "世界", 0: "你好", }
-
-// 结构体数组
-var line1 [2]image.Point
-var line2 = [...]image.Point{image.Point{X: 0, Y: 0}, image.Point{X: 1, Y: 1}}
-var line3 = [...]image.Point{{0, 0}, {1, 1}}
-
-// 图像解码器数组
-var decoder1 [2]func(io.Reader) (image.Image, error)
-var decoder2 = [...]func(io.Reader) (image.Image, error){
-	png.Decode,
-	jpeg.Decode,
+For i := range a {
+fmt.Printf("a[%d]: %d\n", i, a[i])
 }
-
-// 接口数组
-var unknown1 [2]interface{}
-var unknown2 = [...]interface{}{123, "你好"}
-
-// 管道数组
-var chanList = [2]chan int{}
-```
-
-我们还可以定义一个空的数组：
-
-```go
-var d [0]int       // 定义一个长度为0的数组
-var e = [0]int{}   // 定义一个长度为0的数组
-var f = [...]int{} // 定义一个长度为0的数组
-```
-
-长度为0的数组在内存中并不占用空间。空数组虽然很少直接使用，但是可以用于强调某种特有类型的操作时避免分配额外的内存空间，比如用于管道的同步操作：
-
-```go
-	c1 := make(chan [0]int)
-	go func() {
-		fmt.Println("c1")
-		c1 <- [0]int{}
-	}()
-	<-c1
-```
-
-在这里，我们并不关心管道中传输数据的真实类型，其中管道接收和发送操作只是用于消息的同步。对于这种场景，我们用空数组来作为管道类型可以减少管道元素赋值时的开销。当然一般更倾向于用无类型的匿名结构体代替：
-
-```go
-	c2 := make(chan struct{})
-	go func() {
-		fmt.Println("c2")
-		c2 <- struct{}{} // struct{}部分是类型, {}表示对应的结构体值
-	}()
-	<-c2
-```
-
-我们可以用`fmt.Printf`函数提供的`%T`或`%#v`谓词语法来打印数组的类型和详细信息：
-
-```go
-	fmt.Printf("b: %T\n", b)  // b: [3]int
-	fmt.Printf("b: %#v\n", b) // b: [3]int{1, 2, 3}
-```
-
-在Go语言中，数组类型是切片和字符串等结构的基础。以上数组的很多操作都可以直接用于字符串或切片中。
-
-## 1.3.2 字符串
-
-一个字符串是一个不可改变的字节序列，字符串通常是用来包含人类可读的文本数据。和数组不同的是，字符串的元素不可修改，是一个只读的字节数组。每个字符串的长度虽然也是固定的，但是字符串的长度并不是字符串类型的一部分。由于Go语言的源代码要求是UTF8编码，导致Go源代码中出现的字符串面值常量一般也是UTF8编码的。源代码中的文本字符串通常被解释为采用UTF8编码的Unicode码点（rune）序列。因为字节序列对应的是只读的字节序列，因此字符串可以包含任意的数据，包括byte值0。我们也可以用字符串表示GBK等非UTF8编码的数据，不过这种时候将字符串看作是一个只读的二进制数组更准确，因为`for range`等语法并不能支持非UTF8编码的字符串的遍历。
-
-Go语言字符串的底层结构在`reflect.StringHeader`中定义：
-
-```go
-type StringHeader struct {
-	Data uintptr
-	Len  int
+For i, v := range b {
+fmt.Printf("b[%d]: %d\n", i, v)
+}
+For i := 0; i < len(c); i++ {
+fmt.Printf("c[%d]: %d\n", i, c[i])
 }
 ```
 
-字符串结构由两个信息组成：第一个是字符串指向的底层字节数组，第二个是字符串的字节的长度。字符串其实是一个结构体，因此字符串的赋值操作也就是`reflect.StringHeader`结构体的复制过程，并不会涉及底层字节数组的复制。在前面数组一节提到的`[2]string`字符串数组对应的底层结构和`[2]reflect.StringHeader`对应的底层结构是一样的，可以将字符串数组看作一个结构体数组。
+The performance of iteration with the `for range` method may be better, because this iteration guarantees that there will be no out-of-bounds arrays. Each round of iterations accessing array elements can eliminate the need to cross-border judgments.
 
-我们可以看看字符串“Hello, world”本身对应的内存结构：
+Iterating with the `for range` method also ignores the subscripts at the time of iteration:
+
+```go
+Var times [5][0]int
+For range times {
+fmt.Println("hello")
+}
+```
+
+Where `times` corresponds to an array of type `[5][0]int`, although the first dimension has a length, but the size of the array's `[0]int` is 0, so the memory size of the entire array is still 0. Without paying extra memory, we implemented `times` times of fast iterations by `for range`.
+
+Arrays can be used not only for numeric types, but also for string arrays, struct arrays, function arrays, interface arrays, pipe arrays, and more:
+
+```go
+// string array
+Var s1 = [2]string{"hello", "world"}
+Var s2 = [...]string{"Hello", "World"}
+Var s3 = [...]string{1: "world", 0: "hello", }
+
+// structure array
+Var line1 [2]image.Point
+Var line2 = [...]image.Point{image.Point{X: 0, Y: 0}, image.Point{X: 1, Y: 1}}
+Var line3 = [...]image.Point{{0, 0}, {1, 1}}
+
+// image decoder array
+Var decoder1 [2]func(io.Reader) (image.Image, error)
+Var decoder2 = [...]func(io.Reader) (image.Image, error){
+png.Decode,
+jpeg.Decode,
+}
+
+// interface array
+Var unknown1 [2]interface{}
+Var unknown2 = [...]interface{}{123, "Hello"}
+
+// pipe array
+Var chanList = [2]chan int{}
+```
+
+We can also define an empty array:
+
+```go
+Var d [0]int // define an array of length 0
+Var e = [0]int{} // define an array of length 0
+Var f = [...]int{} // define an array of length 0
+```
+
+An array of length 0 does not take up space in memory. Empty arrays are rarely used directly, but can be used to emphasize the allocation of extra memory space when emphasizing a particular type of operation, such as synchronization operations for pipes:
+
+```go
+C1 := make(chan [0]int)
+Go func() {
+fmt.Println("c1")
+C1 <- [0]int{}
+}()
+<-c1
+```
+
+Here, we don't care about the real type of data being transferred in the pipeline, where the pipeline receiving and sending operations are only used for message synchronization. For this scenario, we use an empty array as the pipe type to reduce the overhead of pipe element assignment. Of course, it is generally preferred to replace it with an untyped anonymous structure:
+
+```go
+C2 := make(chan struct{})
+Go func() {
+fmt.Println("c2")
+C2 <- struct{}{} // The struct{} part is a type, and {} represents the corresponding structure value.
+}()
+<-c2
+```
+
+We can use the `%T` or `%#v` predicate provided by the `fmt.Printf` function to print the type and details of the array:
+
+```go
+fmt.Printf("b: %T\n", b) // b: [3]int
+fmt.Printf("b: %#v\n", b) // b: [3]int{1, 2, 3}
+```
+
+In Go, array types are the basis for structures such as slices and strings. Many of the above arrays can be used directly in strings or slices.
+
+## 1.3.2 String
+
+A string is an unchangeable sequence of bytes, and a string is usually used to contain human-readable text data. Unlike arrays, elements of a string are not modifiable and are a read-only byte array. The length of each string is fixed, but the length of the string is not part of the string type. Since the source code requirement of the Go language is UTF8 encoding, the string denomination constants appearing in the Go source code are generally UTF8 encoded. The text string in the source code is usually interpreted as a Unicode codepoint sequence encoded in UTF8. Because the byte sequence corresponds to a read-only sequence of bytes, the string can contain arbitrary data, including a byte value of zero. We can also use string to represent non-UTF8 encoded data such as GBK, but it is more accurate to treat the string as a read-only binary array at this time, because the `for range` syntax does not support non-UTF8 encoded strings. Traversal.
+
+The underlying structure of the Go language string is defined in `reflect.StringHeader`:
+
+```go
+Type StringHeader struct {
+Data uintptr
+Len int
+}
+```
+
+The string structure consists of two pieces of information: the first is the underlying byte array pointed to by the string, and the second is the length of the string's bytes. A string is actually a structure, so the assignment of a string is the copy of the `reflect.StringHeader` structure, and does not involve the copying of the underlying byte array. The underlying structure corresponding to the `[2]string` string array mentioned in the previous array section is the same as the underlying structure corresponding to `[2]reflect.StringHeader`, and the string array can be treated as an array of structures.
+
+We can look at the memory structure corresponding to the string "Hello, world" itself:
 
 ![](../images/ch1-8-string-1.ditaa.png)
 
-*图 1-8 字符串布局*
+*Figure 1-8 String layout*
 
 
-分析可以发现，“Hello, world”字符串底层数据和以下数组是完全一致的：
+Analysis can be found that the underlying data of the "Hello, world" string is exactly the same as the following array:
 
 ```go
-var data = [...]byte{
-	'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd',
+Var data = [...]byte{
+'h', 'e', ​​'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd',
 }
 ```
 
-字符串虽然不是切片，但是支持切片操作，不同位置的切片底层也访问的同一块内存数据（因为字符串是只读的，相同的字符串面值常量通常是对应同一个字符串常量）：
+The string is not a slice, but it Is to support the slicing operation, the same piece of memory data accessed by the underlying slice at different locations (because the string is read-only, the same string denomination constant usually corresponds to the same string constant):
 
 ```go
 s := "hello, world"
-hello := s[:5]
-world := s[7:]
+Hello := s[:5]
+World := s[7:]
 
-s1 := "hello, world"[:5]
-s2 := "hello, world"[7:]
+S1 := "hello, world"[:5]
+S2 := "hello, world"[7:]
 ```
 
-字符串和数组类似，内置的`len`函数返回字符串的长度。也可以通过`reflect.StringHeader`结构访问字符串的长度（这里只是为了演示字符串的结构，并不是推荐的做法）：
+Strings are similar to arrays, and the built-in `len` function returns the length of the string. You can also access the length of the string via the `reflect.StringHeader` structure (this is just to demonstrate the structure of the string, not recommended):
 
 ```go
-fmt.Println("len(s):", (*reflect.StringHeader)(unsafe.Pointer(&s)).Len)   // 12
+fmt.Println("len(s):", (*reflect.StringHeader)(unsafe.Pointer(&s)).Len) // 12
 fmt.Println("len(s1):", (*reflect.StringHeader)(unsafe.Pointer(&s1)).Len) // 5
 fmt.Println("len(s2):", (*reflect.StringHeader)(unsafe.Pointer(&s2)).Len) // 5
 ```
 
-根据Go语言规范，Go语言的源文件都是采用UTF8编码。因此，Go源文件中出现的字符串面值常量一般也是UTF8编码的（对于转义字符，则没有这个限制）。提到Go字符串时，我们一般都会假设字符串对应的是一个合法的UTF8编码的字符序列。可以用内置的`print`调试函数或`fmt.Print`函数直接打印，也可以用`for range`循环直接遍历UTF8解码后的Unicode码点值。
+According to the Go language specification, the source files of the Go language are encoded in UTF8. Therefore, string literal constants that appear in Go source files are also generally UTF8 encoded (for escaped characters, there is no such restriction). When referring to a Go string, we generally assume that the string corresponds to a legal UTF8 encoded sequence of characters. You can print directly with the built-in `print` debug function or the `fmt.Print` function, or you can use the `for range` loop to traverse the UTF8 decoded Unicode code point value directly.
 
-下面的“Hello, 世界”字符串中包含了中文字符，可以通过打印转型为字节类型来查看字符底层对应的数据：
+The following "Hello, World" string contains Chinese characters, which can be converted to byte types by printing to see the data corresponding to the underlying characters:
 
 ```go
-fmt.Printf("%#v\n", []byte("Hello, 世界"))
+fmt.Printf("%#v\n", []byte("Hello, World"))
 ```
 
-输出的结果是：
+The output is:
 
 ```go
 []byte{0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0xe4, 0xb8, 0x96, 0xe7, \
 0x95, 0x8c}
 ```
 
-分析可以发现`0xe4, 0xb8, 0x96`对应中文“世”，`0xe7, 0x95, 0x8c`对应中文“界”。我们也可以在字符串面值中直指定UTF8编码后的值（源文件中全部是ASCII码，可以避免出现多字节的字符）。
+Analysis can be found that `0xe4, 0xb8, 0x96` corresponds to Chinese "World", `0xe7, 0x95, 0x8c` corresponds to Chinese "boundary". We can also specify UTF8 encoded values ​​directly in the string face value (all ASCII codes in the source file can avoid multi-byte characters).
 
 ```go
-fmt.Println("\xe4\xb8\x96") // 打印: 世
-fmt.Println("\xe7\x95\x8c") // 打印: 界
+fmt.Println("\xe4\xb8\x96") // Print: World
+fmt.Println("\xe7\x95\x8c") // Print:
 ```
 
-下图展示了“Hello, 世界”字符串的内存结构布局:
+The following figure shows the memory structure layout of the "Hello, World" string:
 
 ![](../images/ch1-9-string-2.ditaa.png)
 
-*图 1-9 字符串布局*
+*Figure 1-9 String layout*
 
-Go语言的字符串中可以存放任意的二进制字节序列，而且即使是UTF8字符序列也可能会遇到坏的编码。如果遇到一个错误的UTF8编码输入，将生成一个特别的Unicode字符‘\uFFFD’，这个字符在不同的软件中的显示效果可能不太一样，在印刷中这个符号通常是一个黑色六角形或钻石形状，里面包含一个白色的问号‘�’。
+Any string of binary bytes can be stored in the Go language string, and even UTF8 character sequences may encounter bad encoding. If you encounter an incorrect UTF8 encoded input, a special Unicode character '\uFFFD' will be generated. This character may look different in different software. In printing this symbol is usually a black hexagon or diamond. Shape, which contains a white question mark ' '.
 
-下面的字符串中，我们故意损坏了第一字符的第二和第三字节，因此第一字符将会打印为“�”，第二和第三字节则被忽略，后面的“abc”依然可以正常解码打印（错误编码不会向后扩散是UTF8编码的优秀特性之一）。
+In the following string, we intentionally corrupt the second and third bytes of the first character, so the first character will be printed as " ", the second and third bytes will be ignored, followed by "abc" It is still possible to decode the print normally (error coding does not spread backwards is one of the excellent features of UTF8 encoding).
 
 ```go
-fmt.Println("\xe4\x00\x00\xe7\x95\x8cabc") // �界abc
+fmt.Println("\xe4\x00\x00\xe7\x95\x8cabc") // bound abc
 ```
 
-不过在`for range`迭代这个含有损坏的UTF8字符串时，第一字符的第二和第三字节依然会被单独迭代到，不过此时迭代的值是损坏后的0：
+However, when the `for range` is iterated over the corrupted UTF8 string, the second and third bytes of the first character will still be iterated separately, but the value of the iteration is 0 after the corruption:
 
 ```go
-for i, c := range "\xe4\x00\x00\xe7\x95\x8cabc" {
-	fmt.Println(i, c)
+For i, c := range "\xe4\x00\x00\xe7\x95\x8cabc" {
+fmt.Println(i, c)
 }
-// 0 65533  // \uFFFD, 对应 �
-// 1 0      // 空字符
-// 2 0      // 空字符
-// 3 30028  // 界
-// 6 97     // a
-// 7 98     // b
-// 8 99     // c
+// 0 65533 // \uFFFD, corresponding
+// 1 0 // null character
+// 2 0 // null character
+// 3 30028 // bounds
+// 6 97 // a
+// 7 98 // b
+// 8 99 // c
 ```
 
-如果不想解码UTF8字符串，想直接遍历原始的字节码，可以将字符串强制转为`[]byte`字节序列后再行遍历（这里的转换一般不会产生运行时开销）：
+If you don't want to decode the UTF8 string and want to traverse the original bytecode directly, you can force the string to be converted to a `[]byte` byte sequence and then traverse it (the conversion here usually does not generate runtime overhead):
 
 ```go
-for i, c := range []byte("世界abc") {
-	fmt.Println(i, c)
-}
-```
-
-或者是采用传统的下标方式遍历字符串的字节数组：
-
-```go
-const s = "\xe4\x00\x00\xe7\x95\x8cabc"
-for i := 0; i < len(s); i++ {
-	fmt.Printf("%d %x\n", i, s[i])
+For i, c := range []byte("world abc") {
+fmt.Println(i, c)
 }
 ```
 
-Go语言除了`for range`语法对UTF8字符串提供了特殊支持外，还对字符串和`[]rune`类型的相互转换提供了特殊的支持。
+Or use a traditional subscript to traverse the byte array of the string:
 
 ```go
-fmt.Printf("%#v\n", []rune("世界"))      		// []int32{19990, 30028}
-fmt.Printf("%#v\n", string([]rune{'世', '界'})) // 世界
-```
-
-从上面代码的输出结果来看，我们可以发现`[]rune`其实是`[]int32`类型，这里的`rune`只是`int32`类型的别名，并不是重新定义的类型。`rune`用于表示每个Unicode码点，目前只使用了21个bit位。
-
-字符串相关的强制类型转换主要涉及到`[]byte`和`[]rune`两种类型。每个转换都可能隐含重新分配内存的代价，最坏的情况下它们的运算时间复杂度都是`O(n)`。不过字符串和`[]rune`的转换要更为特殊一些，因为一般这种强制类型转换要求两个类型的底层内存结构要尽量一致，显然它们底层对应的`[]byte`和`[]int32`类型是完全不同的内部布局，因此这种转换可能隐含重新分配内存的操作。
-
-下面分别用伪代码简单模拟Go语言对字符串内置的一些操作，这样对每个操作的处理的时间复杂度和空间复杂度都会有较明确的认识。
-
-**`for range`对字符串的迭代模拟实现**
-
-```go
-func forOnString(s string, forBody func(i int, r rune)) {
-	for i := 0; len(s) > 0; {
-		r, size := utf8.DecodeRuneInString(s)
-		forBody(i, r)
-		s = s[size:]
-		i += size
-	}
+Const s = "\xe4\x00\x00\xe7\x95\x8cabc"
+For i := 0; i < len(s); i++ {
+fmt.Printf("%d %x\n", i, s[i])
 }
 ```
 
-`for range`迭代字符串时，每次解码一个Unicode字符，然后进入`for`循环体，遇到崩坏的编码并不会导致迭代停止。
-
-**`[]byte(s)`转换模拟实现**
+In addition to the `for range` syntax, the Go language provides special support for UTF8 strings. It also provides special support for the conversion of strings and `[]rune` types.
 
 ```go
-func str2bytes(s string) []byte {
-	p := make([]byte, len(s))
-	for i := 0; i < len(s); i++ {
-		c := s[i]
-		p[i] = c
-	}
-	return p
+fmt.Printf("%#v\n", []rune("world")) // []int32{19990, 30028}
+fmt.Printf("%#v\n", string([]rune{'世', '界'}))) // World
+```
+
+From the output of the above code, we can find that `[]rune` is actually a `[]int32` type, where `rune` is just an alias for the `int32` type, not a redefined type. `rune` is used to represent each Unicode code point, and currently only 21 bits are used.
+
+String-dependent casts are mainly related to `[]byte` and `[]rune`. Each conversion may imply the cost of reallocating memory. In the worst case, their computation time complexity is `O(n)`. However, the conversion of strings and `[]rune` is more special, because in general such casts require two types of underlying memory structures to be as consistent as possible, apparently their corresponding underlying `[]byte` and `[] The int32` type is a completely different internal layout, so this conversion may imply the operation of reallocating memory.
+
+In the following, the pseudo-code is used to simply simulate some operations built into the Go language on the string, so that the time complexity and space complexity of each operation will have a clearer understanding.
+
+**`for range` Iterative simulation of strings **
+
+```go
+Func forOnString(s string, forBody func(i int, r rune)) {
+For i := 0; len(s) > 0; {
+r, size := utf8.DecodeRuneInString(s)
+forBody(i, r)
+s = s[size:]
+i += size
+}
 }
 ```
 
-模拟实现中新创建了一个切片，然后将字符串的数组逐一复制到了切片中，这是为了保证字符串只读的语义。当然，在将字符串转为`[]byte`时，如果转换后的变量并没有被修改的情形，编译器可能会直接返回原始的字符串对应的底层数据。
+`for range` When iterating a string, each time you decode a Unicode character, and then enter the `for` loop body, encountering the collapsed code does not cause the iteration to stop.
 
-**`string(bytes)`转换模拟实现**
+**`[byte(s)` conversion simulation implementation**
 
 ```go
-func bytes2str(s []byte) (p string) {
-	data := make([]byte, len(s))
-	for i, c := range s {
-		data[i] = c
-	}
-
-	hdr := (*reflect.StringHeader)(unsafe.Pointer(&p))
-	hdr.Data = uintptr(unsafe.Pointer(&data[0]))
-	hdr.Len = len(s)
-
-	return p
+Func str2bytes(s string) []byte {
+p := make([]byte, len(s))
+For i := 0; i < len(s); i++ {
+c := s[i]
+p[i] = c
+}
+Return p
 }
 ```
 
-因为Go语言的字符串是只读的，无法直接同构构造底层字节数组生成字符串。在模拟实现中通过`unsafe`包获取了字符串的底层数据结构，然后将切片的数据逐一复制到了字符串中，这同样是为了保证字符串只读的语义不会受切片的影响。如果转换后的字符串在生命周期中原始的`[]byte`的变量并不会发生变化，编译器可能会直接基于`[]byte`底层的数据构建字符串。
+A new slice is created in the simulation implementation, and then an array of strings is copied into the slice one by one, in order to guarantee the semantics of the string read-only. Of course, when converting a string to `[]byte`, if the converted variable is not modified, the compiler may directly return the underlying data corresponding to the original string.
 
-**`[]rune(s)`转换模拟实现**
+**`string(bytes)` conversion simulation implementation**
 
 ```go
-func str2runes(s string) []rune{
-	var p []int32
-	for len(s)>0 {
-        r,size:=utf8.DecodeRuneInString(s)
-        p=append(p,int32(r))
-        s=s[size:]
-        }
-        return []rune(p)
+Func bytes2str(s []byte) (p string) {
+Data := make([]byte, len(s))
+For i, c := range s {
+Data[i] = c
+}
+
+Hdr := (*reflect.StringHeader)(unsafe.Pointer(&p))
+hdr.Data = uintptr(unsafe.Pointer(&data[0]))
+hdr.Len = len(s)
+
+Return p
 }
 ```
 
-因为底层内存结构的差异，字符串到`[]rune`的转换必然会导致重新分配`[]rune`内存空间，然后依次解码并复制对应的Unicode码点值。这种强制转换并不存在前面提到的字符串和字节切片转化时的优化情况。
+Because the Go language string is read-only, it is not possible to directly construct the underlying byte array to generate a string. In the simulation implementation, the underlying data structure of the string is obtained by the `unsafe` package, and then the sliced ​​data is copied into the string one by one, which is also to ensure that the semantics of the string read-only are not affected by the slice. If the converted string's original `[]byte` variable does not change during the lifetime, the compiler may construct the string directly based on the underlying data of `[]byte`.
 
-**`string(runes)`转换模拟实现**
+**`[rune(s)` conversion simulation implementation**
 
 ```go
-func runes2string(s []int32) string {
-	var p []byte
-	buf := make([]byte, 3)
-	for _, r := range s {
-		n := utf8.EncodeRune(buf, r)
-		p = append(p, buf[:n]...)
-	}
-	return string(p)
+Func str2runes(s string) []rune{
+Var p []int32
+For len(s)>0 {
+        r,size:=utf8.DecodeRuneInString(s)
+        p=append(p,int32(r))
+        s=s[size:]
+        }
+        Return []rune(p)
 }
 ```
 
-同样因为底层内存结构的差异，`[]rune`到字符串的转换也必然会导致重新构造字符串。这种强制转换并不存在前面提到的优化情况。
+Because of the difference in the underlying memory structure, the conversion of strings to `[]rune` will inevitably result in reallocation of the `[]rune` memory space, and then sequentially decode and copy the corresponding Unicode code point values. This cast does not have the optimizations of the string and byte slice conversions mentioned earlier.
 
-## 1.3.3 切片(slice)
-
-简单地说，切片就是一种简化版的动态数组。因为动态数组的长度是不固定，切片的长度自然也就不能是类型的组成部分了。数组虽然有适用它们的地方，但是数组的类型和操作都不够灵活，因此在Go代码中数组使用的并不多。而切片则使用得相当广泛，理解切片的原理和用法是一个Go程序员的必备技能。
-
-我们先看看切片的结构定义，`reflect.SliceHeader`：
+**`string(runes)` conversion simulation implementation**
 
 ```go
-type SliceHeader struct {
-	Data uintptr
-	Len  int
-	Cap  int
+Func runes2string(s []int32) string {
+Var p []byte
+Buf := make([]byte, 3)
+For _, r := range s {
+n := utf8.EncodeRune(buf, r)
+p = append(p, buf[:n]...)
+}
+Return string(p)
 }
 ```
 
-可以看出切片的开头部分和Go字符串是一样的，但是切片多了一个`Cap`成员表示切片指向的内存空间的最大容量（对应元素的个数，而不是字节数）。下图是`x := []int{2,3,5,7,11}`和`y := x[1:3]`两个切片对应的内存结构。
+Also because of the difference in the underlying memory structure, the conversion of `[]rune` to a string will inevitably lead to the reconstruction of the string. This type of coercion does not have the optimization described above.
+
+## 1.3.3 Slice
+
+Simply put, slicing is a simplified version of a dynamic array. Because the length of the dynamic array is not fixed, the length of the slice naturally cannot be part of the type. Arrays have places where they apply, but array types and operations are not flexible enough, so arrays are not used much in Go code. Slices are used quite extensively, and understanding the principles and usage of slices is a must-have skill for Go programmers.
+
+Let's take a look at the structure definition of the slice, `reflect.SliceHeader`:
+
+```go
+Type SliceHeader struct {
+Data uintptr
+Len int
+Cap int
+}
+```
+
+It can be seen that the beginning of the slice is the same as the Go string, but the slice has an extra `Cap` member indicating the maximum size of the memory space pointed to by the slice (the number of corresponding elements, not the number of bytes). The following figure shows the memory structure corresponding to the two slices of `x := []int{2,3,5,7,11}` and `y := x[1:3]`.
 
 ![](../images/ch1-10-slice-1.ditaa.png)
 
-*图 1-10 切片布局*
+*Figure 1-10 Slice layout*
 
 
-让我们看看切片有哪些定义方式：
+Let's see how the slices are defined:
 
 ```go
-var (
-	a []int               // nil切片, 和 nil 相等, 一般用来表示一个不存在的切片
-	b = []int{}           // 空切片, 和 nil 不相等, 一般用来表示一个空的集合
-	c = []int{1, 2, 3}    // 有3个元素的切片, len和cap都为3
-	d = c[:2]             // 有2个元素的切片, len为2, cap为3
-	e = c[0:2:cap(c)]     // 有2个元素的切片, len为2, cap为3
-	f = c[:0]             // 有0个元素的切片, len为0, cap为3
-	g = make([]int, 3)    // 有3个元素的切片, len和cap都为3
-	h = make([]int, 2, 3) // 有2个元素的切片, len为2, cap为3
-	i = make([]int, 0, 3) // 有0个元素的切片, len为0, cap为3
+Var (
+a []int // nil slice, equal to nil, generally used to represent a slice that does not exist
+b = []int{} // empty slice, not equal to nil, generally used to represent an empty collection
+c = []int{1, 2, 3} // There are 3 elements of the slice, both len and cap are 3
+d = c[:2] // There are 2 elements of the slice, len is 2, cap is 3
+e = c[0:2:cAp(c)] // There are 2 elements of the slice, len is 2, cap is 3
+f = c[:0] // There are 0 elements of the slice, len is 0, cap is 3
+g = make([]int, 3) // There are 3 elements of the slice, both len and cap are 3
+h = make([]int, 2, 3) // There are 2 elements of the slice, len is 2, cap is 3
+i = make([]int, 0, 3) // Slice with 0 elements, len is 0, cap is 3
 )
 ```
 
-和数组一样，内置的`len`函数返回切片中有效元素的长度，内置的`cap`函数返回切片容量大小，容量必须大于或等于切片的长度。也可以通过`reflect.SliceHeader`结构访问切片的信息（只是为了说明切片的结构，并不是推荐的做法）。切片可以和`nil`进行比较，只有当切片底层数据指针为空时切片本身为`nil`，这时候切片的长度和容量信息将是无效的。如果有切片的底层数据指针为空，但是长度和容量不为0的情况，那么说明切片本身已经被损坏了（比如直接通过`reflect.SliceHeader`或`unsafe`包对切片作了不正确的修改）。
+Like the array, the built-in `len` function returns the length of the valid element in the slice. The built-in `cap` function returns the slice size, which must be greater than or equal to the length of the slice. It is also possible to access the information of the slice through the `reflect.SliceHeader` structure (just to illustrate the structure of the slice, it is not recommended). Slices can be compared to `nil`. The slice itself is `nil` when the underlying data pointer is empty, and the length and capacity information of the slice will be invalid. If the underlying data pointer of the slice is empty, but the length and capacity are not 0, then the slice itself has been corrupted (for example, the slice was incorrectly modified directly by the `reflect.SliceHeader` or `unsafe` package. ).
 
-遍历切片的方式和遍历数组的方式类似：
-
-```go
-	for i := range a {
-		fmt.Printf("a[%d]: %d\n", i, a[i])
-	}
-	for i, v := range b {
-		fmt.Printf("b[%d]: %d\n", i, v)
-	}
-	for i := 0; i < len(c); i++ {
-		fmt.Printf("c[%d]: %d\n", i, c[i])
-	}
-```
-
-其实除了遍历之外，只要是切片的底层数据指针、长度和容量没有发生变化的话，对切片的遍历、元素的读取和修改都和数组是一样的。在对切片本身赋值或参数传递时，和数组指针的操作方式类似，只是复制切片头信息（`reflect.SliceHeader`），并不会复制底层的数据。对于类型，和数组的最大不同是，切片的类型和长度信息无关，只要是相同类型元素构成的切片均对应相同的切片类型。
-
-如前所说，切片是一种简化版的动态数组，这是切片类型的灵魂。除了构造切片和遍历切片之外，添加切片元素、删除切片元素都是切片处理中经常遇到的问题。
-
-
-**添加切片元素**
-
-内置的泛型函数`append`可以在切片的尾部追加`N`个元素：
+Traversing slices is similar to traversing arrays:
 
 ```go
-var a []int
-a = append(a, 1)               // 追加1个元素
-a = append(a, 1, 2, 3)         // 追加多个元素, 手写解包方式
-a = append(a, []int{1,2,3}...) // 追加一个切片, 切片需要解包
+For i := range a {
+fmt.Printf("a[%d]: %d\n", i, a[i])
+}
+For i, v := range b {
+fmt.Printf("b[%d]: %d\n", i, v)
+}
+For i := 0; i < len(c); i++ {
+fmt.Printf("c[%d]: %d\n", i, c[i])
+}
 ```
 
-不过要注意的是，在容量不足的情况下，`append`的操作会导致重新分配内存，可能导致巨大的内存分配和复制数据代价。即使容量足够，依然需要用`append`函数的返回值来更新切片本身，因为新切片的长度已经发生了变化。
+In fact, in addition to traversal, as long as the underlying data pointer, length and capacity of the slice have not changed, the traversal of the slice, the reading and modification of the elements are the same as the array. When assigning values ​​or passing parameters to the slice itself, it operates in the same way as an array pointer, except that the slice header information (`reflect.SliceHeader`) is copied and the underlying data is not copied. For types, the biggest difference from an array is that the type of the slice is independent of the length information, as long as the slices of the same type of elements correspond to the same slice type.
 
-除了在切片的尾部追加，我们还可以在切片的开头添加元素：
+As mentioned before, slicing is a simplified version of a dynamic array, which is the soul of the slice type. In addition to constructing slices and traversing slices, adding slice elements and deleting slice elements are common problems in slice processing.
+
+
+**Add slice elements**
+
+The built-in generic function `append` can append `N` elements to the end of the slice:
 
 ```go
-var a = []int{1,2,3}
-a = append([]int{0}, a...)        // 在开头添加1个元素
-a = append([]int{-3,-2,-1}, a...) // 在开头添加1个切片
+Var a []int
+a = append(a, 1) // append 1 element
+a = append(a, 1, 2, 3) // append multiple elements, handwritten unpacking
+a = append(a, []int{1,2,3}...) // append a slice, the slice needs to be unpacked
 ```
 
-在开头一般都会导致内存的重新分配，而且会导致已有的元素全部复制1次。因此，从切片的开头添加元素的性能一般要比从尾部追加元素的性能差很多。
+However, it should be noted that in the case of insufficient capacity, the operation of `append` will result in reallocation of memory, which may result in huge memory allocation and copy data cost. Even if the capacity is sufficient, you still need to update the slice itself with the return value of the `append` function, because the length of the new slice has changed.
 
-由于`append`函数返回新的切片，也就是它支持链式操作。我们可以将多个`append`操作组合起来，实现在切片中间插入元素：
+In addition to appending at the end of the slice, we can also add elements at the beginning of the slice:
 
 ```go
-var a []int
-a = append(a[:i], append([]int{x}, a[i:]...)...)     // 在第i个位置插入x
-a = append(a[:i], append([]int{1,2,3}, a[i:]...)...) // 在第i个位置插入切片
+Var a = []int{1,2,3}
+a = append([]int{0}, a...) // Add 1 element at the beginning
+a = append([]int{-3,-2,-1}, a...) // Add 1 slice at the beginning
 ```
 
-每个添加操作中的第二个`append`调用都会创建一个临时切片，并将`a[i:]`的内容复制到新创建的切片中，然后将临时创建的切片再追加到`a[:i]`。
+At the beginning, it usually causes memory to be reallocated, and it will cause all existing elements to be copied once. Therefore, the performance of adding elements from the beginning of a slice is generally much worse than the performance of appending elements from the tail.
 
-可以用`copy`和`append`组合可以避免创建中间的临时切片，同样是完成添加元素的操作：
+Since the `append` function returns a new slice, that is, it supports chained operations. We can combine multiple `append` operations to insert elements in the middle of the slice:
 
 ```go
-a = append(a, 0)     // 切片扩展1个空间
-copy(a[i+1:], a[i:]) // a[i:]向后移动1个位置
-a[i] = x             // 设置新添加的元素
+Var a []int
+a = append(a[:i], append([]int{x}, a[i:]...)...) // Insert x in the ith position
+a = append(a[:i], append([]int{1,2,3}, a[i:]...)...) // Insert a slice at the ith position
 ```
 
-第一句`append`用于扩展切片的长度，为要插入的元素留出空间。第二句`copy`操作将要插入位置开始之后的元素向后挪动一个位置。第三句真实地将新添加的元素赋值到对应的位置。操作语句虽然冗长了一点，但是相比前面的方法，可以减少中间创建的临时切片。
+The second `append` call in each add operation creates a temporary slice and copies the contents of `a[i:]` into the newly created slice, then appends the temporarily created slice to `a[ :i]`.
 
-用`copy`和`append`组合也可以实现在中间位置插入多个元素(也就是插入一个切片):
+You can use the combination of `copy` and `append` to avoid creating intermediate temporary slices, as well as completing the addition of elements:
 
 ```go
-a = append(a, x...)       // 为x切片扩展足够的空间
-copy(a[i+len(x):], a[i:]) // a[i:]向后移动len(x)个位置
-copy(a[i:], x)            // 复制新添加的切片
+a = append(a, 0) // slice expands 1 space
+Copy(a[i+1:], a[i:]) // a[i:] moves backward by 1 position
+a[i] = x // set the newly added element
 ```
 
-稍显不足的是，在第一句扩展切片容量的时候，扩展空间部分的元素复制是没有必要的。没有专门的内置函数用于扩展切片的容量，`append`本质是用于追加元素而不是扩展容量，扩展切片容量只是`append`的一个副作用。
+The first sentence `append` is used to extend the length of the slice, leaving room for the element to be inserted. The second sentence `copy` operation will move the element after the start of the position to a position backward. The third sentence truly assigns the newly added element to the corresponding position. Although the operation statement is a bit more verbose, it can reduce the temporary slice created in the middle compared to the previous method.
 
-**删除切片元素**
-
-根据要删除元素的位置有三种情况：从开头位置删除，从中间位置删除，从尾部删除。其中删除切片尾部的元素最快：
+It is also possible to insert multiple elements in the middle position (that is, insert a slice) by using the combination of `copy` and `append`:
 
 ```go
-a = []int{1, 2, 3}
-a = a[:len(a)-1]   // 删除尾部1个元素
-a = a[:len(a)-N]   // 删除尾部N个元素
+a = append(a, x...) // expand enough space for x slices
+Copy(a[i+len(x):], a[i:]) // a[i:] moves len(x) positions backwards
+Copy(a[i:], x) // Copy the newly added slice
 ```
 
-删除开头的元素可以直接移动数据指针：
+Slightly insufficient is that when the first sentence expands the slice capacity, element copying in the extended space portion is not necessary. There are no specialized built-in functions for extending the capacity of slices. The `append` essence is for appending elements instead of expanding capacity. Expanding slice capacity is only a side effect of `append`.
+
+**Delete slice elements**
+
+There are three cases depending on where you want to delete an element: from the beginning, from the middle, and from the tail. The element that removes the tail of the slice is the fastest:
 
 ```go
 a = []int{1, 2, 3}
-a = a[1:] // 删除开头1个元素
-a = a[N:] // 删除开头N个元素
+a = a[:len(a)-1] // remove the trailing 1 element
+a = a[:len(a)-N] // remove the tail N elements
 ```
 
-删除开头的元素也可以不移动数据指针，但是将后面的数据向开头移动。可以用`append`原地完成（所谓原地完成是指在原有的切片数据对应的内存区间内完成，不会导致内存空间结构的变化）：
+Deleting the leading element directly moves the data pointer:
 
 ```go
 a = []int{1, 2, 3}
-a = append(a[:0], a[1:]...) // 删除开头1个元素
-a = append(a[:0], a[N:]...) // 删除开头N个元素
+a = a[1:] // delete the first 1 element
+a = a[N:] // delete the first N elements
 ```
 
-也可以用`copy`完成删除开头的元素：
+You can also remove the data pointer without moving the leading element, but move the following data to the beginning. Can be completed with `append` (the so-called in-situ completion refers to the completion of the memory segment corresponding to the original slice data, does not lead to changes in the memory space structure):
 
 ```go
 a = []int{1, 2, 3}
-a = a[:copy(a, a[1:])] // 删除开头1个元素
-a = a[:copy(a, a[N:])] // 删除开头N个元素
+a = append(a[:0], a[1:]...) // delete the first 1 element
+a = append(a[:0], a[N:]...) // delete the first N elements
 ```
 
-对于删除中间的元素，需要对剩余的元素进行一次整体挪动，同样可以用`append`或`copy`原地完成：
+You can also delete the first element with `copy`:
+
+```go
+a = []int{1, 2, 3}
+a = a[:copy(a, a[1:])] // delete the first 1 element
+a = a[:copy(a, a[N:])] // delete the first N elements
+```
+
+For deleting the middle element, you need to move the remaining elements one time. You can also use 'append` or `copy` to complete the original:
 
 ```go
 a = []int{1, 2, 3, ...}
 
-a = append(a[:i], a[i+1:]...) // 删除中间1个元素
-a = append(a[:i], a[i+N:]...) // 删除中间N个元素
+a = append(a[:i], a[i+1:]...) // remove the middle 1 element
+a = append(a[:i], a[i+N:]...) // remove the middle N elements
 
-a = a[:i+copy(a[i:], a[i+1:])]  // 删除中间1个元素
-a = a[:i+copy(a[i:], a[i+N:])]  // 删除中间N个元素
+a = a[:i+copy(a[i:], a[i+1:])] // remove the middle 1 element
+a = a[:i+copy(a[i:], a[i+N:])] // Remove the middle N elements
 ```
 
-删除开头的元素和删除尾部的元素都可以认为是删除中间元素操作的特殊情况。
+Deleting the leading element and removing the trailing element can be considered special cases of deleting the intermediate element.
 
-**切片内存技巧**
+**Slice memory tips**
 
-在本节开头的数组部分我们提到过有类似`[0]int`的空数组，空数组一般很少用到。但是对于切片来说，`len`为`0`但是`cap`容量不为`0`的切片则是非常有用的特性。当然，如果`len`和`cap`都为`0`的话，则变成一个真正的空切片，虽然它并不是一个`nil`值的切片。在判断一个切片是否为空时，一般通过`len`获取切片的长度来判断，一般很少将切片和`nil`值做直接的比较。
+In the array section at the beginning of this section we mentioned that there are empty arrays like `[0]int`, which are rarely used. But for slices, `len` is `0` but `cap` is not a `0` slice which is a very useful feature. Of course, if both `len` and `cap` are `0`, it becomes a true empty slice, although it is not a slice of the `nil` value. When judging whether a slice is empty, it is generally judged by the length of the slice obtained by `len`, and it is generally rare to directly compare the slice with the value of `nil`.
 
-比如下面的`TrimSpace`函数用于删除`[]byte`中的空格。函数实现利用了0长切片的特性，实现高效而且简洁。
+For example, the `TrimSpace` function below is used to remove spaces in `[]byte`. The function implementation takes advantage of the 0-long slice feature to achieve efficiency and simplicity.
 
 
 ```go
-func TrimSpace(s []byte) []byte {
-	b := s[:0]
-	for _, x := range s {
-		if x != ' ' {
-			b = append(b, x)
-		}
-	}
-	return b
+Func TrimSpace(s []byte) []byte {
+b := s[:0]
+For _, x := range s {
+If x != ' ' {
+b = append(b, x)
+}
+}
+Return b
 }
 ```
 
-其实类似的根据过滤条件原地删除切片元素的算法都可以采用类似的方式处理（因为是删除操作不会出现内存不足的情形）：
+In fact, similar algorithms for deleting slice elements in-situ according to filter conditions can be handled in a similar way (because there is no memory shortage in the delete operation):
 
 ```go
-func Filter(s []byte, fn func(x byte) bool) []byte {
-	b := s[:0]
-	for _, x := range s {
-		if !fn(x) {
-			b = append(b, x)
-		}
-	}
-	return b
+Func Filter(s []byte, fn func(x byte) bool) []byte {
+b := s[:0]
+For _, x := range s {
+If !fn(x) {
+b = append(b, x)
+}
+}
+Return b
 }
 ```
 
-切片高效操作的要点是要降低内存分配的次数，尽量保证`append`操作不会超出`cap`的容量，降低触发内存分配的次数和每次分配内存大小。
+The main point of efficient operation of slicing is to reduce the number of memory allocations. Try to ensure that the `append` operation does not exceed the capacity of `cap`, reduce the number of times the memory allocation is triggered and the size of the memory allocated each time.
 
 
-**避免切片内存泄漏**
+** Avoid slicing memory leaks**
 
-如前面所说，切片操作并不会复制底层的数据。底层的数组会被保存在内存中，直到它不再被引用。但是有时候可能会因为一个小的内存引用而导致底层整个数组处于被使用的状态，这会延迟自动内存回收器对底层数组的回收。
+As mentioned earlier, the slicing operation does not copy the underlying data. The underlying array will be stored in memory until it is no longer referenced. But sometimes the entire underlying array may be in a state of being used because of a small memory reference, which delays the automatic memory recycler from reclaiming the underlying array.
 
-例如，`FindPhoneNumber`函数加载整个文件到内存，然后搜索第一个出现的电话号码，最后结果以切片方式返回。
+For example, the `FindPhoneNumber` function loads the entire file into memory, then searches for the first occurrence of the phone number, and the final result is returned in slices.
 
 ```go
-func FindPhoneNumber(filename string) []byte {
-	b, _ := ioutil.ReadFile(filename)
-	return regexp.MustCompile("[0-9]+").Find(b)
+Func FindPhoneNumber(filename string) []byte {
+b, _ := ioutil.ReadFile(filename)
+Return regexp.MustCompile("[0-9]+").Find(b)
 }
 ```
 
-这段代码返回的`[]byte`指向保存整个文件的数组。因为切片引用了整个原始数组，导致自动垃圾回收器不能及时释放底层数组的空间。一个小的需求可能导致需要长时间保存整个文件数据。这虽然这并不是传统意义上的内存泄漏，但是可能会拖慢系统的整体性能。
+The `[]byte` returned by this code points to an array that holds the entire file. Because the slice references the entire original array, the automatic garbage collector cannot release the space of the underlying array in time. A small demand can result in the need to save the entire file data for a long time. Although this is not a memory leak in the traditional sense, it may slow down the overall performance of the system.
 
-要修复这个问题，可以将感兴趣的数据复制到一个新的切片中（数据的传值是Go语言编程的一个哲学，虽然传值有一定的代价，但是换取的好处是切断了对原始数据的依赖）：
+To fix this problem, you can copy the data of interest into a new slice (the value of the data is a philosophy of Go programming, although the value of the value has a certain price, but the benefit of the exchange is to cut off the original data. rely):
 
 ```go
-func FindPhoneNumber(filename string) []byte {
-	b, _ := ioutil.ReadFile(filename)
-	b = regexp.MustCompile("[0-9]+").Find(b)
-	return append([]byte{}, b...)
+Func FindPhoneNumber(filename string) []byte {
+b, _ := ioutil.ReadFile(filename)
+b = regexp.MustCompile("[0-9]+").Find(b)
+Return append([]byte{}, b...)
 }
 ```
 
-类似的问题，在删除切片元素时可能会遇到。假设切片里存放的是指针对象，那么下面删除末尾的元素后，被删除的元素依然被切片底层数组引用，从而导致不能及时被自动垃圾回收器回收（这要依赖回收器的实现方式）：
+A similar problem may be encountered when deleting slice elements. Assuming that the pointer object is stored in the slice, after deleting the last element, the deleted element is still referenced by the underlying array of the slice, which may not be recycled by the automatic garbage collector in time (this depends on the implementation of the recycler):
 
 ```go
-var a []*int{ ... }
-a = a[:len(a)-1]    // 被删除的最后一个元素依然被引用, 可能导致GC操作被阻碍
+Var a []*int{ ... }
+a = a[:len(a)-1] // The last element to be deleted is still referenced, possibly causing GC operations to be blocked
 ```
 
-保险的方式是先将需要自动内存回收的元素设置为`nil`，保证自动回收器可以发现需要回收的对象，然后再进行切片的删除操作：
+The insurance method is to first set the element that needs automatic memory recycling to `nil`, to ensure that the automatic recycler can find the object that needs to be recycled, and then delete the slice:
 
 ```go
-var a []*int{ ... }
-a[len(a)-1] = nil // GC回收最后一个元素内存
-a = a[:len(a)-1]  // 从切片删除最后一个元素
+Var a []*int{ ... }
+a[len(a)-1] = nil // GC recycles the last element memory
+a = a[:len(a)-1] //Remove the last element from the slice
 ```
 
-当然，如果切片存在的周期很短的话，可以不用刻意处理这个问题。因为如果切片本身已经可以被GC回收的话，切片对应的每个元素自然也就是可以被回收的了。
+Of course, if the period of the slice is very short, you can not deal with this problem deliberately. Because if the slice itself can already be recycled by the GC, each element corresponding to the slice can naturally be recycled.
 
 
-**切片类型强制转换**
+**Slice type cast**
 
-为了安全，当两个切片类型`[]T`和`[]Y`的底层原始切片类型不同时，Go语言是无法直接转换类型的。不过安全都是有一定代价的，有时候这种转换是有它的价值的——可以简化编码或者是提升代码的性能。比如在64位系统上，需要对一个`[]float64`切片进行高速排序，我们可以将它强制转为`[]int`整数切片，然后以整数的方式进行排序（因为`float64`遵循IEEE754浮点数标准特性，当浮点数有序时对应的整数也必然是有序的）。
+For security, when the underlying primitive slice types of the two slice types `[]T` and `[]Y` are different, the Go language cannot directly convert the type. However, security comes at a price. Sometimes this conversion has its value - it can simplify coding or improve the performance of the code. For example, on a 64-bit system, you need to sort a `[]float64` slice at high speed. We can cast it to a `[]int` integer slice and then sort it by integer (because `float64` follows IEEE754 float The standard feature of points, when the floating point number is ordered, the corresponding integer must also be ordered).
 
-下面的代码通过两种方法将`[]float64`类型的切片转换为`[]int`类型的切片：
+The following code converts a slice of type `[]float64` into a slice of type `[]int` in two ways:
 
 ```go
 // +build amd64 arm64
 
-import "sort"
+Import "sort"
 
-var a = []float64{4, 2, 5, 7, 2, 1, 88, 1}
+Var a = []float64{4, 2, 5, 7, 2, 1, 88, 1}
 
-func SortFloat64FastV1(a []float64) {
-	// 强制类型转换
-	var b []int = ((*[1 << 20]int)(unsafe.Pointer(&a[0])))[:len(a):cap(a)]
+Func SortFloat64FastV1(a []float64) {
+// Forced type conversion
+Var b []int = ((*[1 << 20]int)(unsafe.Pointer(&a[0])))[:len(a):cap(a)]
 
-	// 以int方式给float64排序
-	sort.Ints(b)
+// Sort float64 in int
+sort.Ints(b)
 }
 
-func SortFloat64FastV2(a []float64) {
-	// 通过 reflect.SliceHeader 更新切片头部信息实现转换
-	var c []int
-	aHdr := (*reflect.SliceHeader)(unsafe.Pointer(&a))
-	cHdr := (*reflect.SliceHeader)(unsafe.Pointer(&c))
-	*cHdr = *aHdr
+Func SortFloat64FastV2(a []float64) {
+// Convert the slice header information by reflect.SliceHeader
+Var c []int
+aHdr := (*reflect.SliceHeader)(unsafe.Pointer(&a))
+cHdr := (*reflect.SliceHeader)(unsafe.Pointer(&c))
+*cHdr = *aHdr
 
-	// 以int方式给float64排序
-	sort.Ints(c)
+// Sort float64 in int
+sort.Ints(c)
 }
 ```
 
-第一种强制转换是先将切片数据的开始地址转换为一个较大的数组的指针，然后对数组指针对应的数组重新做切片操作。中间需要`unsafe.Pointer`来连接两个不同类型的指针传递。需要注意的是，Go语言实现中非0大小数组的长度不得超过2GB，因此需要针对数组元素的类型大小计算数组的最大长度范围（`[]uint8`最大2GB，`[]uint16`最大1GB，以此类推，但是`[]struct{}`数组的长度可以超过2GB）。
+The first type of cast is to first convert the start address of the slice data into a pointer to a larger array, and then re-slice the array corresponding to the array pointer. In the middle you need `unsafe.Pointer` to connect two different types of pointers. It should be noted that the length of the non-zero size array in the Go language implementation must not exceed 2GB, so you need to calculate the maximum length range of the array for the type size of the array elements (`[]uint8`maximum 2GB, `[]uint16` max 1GB, And so on, but the length of the `[]struct{}` array can exceed 2GB).
 
-第二种转换操作是分别取到两个不同类型的切片头信息指针，任何类型的切片头部信息底层都是对应`reflect.SliceHeader`结构，然后通过更新结构体方式来更新切片信息，从而实现`a`对应的`[]float64`切片到`c`对应的`[]int`类型切片的转换。
+The second conversion operation is to take two different types of slice header information pointers respectively, and the bottom layer of any type of slice header information corresponds to the `reflect.SliceHeader` structure, and then update the slice information by updating the structure mode, thereby realizing The ``]float64` corresponding to `a` is sliced ​​to the ``]int` type slice corresponding to `c`.
 
-通过基准测试，我们可以发现用`sort.Ints`对转换后的`[]int`排序的性能要比用`sort.Float64s`排序的性能好一点。不过需要注意的是，这个方法可行的前提是要保证`[]float64`中没有NaN和Inf等非规范的浮点数（因为浮点数中NaN不可排序，正0和负0相等，但是整数中没有这类情形）。
-
+Through benchmarking, we can see that the performance of sorting ``ort`` with `sort.Ints` is better than sorting with `sort.Float64s`. However, it should be noted that the premise of this method is to ensure that there are no non-canonical floating point numbers such as NaN and Inf in `[]float64` (because NaN is not sortable in floating point numbers, positive 0 and negative 0 are equal, but there is no integer Such a situation).

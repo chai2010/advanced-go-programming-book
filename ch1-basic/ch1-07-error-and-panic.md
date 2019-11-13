@@ -1,429 +1,429 @@
-# 1.7 错误和异常
+# 1.7 Errors and Exceptions
 
-错误处理是每个编程语言都要考虑的一个重要话题。在Go语言的错误处理中，错误是软件包API和应用程序用户界面的一个重要组成部分。
+Error handling is an important topic to consider in every programming language. In Go error handling, errors are an important part of the package API and the application's user interface.
 
-在程序中总有一部分函数总是要求必须能够成功的运行。比如`strconv.Itoa`将整数转换为字符串，从数组或切片中读写元素，从`map`读取已经存在的元素等。这类操作在运行时几乎不会失败，除非程序中有BUG，或遇到灾难性的、不可预料的情况，比如运行时的内存溢出。如果真的遇到真正异常情况，我们只要简单终止程序就可以了。
+There are always some functions in the program that always require a successful run. For example, `strconv.Itoa` converts an integer to a string, reads and writes elements from an array or slice, and reads existing elements from `map`. Such operations will hardly fail at runtime unless there are bugs in the program or catastrophic, unpredictable situations, such as memory leaks at runtime. If you really encounter a real abnormal situation, we can simply terminate the program.
 
-排除异常的情况，如果程序运行失败仅被认为是几个预期的结果之一。对于那些将运行失败看作是预期结果的函数，它们会返回一个额外的返回值，通常是最后一个来传递错误信息。如果导致失败的原因只有一个，额外的返回值可以是一个布尔值，通常被命名为ok。比如，当从一个`map`查询一个结果时，可以通过额外的布尔值判断是否成功：
+Excluding an anomaly, if the program fails, it is only considered to be one of several expected results. For functions that treat run failures as expected, they return an extra return value, usually the last one to pass the error message. If there is only one reason for the failure, the extra return value can be a Boolean value, usually named ok. For example, when querying a result from a `map`, you can use the extra boolean value to determine whether it is successful:
 
 ```go
-if v, ok := m["key"]; ok {
-	return v
+If v, ok := m["key"]; ok {
+Return v
 }
 ```
 
-但是导致失败的原因通常不止一种，很多时候用户希望了解更多的错误信息。如果只是用简单的布尔类型的状态值将不能满足这个要求。在C语言中，默认采用一个整数类型的`errno`来表达错误，这样就可以根据需要定义多种错误类型。在Go语言中，`syscall.Errno`就是对应C语言中`errno`类型的错误。在`syscall`包中的接口，如果有返回错误的话，底层也是`syscall.Errno`错误类型。
+But there are usually more than one cause of failure, and many times users want to know more about the error. If you only use a simple boolean state value, you will not be able to meet this requirement. In C, the default is an integer type of `errno` to express errors, so you can define multiple error types as needed. In the Go language, `syscall.Errno` is the error corresponding to the `errno` type in the C language. The interface in the `syscall` package, if there is a return error, the underlying is also the `syscall.Errno` error type.
 
-比如我们通过`syscall`包的接口来修改文件的模式时，如果遇到错误我们可以通过将`err`强制断言为`syscall.Errno`错误类型来处理：
+For example, when we modify the file mode through the interface of the `syscall` package, if we encounter an error, we can handle it by forcing the `err` to assert the `syscall.Errno` error type:
 
 ```go
-err := syscall.Chmod(":invalid path:", 0666)
-if err != nil {
-	log.Fatal(err.(syscall.Errno))
+Err := syscall.Chmod(":invalid path:", 0666)
+If err != nil {
+log.Fatal(err.(syscall.Errno))
 }
 ```
 
-我们还可以进一步地通过类型查询或类型断言来获取底层真实的错误类型，这样就可以获取更详细的错误信息。不过一般情况下我们并不关心错误在底层的表达方式，我们只需要知道它是一个错误就可以了。当返回的错误值不是`nil`时，我们可以通过调用`error`接口类型的`Error`方法来获得字符串类型的错误信息。
+We can further obtain the underlying true error type through type queries or type assertions, so that we can get more detailed error information. However, in general, we don't care about the way the error is expressed at the bottom. We just need to know that it is a mistake. When the returned error value is not `nil`, we can get the string type error message by calling the `Error` method of the `error` interface type.
 
-在Go语言中，错误被认为是一种可以预期的结果；而异常则是一种非预期的结果，发生异常可能表示程序中存在BUG或发生了其它不可控的问题。Go语言推荐使用`recover`函数将内部异常转为错误处理，这使得用户可以真正的关心业务相关的错误处理。
+In the Go language, errors are considered to be a predictable result; exceptions are an unintended result, and an exception may indicate a bug in the program or other uncontrollable problems. The Go language recommends using the `recover` function to turn internal exceptions into error handling, which allows users to really care about business-related error handling.
 
-如果某个接口简单地将所有普通的错误当做异常抛出，将会使错误信息杂乱且没有价值。就像在`main`函数中直接捕获全部一样，是没有意义的：
+If an interface simply throws all normal errors as exceptions, it will make the error message cluttered and worthless. Just like capturing all of them directly in the `main` function, it makes no sense:
 
 ```go
-func main() {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Fatal(r)
-		}
-	}()
+Func main() {
+Defer func() {
+If r := recover(); r != nil {
+log.Fatal(r)
+}
+}()
 
-	...
+...
 }
 ```
 
-捕获异常不是最终的目的。如果异常不可预测，直接输出异常信息是最好的处理方式。
+Capturing an exception is not the ultimate goal. If the exception is unpredictable, directly outputting the exception information is the best way to handle it.
 
-## 1.7.1 错误处理策略
+## 1.7.1 Error Handling Strategy
 
-让我们演示一个文件复制的例子：函数需要打开两个文件，然后将其中一个文件的内容复制到另一个文件：
+Let's demonstrate an example of file copying: the function needs to open two files and then copy the contents of one of the files to another file:
 
 ```go
-func CopyFile(dstName, srcName string) (written int64, err error) {
-	src, err := os.Open(srcName)
-	if err != nil {
-		return
-	}
+Func CopyFile(dstName, srcName string) (written int64, err error) {
+Src, err := os.Open(srcName)
+If err != nil {
+Return
+}
 
-	dst, err := os.Create(dstName)
-	if err != nil {
-		return
-	}
+Dst, err := os.Create(dstName)
+If err != nil {
+Return
+}
 
-	written, err = io.Copy(dst, src)
-	dst.Close()
-	src.Close()
-	return
+Written, err = io.Copy(dst, src)
+dst.Close()
+src.Close()
+Return
 }
 ```
 
-上面的代码虽然能够工作，但是隐藏一个bug。如果第一个`os.Open`调用成功，但是第二个`os.Create`调用失败，那么会在没有释放`src`文件资源的情况下返回。虽然我们可以通过在第二个返回语句前添加`src.Close()`调用来修复这个BUG；但是当代码变得复杂时，类似的问题将很难被发现和修复。我们可以通过`defer`语句来确保每个被正常打开的文件都能被正常关闭：
+The above code works, but hides a bug. If the first `os.Open` call succeeds, but the second `os.Create` call fails, it will be returned without releasing the `src` file resource. Although we can fix this bug by adding a `src.Close()` call before the second return statement, similar problems will be hard to find and fix when the code becomes complex. We can use the `defer` statement to ensure that every file that is normally opened can be closed normally:
 
 ```go
-func CopyFile(dstName, srcName string) (written int64, err error) {
-	src, err := os.Open(srcName)
-	if err != nil {
-		return
-	}
-	defer src.Close()
+Func CopyFile(dstName, srcName string) (written int64, err error) {
+Src, err := os.Open(srcName)
+If err != nil {
+Return
+}
+Defer src.Close()
 
-	dst, err := os.Create(dstName)
-	if err != nil {
-		return
-	}
-	defer dst.Close()
+Dst, err := os.Create(dstName)
+If err != nil {
+Return
+}
+Defer dst.Close()
 
-	return io.Copy(dst, src)
+Return io.Copy(dst, src)
 }
 ```
 
-`defer`语句可以让我们在打开文件时马上思考如何关闭文件。不管函数如何返回，文件关闭语句始终会被执行。同时`defer`语句可以保证，即使`io.Copy`发生了异常，文件依然可以安全地关闭。
+The `defer` statement allows us to think about how to close a file as soon as we open the file. Regardless of how the function returns, the file close statement will always be executed. At the same time, the `defer` statement guarantees that the file can be safely closed even if an exception occurs in `io.Copy`.
 
-前文我们说到，Go语言中的导出函数一般不抛出异常，一个未受控的异常可以看作是程序的BUG。但是对于那些提供类似Web服务的框架而言；它们经常需要接入第三方的中间件。因为第三方的中间件是否存在BUG是否会抛出异常，Web框架本身是不能确定的。为了提高系统的稳定性，Web框架一般会通过`recover`来防御性地捕获所有处理流程中可能产生的异常，然后将异常转为普通的错误返回。
+As we mentioned earlier, the exported function in the Go language generally does not throw an exception, and an uncontrolled exception can be regarded as a bug in the program. But for those frameworks that offer similar Web services; they often need to access third-party middleware. Because the third-party middleware has a bug, whether the exception will throw an exception, the Web framework itself is not certain. In order to improve the stability of the system, the Web framework generally uses ‘recover` to defensively capture all possible exceptions in the processing flow, and then turn the exception into a normal error return.
 
-让我们以JSON解析器为例，说明recover的使用场景。考虑到JSON解析器的复杂性，即使某个语言解析器目前工作正常，也无法肯定它没有漏洞。因此，当某个异常出现时，我们不会选择让解析器崩溃，而是会将panic异常当作普通的解析错误，并附加额外信息提醒用户报告此错误。
+Let us take the JSON parser as an example to illustrate the use scenario of recover. Given the complexity of the JSON parser, even if a language parser is working properly, it is not certain that it has no loopholes. Therefore, when an exception occurs, we won't choose to crash the parser. Instead, we will treat the panic exception as a normal parsing error and attach additional information to alert the user to report the error.
 
 ```go
-func ParseJSON(input string) (s *Syntax, err error) {
-	defer func() {
-		if p := recover(); p != nil {
-			err = fmt.Errorf("JSON: internal error: %v", p)
-		}
-	}()
-	// ...parser...
+Func ParseJSON(input string) (s *Syntax, err error) {
+Defer func() {
+If p := recover(); p != nil {
+Err = fmt.Errorf("JSON: internal error: %v", p)
+}
+}()
+// ...parser...
 }
 ```
 
-标准库中的`json`包，在内部递归解析JSON数据的时候如果遇到错误，会通过抛出异常的方式来快速跳出深度嵌套的函数调用，然后由最外一级的接口通过`recover`捕获`panic`，然后返回相应的错误信息。
+The `json` package in the standard library, if it encounters an error when recursively parsing JSON data internally, it will quickly jump out of the deeply nested function call by throwing an exception, and then pass the 'recover' by the interface of the outermost level. `Capture `panic` and return the corresponding error message.
 
-Go语言库的实现习惯: 即使在包内部使用了`panic`，但是在导出函数时会被转化为明确的错误值。
+Go language library implementation habits: Even if `panic` is used inside the package, it will be converted to an explicit error value when the function is exported.
 
-## 1.7.2 获取错误的上下文
+## 1.7.2 Getting the wrong context
 
-有时候为了方便上层用户理解；底层实现者会将底层的错误重新包装为新的错误类型返回给用户：
+Sometimes it is easy for the upper level user to understand; the underlying implementer will repack the underlying error as a new error type and return it to the user:
 
 ```go
-if _, err := html.Parse(resp.Body); err != nil {
-	return nil, fmt.Errorf("parsing %s as HTML: %v", url,err)
+If _, err := html.Parse(resp.Body); err != nil {
+Return nil, fmt.Errorf("parsing %s as HTML: %v", url, err)
 }
 ```
 
-上层用户在遇到错误时，可以很容易从业务层面理解错误发生的原因。但是鱼和熊掌总是很难兼得，在上层用户获得新的错误的同时，我们也丢失了底层最原始的错误类型（只剩下错误描述信息了）。
+When an upper user encounters an error, it is easy to understand the cause of the error from the business level. But the fish and the bear's paw are always difficult to get both. When the upper user gets a new mistake, we also lose the underlying most primitive error type (only the error description information is left).
 
-为了记录这种错误类型在包装的变迁过程中的信息，我们一般会定义一个辅助的`WrapError`函数，用于包装原始的错误，同时保留完整的原始错误类型。为了问题定位的方便，同时也为了能记录错误发生时的函数调用状态，我们很多时候希望在出现致命错误的时候保存完整的函数调用信息。同时，为了支持RPC等跨网络的传输，我们可能要需要将错误序列化为类似JSON格式的数据，然后再从这些数据中将错误解码恢出来。
+In order to record information about the type of error in the package's transition, we generally define an auxiliary `WrapError` function that wraps the original error while preserving the full original error type. In order to facilitate the positioning of the problem, and in order to record the state of the function call when the error occurs, we often want to save the complete function call information when a fatal error occurs. At the same time, in order to support cross-network transmission such as RPC, we may need to serialize the error into data similar to JSON format, and then recover the error decoding from the data.
 
-为此，我们可以定义自己的`github.com/chai2010/errors`包，里面是以下的错误类型：
+To do this, we can define our own `github.com/chai2010/errors` package, which is the following error type:
 
 ```go
 
-type Error interface {
-	Caller() []CallerInfo
-	Wraped() []error
-	Code() int
-	error
+Type Error interface {
+Caller() []CallerInfo
+Wraped() []error
+Code() int
+Error
 
-	private()
+Private()
 }
 
-type CallerInfo struct {
-	FuncName string
-	FileName string
-	FileLine int
+Type CallerInfo struct {
+FuncName string
+FileName string
+FileLine int
 }
 ```
 
-其中`Error`为接口类型，是`error`接口类型的扩展，用于给错误增加调用栈信息，同时支持错误的多级嵌套包装，支持错误码格式。为了使用方便，我们可以定义以下的辅助函数：
+Among them, `Error` is an interface type, which is an extension of the `error` interface type. It is used to add call stack information to errors, and supports error multi-level nested wrappers and supports error code formats. For ease of use, we can define the following helper functions:
 
 ```go
-func New(msg string) error
-func NewWithCode(code int, msg string) error
+Func New(msg string) error
+Func NewWithCode(code int, msg string) error
 
-func Wrap(err error, msg string) error
-func WrapWithCode(code int, err error, msg string) error
+Func Wrap(err error, msg string) error
+Func WrapWithCode(code int, err error, msg string) error
 
-func FromJson(json string) (Error, error)
-func ToJson(err error) string
+Func FromJson(json string) (Error, error)
+Func ToJson(err error) string
 ```
 
-`New`用于构建新的错误类型，和标准库中`errors.New`功能类似，但是增加了出错时的函数调用栈信息。`FromJson`用于从JSON字符串编码的错误中恢复错误对象。`NewWithCode`则是构造一个带错误码的错误，同时也包含出错时的函数调用栈信息。`Wrap`和`WrapWithCode`则是错误二次包装函数，用于将底层的错误包装为新的错误，但是保留的原始的底层错误信息。这里返回的错误对象都可以直接调用`json.Marshal`将错误编码为JSON字符串。
+`New` is used to build new error types, similar to the `errors.New` function in the standard library, but with the addition of function call stack information when an error occurs. `FromJson` is used to recover the wrong object from the JSON string encoded error. `NewWithCode` is to construct an error with an error code, and also contains the function call stack information when the error occurs. `Wrap` and `WrapWithCode` are error secondary wrappers that wrap the underlying error as a new error, but retain the original underlying error message. The error object returned here can directly call `json.Marshal` to encode the error as a JSON string.
 
-我们可以这样使用包装函数:
+We can use the wrapper function like this:
 
 ```go
-import (
-	"github.com/chai2010/errors"
+Import (
+"github.com/chai2010/errors"
 )
 
-func loadConfig() error {
-	_, err := ioutil.ReadFile("/path/to/file")
-	if err != nil {
-		return errors.Wrap(err, "read failed")
-	}
-
-	// ...
+Func loadConfig() error {
+_, err := ioutil.ReadFile("/path/to/file")
+If err != nil {
+Return errors.Wrap(err, "read failed")
 }
 
-func setup() error {
-	err := loadConfig()
-	if err != nil {
-		return errors.Wrap(err, "invalid config")
-	}
-
-	// ...
+// ...
 }
 
-func main() {
-	if err := setup(); err != nil {
-		log.Fatal(err)
-	}
-
-	// ...
-}
-```
-
-上面的例子中，错误被进行了2层包装。我们可以这样遍历原始错误经历了哪些包装流程：
-
-```go
-	for i, e := range err.(errors.Error).Wraped() {
-		fmt.Printf("wraped(%d): %v\n", i, e)
-	}
-```
-
-同时也可以获取每个包装错误的函数调用堆栈信息：
-
-```go
-	for i, x := range err.(errors.Error).Caller() {
-		fmt.Printf("caller:%d: %s\n", i, x.FuncName)
-	}
-```
-
-如果需要将错误通过网络传输，可以用`errors.ToJson(err)`编码为JSON字符串：
-
-```go
-// 以JSON字符串方式发送错误
-func sendError(ch chan<- string, err error) {
-	ch <- errors.ToJson(err)
+Func setup() error {
+Err := loadConfig()
+If err != nil {
+Return errors.Wrap(err, "invalid config")
 }
 
-// 接收JSON字符串格式的错误
-func recvError(ch <-chan string) error {
-	p, err := errors.FromJson(<-ch)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return p
+// ...
+}
+
+Func main() {
+If err := setup(); err != nil {
+log.Fatal(err)
+}
+
+// ...
 }
 ```
 
-对于基于http协议的网络服务，我们还可以给错误绑定一个对应的http状态码：
+In the above example, the error was wrapped in 2 layers. We can traverse the packaging process that the original error has gone through:
 
 ```go
-err := errors.NewWithCode(404, "http error code")
+For i, e := range err.(errors.Error).Wraped() {
+fmt.Printf("wraped(%d): %v\n", i, e)
+}
+```
+
+You can also get the function call stack information for each wrapper error:
+
+```go
+For i, x := range err.(errors.Error).Caller() {
+fmt.Printf("caller:%d: %s\n", i, x.FuncName)
+}
+```
+
+If you need to pass the error over the network, you can encode it as a JSON string with `errors.ToJson(err)`:
+
+```go
+// Send error as a JSON string
+Func sendError(ch chan<- string, err error) {
+Ch <-errors.ToJson(err)
+}
+
+// Receive error in JSON string format
+Func recvError(ch <-chan string) error {
+p, err := errors.FromJson(<-ch)
+If err != nil {
+log.Fatal(err)
+}
+Return p
+}
+```
+
+For web services based on the http protocol, we can also bind a corresponding http status code to the error:
+
+```go
+Err := errors.NewWithCode(404, "http error code")
 
 fmt.Println(err)
 fmt.Println(err.(errors.Error).Code())
 ```
 
-在Go语言中，错误处理也有一套独特的编码风格。检查某个子函数是否失败后，我们通常将处理失败的逻辑代码放在处理成功的代码之前。如果某个错误会导致函数返回，那么成功时的逻辑代码不应放在`else`语句块中，而应直接放在函数体中。
+In the Go language, error handling also has a unique coding style. After checking if a subfunction has failed, we usually put the logic code that failed to process before the code that processed it successfully. If an error causes the function to return, then the logic code for success should not be placed in the `else` statement block, but should be placed directly in the function body.
 
 ```go
 f, err := os.Open("filename.ext")
-if err != nil {
-	// 失败的情形, 马上返回错误
+If err != nil {
+// In case of failure, return error immediately
 }
 
-// 正常的处理流程
+// normal processing flow
 ```
 
-Go语言中大部分函数的代码结构几乎相同，首先是一系列的初始检查，用于防止错误发生，之后是函数的实际逻辑。
+The code structure of most functions in the Go language is almost the same, starting with a series of initial checks to prevent errors from occurring, followed by the actual logic of the function.
 
 
-## 1.7.3 错误的错误返回
+## 1.7.3 Error returning error
 
-Go语言中的错误是一种接口类型。接口信息中包含了原始类型和原始的值。只有当接口的类型和原始的值都为空的时候，接口的值才对应`nil`。其实当接口中类型为空的时候，原始值必然也是空的；反之，当接口对应的原始值为空的时候，接口对应的原始类型并不一定为空的。
+The error in the Go language is an interface type. The interface information contains the original type and the original value. The value of the interface corresponds to `nil` only if the type of the interface and the original value are both empty. In fact, when the type of the interface is empty, the original value must be empty. Conversely, when the original value of the interface is empty, the original type corresponding to the interface is not necessarily empty.
 
-在下面的例子中，试图返回自定义的错误类型，当没有错误的时候返回`nil`：
+In the following example, I tried to return a custom error type and return `nil` when there are no errors:
 
 ```go
-func returnsError() error {
-	var p *MyError = nil
-	if bad() {
-		p = ErrBad
-	}
-	return p // Will always return a non-nil error.
+Func returnsError() error {
+Var p *MyError = nil
+If bad() {
+p = ErrBad
+}
+Return p // Will always return a non-nil error.
 }
 ```
 
-但是，最终返回的结果其实并非是`nil`：是一个正常的错误，错误的值是一个`MyError`类型的空指针。下面是改进的`returnsError`：
+However, the result of the final return is actually not `nil`: a normal error, the wrong value is a null pointer of type `MyError`. Here's the improved `returnsError`:
 
 ```go
-func returnsError() error {
-	if bad() {
-		return (*MyError)(err)
-	}
-	return nil
+Func returnsError() error {
+If bad() {
+Return (*MyError)(err)
+}
+Return nil
 }
 ```
 
-因此，在处理错误返回值的时候，没有错误的返回值最好直接写为`nil`。
+Therefore, when processing the error return value, the error return value is preferably written directly as `nil`.
 
-Go语言作为一个强类型语言，不同类型之间必须要显式的转换（而且必须有相同的基础类型）。但是，Go语言中`interface`是一个例外：非接口类型到接口类型，或者是接口类型之间的转换都是隐式的。这是为了支持鸭子类型，当然会牺牲一定的安全性。
+The Go language is a strongly typed language, and explicit conversions must be made between different types (and must have the same underlying type). However, the `interface` in the Go language is an exception: non-interface types to interface types, or conversions between interface types are implicit. This is to support the duck type, of course, will sacrifice a certain degree of security.
 
-## 1.7.4 剖析异常
+## 1.7.4 Parsing Exceptions
 
-`panic`支持抛出任意类型的异常（而不仅仅是`error`类型的错误），`recover`函数调用的返回值和`panic`函数的输入参数类型一致，它们的函数签名如下：
+`panic` supports throwing arbitrary types of exceptions (not just `error` type errors). The return value of the `recover` function call is the same as the input parameter type of the `panic` function. Their function signatures are as follows:
 
 ```go
-func panic(interface{})
-func recover() interface{}
+Func panic(interface{})
+Func recover() interface{}
 ```
 
-Go语言函数调用的正常流程是函数执行返回语句返回结果，在这个流程中是没有异常的，因此在这个流程中执行`recover`异常捕获函数始终是返回`nil`。另一种是异常流程: 当函数调用`panic`抛出异常，函数将停止执行后续的普通语句，但是之前注册的`defer`函数调用仍然保证会被正常执行，然后再返回到调用者。对于当前函数的调用者，因为处理异常状态还没有被捕获，和直接调用`panic`函数的行为类似。在异常发生时，如果在`defer`中执行`recover`调用，它可以捕获触发`panic`时的参数，并且恢复到正常的执行流程。
+The normal flow of the Go language function call is the result returned by the function execution return statement. There is no exception in this process, so executing the `recover` exception catching function in this process always returns `nil`. The other is the exception flow: When the function calls `panic` to throw an exception, the function will stop executing the subsequent normal statement, but the previously registered `defer` function call will still be executed normally and then returned to the caller. For the caller of the current function, because the exception handling state has not been caught, it is similar to the behavior of calling the `panic` function directly. When an exception occurs, if a `recover` call is made in `defer`, it can capture the parameters when the `panic` is triggered and return to the normal execution flow.
 
-在非`defer`语句中执行`recover`调用是初学者常犯的错误:
+Executing a `recover` call in a non-defer` statement is a common mistake for beginners:
 
 ```go
-func main() {
-	if r := recover(); r != nil {
-		log.Fatal(r)
-	}
+Func main() {
+If r := recover(); r != nil {
+log.Fatal(r)
+}
 
-	panic(123)
+Panic(123)
 
-	if r := recover(); r != nil {
-		log.Fatal(r)
-	}
+If r := recover(); r != nil {
+log.Fatal(r)
+}
 }
 ```
 
-上面程序中两个`recover`调用都不能捕获任何异常。在第一个`recover`调用执行时，函数必然是在正常的非异常执行流程中，这时候`recover`调用将返回`nil`。发生异常时，第二个`recover`调用将没有机会被执行到，因为`panic`调用会导致函数马上执行已经注册`defer`的函数后返回。
+Both `recover` calls in the above program cannot catch any exceptions. When the first `recover` call is executed, the function must be in the normal non-exception execution flow, at which point the `recover` call will return `nil`. When an exception occurs, the second `recover` call will have no chance to be executed, because the `panic` call will cause the function to return immediately after executing the function that has registered the `defer`.
 
-其实`recover`函数调用有着更严格的要求：我们必须在`defer`函数中直接调用`recover`。如果`defer`中调用的是`recover`函数的包装函数的话，异常的捕获工作将失败！比如，有时候我们可能希望包装自己的`MyRecover`函数，在内部增加必要的日志信息然后再调用`recover`，这是错误的做法：
+In fact, the `recover` function call has stricter requirements: we must call `recover` directly in the `defer` function. If the wrapper function of the `recover` function is called in `defer`, the catchup of the exception will fail! For example, sometimes we might want to wrap our own `MyRecover` function, add the necessary log information internally and then call `recover`, which is the wrong approach:
 
 ```go
-func main() {
-	defer func() {
-		// 无法捕获异常
-		if r := MyRecover(); r != nil {
-			fmt.Println(r)
-		}
-	}()
-	panic(1)
+Func main() {
+Defer func() {
+// Unable to catch exception
+If r := MyRecover(); r != nil {
+fmt.Println(r)
+}
+}()
+Panic(1)
 }
 
-func MyRecover() interface{} {
-	log.Println("trace...")
-	return recover()
+Func MyRecover() interface{} {
+log.Println("trace...")
+Return recover()
 }
 ```
 
-同样，如果是在嵌套的`defer`函数中调用`recover`也将导致无法捕获异常：
+Similarly, if you call `recover` in a nested `defer` function, it will also fail to catch the exception:
 
 ```go
-func main() {
-	defer func() {
-		defer func() {
-			// 无法捕获异常
-			if r := recover(); r != nil {
-				fmt.Println(r)
-			}
-		}()
-	}()
-	panic(1)
+Func main() {
+Defer func() {
+Defer func() {
+// Unable to catch exception
+If r := recover(); r != nil {
+fmt.Println(r)
+}
+}()
+}()
+Panic(1)
 }
 ```
 
-2层嵌套的`defer`函数中直接调用`recover`和1层`defer`函数中调用包装的`MyRecover`函数一样，都是经过了2个函数帧才到达真正的`recover`函数，这个时候Goroutine的对应上一级栈帧中已经没有异常信息。
+The 2-layer nested `defer` function directly calls `recover` and the 1-layer `defer` function to call the wrapped `MyRecover` function. After two function frames, the real `recover` function is reached. At the time, Goroutine has no abnormal information in the corresponding upper stack frame.
 
-如果我们直接在`defer`语句中调用`MyRecover`函数又可以正常工作了：
+If we call the `MyRecover` function directly in the `defer` statement, it works fine:
 
 ```go
-func MyRecover() interface{} {
-	return recover()
+Func MyRecover() interface{} {
+Return recover()
 }
 
-func main() {
-	// 可以正常捕获异常
-	defer MyRecover()
-	panic(1)
+Func main() {
+// can catch exceptions normally
+Defer MyRecover()
+Panic(1)
 }
 ```
 
-但是，如果`defer`语句直接调用`recover`函数，依然不能正常捕获异常：
+However, if the `defer` statement directly calls the `recover` function, the exception will still not be caught properly:
 
 ```go
-func main() {
-	// 无法捕获异常
-	defer recover()
-	panic(1)
+Func main() {
+// Unable to catch exception
+Defer recover()
+Panic(1)
 }
 ```
 
-必须要和有异常的栈帧只隔一个栈帧，`recover`函数才能正常捕获异常。换言之，`recover`函数捕获的是祖父一级调用函数栈帧的异常（刚好可以跨越一层`defer`函数）！
+It must be separated from the stack frame with an exception by a stack frame, and the `recover` function can catch the exception normally. In other words, the `recover` function captures the exception of the grandfather's first call to the function stack frame (just a layer of the `defer` function)!
 
-当然，为了避免`recover`调用者不能识别捕获到的异常, 应该避免用`nil`为参数抛出异常:
+Of course, in order to avoid the `recover` caller not recognizing the caught exception, you should avoid throwing an exception with `nil` for the argument:
 
 ```go
-func main() {
-	defer func() {
-		if r := recover(); r != nil { ... }
-		// 虽然总是返回nil, 但是可以恢复异常状态
-	}()
+Func main() {
+Defer func() {
+If r := recover(); r != nil { ... }
+// Although it always returns nil, it can restore the abnormal state
+}()
 
-	// 警告: 用`nil`为参数抛出异常
-	panic(nil)
+// Warning: throw an exception with 'nil` as a parameter
+Panic(nil)
 }
 ```
 
-当希望将捕获到的异常转为错误时，如果希望忠实返回原始的信息，需要针对不同的类型分别处理：
+When you want to turn the caught exception into an error, if you want to faithfully return the original information, you need to handle it separately for different types:
 
 ```go
-func foo() (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			switch x := r.(type) {
-			case string:
-				err = errors.New(x)
-			case error:
-				err = x
-			default:
-				err = fmt.Errorf("Unknown panic: %v", r)
-			}
-		}
-	}()
+Func foo() (err error) {
+Defer func() {
+If r := recover(); r != nil {
+Switch x := r.(type) {
+Case string:
+Err = errors.New(x)
+Case error:
+Err = x
+Default:
+Err = fmt.Errorf("Unknown panic: %v", r)
+}
+}
+}()
 
-	panic("TODO")
+Panic("TODO")
 }
 ```
 
-基于这个代码模板，我们甚至可以模拟出不同类型的异常。通过为定义不同类型的保护接口，我们就可以区分异常的类型了：
+Based on this code template, we can even simulate different types of exceptions. By defining different types of protection interfaces, we can distinguish the types of exceptions:
 
 ```go
-func main {
-	defer func() {
-		if r := recover(); r != nil {
-			switch x := r.(type) {
-			case runtime.Error:
-				// 这是运行时错误类型异常
-			case error:
-				// 普通错误类型异常
-			default:
-				// 其他类型异常
-			}
-		}
-	}()
+Func main {
+Defer func() {
+If r := recover(); r != nil {
+Switch x := r.(type) {
+Case runtime.Error:
+// This is a runtime error type exception
+Case error:
+// Ordinary error type exception
+Default:
+// other types of exceptions
+}
+}
+}()
 
-	// ...
+// ...
 }
 ```
 
-不过这样做和Go语言简单直接的编程哲学背道而驰了。
+But doing so runs counter to the simple and straightforward programming philosophy of Go.

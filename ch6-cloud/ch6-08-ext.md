@@ -1,5 +1,5 @@
-# 6.8 补充说明
+# 6.8 Additional instructions
 
-分布式是很大的领域，本章中的介绍只能算是对领域的管中窥豹。因为大型系统流量大，并发高，所以往往很多朴素的方案会变得难以满足需求。人们为了解决大型系统场景中的各种问题，而开发出了各式各样的分布式系统。有些系统非常简单，比如本章中介绍的分布式id生成器，而有一些系统则可能非常复杂，比如本章中的分布式搜索引擎（当然，本章中提到的es不是Go实现）。
+Distributed is a big field, and the introduction in this chapter can only be regarded as a glimpse of the domain. Because large systems have large flows and high concurrency, many simple solutions can often become difficult to meet. In order to solve various problems in large-scale system scenarios, people have developed a variety of distributed systems. Some systems are very simple, such as the distributed id generator described in this chapter, and some systems can be very complex, such as the distributed search engine in this chapter (of course, the es mentioned in this chapter is not a Go implementation).
 
-无论简单的或是复杂的系统，都会在特定的场景中体现出它们重要的价值，希望读者朋友可以多多接触开源，积累自己的工具箱，从而站在巨人们的肩膀之上。
+Whether it is a simple or complex system, it will reflect their important value in a specific scene. I hope readers can get more exposure to open source, accumulate their own toolbox, and stand on the shoulders of giants.

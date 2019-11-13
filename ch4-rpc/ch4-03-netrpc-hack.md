@@ -1,334 +1,334 @@
-# 4.3 玩转RPC
+# 4.3 Fun RPC
 
-在不同的场景中RPC有着不同的需求，因此开源的社区就诞生了各种RPC框架。本节我们将尝试Go内置RPC框架在一些比较特殊场景的用法。
+RPC has different needs in different scenarios, so the open source community has created various RPC frameworks. In this section we will try to use the Go built-in RPC framework in some special scenarios.
 
-## 4.3.1 客户端RPC的实现原理
+## 4.3.1 Principle of Implementing Client RPC
 
-Go语言的RPC库最简单的使用方式是通过`Client.Call`方法进行同步阻塞调用，该方法的实现如下：
+The easiest way to use the Go language RPC library is to use the `Client.Call` method for synchronous blocking calls. The implementation of this method is as follows:
 
 ```go
-func (client *Client) Call(
-	serviceMethod string, args interface{},
-	reply interface{},
-) error {
-	call := <-client.Go(serviceMethod, args, reply, make(chan *Call, 1)).Done
-	return call.Error
+Func (client *Client) Call(
+serviceMethod string, args interface{},
+Reply interface{},
+Error {
+Call := <-client.Go(serviceMethod, args, reply, make(chan *Call, 1)).Done
+Return call.Error
 }
 ```
 
-首先通过`Client.Go`方法进行一次异步调用，返回一个表示这次调用的`Call`结构体。然后等待`Call`结构体的Done管道返回调用结果。
+First make an asynchronous call through the `Client.Go` method, returning a `Call` structure that represents this call. Then wait for the Done pipe of the `Call` structure to return the result of the call.
 
-我们也可以通过`Client.Go`方法异步调用前面的HelloService服务：
+We can also call the previous HelloService service asynchronously via the `Client.Go` method:
 
 ```go
-func doClientWork(client *rpc.Client) {
-	helloCall := client.Go("HelloService.Hello", "hello", new(string), nil)
+Func doClientWork(client *rpc.Client) {
+helloCall := client.Go("HelloService.Hello", "hello", new(string), nil)
 
-	// do some thing
+// do some thing
 
-	helloCall = <-helloCall.Done
-	if err := helloCall.Error; err != nil {
-		log.Fatal(err)
-	}
+helloCall = <-helloCall.Done
+If err := helloCall.Error; err != nil {
+log.Fatal(err)
+}
 
-	args := helloCall.Args.(string)
-	reply := helloCall.Reply.(string)
-	fmt.Println(args, reply)
+Args := helloCall.Args.(string)
+Reply := helloCall.Reply.(string)
+fmt.Println(args, reply)
 }
 ```
 
-在异步调用命令发出后，一般会执行其他的任务，因此异步调用的输入参数和返回值可以通过返回的Call变量进行获取。
+After the asynchronous call command is issued, other tasks are generally executed, so the input parameters and return values ​​of the asynchronous call can be obtained through the returned Call variable.
 
-执行异步调用的`Client.Go`方法实现如下：
+The `Client.Go` method that performs the asynchronous call is implemented as follows:
 
 ```go
-func (client *Client) Go(
-	serviceMethod string, args interface{},
-	reply interface{},
-	done chan *Call,
+Func (client *Client) Go(
+serviceMethod string, args interface{},
+Reply interface{},
+Done chan *Call,
 ) *Call {
-	call := new(Call)
-	call.ServiceMethod = serviceMethod
-	call.Args = args
-	call.Reply = reply
-	call.Done = make(chan *Call, 10) // buffered.
+Call := new(Call)
+call.ServiceMethod = serviceMethod
+call.Args = args
+call.Reply = reply
+call.Done = make(chan *Call, 10) // buffered.
 
-	client.send(call)
-	return call
+Client.send(call)
+Return call
 }
 ```
 
-首先是构造一个表示当前调用的call变量，然后通过`client.send`将call的完整参数发送到RPC框架。`client.send`方法调用是线程安全的，因此可以从多个Goroutine同时向同一个RPC链接发送调用指令。
+The first is to construct a call variable that represents the current call, and then send the complete parameters of the call to the RPC framework via `client.send`. The `client.send` method call is thread-safe, so you can send call instructions from multiple Goroutines to the same RPC link at the same time.
 
-当调用完成或者发生错误时，将调用`call.done`方法通知完成：
+When the call completes or an error occurs, the call to the `call.done` method is called to complete:
 
 ```go
-func (call *Call) done() {
-	select {
-	case call.Done <- call:
-		// ok
-	default:
-		// We don't want to block here. It is the caller's responsibility to make
-		// sure the channel has enough buffer space. See comment in Go().
-	}
+Func (call *Call) done() {
+Select {
+Case call.Done <- call:
+// ok
+Default:
+// We don't want to block here. It is the caller's responsibility to make
+// sure the channel has enough buffer space. See comment in Go().
+}
 }
 ```
 
-从`Call.done`方法的实现可以得知`call.Done`管道会将处理后的call返回。
+From the implementation of the `Call.done` method, you can see that the `call.Done` pipeline will return the processed call.
 
-## 4.3.2 基于RPC实现Watch功能
+## 4.3.2 Implementing the Watch function based on RPC
 
-在很多系统中都提供了Watch监视功能的接口，当系统满足某种条件时Watch方法返回监控的结果。在这里我们可以尝试通过RPC框架实现一个基本的Watch功能。如前文所描述，因为`client.send`是线程安全的，我们也可以通过在不同的Goroutine中同时并发阻塞调用RPC方法。通过在一个独立的Goroutine中调用Watch函数进行监控。
+In many systems, the interface for Watch monitoring is provided. When the system meets certain conditions, the Watch method returns the result of the monitoring. Here we can try to implement a basic Watch function through the RPC framework. As described earlier, because `client.send` is thread-safe, we can also call the RPC method by concurrent blocking in different Goroutines. Monitor by calling the Watch function in a separate Goroutine.
 
-为了便于演示，我们计划通过RPC构造一个简单的内存KV数据库。首先定义服务如下：
+For demonstration purposes, we plan to construct a simple memory KV database via RPC. First define the service as follows:
 
 ```go
-type KVStoreService struct {
-	m      map[string]string
-	filter map[string]func(key string)
-	mu     sync.Mutex
+Type KVStoreService struct {
+m map[string]string
+Filter map[string]func(key string)
+Mu sync.Mutex
 }
 
-func NewKVStoreService() *KVStoreService {
-	return &KVStoreService{
-		m:      make(map[string]string),
-		filter: make(map[string]func(key string)),
-	}
+Func NewKVStoreService() *KVStoreService {
+Return &KVStoreService{
+m: make(map[string]string),
+Filter: make(map[string]func(key string)),
+}
 }
 ```
 
-其中`m`成员是一个map类型，用于存储KV数据。`filter`成员对应每个Watch调用时定义的过滤器函数列表。而`mu`成员为互斥锁，用于在多个Goroutine访问或修改时对其它成员提供保护。
+The `m` member is a map type used to store KV data. The `filter` member corresponds to the list of filter functions defined at each call call. The `mu` member is a mutex that is used to protect other members when multiple Goroutines access or modify.
 
-然后就是Get和Set方法：
+Then there is the Get and Set methods:
 
 ```go
-func (p *KVStoreService) Get(key string, value *string) error {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+Func (p *KVStoreService) Get(key string, value *string) error {
+p.mu.Lock()
+Defer p.mu.Unlock()
 
-	if v, ok := p.m[key]; ok {
-		*value = v
-		return nil
-	}
-
-	return fmt.Errorf("not found")
+If v, ok := p.m[key]; ok {
+*value = v
+Return nil
 }
 
-func (p *KVStoreService) Set(kv [2]string, reply *struct{}) error {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+Return fmt.Errorf("not found")
+}
 
-	key, value := kv[0], kv[1]
+Func (p *KVStoreService) Set(kv [2]string, reply *struct{}) error {
+p.mu.Lock()
+Defer p.mu.Unlock()
 
-	if oldValue := p.m[key]; oldValue != value {
-		for _, fn := range p.filter {
-			fn(key)
-		}
-	}
+Key, value := kv[0], kv[1]
 
-	p.m[key] = value
-	return nil
+If oldValue := p.m[key]; oldValue != value {
+For _, fn := range p.filter {
+Fn(key)
+}
+}
+
+P.m[key] = value
+Return nil
 }
 ```
 
-在Set方法中，输入参数是key和value组成的数组，用一个匿名的空结构体表示忽略了输出参数。当修改某个key对应的值时会调用每一个过滤器函数。
+In the Set method, the input parameter is an array of key and value, and an anonymous empty structure is used to ignore the output parameters. Each filter function is called when the value corresponding to a key is modified.
 
-而过滤器列表在Watch方法中提供：
+The filter list is provided in the Watch method:
 
 ```go
-func (p *KVStoreService) Watch(timeoutSecond int, keyChanged *string) error {
-	id := fmt.Sprintf("watch-%s-%03d", time.Now(), rand.Int())
-	ch := make(chan string, 10) // buffered
+Func (p *KVStoreService) Watch(timeoutSecond int, keyChanged *string) error {
+Id := fmt.Sprintf("watch-%s-%03d", time.Now(), rand.Int())
+Ch := make(chan string, 10) // buffered
 
-	p.mu.Lock()
-	p.filter[id] = func(key string) { ch <- key }
-	p.mu.Unlock()
+p.mu.Lock()
+P.filter[id] = func(key string) { ch <- key }
+p.mu.Unlock()
 
-	select {
-	case <-time.After(time.Duration(timeoutSecond) * time.Second):
-		return fmt.Errorf("timeout")
-	case key := <-ch:
-		*keyChanged = key
-		return nil
-	}
+Select {
+Case <-time.After(time.Duration(timeoutSecond) * time.Second):
+Return fmt.Errorf("timeout")
+Case key := <-ch:
+*keyChanged = key
+Return nil
+}
 
-	return nil
+Return nil
 }
 ```
 
-Watch方法的输入参数是超时的秒数。当有key变化时将key作为返回值返回。如果超过时间后依然没有key被修改，则返回超时的错误。Watch的实现中，用唯一的id表示每个Watch调用，然后根据id将自身对应的过滤器函数注册到`p.filter`列表。
+The input parameter of the Watch method is the number of seconds to time out. Returns the key as the return value when there is a key change. If no key is modified after the time has elapsed, a timeout error is returned. In the implementation of Watch, each Watch call is represented by a unique id, and then the corresponding filter function is registered to the `p.filter` list according to the id.
 
-KVStoreService服务的注册和启动过程我们不再赘述。下面我们看看如何从客户端使用Watch方法：
+The registration and startup process of the KVStoreService service will not be repeated. Let's see how to use the Watch method from the client:
 
 ```go
-func doClientWork(client *rpc.Client) {
-	go func() {
-		var keyChanged string
-		err := client.Call("KVStoreService.Watch", 30, &keyChanged)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("watch:", keyChanged)
-	} ()
+Func doClientWork(client *rpc.Client) {
+Go func() {
+Var keyChanged string
+Err := client.Call("KVStoreService.Watch", 30, &keyChanged)
+If err != nil {
+log.Fatal(err)
+}
+fmt.Println("watch:", keyChanged)
+} ()
 
-	err := client.Call(
-		"KVStoreService.Set", [2]string{"abc", "abc-value"},
-		new(struct{}),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
+Err := client.Call(
+"KVStoreService.Set", [2]string{"abc", "abc-value"},
+New(struct{}),
+)
+If err != nil {
+log.Fatal(err)
+}
 
-	time.Sleep(time.Second*3)
+time.Sleep(time.Second*3)
 }
 ```
 
-首先启动一个独立的Goroutine监控key的变化。同步的watch调用会阻塞，直到有key发生变化或者超时。然后在通过Set方法修改KV值时，服务器会将变化的key通过Watch方法返回。这样我们就可以实现对某些状态的监控。
+Start by launching a separate Goroutine monitoring key change. A synchronized watch call will block until a key changes or times out. Then when the KV value is modified by the Set method, the server will return the changed key through the Watch method. This way we can monitor certain states.
 
-## 4.3.3 反向RPC
+## 4.3.3 Reverse RPC
 
-通常的RPC是基于C/S结构，RPC的服务端对应网络的服务器，RPC的客户端也对应网络客户端。但是对于一些特殊场景，比如在公司内网提供一个RPC服务，但是在外网无法链接到内网的服务器。这种时候我们可以参考类似反向代理的技术，首先从内网主动链接到外网的TCP服务器，然后基于TCP链接向外网提供RPC服务。
+The normal RPC is based on the C/S structure. The server of the RPC corresponds to the server of the network, and the client of the RPC also corresponds to the network client. However, for some special scenarios, such as providing an RPC service on the intranet, but the external network cannot be linked to the intranet server. In this case, we can refer to the technology similar to the reverse proxy. Firstly, we actively link to the TCP server of the external network from the intranet, and then provide the RPC service to the external network based on the TCP link.
 
-以下是启动反向RPC服务的代码：
+Here is the code to start the reverse RPC service:
 
 ```go
-func main() {
-	rpc.Register(new(HelloService))
+Func main() {
+rpc.Register(new(HelloService))
 
-	for {
-		conn, _ := net.Dial("tcp", "localhost:1234")
-		if conn == nil {
-			time.Sleep(time.Second)
-			continue
-		}
+For {
+Conn, _ := net.Dial("tcp", "localhost:1234")
+If conn == nil {
+time.Sleep(time.Second)
+Continue
+}
 
-		rpc.ServeConn(conn)
-		conn.Close()
-	}
+rpc.ServeConn(conn)
+conn.Close()
+}
 }
 ```
 
-反向RPC的内网服务将不再主动提供TCP监听服务，而是首先主动链接到对方的TCP服务器。然后基于每个建立的TCP链接向对方提供RPC服务。
+The reverse RPC intranet service will no longer actively provide TCP listening services, but will first actively link to the other party's TCP server. The RPC service is then provided to each other based on each established TCP link.
 
-而RPC客户端则需要在一个公共的地址提供一个TCP服务，用于接受RPC服务器的链接请求：
+The RPC client needs to provide a TCP service at a public address to accept the link request from the RPC server:
 
 ```go
-func main() {
-	listener, err := net.Listen("tcp", ":1234")
-	if err != nil {
-		log.Fatal("ListenTCP error:", err)
-	}
+Func main() {
+Listener, err := net.Listen("tcp", ":1234")
+If err != nil {
+log.Fatal("ListenTCP error:", err)
+}
 
-	clientChan := make(chan *rpc.Client)
+clientChan := make(chan *rpc.Client)
 
-	go func() {
-		for {
-			conn, err := listener.Accept()
-			if err != nil {
-				log.Fatal("Accept error:", err)
-			}
+Go func() {
+For {
+Conn, err := listener.Accept()
+If err != nil {
+log.Fatal("Accept error:", err)
+}
 
-			clientChan <- rpc.NewClient(conn)
-		}
-	}()
+clientChan <- rpc.NewClient(conn)
+}
+}()
 
-	doClientWork(clientChan)
+doClientWork(clientChan)
 }
 ```
 
-当每个链接建立后，基于网络链接构造RPC客户端对象并发送到clientChan管道。
+When each link is established, the RPC client object is constructed based on the network link and sent to the clientChan pipeline.
 
-客户端执行RPC调用的操作在doClientWork函数完成：
+The client performs the RPC call operation in the doClientWork function:
 
 ```go
-func doClientWork(clientChan <-chan *rpc.Client) {
-	client := <-clientChan
-	defer client.Close()
+Func doClientWork(clientChan <-chan *rpc.Client) {
+Client := <-clientChan
+Defer client.Close()
 
-	var reply string
-	err = client.Call("HelloService.Hello", "hello", &reply)
-	if err != nil {
-		log.Fatal(err)
-	}
+Var reply string
+Err = client.Call("HelloService.Hello", "hello", &reply)
+If err != nil {
+log.Fatal(err)
+}
 
-	fmt.Println(reply)
+fmt.Println(reply)
 }
 ```
 
-首先从管道去取一个RPC客户端对象，并且通过defer语句指定在函数退出前关闭客户端。然后是执行正常的RPC调用。
+First, take an RPC client object from the pipeline, and use the defer statement to specify to close the client before the function exits. Then it is to perform a normal RPC call.
 
 
-## 4.3.4 上下文信息
+## 4.3.4 Context information
 
-基于上下文我们可以针对不同客户端提供定制化的RPC服务。我们可以通过为每个链接提供独立的RPC服务来实现对上下文特性的支持。
+Based on the context we can provide customized RPC services for different clients. We can support contextual features by providing separate RPC services for each link.
 
-首先改造HelloService，里面增加了对应链接的conn成员：
+First modify the HelloService, which adds the conn member of the corresponding link:
 
 ```go
-type HelloService struct {
-	conn net.Conn
+Type HelloService struct {
+Conn net.Conn
 }
 ```
 
-然后为每个链接启动独立的RPC服务：
+Then start a separate RPC service for each link:
 
 ```go
-func main() {
-	listener, err := net.Listen("tcp", ":1234")
-	if err != nil {
-		log.Fatal("ListenTCP error:", err)
-	}
+Func main() {
+Listener, err := net.Listen("tcp", ":1234")
+If err != nil {
+log.Fatal("ListenTCP error:", err)
+}
 
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Fatal("Accept error:", err)
-		}
+For {
+Conn, err := listener.Accept()
+If err != nil {
+log.Fatal("Accept error:", err)
+}
 
-		go func() {
-			defer conn.Close()
+Go func() {
+Defer conn.Close()
 
-			p := rpc.NewServer()
-			p.Register(&HelloService{conn: conn})
-			p.ServeConn(conn)
-		} ()
-	}
+p := rpc.NewServer()
+p.Register(&HelloService{conn: conn})
+p.ServeConn(conn)
+} ()
+}
 }
 ```
 
-Hello方法中就可以根据conn成员识别不同链接的RPC调用：
+In the Hello method, you can identify RPC calls for different links based on the conn member:
 
 ```go
-func (p *HelloService) Hello(request string, reply *string) error {
-	*reply = "hello:" + request + ", from" + p.conn.RemoteAddr().String()
-	return nil
+Func (p *HelloService) Hello(request string, reply *string) error {
+*reply = "hello:" + request + ", from" + p.conn.RemoteAddr().String()
+Return nil
 }
 ```
 
-基于上下文信息，我们可以方便地为RPC服务增加简单的登陆状态的验证：
+Based on the context information, we can easily add a simple login status verification for the RPC service:
 
 ```go
-type HelloService struct {
-	conn    net.Conn
-	isLogin bool
+Type HelloService struct {
+Conn net.Conn
+isLogin bool
 }
 
-func (p *HelloService) Login(request string, reply *string) error {
-	if request != "user:password" {
-		return fmt.Errorf("auth failed")
-	}
-	log.Println("login ok")
-	p.isLogin = true
-	return nil
+Func (p *HelloService) Login(request string, reply *string) error {
+If request != "user:password" {
+Return fmt.Errorf("auth failed")
+}
+log.Println("login ok")
+p.isLogin = true
+Return nil
 }
 
-func (p *HelloService) Hello(request string, reply *string) error {
-	if !p.isLogin {
-		return fmt.Errorf("please login")
-	}
-	*reply = "hello:" + request + ", from" + p.conn.RemoteAddr().String()
-	return nil
+Func (p *HelloService) Hello(request string, reply *string) error {
+If !p.isLogin {
+Return fmt.Errorf("please login")
+}
+*reply = "hello:" + request + ", from" + p.conn.RemoteAddr().String()
+Return nil
 }
 ```
 
-这样可以要求在客户端链接RPC服务时，首先要执行登陆操作，登陆成功后才能正常执行其他的服务。
+In this way, when the client links the RPC service, the login operation must be performed first, and other services can be executed normally after the login is successful.

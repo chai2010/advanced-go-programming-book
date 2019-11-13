@@ -1,709 +1,709 @@
-# 1.6 常见的并发模式
+# 1.6 Common Concurrency Mode
 
-Go语言最吸引人的地方是它内建的并发支持。Go语言并发体系的理论是C.A.R Hoare在1978年提出的CSP（Communicating Sequential Process，通讯顺序进程）。CSP有着精确的数学模型，并实际应用在了Hoare参与设计的T9000通用计算机上。从NewSqueak、Alef、Limbo到现在的Go语言，对于对CSP有着20多年实战经验的Rob Pike来说，他更关注的是将CSP应用在通用编程语言上产生的潜力。作为Go并发编程核心的CSP理论的核心概念只有一个：同步通信。关于同步通信的话题我们在前面一节已经讲过，本节我们将简单介绍下Go语言中常见的并发模式。
+The most appealing aspect of the Go language is its built-in concurrency support. The theory of the Go language concurrency system is the CSP (Communicating Sequential Process) proposed by C.A.R Hoare in 1978. CSP has a precise mathematical model and is actually applied to the T9000 general purpose computer that Hoare is involved in. From NewSqueak, Alef, Limbo to the current Go language, Rob Pike, who has more than 20 years of practical experience with CSP, is more concerned with the potential of applying CSP to a general-purpose programming language. There is only one core concept of CSP theory as the core of Go concurrent programming: synchronous communication. The topic of synchronous communication has already been covered in the previous section. In this section we will briefly introduce the concurrency patterns common in the Go language.
 
-首先要明确一个概念：并发不是并行。并发更关注的是程序的设计层面，并发的程序完全是可以顺序执行的，只有在真正的多核CPU上才可能真正地同时运行。并行更关注的是程序的运行层面，并行一般是简单的大量重复，例如GPU中对图像处理都会有大量的并行运算。为更好的编写并发程序，从设计之初Go语言就注重如何在编程语言层级上设计一个简洁安全高效的抽象模型，让程序员专注于分解问题和组合方案，而且不用被线程管理和信号互斥这些繁琐的操作分散精力。
+The first thing to be clear is a concept: concurrency is not parallel. Concurrency is more concerned with the design level of the program. Concurrent programs can be executed sequentially, and only on real multi-core CPUs can actually run at the same time. Parallelism is more concerned with the running level of the program. Parallelism is generally a simple and large number of repetitions. For example, there are a large number of parallel operations on image processing in the GPU. In order to better write concurrent programs, from the beginning of the design, Go language focuses on how to design a simple, safe and efficient abstract model at the programming language level, allowing programmers to focus on solving problems and combining solutions without being managed by threads and signals. Respond to these cumbersome operations.
 
-在并发编程中，对共享资源的正确访问需要精确的控制，在目前的绝大多数语言中，都是通过加锁等线程同步方案来解决这一困难问题，而Go语言却另辟蹊径，它将共享的值通过Channel传递(实际上多个独立执行的线程很少主动共享资源)。在任意给定的时刻，最好只有一个Goroutine能够拥有该资源。数据竞争从设计层面上就被杜绝了。为了提倡这种思考方式，Go语言将其并发编程哲学化为一句口号：
+In concurrent programming, proper access to shared resources requires precise control. In most current languages, this difficult problem is solved by a thread synchronization scheme such as locking, and the Go language has a different approach, which will share The value is passed through the Channel (in fact, multiple independently executing threads seldom actively share resources). At any given moment, it is best to have only one Goroutine to own the resource. Data competition has been eliminated from the design level. In order to promote this way of thinking, the Go language philosophizes its concurrent programming into a slogan:
 
 > Do not communicate by sharing memory; instead, share memory by communicating.
 
-> 不要通过共享内存来通信，而应通过通信来共享内存。
+> Do not communicate through shared memory, but share memory through communication.
 
-这是更高层次的并发编程哲学(通过管道来传值是Go语言推荐的做法)。虽然像引用计数这类简单的并发问题通过原子操作或互斥锁就能很好地实现，但是通过Channel来控制访问能够让你写出更简洁正确的程序。
+This is a higher level of concurrent programming philosophy (passing values ​​through the pipeline is recommended by Go). While simple concurrency issues like reference counting are well implemented by atomic operations or mutex locks, controlling access through Channels allows you to write cleaner and more correct programs.
 
-## 1.6.1 并发版本的Hello world
+## 1.6.1 Concurrent version of Hello world
 
-我们先以在一个新的Goroutine中输出“Hello world”，`main`等待后台线程输出工作完成之后退出，这样一个简单的并发程序作为热身。
+We first output "Hello world" in a new Goroutine, `main` waits for the background thread output to finish exiting, so a simple concurrent program is warmed up.
 
-并发编程的核心概念是同步通信，但是同步的方式却有多种。我们先以大家熟悉的互斥量`sync.Mutex`来实现同步通信。根据文档，我们不能直接对一个未加锁状态的`sync.Mutex`进行解锁，这会导致运行时异常。下面这种方式并不能保证正常工作：
+The core concept of concurrent programming is synchronous communication, but there are many ways to synchronize. We first implement synchronous communication with the familiar mutex `sync.Mutex`. According to the documentation, we can't directly unlock an unlocked `sync.Mutex`, which causes runtime exceptions. The following way does not guarantee normal work:
 
 ```go
-func main() {
-	var mu sync.Mutex
+Func main() {
+Var mu sync.Mutex
 
-	go func(){
-		fmt.Println("你好, 世界")
-		mu.Lock()
-	}()
+Go func(){
+fmt.Println("Hello, World")
+mu.Lock()
+}()
 
-	mu.Unlock()
+mu.Unlock()
 }
 ```
 
-因为`mu.Lock()`和`mu.Unlock()`并不在同一个Goroutine中，所以也就不满足顺序一致性内存模型。同时它们也没有其它的同步事件可以参考，这两个事件不可排序也就是可以并发的。因为可能是并发的事件，所以`main`函数中的`mu.Unlock()`很有可能先发生，而这个时刻`mu`互斥对象还处于未加锁的状态，从而会导致运行时异常。
+Because `mu.Lock()` and `mu.Unlock()` are not in the same Goroutine, they do not satisfy the sequential consistency memory model. At the same time, they have no other synchronization events to refer to. These two events can not be ordered, that is, they can be concurrent. Because it may be a concurrent event, `mu.Unlock()` in the `main` function is likely to occur first, and the `mu` mutex is still in an unlocked state at this time, which causes a runtime exception. .
 
-下面是修复后的代码：
+Here is the repaired code:
 
 ```go
-func main() {
-	var mu sync.Mutex
+Func main() {
+Var mu sync.Mutex
 
-	mu.Lock()
-	go func(){
-		fmt.Println("你好, 世界")
-		mu.Unlock()
-	}()
+mu.Lock()
+Go func(){
+fmt.Println("Hello, World")
+mu.Unlock()
+}()
 
-	mu.Lock()
+mu.Lock()
 }
 ```
 
-修复的方式是在`main`函数所在线程中执行两次`mu.Lock()`，当第二次加锁时会因为锁已经被占用（不是递归锁）而阻塞，`main`函数的阻塞状态驱动后台线程继续向前执行。当后台线程执行到`mu.Unlock()`时解锁，此时打印工作已经完成了，解锁会导致`main`函数中的第二个`mu.Lock()`阻塞状态取消，此时后台线程和主线程再没有其它的同步事件参考，它们退出的事件将是并发的：在`main`函数退出导致程序退出时，后台线程可能已经退出了，也可能没有退出。虽然无法确定两个线程退出的时间，但是打印工作是可以正确完成的。
+The way to fix it is to execute `mu.Lock()` twice in the thread where the `main` function is located. When the second lock is applied, it will be blocked because the lock is already occupied (not a recursive lock), and the `main` function is blocked. The state-driven background thread continues to execute forward. When the background thread is unlocked when it executes to `mu.Unlock()`, the print job is completed. Unlocking will cause the second `mu.Lock()` blocking state in the `main` function to be canceled. There is no other synchronization event reference with the main thread, and the events they exit will be concurrent: when the `main` function exits causing the program to exit, the background thread may have exited or may not exit. Although it is not possible to determine when two threads will exit, the print job can be done correctly.
 
-使用`sync.Mutex`互斥锁同步是比较低级的做法。我们现在改用无缓存的管道来实现同步：
+Synchronization with `sync.Mutex` is a relatively low-level approach. We are now using a non-cached pipeline to achieve synchronization:
 
 ```go
-func main() {
-	done := make(chan int)
+Func main() {
+Done := make(chan int)
 
-	go func(){
-		fmt.Println("你好, 世界")
-		<-done
-	}()
+Go func(){
+fmt.Println("Hello, World")
+<-done
+}()
 
-	done <- 1
+Done <- 1
 }
 ```
 
-根据Go语言内存模型规范，对于从无缓冲Channel进行的接收，发生在对该Channel进行的发送完成之前。因此，后台线程`<-done`接收操作完成之后，`main`线程的`done <- 1`发送操作才可能完成（从而退出main、退出程序），而此时打印工作已经完成了。
+According to the Go language memory model specification, for reception from an unbuffered channel, before the transmission to the Channel is completed. Therefore, after the background thread `<-done` receives the operation, the `done <- 1` send operation of the `main` thread is completed (thus exiting the main, exiting the program), and the print job is now complete.
 
-上面的代码虽然可以正确同步，但是对管道的缓存大小太敏感：如果管道有缓存的话，就无法保证main退出之前后台线程能正常打印了。更好的做法是将管道的发送和接收方向调换一下，这样可以避免同步事件受管道缓存大小的影响：
+Although the above code can be properly synchronized, it is too sensitive to the size of the pipeline's cache: if the pipeline has a cache, there is no guarantee that the background thread will print properly before the main exit. A better approach is to swap the send and receive directions of the pipeline to avoid synchronization events being affected by the size of the pipeline cache:
 
 ```go
-func main() {
-	done := make(chan int, 1) // 带缓存的管道
+Func main() {
+Done := make(chan int, 1) // pipe with cache
 
-	go func(){
-		fmt.Println("你好, 世界")
-		done <- 1
-	}()
+Go func(){
+fmt.Println("Hello, World")
+Done <- 1
+}()
 
-	<-done
+<-done
 }
 ```
 
-对于带缓冲的Channel，对于Channel的第K个接收完成操作发生在第K+C个发送操作完成之前，其中C是Channel的缓存大小。虽然管道是带缓存的，`main`线程接收完成是在后台线程发送开始但还未完成的时刻，此时打印工作也是已经完成的。
+For a buffered Channel, the Kth receive completion operation for the Channel occurs before the K+Cth transmit operation is completed, where C is the buffer size of the Channel. Although the pipeline is cached, the completion of the `main` thread is the time when the background thread sends the start but has not yet completed, and the print job is completed.
 
-基于带缓存的管道，我们可以很容易将打印线程扩展到N个。下面的例子是开启10个后台线程分别打印：
+Based on the pipeline with cache, we can easily extend the print thread to N. The following example is to open 10 background threads to print separately:
 
 ```go
-func main() {
-	done := make(chan int, 10) // 带 10 个缓存
+Func main() {
+Done := make(chan int, 10) // with 10 caches
 
-	// 开N个后台打印线程
-	for i := 0; i < cap(done); i++ {
-		go func(){
-			fmt.Println("你好, 世界")
-			done <- 1
-		}()
-	}
+// Open N spool threads
+For i := 0; i < cap(done); i++ {
+Go func(){
+fmt.Println("Hello, World")
+Done <- 1
+}()
+}
 
-	// 等待N个后台线程完成
-	for i := 0; i < cap(done); i++ {
-		<-done
-	}
+/ / Wait for N background threads to complete
+For i := 0; i < cap(done); i++ {
+<-done
+}
 }
 ```
 
-对于这种要等待N个线程完成后再进行下一步的同步操作有一个简单的做法，就是使用`sync.WaitGroup`来等待一组事件：
+One simple way to do this is to wait for N threads to complete before proceeding to the next synchronization, using `sync.WaitGroup` to wait for a set of events:
 
 ```go
-func main() {
-	var wg sync.WaitGroup
+Func main() {
+Var wg sync.WaitGroup
 
-	// 开N个后台打印线程
-	for i := 0; i < 10; i++ {
-		wg.Add(1)
+// Open N spool threads
+For i := 0; i < 10; i++ {
+wg.Add(1)
 
-		go func() {
-			fmt.Println("你好, 世界")
-			wg.Done()
-		}()
-	}
+Go func() {
+fmt.Println("Hello, World")
+wg.Done()
+}()
+}
 
-	// 等待N个后台线程完成
-	wg.Wait()
+/ / Wait for N background threads to complete
+wg.Wait()
 }
 ```
 
-其中`wg.Add(1)`用于增加等待事件的个数，必须确保在后台线程启动之前执行（如果放到后台线程之中执行则不能保证被正常执行到）。当后台线程完成打印工作之后，调用`wg.Done()`表示完成一个事件。`main`函数的`wg.Wait()`是等待全部的事件完成。
+The `wg.Add(1)` is used to increase the number of wait events, and must be executed before the background thread starts (if it is executed in the background thread, it is not guaranteed to be executed normally). When the background thread finishes printing, call `wg.Done()` to complete an event. The `wg.Wait()` of the `main` function waits for all events to complete.
 
-## 1.6.2 生产者消费者模型
+## 1.6.2 Producer Consumer Model
 
-并发编程中最常见的例子就是生产者消费者模式，该模式主要通过平衡生产线程和消费线程的工作能力来提高程序的整体处理数据的速度。简单地说，就是生产者生产一些数据，然后放到成果队列中，同时消费者从成果队列中来取这些数据。这样就让生产消费变成了异步的两个过程。当成果队列中没有数据时，消费者就进入饥饿的等待中；而当成果队列中数据已满时，生产者则面临因产品挤压导致CPU被剥夺的下岗问题。
+The most common example of concurrent programming is the Producer Consumer model, which increases the overall processing speed of the program by balancing the working power of the production and consumption threads. Simply put, the producer produces some data and then puts it in the results queue, while the consumer takes the data from the results queue. This makes production and consumption become two processes of asynchronous. When there is no data in the results queue, the consumer enters the wait for hunger; when the data in the results queue is full, the producer faces the problem of the laid-off of the CPU being deprived due to product squeeze.
 
-Go语言实现生产者消费者并发很简单：
+Go language implementation producer consumer concurrency is very simple:
 
 ```go
-// 生产者: 生成 factor 整数倍的序列
-func Producer(factor int, out chan<- int) {
-	for i := 0; ; i++ {
-		out <- i*factor
-	}
+// Producer: Generate a sequence of factor multiples of factor
+Func Producer(factor int, out chan<- int) {
+For i := 0; ; i++ {
+Out <- i*factor
+}
 }
 
-// 消费者
-func Consumer(in <-chan int) {
-	for v := range in {
-		fmt.Println(v)
-	}
+// consumer
+Func Consumer(in <-chan int) {
+For v := range in {
+fmt.Println(v)
 }
-func main() {
-	ch := make(chan int, 64) // 成果队列
+}
+Func main() {
+Ch := make(chan int, 64) // result queue
 
-	go Producer(3, ch) // 生成 3 的倍数的序列
-	go Producer(5, ch) // 生成 5 的倍数的序列
-	go Consumer(ch)    // 消费 生成的队列
+Go Producer(3, ch) // Generate a sequence of multiples of 3
+Go Producer(5, ch) // Generate a sequence of multiples of 5
+Go Consumer(ch) // consumption generated queue
 
-	// 运行一定时间后退出
-	time.Sleep(5 * time.Second)
+// Exit after running for a certain period of time
+time.Sleep(5 * time.Second)
 }
 ```
 
-我们开启了2个`Producer`生产流水线，分别用于生成3和5的倍数的序列。然后开启1个`Consumer`消费者线程，打印获取的结果。我们通过在`main`函数休眠一定的时间来让生产者和消费者工作一定时间。正如前面一节说的，这种靠休眠方式是无法保证稳定的输出结果的。
+We have opened two `Producer` production lines for generating a sequence of multiples of 3 and 5. Then open a `Consumer` consumer thread and print the result. We let producers and consumers work for a certain amount of time by sleeping in the `main` function for a certain amount of time. As mentioned in the previous section, this sleep mode does not guarantee a stable output.
 
-我们可以让`main`函数保存阻塞状态不退出，只有当用户输入`Ctrl-C`时才真正退出程序：
+We can let the `main` function save the blocking state without exiting, only when the user enters `Ctrl-C` to actually exit the program:
 
 ```go
-func main() {
-	ch := make(chan int, 64) // 成果队列
+Func main() {
+Ch := make(chan int, 64) // result queue
 
-	go Producer(3, ch) // 生成 3 的倍数的序列
-	go Producer(5, ch) // 生成 5 的倍数的序列
-	go Consumer(ch)    // 消费 生成的队列
+Go Producer(3, ch) // Generate a sequence of multiples of 3
+Go Producer(5, ch) // Generate a sequence of multiples of 5
+Go Consumer(ch) // consumption generated queue
 
-	// Ctrl+C 退出
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-	fmt.Printf("quit (%v)\n", <-sig)
+// Ctrl+C to exit
+Sig := make(chan os.Signal, 1)
+signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+fmt.Printf("quit (%v)\n", <-sig)
 }
 ```
 
-我们这个例子中有2个生产者，并且2个生产者之间并无同步事件可参考，它们是并发的。因此，消费者输出的结果序列的顺序是不确定的，这并没有问题，生产者和消费者依然可以相互配合工作。
+There are 2 producers in our example, and there are no synchronization events between the two producers. They are concurrent. Therefore, the order of the output sequence of the consumer output is uncertain, and this is no problem, and producers and consumers can still work together.
 
-## 1.6.3 发布订阅模型
+## 1.6.3 Publishing a subscription model
 
-发布订阅（publish-and-subscribe）模型通常被简写为pub/sub模型。在这个模型中，消息生产者成为发布者（publisher），而消息消费者则成为订阅者（subscriber），生产者和消费者是M:N的关系。在传统生产者和消费者模型中，是将消息发送到一个队列中，而发布订阅模型则是将消息发布给一个主题。
+The publish-and-subscribe model is usually abbreviated as a pub/sub model. In this model, the message producer becomes the publisher, and the message consumer becomes the subscriber, and the producer and consumer are M:N relationships. In the traditional producer and consumer model, messages are sent to a queue, and the publish-subscription model publishes messages to a topic.
 
-为此，我们构建了一个名为`pubsub`的发布订阅模型支持包：
+To do this, we built a publish subscription model support package called `pubsub`:
 
 ```go
 // Package pubsub implements a simple multi-topic pub-sub library.
-package pubsub
+Package pubsub
 
-import (
-	"sync"
-	"time"
+Import (
+"sync"
+"time"
 )
 
-type (
-	subscriber chan interface{}         // 订阅者为一个管道
-	topicFunc  func(v interface{}) bool // 主题为一个过滤器
+Type (
+Subscriber chan interface{} // subscriber is a pipe
+topicFunc func(v interface{}) bool // The theme is a filter
 )
 
-// 发布者对象
-type Publisher struct {
-	m           sync.RWMutex             // 读写锁
-	buffer      int                      // 订阅队列的缓存大小
-	timeout     time.Duration            // 发布超时时间
-	subscribers map[subscriber]topicFunc // 订阅者信息
+// publisher object
+Type Publisher struct {
+m sync.RWMutex // read-write lock
+Buffer int // the cache size of the subscription queue
+Timeout time.Duration// Publish timeout
+Subscribers map[subscriber]topicFunc // subscriber information
 }
 
-// 构建一个发布者对象, 可以设置发布超时时间和缓存队列的长度
-func NewPublisher(publishTimeout time.Duration, buffer int) *Publisher {
-	return &Publisher{
-		buffer:      buffer,
-		timeout:     publishTimeout,
-		subscribers: make(map[subscriber]topicFunc),
-	}
+// Build a publisher object, you can set the publish timeout and the length of the cache queue
+Func NewPublisher(publishTimeout time.Duration, buffer int) *Publisher {
+Return &Publisher{
+Buffer: buffer,
+Timeout: publishTimeout,
+Subscribers: make(map[subscriber]topicFunc),
+}
 }
 
-// 添加一个新的订阅者，订阅全部主题
-func (p *Publisher) Subscribe() chan interface{} {
-	return p.SubscribeTopic(nil)
+// Add a new subscriber, subscribe to all topics
+Func (p *Publisher) Subscribe() chan interface{} {
+Return p.SubscribeTopic(nil)
 }
 
-// 添加一个新的订阅者，订阅过滤器筛选后的主题
-func (p *Publisher) SubscribeTopic(topic topicFunc) chan interface{} {
-	ch := make(chan interface{}, p.buffer)
-	p.m.Lock()
-	p.subscribers[ch] = topic
-	p.m.Unlock()
-	return ch
+// Add a new subscriber, subscribe to the filter filtered subject
+Func (p *Publisher) SubscribeTopic(topic topicFunc) chan interface{} {
+Ch := make(chan interface{}, p.buffer)
+p.m.Lock()
+P.subscribers[ch] = topic
+p.m.Unlock()
+Return ch
 }
 
-// 退出订阅
-func (p *Publisher) Evict(sub chan interface{}) {
-	p.m.Lock()
-	defer p.m.Unlock()
+// quit the subscription
+Func (p *Publisher) Evict(sub chan interface{}) {
+p.m.Lock()
+Defer p.m.Unlock()
 
-	delete(p.subscribers, sub)
-	close(sub)
+Delete(p.subscribers, sub)
+Close(sub)
 }
 
-// 发布一个主题
-func (p *Publisher) Publish(v interface{}) {
-	p.m.RLock()
-	defer p.m.RUnlock()
+// Post a topic
+Func (p *Publisher) Publish(v interface{}) {
+p.m.RLock()
+Defer p.m.RUnlock()
 
-	var wg sync.WaitGroup
-	for sub, topic := range p.subscribers {
-		wg.Add(1)
-		go p.sendTopic(sub, topic, v, &wg)
-	}
-	wg.Wait()
+Var wg sync.WaitGroup
+For sub, topic := range p.subscribers {
+wg.Add(1)
+Go p.sendTopic(sub, topic, v, &wg)
+}
+wg.Wait()
 }
 
-// 关闭发布者对象，同时关闭所有的订阅者管道。
-func (p *Publisher) Close() {
-	p.m.Lock()
-	defer p.m.Unlock()
+// Close the publisher object and close all subscriber pipes.
+Func (p *Publisher) Close() {
+p.m.Lock()
+Defer p.m.Unlock()
 
-	for sub := range p.subscribers {
-		delete(p.subscribers, sub)
-		close(sub)
-	}
+For sub := range p.subscribers {
+Delete(p.subscribers, sub)
+Close(sub)
+}
 }
 
-// 发送主题，可以容忍一定的超时
-func (p *Publisher) sendTopic(
-	sub subscriber, topic topicFunc, v interface{}, wg *sync.WaitGroup,
+/ / Send a topic, can tolerate a certain timeout
+Func (p *Publisher) sendTopic(
+Sub subscriber, topic topicFunc, v interface{}, wg *sync.WaitGroup,
 ) {
-	defer wg.Done()
-	if topic != nil && !topic(v) {
-		return
-	}
+Defer wg.Done()
+If topic != nil && !topic(v) {
+Return
+}
 
-	select {
-	case sub <- v:
-	case <-time.After(p.timeout):
-	}
+Select {
+Case sub <- v:
+Case <-time.After(p.timeout):
+}
 }
 ```
 
-下面的例子中，有两个订阅者分别订阅了全部主题和含有"golang"的主题：
+In the following example, two subscribers subscribed to all topics and topics with "golang":
 
 ```go
-import "path/to/pubsub"
+Import "path/to/pubsub"
 
-func main() {
-	p := pubsub.NewPublisher(100*time.Millisecond, 10)
-	defer p.Close()
+Func main() {
+p := pubsub.NewPublisher(100*time.Millisecond, 10)
+Defer p.Close()
 
-	all := p.Subscribe()
-	golang := p.SubscribeTopic(func(v interface{}) bool {
-		if s, ok := v.(string); ok {
-			return strings.Contains(s, "golang")
-		}
-		return false
-	})
+All := p.Subscribe()
+Golang := p.SubscribeTopic(func(v interface{}) bool {
+If s, ok := v.(string); ok {
+Return strings.Contains(s, "golang")
+}
+Return false
+})
 
-	p.Publish("hello,  world!")
-	p.Publish("hello, golang!")
+p.Publish("hello, world!")
+p.Publish("hello, golang!")
 
-	go func() {
-		for  msg := range all {
-			fmt.Println("all:", msg)
-		}
-	} ()
+Go func() {
+For msg := range all {
+fmt.Println("all:", msg)
+}
+} ()
 
-	go func() {
-		for  msg := range golang {
-			fmt.Println("golang:", msg)
-		}
-	} ()
+Go func() {
+For msg := range golang {
+fmt.Println("golang:", msg)
+}
+} ()
 
-	// 运行一定时间后退出
-	time.Sleep(3 * time.Second)
+// Exit after running for a certain period of time
+time.Sleep(3 * time.Second)
 }
 ```
 
-在发布订阅模型中，每条消息都会传送给多个订阅者。发布者通常不会知道、也不关心哪一个订阅者正在接收主题消息。订阅者和发布者可以在运行时动态添加，是一种松散的耦合关系，这使得系统的复杂性可以随时间的推移而增长。在现实生活中，像天气预报之类的应用就可以应用这个并发模式。
+In the publish subscription model, each message is delivered to multiple subscribers. Publishers usually don't know or care which subscriber is receiving the subject message. Subscribers and publishers can be dynamically added at runtime, a loosely coupled relationship that allows the complexity of the system to grow over time. In real life, applications like weather forecasts can apply this concurrency pattern.
 
-## 1.6.4 控制并发数
+## 1.6.4 Controlling the number of concurrent
 
-很多用户在适应了Go语言强大的并发特性之后，都倾向于编写最大并发的程序，因为这样似乎可以提供最大的性能。在现实中我们行色匆匆，但有时却需要我们放慢脚步享受生活，并发的程序也是一样：有时候我们需要适当地控制并发的程度，因为这样不仅仅可给其它的应用/任务让出/预留一定的CPU资源，也可以适当降低功耗缓解电池的压力。
+Many users tend to write the most concurrent programs after adapting to the powerful concurrency features of the Go language, as this seems to provide maximum performance. In reality, we are in a hurry, but sometimes we need to slow down and enjoy life. The same procedure is used: sometimes we need to control the degree of concurrency appropriately, because it can not only give up other applications/tasks/ Reserve a certain amount of CPU resources, you can also reduce the power consumption to ease the pressure on the battery.
 
-在Go语言自带的godoc程序实现中有一个`vfs`的包对应虚拟的文件系统，在`vfs`包下面有一个`gatefs`的子包，`gatefs`子包的目的就是为了控制访问该虚拟文件系统的最大并发数。`gatefs`包的应用很简单：
+In the godoc program implementation of Go language, there is a `vfs` package corresponding to the virtual file system. There is a sub-package of `gatefs` under the `vfs` package. The purpose of the `gatefs` sub-package is to control access. The maximum number of concurrency of the virtual file system. The application of the `gatefs` package is simple:
 
 ```go
-import (
-	"golang.org/x/tools/godoc/vfs"
-	"golang.org/x/tools/godoc/vfs/gatefs"
+Import (
+"golang.org/x/tools/godoc/vfs"
+"golang.org/x/tools/godoc/vfs/gatefs"
 )
 
-func main() {
-	fs := gatefs.New(vfs.OS("/path"), make(chan bool, 8))
-	// ...
+Func main() {
+Fs := gatefs.New(vfs.OS("/path"), make(chan bool, 8))
+// ...
 }
 ```
 
-其中`vfs.OS("/path")`基于本地文件系统构造一个虚拟的文件系统，然后`gatefs.New`基于现有的虚拟文件系统构造一个并发受控的虚拟文件系统。并发数控制的原理在前面一节已经讲过，就是通过带缓存管道的发送和接收规则来实现最大并发阻塞：
+Where `vfs.OS("/path")` constructs a virtual filesystem based on the local filesystem, and then `gatefs.New` constructs a concurrently controlled virtual filesystem based on the existing virtual filesystem. The principle of concurrency control has been discussed in the previous section, which is to achieve maximum concurrent blocking by sending and receiving rules with cache pipes:
 
 ```go
-var limit = make(chan int, 3)
+Var limit = make(chan int, 3)
 
-func main() {
-	for _, w := range work {
-		go func() {
-			limit <- 1
-			w()
-			<-limit
-		}()
-	}
-	select{}
+Func main() {
+For _, w := range work {
+Go func() {
+Limit <- 1
+w()
+<-limit
+}()
+}
+Select{}
 }
 ```
 
 
-不过`gatefs`对此做一个抽象类型`gate`，增加了`enter`和`leave`方法分别对应并发代码的进入和离开。当超出并发数目限制的时候，`enter`方法会阻塞直到并发数降下来为止。
+However, `gatefs` does an abstract type `gate` for this, adding the `enter` and `leave` methods to the entry and exit of the concurrent code, respectively. When the number of concurrency limits is exceeded, the `enter` method blocks until the number of concurrency drops.
 
 ```go
-type gate chan bool
+Type gate chan bool
 
-func (g gate) enter() { g <- true }
-func (g gate) leave() { <-g }
+Func (g gate) enter() { g <- true }
+Func (g gate) leave() { <-g }
 ```
 
-`gatefs`包装的新的虚拟文件系统就是将需要控制并发的方法增加了`enter`和`leave`调用而已：
+The new virtual filesystem wrapped by `gatefs` adds the `enter` and `leave` calls to methods that need to control concurrency:
 
 
 ```go
-type gatefs struct {
-	fs vfs.FileSystem
-	gate
+Type gatefs struct {
+Fs vfs.FileSystem
+Gate
 }
 
-func (fs gatefs) Lstat(p string) (os.FileInfo, error) {
-	fs.enter()
-	defer fs.leave()
-	return fs.fs.Lstat(p)
+Func (fs gatefs) Lstat(p string) (os.FileInfo, error) {
+Fs.enter()
+Defer fs.leave()
+Return fs.fs.Lstat(p)
 }
 ```
 
-我们不仅可以控制最大的并发数目，而且可以通过带缓存Channel的使用量和最大容量比例来判断程序运行的并发率。当管道为空的时候可以认为是空闲状态，当管道满了时任务是繁忙状态，这对于后台一些低级任务的运行是有参考价值的。
+We can not only control the maximum number of concurrency, but also determine the concurrency rate of the program running by using the usage and maximum capacity ratio of the cached channel. When the pipeline is empty, it can be considered as idle state. When the pipeline is full, the task is busy. This is of reference value for the operation of some low-level tasks in the background.
 
 
-## 1.6.5 赢者为王
+## 1.6.5 Winner is king
 
-采用并发编程的动机有很多：并发编程可以简化问题，比如一类问题对应一个处理线程会更简单；并发编程还可以提升性能，在一个多核CPU上开2个线程一般会比开1个线程快一些。其实对于提升性能而言，程序并不是简单地运行速度快就表示用户体验好的；很多时候程序能快速响应用户请求才是最重要的，当没有用户请求需要处理的时候才合适处理一些低优先级的后台任务。
+There are many motivations for concurrent programming: concurrent programming can simplify problems. For example, one type of problem is simpler for a processing thread. Concurrent programming can also improve performance. Opening two threads on a multi-core CPU is generally faster than opening one thread. some. In fact, in terms of improving performance, the program is not simply running fast, indicating that the user experience is good; in many cases, the program can respond to user requests quickly, which is the most important. When there is no user request to process, it is appropriate to handle some low priority. Level background tasks.
 
-假设我们想快速地搜索“golang”相关的主题，我们可能会同时打开Bing、Google或百度等多个检索引擎。当某个搜索最先返回结果后，就可以关闭其它搜索页面了。因为受网络环境和搜索引擎算法的影响，某些搜索引擎可能很快返回搜索结果，某些搜索引擎也可能等到他们公司倒闭也没有完成搜索。我们可以采用类似的策略来编写这个程序：
+Suppose we want to quickly search for "golang" related topics, we may open multiple search engines such as Bing, Google or Baidu. When a search returns results first, you can close other search pages. Because of the influence of the network environment and search engine algorithms, some search engines may return search results quickly, and some search engines may wait until their company fails and does not complete the search. We can use a similar strategy to write this program:
 
 ```go
-func main() {
-	ch := make(chan string, 32)
+Func main() {
+Ch := make(chan string, 32)
 
-	go func() {
-		ch <- searchByBing("golang")
-	}()
-	go func() {
-		ch <- searchByGoogle("golang")
-	}()
-	go func() {
-		ch <- searchByBaidu("golang")
-	}()
+Go func() {
+Ch <- searchByBing("golang")
+}()
+Go func() {
+Ch <- searchByGoogle("golang")
+}()
+Go func() {
+Ch <- searchByBaidu("golang")
+}()
 
-	fmt.Println(<-ch)
+fmt.Println(<-ch)
 }
 ```
 
-首先，我们创建了一个带缓存的管道，管道的缓存数目要足够大，保证不会因为缓存的容量引起不必要的阻塞。然后我们开启了多个后台线程，分别向不同的搜索引擎提交搜索请求。当任意一个搜索引擎最先有结果之后，都会马上将结果发到管道中（因为管道带了足够的缓存，这个过程不会阻塞）。但是最终我们只从管道取第一个结果，也就是最先返回的结果。
+First, we created a pipeline with a cache that is large enough to ensure that there is no unnecessary blocking due to the size of the cache. Then we opened multiple background threads and submitted search requests to different search engines. When any search engine has the first result, it will immediately send the result to the pipeline (because the pipeline has enough cache, this process will not block). But in the end we only take the first result from the pipeline, which is the result of the first return.
 
-通过适当开启一些冗余的线程，尝试用不同途径去解决同样的问题，最终以赢者为王的方式提升了程序的相应性能。
+By properly opening some redundant threads, try to solve the same problem in different ways, and finally improve the corresponding performance of the program by winning the winner.
 
 
-## 1.6.6 素数筛
+## 1.6.6 Prime screen
 
-在“Hello world 的革命”一节中，我们为了演示Newsqueak的并发特性，文中给出了并发版本素数筛的实现。并发版本的素数筛是一个经典的并发例子，通过它我们可以更深刻地理解Go语言的并发特性。“素数筛”的原理如图：
+In the "Revolution of the Hello World" section, we demonstrate the implementation of the concurrent version of the prime number in order to demonstrate the concurrency of Newsqueak. The concurrent version of Prime Screen is a classic concurrency example that gives us a deeper understanding of the concurrency features of Go. The principle of "prime sieve" is as follows:
 
 ![](../images/ch1-13-prime-sieve.png)
 
-*图 1-13 素数筛*
+*Figure 1-13 Prime Screen*
 
 
-我们需要先生成最初的`2, 3, 4, ...`自然数序列（不包含开头的0、1）：
+We need Mr. to form the original `2, 3, 4, ...` natural number sequence (without the beginning 0, 1):
 
 ```go
-// 返回生成自然数序列的管道: 2, 3, 4, ...
-func GenerateNatural() chan int {
-	ch := make(chan int)
-	go func() {
-		for i := 2; ; i++ {
-			ch <- i
-		}
-	}()
-	return ch
+// Return the pipeline that generated the sequence of natural numbers: 2, 3, 4, ...
+Func GenerateNatural() chan int {
+Ch := make(chan int)
+Go func() {
+For i := 2; ; i++ {
+Ch <- i
+}
+}()
+Return ch
 }
 ```
 
-`GenerateNatural`函数内部启动一个Goroutine生产序列，返回对应的管道。
+The `GenerateNatural` function internally starts a Goroutine production sequence and returns the corresponding pipeline.
 
-然后是为每个素数构造一个筛子：将输入序列中是素数倍数的数提出，并返回新的序列，是一个新的管道。
+Then construct a sieve for each prime number: propose a number that is a multiple of the prime number in the input sequence, and return a new sequence, which is a new pipe.
 
 ```go
-// 管道过滤器: 删除能被素数整除的数
-func PrimeFilter(in <-chan int, prime int) chan int {
-	out := make(chan int)
-	go func() {
-		for {
-			if i := <-in; i%prime != 0 {
-				out <- i
-			}
-		}
-	}()
-	return out
+// Pipeline filter: Delete the number that can be divisible by the prime number
+Func PrimeFilter(in <-chan int, prime int) chan int {
+Out := make(chan int)
+Go func() {
+For {
+If i := <-in; i%prime != 0 {
+Out <- i
+}
+}
+}()
+Return out
 }
 ```
 
-`PrimeFilter`函数也是内部启动一个Goroutine生产序列，返回过滤后序列对应的管道。
+The `PrimeFilter` function also internally launches a Goroutine production sequence, returning the pipeline corresponding to the filtered sequence.
 
-现在我们可以在`main`函数中驱动这个并发的素数筛了：
+Now we can drive this concurrent prime number filter in the `main` function:
 
 ```go
-func main() {
-	ch := GenerateNatural() // 自然数序列: 2, 3, 4, ...
-	for i := 0; i < 100; i++ {
-		prime := <-ch // 新出现的素数
-		fmt.Printf("%v: %v\n", i+1, prime)
-		ch = PrimeFilter(ch, prime) // 基于新素数构造的过滤器
-	}
+Func main() {
+Ch := GenerateNatural() // NaturalNumber sequence: 2, 3, 4, ...
+For i := 0; i < 100; i++ {
+Prime := <-ch // new prime number
+fmt.Printf("%v: %v\n", i+1, prime)
+Ch = PrimeFilter(ch, prime) // Filter based on new primes
+}
 }
 ```
 
-我们先是调用`GenerateNatural()`生成最原始的从2开始的自然数序列。然后开始一个100次迭代的循环，希望生成100个素数。在每次循环迭代开始的时候，管道中的第一个数必定是素数，我们先读取并打印这个素数。然后基于管道中剩余的数列，并以当前取出的素数为筛子过滤后面的素数。不同的素数筛子对应的管道是串联在一起的。
+We first call `GenerateNatural()` to generate the most primitive sequence of natural numbers starting with 2. Then start a cycle of 100 iterations, hoping to generate 100 prime numbers. At the beginning of each loop iteration, the first number in the pipeline must be a prime number. We read and print the prime number first. Then based on the remaining series in the pipeline, and filtering the subsequent prime numbers with the currently extracted primes as a sieve. The pipes corresponding to different prime screens are connected in series.
 
-素数筛展示了一种优雅的并发程序结构。但是因为每个并发体处理的任务粒度太细微，程序整体的性能并不理想。对于细粒度的并发程序，CSP模型中固有的消息传递的代价太高了（多线程并发模型同样要面临线程启动的代价）。
+Prime screens show an elegant concurrent program structure. However, because the task granularity of each concurrent body processing is too small, the overall performance of the program is not ideal. For fine-grained concurrent programs, the inherent message passing in the CSP model is too expensive (multithreaded concurrent models also face the cost of thread startup).
 
-## 1.6.7 并发的安全退出
+## 1.6.7 Concurrent security exit
 
-有时候我们需要通知goroutine停止它正在干的事情，特别是当它工作在错误的方向上的时候。Go语言并没有提供在一个直接终止Goroutine的方法，由于这样会导致goroutine之间的共享变量处在未定义的状态上。但是如果我们想要退出两个或者任意多个Goroutine怎么办呢？
+Sometimes we need to tell goroutine to stop what it is doing, especially when it is working in the wrong direction. The Go language does not provide a way to terminate Goroutine directly, as this will cause the shared variable between goroutines to be in an undefined state. But what if we want to quit two or more Goroutines?
 
-Go语言中不同Goroutine之间主要依靠管道进行通信和同步。要同时处理多个管道的发送或接收操作，我们需要使用`select`关键字（这个关键字和网络编程中的`select`函数的行为类似）。当`select`有多个分支时，会随机选择一个可用的管道分支，如果没有可用的管道分支则选择`default`分支，否则会一直保存阻塞状态。
+Different Goroutines in the Go language rely on pipes for communication and synchronization. To handle the sending or receiving of multiple pipes at the same time, we need to use the `select` keyword (this keyword behaves similarly to the `select` function in network programming). When `select` has multiple branches, it will randomly select an available pipe branch. If there is no pipe branch available, select the `default` branch, otherwise the blocking state will be saved.
 
-基于`select`实现的管道的超时判断：
+The timeout judgment of the pipeline based on `select`:
 
 ```go
-select {
-case v := <-in:
-	fmt.Println(v)
-case <-time.After(time.Second):
-	return // 超时
+Select {
+Case v := <-in:
+fmt.Println(v)
+Case <-time.After(time.Second):
+Return // timeout
 }
 ```
 
-通过`select`的`default`分支实现非阻塞的管道发送或接收操作：
+Non-blocking pipe send or receive operations through the `default` branch of `select`:
 
 ```go
-select {
-case v := <-in:
-	fmt.Println(v)
-default:
-	// 没有数据
+Select {
+Case v := <-in:
+fmt.Println(v)
+Default:
+	// no data
 }
 ```
 
-通过`select`来阻止`main`函数退出：
+Prevent `main` function from exiting by `select`:
 
 ```go
-func main() {
-	// do some thins
-	select{}
+Func main() {
+// do some thins
+Select{}
 }
 ```
 
-当有多个管道均可操作时，`select`会随机选择一个管道。基于该特性我们可以用`select`实现一个生成随机数序列的程序：
+When multiple pipes are operational, `select` will randomly select a pipe. Based on this feature, we can use `select` to implement a program that generates a sequence of random numbers:
 
 ```go
-func main() {
-	ch := make(chan int)
-	go func() {
-		for {
-			select {
-			case ch <- 0:
-			case ch <- 1:
-			}
-		}
-	}()
+Func main() {
+Ch := make(chan int)
+Go func() {
+For {
+Select {
+Case ch <- 0:
+Case ch <- 1:
+}
+}
+}()
 
-	for v := range ch {
-		fmt.Println(v)
-	}
+For v := range ch {
+fmt.Println(v)
+}
 }
 ```
 
-我们通过`select`和`default`分支可以很容易实现一个Goroutine的退出控制:
+We can easily implement a Goroutine exit control through the `select` and `default` branches:
 
 ```go
-func worker(cannel chan bool) {
-	for {
-		select {
-		default:
-			fmt.Println("hello")
-			// 正常工作
-		case <-cannel:
-			// 退出
-		}
-	}
+Func worker(cannel chan bool) {
+For {
+Select {
+Default:
+fmt.Println("hello")
+			// normal work
+Case <-cannel:
+			// drop out
+}
+}
 }
 
-func main() {
-	cannel := make(chan bool)
-	go worker(cannel)
+Func main() {
+Cannel := make(chan bool)
+Go worker(cannel)
 
-	time.Sleep(time.Second)
-	cannel <- true
+time.Sleep(time.Second)
+Cannel <- true
 }
 ```
 
-但是管道的发送操作和接收操作是一一对应的，如果要停止多个Goroutine那么可能需要创建同样数量的管道，这个代价太大了。其实我们可以通过`close`关闭一个管道来实现广播的效果，所有从关闭管道接收的操作均会收到一个零值和一个可选的失败标志。
+However, the sending and receiving operations of the pipeline are one-to-one. If you want to stop multiple Goroutines, you may need to create the same number of pipes. This is too expensive. In fact, we can close the pipeline through `close` to achieve the effect of the broadcast, all operations received from the closed pipeline will receive a zero value and an optional failure flag.
 
 ```go
-func worker(cannel chan bool) {
-	for {
-		select {
-		default:
-			fmt.Println("hello")
-			// 正常工作
-		case <-cannel:
-			// 退出
-		}
-	}
+Func worker(cannel chan bool) {
+For {
+Select {
+Default:
+fmt.Println("hello")
+			// normal work
+Case <-cannel:
+			// drop out
+}
+}
 }
 
-func main() {
-	cancel := make(chan bool)
+Func main() {
+Cancel := make(chan bool)
 
-	for i := 0; i < 10; i++ {
-		go worker(cancel)
-	}
+For i := 0; i < 10; i++ {
+Go worker(cancel)
+}
 
-	time.Sleep(time.Second)
-	close(cancel)
+time.Sleep(time.Second)
+Close(cancel)
 }
 ```
 
-我们通过`close`来关闭`cancel`管道向多个Goroutine广播退出的指令。不过这个程序依然不够稳健：当每个Goroutine收到退出指令退出时一般会进行一定的清理工作，但是退出的清理工作并不能保证被完成，因为`main`线程并没有等待各个工作Goroutine退出工作完成的机制。我们可以结合`sync.WaitGroup`来改进:
+We use `close` to close the `cancel` pipeline to broadcast instructions to multiple Goroutine exits. However, this program is still not robust enough: when each Goroutine receives an exit command, it will generally perform some cleanup work, but the cleanup work of the exit is not guaranteed to be completed, because the `main` thread does not wait for the work Goroutine to exit the work. Mechanisms. We can improve with `sync.WaitGroup`:
 
 ```go
-func worker(wg *sync.WaitGroup, cannel chan bool) {
-	defer wg.Done()
+Func worker(wg *sync.WaitGroup, cannel chan bool) {
+Defer wg.Done()
 
-	for {
-		select {
-		default:
-			fmt.Println("hello")
-		case <-cannel:
-			return
-		}
-	}
+For {
+Select {
+Default:
+fmt.Println("hello")
+Case <-cannel:
+Return
+}
+}
 }
 
-func main() {
-	cancel := make(chan bool)
+Func main() {
+Cancel := make(chan bool)
 
-	var wg sync.WaitGroup
-	for i := 0; i < 10; i++ {
-		wg.Add(1)
-		go worker(&wg, cancel)
-	}
+Var wg sync.WaitGroup
+For i := 0; i < 10; i++ {
+wg.Add(1)
+Go worker(&wg, cancel)
+}
 
-	time.Sleep(time.Second)
-	close(cancel)
-	wg.Wait()
+time.Sleep(time.Second)
+Close(cancel)
+wg.Wait()
 }
 ```
 
-现在每个工作者并发体的创建、运行、暂停和退出都是在`main`函数的安全控制之下了。
+Now the creation, operation, pause, and exit of each worker's concurrency are under the security control of the `main` function.
 
 
-## 1.6.8 context包
+## 1.6.8 context package
 
-在Go1.7发布时，标准库增加了一个`context`包，用来简化对于处理单个请求的多个Goroutine之间与请求域的数据、超时和退出等操作，官方有博文对此做了专门介绍。我们可以用`context`包来重新实现前面的线程安全退出或超时的控制:
+At the time of the release of Go1.7, the standard library added a `context` package to simplify the operation of data, timeouts, and exits between multiple Goroutines and request domains for processing a single request. Introduction. We can use the `context` package to re-implement the previous thread-safe exit or timeout control:
 
 ```go
-func worker(ctx context.Context, wg *sync.WaitGroup) error {
-	defer wg.Done()
+Func worker(ctx context.Context, wg *sync.WaitGroup) error {
+Defer wg.Done()
 
-	for {
-		select {
-		default:
-			fmt.Println("hello")
-		case <-ctx.Done():
-			return ctx.Err()
-		}
-	}
+For {
+Select {
+Default:
+fmt.Println("hello")
+Case <-ctx.Done():
+Return ctx.Err()
+}
+}
 }
 
-func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+Func main() {
+Ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
-	var wg sync.WaitGroup
-	for i := 0; i < 10; i++ {
-		wg.Add(1)
-		go worker(ctx, &wg)
-	}
+Var wg sync.WaitGroup
+For i := 0; i < 10; i++ {
+wg.Add(1)
+Go worker(ctx, &wg)
+}
 
-	time.Sleep(time.Second)
-	cancel()
+time.Sleep(time.Second)
+Cancel()
 
-	wg.Wait()
+wg.Wait()
 }
 ```
 
-当并发体超时或`main`主动停止工作者Goroutine时，每个工作者都可以安全退出。
+When the concurrent body times out or `main` actively stops the worker Goroutine, each worker can safely quit.
 
-Go语言是带内存自动回收特性的，因此内存一般不会泄漏。在前面素数筛的例子中，`GenerateNatural`和`PrimeFilter`函数内部都启动了新的Goroutine，当`main`函数不再使用管道时后台Goroutine有泄漏的风险。我们可以通过`context`包来避免这个问题，下面是改进的素数筛实现：
+The Go language is automatically reclaimed with memory, so memory is generally not leaking. In the previous prime-screen example, the `GenerateNatural` and `PrimeFilter` functions internally start a new Goroutine, and the back-end Goroutine is at risk of leaking when the `main` function no longer uses the pipeline. We can avoid this problem with the `context` package. Here is the improved prime screen implementation:
 
 ```go
-// 返回生成自然数序列的管道: 2, 3, 4, ...
-func GenerateNatural(ctx context.Context) chan int {
-	ch := make(chan int)
-	go func() {
-		for i := 2; ; i++ {
-			select {
-			case <- ctx.Done():
-				return
-			case ch <- i:
-			}
-		}
-	}()
-	return ch
+// Return the pipeline that generated the sequence of natural numbers: 2, 3, 4, ...
+Func GenerateNatural(ctx context.Context) chan int {
+Ch := make(chan int)
+Go func() {
+For i := 2; ; i++ {
+Select {
+Case <- ctx.Done():
+Return
+Case ch <- i:
+}
+}
+}()
+Return ch
 }
 
-// 管道过滤器: 删除能被素数整除的数
-func PrimeFilter(ctx context.Context, in <-chan int, prime int) chan int {
-	out := make(chan int)
-	go func() {
-		for {
-			if i := <-in; i%prime != 0 {
-				select {
-				case <- ctx.Done():
-					return
-				case out <- i:
-				}
-			}
-		}
-	}()
-	return out
+// Pipeline filter: Delete the number that can be divisible by the prime number
+Func PrimeFilter(ctx context.Context, in <-chan int, prime int) chan int {
+Out := make(chan int)
+Go func() {
+For {
+If i := <-in; i%prime != 0 {
+Select {
+Case <- ctx.Done():
+Return
+Case out <- i:
+}
+}
+}
+}()
+Return out
 }
 
-func main() {
-	// 通过 Context 控制后台Goroutine状态
-	ctx, cancel := context.WithCancel(context.Background())
+Func main() {
+/ / Control the background Goroutine state through the Context
+Ctx, cancel := context.WithCancel(context.Background())
 
-	ch := GenerateNatural(ctx) // 自然数序列: 2, 3, 4, ...
-	for i := 0; i < 100; i++ {
-		prime := <-ch // 新出现的素数
-		fmt.Printf("%v: %v\n", i+1, prime)
-		ch = PrimeFilter(ctx, ch, prime) // 基于新素数构造的过滤器
-	}
+Ch := GenerateNatural(ctx) // Sequence of natural numbers: 2, 3, 4, ...
+For i := 0; i < 100; i++ {
+Prime := <-ch // new prime number
+fmt.Printf("%v: %v\n", i+1, prime)
+Ch = PrimeFilter(ctx, ch, prime) // Filter based on new primes
+}
 
-	cancel()
+Cancel()
 }
 ```
 
-当main函数完成工作前，通过调用`cancel()`来通知后台Goroutine退出，这样就避免了Goroutine的泄漏。
+Before the main function finishes working, the background Goroutine is notified to exit by calling `cancel()`, thus avoiding the Goroutine leak.
 
-并发是一个非常大的主题，我们这里只是展示几个非常基础的并发编程的例子。官方文档也有很多关于并发编程的讨论，国内也有专门讨论Go语言并发编程的书籍。读者可以根据自己的需求查阅相关的文献。
+Concurrency is a very big topic, and here we are just showing a few examples of very basic concurrent programming. The official documentation also has a lot of discussion about concurrent programming, and there are books in the country that specifically discuss Go language concurrent programming. Readers can refer to relevant documents according to their needs.

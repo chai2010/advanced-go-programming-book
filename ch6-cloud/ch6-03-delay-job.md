@@ -1,99 +1,99 @@
-# 6.3 延时任务系统
+# 6.3 Delay Mission System
 
-我们在做系统时，很多时候是处理实时的任务，请求来了马上就处理，然后立刻给用户以反馈。但有时也会遇到非实时的任务，比如确定的时间点发布重要公告。或者需要在用户做了一件事情的X分钟/Y小时后，对其特定动作，比如通知、发券等等。
+When we are doing the system, we often deal with real-time tasks. The request is processed immediately, and then the user is immediately given feedback. But sometimes you will encounter non-real-time tasks, such as issuing important announcements at certain points in time. Or you need to do something specific after the user has done something X minutes / Y hours, such as notifications, issuing bonds, and so on.
 
-如果业务规模比较小，有时我们也可以通过数据库配合轮询来对这种任务进行简单处理，但上了规模的公司，自然会寻找更为普适的解决方案来解决这一类问题。
+If the business scale is relatively small, sometimes we can also use the database to coordinate with the polling to simply handle this task, but companies of scale will naturally find more versatile solutions to solve this kind of problem.
 
-一般有两种思路来解决这个问题：
+There are generally two ways to solve this problem:
 
-1. 实现一套类似crontab的分布式定时任务管理系统。
-2. 实现一个支持定时发送消息的消息队列。
+1. Implement a distributed timing task management system similar to crontab.
+2. Implement a message queue that supports scheduled messages.
 
-两种思路进而衍生出了一些不同的系统，但其本质是差不多的。都是需要实现一个定时器（timer）。在单机的场景下定时器其实并不少见，例如我们在和网络库打交道的时候经常会调用`SetReadDeadline()`函数，就是在本地创建了一个定时器，在到达指定的时间后，我们会收到定时器的通知，告诉我们时间已到。这时候如果读取还没有完成的话，就可以认为发生了网络问题，从而中断读取。
+The two ideas have led to a number of different systems, but the essence is similar. It is necessary to implement a timer. In the stand-alone scenario, the timer is not uncommon. For example, when we deal with the network library, we often call the `SetReadDeadline()` function, which creates a timer locally. After the specified time, we will receive it. A notification to the timer tells us that the time has arrived. At this time, if the reading has not been completed, it can be considered that a network problem has occurred, thereby interrupting the reading.
 
-下面我们从定时器开始，探究延时任务系统的实现。
+Let's start with the timer and explore the implementation of the delayed task system.
 
-## 6.3.1 定时器的实现
+## 6.3.1 Implementation of the timer
 
-定时器（timer）的实现在工业界已经是有解的问题了。常见的就是时间堆和时间轮。
+The implementation of timers has been a problem in the industry. Common is the time heap and time wheel.
 
-### 6.3.1.1 时间堆
+### 6.3.1.1 Time heap
 
-最常见的时间堆一般用小顶堆实现，小顶堆其实就是一种特殊的二叉树，见*图6-4*
+The most common time heap is usually implemented with a small top heap. The small top heap is actually a special binary tree. See *Figure 6-4*
 
 ![二叉堆](../images/ch6-binary_tree.png)
 
-*图 6-4 二叉堆结构*
+*Figure 6-4 Binary Heap Structure*
 
-小顶堆的好处是什么呢？对于定时器来说，如果堆顶元素比当前的时间还要大，那么说明堆内所有元素都比当前时间大。进而说明这个时刻我们还没有必要对时间堆进行任何处理。定时检查的时间复杂度是`O(1)`。
+What are the benefits of a small top heap? For timers, if the top element is larger than the current time, then all elements in the heap are larger than the current time. Furthermore, we have no need to deal with the time heap at this moment. The time complexity of the timing check is `O(1)`.
 
-当我们发现堆顶的元素小于当前时间时，那么说明可能已经有一批事件已经开始过期了，这时进行正常的弹出和堆调整操作就好。每一次堆调整的时间复杂度都是`O(LgN)`。
+When we find that the elements at the top of the heap are smaller than the current time, then it may be that a batch of events has already begun to expire, and normal pop-up and heap adjustment operations are fine. The time complexity of each heap adjustment is `O(LgN)`.
 
-Go自身的内置定时器就是用时间堆来实现的，不过并没有使用二叉堆，而是使用了扁平一些的四叉堆。在最近的版本中，还加了一些优化，我们先不说优化，先来看看四叉的小顶堆长什么样：
+Go's own built-in timer is implemented with a time heap, but instead of using a binary heap, a flatter quad fork is used. In the most recent version, some optimizations have been added. Let's not talk about optimization first. Let's first look at what the four-prong small top stack looks like:
 
-![四叉堆](../images/ch6-four-branch-tree.png)
+![Quad fork] (../images/ch6-four-branch-tree.png)
 
-*图 6-5 四叉堆结构*
+*Figure 6-5 Quad Cross Stack Structure*
 
-小顶堆的性质，父节点比其4个子节点都小，子节点之间没有特别的大小关系要求。
+The nature of the small top heap, the parent node is smaller than its four child nodes, there is no special size relationship between the child nodes.
 
-四叉堆中元素超时和堆调整与二叉堆没有什么本质区别。
+There is no essential difference between element timeout and heap adjustment in a quad fork heap and a binary heap.
 
-### 6.3.1.2 时间轮
+### 6.3.1.2 Time Wheel
 
 ![timewheel](../images/ch6-timewheel.png)
 
-*图 6-6 时间轮*
+*Figure 6-6 Time Wheel*
 
-用时间轮来实现定时器时，我们需要定义每一个格子的“刻度”，可以将时间轮想像成一个时钟，中心有秒针顺时针转动。每次转动到一个刻度时，我们就需要去查看该刻度挂载的任务列表是否有已经到期的任务。
+When using the time wheel to implement the timer, we need to define the "scale" of each grid. The time wheel can be imagined as a clock, and the center has a second hand clockwise. Each time we turn to a scale, we need to see if the task list mounted on that scale has a task that has expired.
 
-从结构上来讲，时间轮和哈希表很相似，如果我们把哈希算法定义为：触发时间%时间轮元素大小。那么这就是一个简单的哈希表。在哈希冲突时，采用链表挂载哈希冲突的定时器。
+Structurally, the time wheel is similar to the hash table, if we define the hash algorithm as: trigger time % time wheel element size. Then this is a simple hash table. In the case of a hash collision, a timer for hooking the hash collision is used.
 
-除了这种单层时间轮，业界也有一些时间轮采用多层实现，这里就不再赘述了。
+In addition to this single-layer time wheel, there are some time wheels in the industry that use multiple layers of implementation, so I won't go into details here.
 
-## 6.3.2 任务分发
+## 6.3.2 Task Distribution
 
-有了基本的定时器实现方案，如果我们开发的是单机系统，那么就可以撸起袖子开干了，不过本章我们讨论的是分布式，距离“分布式”还稍微有一些距离。
+With a basic timer implementation, if we are developing a stand-alone system, we can pick up the sleeves, but in this chapter we are talking about distributed, and there is still some distance from the "distributed".
 
-我们还需要把这些“定时”或是“延时”（本质也是定时）任务分发出去。下面是一种思路：
+We also need to distribute these "timing" or "delay" (essentially timing) tasks. Here is an idea:
 
 ![task-dist](../images/ch6-task-sched.png)
 
-*图 6-7 分布式任务分发*
+*Figure 6-7 Distributed Task Distribution*
 
-每一个实例每隔一小时，会去数据库里把下一个小时需要处理的定时任务捞出来，捞取的时候只要取那些`task_id % shard_count = shard_id`的那些任务即可。
+Every hour, every instance, will go to the database to retrieve the scheduled tasks that need to be processed in the next hour. Just pick those tasks with `task_id % shard_count = shard_id`.
 
-当这些定时任务被触发之后需要通知用户侧，有两种思路：
+When these timing tasks are triggered, you need to notify the user side. There are two ways to do this:
 
-1. 将任务被触发的信息封装为一条消息，发往消息队列，由用户侧对消息队列进行监听。
-2. 对用户预先配置的回调函数进行调用。
+1. Encapsulate the information triggered by the task as a message and send it to the message queue. The user side listens to the message queue.
+2. Call the user-configured callback function.
 
-两种方案各有优缺点，如果采用1，那么如果消息队列出故障会导致整个系统不可用，当然，现在的消息队列一般也会有自身的高可用方案，大多数时候我们不用担心这个问题。其次一般业务流程中间走消息队列的话会导致延时增加，定时任务若必须在触发后的几十毫秒到几百毫秒内完成，那么采用消息队列就会有一定的风险。如果采用2，会加重定时任务系统的负担。我们知道，单机的定时器执行时最害怕的就是回调函数执行时间过长，这样会阻塞后续的任务执行。在分布式场景下，这种忧虑依然是适用的。一个不负责任的业务回调可能就会直接拖垮整个定时任务系统。所以我们还要考虑在回调的基础上增加经过测试的超时时间设置，并且对由用户填入的超时时间做慎重的审核。
+Both schemes have their own advantages and disadvantages. If you use 1, then if the message queue fails, the whole system will be unavailable. Of course, the current message queue will generally have its own high-availability solution. Most of the time, we don't have to worry about this problem. . Secondly, if the message queue is used in the middle of the general business process, the delay will increase. If the timed task must be completed within tens of milliseconds to several hundred milliseconds after the trigger, then the message queue will have certain risks. If you adopt 2, it will increase the burden of the timing task system. We know that the most feared execution of a single-machine timer is that the callback function takes too long to execute, which will block subsequent task execution. In a distributed scenario, this concern is still applicable. An irresponsible business callback may directly drag down the entire timed mission system. Therefore, we also need to consider adding a tested timeout setting based on the callback, and carefully review the timeout period filled in by the user.
 
-## 6.3.3 数据再平衡和幂等考量
+## 6.3.3 Data rebalancing and idempotency considerations
 
-当我们的任务执行集群有机器故障时，需要对任务进行重新分配。按照之前的求模策略，对这台机器还没有处理的任务进行重新分配就比较麻烦了。如果是实际运行的线上系统，还要在故障时的任务平衡方面花更多的心思。
+When our task performs a cluster machine failure, the task needs to be reallocated. According to the previous modulo strategy, it is more troublesome to redistribute tasks that have not been processed by this machine. If it is an online system that is actually running, you should pay more attention to the task balance in the event of a failure.
 
-下面给出一种思路：
+Here is an idea:
 
-我们可以参考Elasticsearch的数据分布设计，每份任务数据都有多个副本，这里假设两副本，如*图 6-8*所示：
+We can refer to Elasticsearch's data distribution design, each task data has multiple copies, here assume two copies, as shown in Figure 6-8*:
 
-![数据分布](../images/ch6-data-dist1.png)
+![Data Distribution](../images/ch6-data-dist1.png)
 
-*图 6-8 任务数据分布*
+*Figure 6-8 Task Data Distribution*
 
-一份数据虽然有两个持有者，但持有者持有的副本会进行区分，比如持有的是主副本还是非主副本，主副本在图中为摸黑部分，非主副本为正常线条。
+Although there is two holders of a piece of data, the copy held by the holder will be distinguished, such as whether it is a master copy or a non-master copy. The master copy is a black part in the figure, and the non-master copy is a normal line. .
 
-一个任务只会在持有主副本的节点上被执行。
+A task will only be executed on the node holding the master copy.
 
-当有机器故障时，任务数据需要进行数据再平衡的工作，比如节点1挂了，见*图 6-9*。
+When the machine fails, the task data needs to work on data rebalancing. For example, node 1 is hung up, see *Figure 6-9*.
 
-![数据分布2](../images/ch6-data-dist2.png)
+![Data Distribution 2](../images/ch6-data-dist2.png)
 
-*图 6-9 故障时数据分布*
+*Figure 6-9 Data distribution at fault*
 
-节点1的数据会被迁移到节点2和节点3上。
+The data of node 1 will be migrated to node 2 and node 3.
 
-当然，也可以用稍微复杂一些的思路，比如对集群中的节点进行角色划分，由协调节点来做这种故障时的任务重新分配工作，考虑到高可用，协调节点可能也需要有1至2个备用节点以防不测。
+Of course, you can also use a slightly more complicated idea, such as the role division of nodes in the cluster, and the coordination node to do the task redistribution work in this failure. Considering the high availability, the coordination node may also need 1 to 2 An alternate node to prevent accidents.
 
-之前提到我们会用消息队列触发对用户的通知，在使用消息队列时，很多队列是不支持`exactly once`的语义的，这种情况下我们需要让用户自己来负责消息的去重或者消费的幂等处理。
+As mentioned before, we will use the message queue to trigger the notification to the user. When using the message queue, many queues do not support the semantics of `exactly once`. In this case, we need to let the user take care of the deduplication or consumption of the message. Idempotent processing.

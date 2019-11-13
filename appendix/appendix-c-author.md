@@ -1,6 +1,5 @@
-# 附录C：作者简介
+# Appendix C: Introduction to the author
 
-- 柴树杉（Github [@chai2010](https://github.com/chai2010); Twitter [@chaishushan](https://twitter.com/chaishushan)）Go语言代码贡献者，Dart语言和WebAssembly等技术爱好者，著有[《WebAssembly标准入门》](https://github.com/chai2010/awesome-wasm-zh/blob/master/webassembly-primer.md)等书。
+- Diechass (Github [@chai2010](https://github.com/chai2010); Twitter [@chaishushan](https://twitter.com/chaishushan)) Go language contributors, Dart language and WebAssembly Those who have [[WebAssembly Standards Getting Started]] (https://github.com/chai2010/awesome-wasm-zh/blob/master/webassembly-primer.md) and other books.
 
-- 曹春晖（Gtihub [@cch123](https://github.com/cch123)）在 web 领域工作多年，开源爱好者。对大型网站系统的架构和相关工具的实现很感兴趣，并且有一些研究成果。目前在滴滴平台技术部工作。
-
+- Ca Chunhu (Gtihub [@cch123] (https://github.com/cch123)) has worked in the web field for many years, open source enthusiasts. I am interested in the architecture of large website systems and the implementation of related tools, and there are some research results. Currently working in the Drip Platform Technology Department.

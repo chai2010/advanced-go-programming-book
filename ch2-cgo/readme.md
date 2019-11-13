@@ -1,7 +1,7 @@
-# 第2章 CGO编程
+# Chapter 2 CGO Programming
 
-*过去的经验往往是走向未来的枷锁，因为在过气技术中投入的沉没成本会阻碍人们拥抱新技术。——chai2010*
+* Past experience is often the shackles of the future, because the sunk costs invested in gas technology can hinder people from embracing new technologies. ——chai2010*
 
-*曾经一度因未能习得C++令人眼花缭乱的新标准而痛苦不已；Go语言“少既是多”大道至简的理念让我重拾信心，寻回了久违的编程乐趣。——Ending*
+* It was once painful because I couldn't learn the dazzling new standards of C++; Go's "less is more" avenue to Jane's philosophy made me regain my confidence and find the long-lost programming fun. ——Ending*
 
-C/C++经过几十年的发展，已经积累了庞大的软件资产，它们很多久经考验而且性能已经足够优化。Go语言必须能够站在C/C++这个巨人的肩膀之上，有了海量的C/C++软件资产兜底之后，我们才可以放心愉快地用Go语言编程。C语言作为一个通用语言，很多库会选择提供一个C兼容的API，然后用其他不同的编程语言实现。Go语言通过自带的一个叫CGO的工具来支持C语言函数调用，同时我们可以用Go语言导出C动态库接口给其它语言使用。本章主要讨论CGO编程中涉及的一些问题。
+After decades of development, C/C++ has accumulated huge software assets, many of which have been tested and their performance has been optimized. The Go language must be able to stand on the shoulders of the giant C/C++. With a huge amount of C/C++ software assets, we can confidently program in Go. C language as a general language, many libraries will choose to provide a C-compatible API, and then implemented in a different programming language. The Go language supports C language function calls through a tool called CGO, and we can use the Go language to export the C dynamic library interface to other languages. This chapter focuses on some of the issues involved in CGO programming.

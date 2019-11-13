@@ -1,195 +1,195 @@
-# 6.6 分布式配置管理
+# 6.6 Distributed Configuration Management
 
-在分布式系统中，常困扰我们的还有上线问题。虽然目前有一些优雅重启方案，但实际应用中可能受限于我们系统内部的运行情况而没有办法做到真正的“优雅”。比如我们为了对去下游的流量进行限制，在内存中堆积一些数据，并对堆积设定时间或总量的阈值。在任意阈值达到之后将数据统一发送给下游，以避免频繁的请求超出下游的承载能力而将下游打垮。这种情况下重启要做到优雅就比较难了。
+In distributed systems, there are often problems that are bothering us. Although there are some elegant restart schemes at present, the actual application may be limited by the internal operation of our system and there is no way to achieve true "elegance". For example, in order to limit the flow to downstream, some data is accumulated in the memory, and the threshold of the time or total amount is set for the accumulation. After the arbitrary threshold is reached, the data is sent to the downstream uniformly, so as to avoid frequent requests exceeding the downstream carrying capacity and smashing downstream. In this case, it is more difficult to restart to be elegant.
 
-所以我们的目标还是尽量避免采用或者绕过上线的方式，对线上程序做一些修改。比较典型的修改内容就是程序的配置项。
+Therefore, our goal is to avoid adopting or bypassing the online method and make some modifications to the online program. A typical modification is the configuration item of the program.
 
-## 6.6.1 场景举例
+## 6.6.1 Scene Example
 
-### 6.6.1.1 报表系统
+### 6.6.1.1 Reporting System
 
-在一些偏OLAP或者离线的数据平台中，经过长期的叠代开发，整个系统的功能模块已经渐渐稳定。可变动的项只出现在数据层，而数据层的变动大多可以认为是SQL的变动，架构师们自然而然地会想着把这些变动项抽离到系统外部。比如本节所述的配置管理系统。
+In some OLAP or offline data platforms, after a long period of iterative development, the functional modules of the entire system have gradually stabilized. Variable items only appear in the data layer, and most of the changes in the data layer can be considered as changes in SQL. Architects naturally think about pulling these changes out of the system. For example, the configuration management system described in this section.
 
-当业务提出了新的需求时，我们的需求是将新的SQL录入到系统内部，或者简单修改一下老的SQL。不对系统进行上线，就可以直接完成这些修改。
+When the business puts forward new requirements, our requirement is to enter new SQL into the system, or simply modify the old SQL. These changes can be done directly without going online.
 
-### 6.6.1.2 业务配置
+### 6.6.1.2 Business Configuration
 
-大公司的平台部门服务众多业务线，在平台内为各业务线分配唯一id。平台本身也由多个模块构成，这些模块需要共享相同的业务线定义（要不然就乱套了）。当公司新开产品线时，需要能够在短时间内打通所有平台系统的流程。这时候每个系统都走上线流程肯定是来不及的。另外需要对这种公共配置进行统一管理，同时对其增减逻辑也做统一管理。这些信息变更时，需要自动通知到业务方的系统，而不需要人力介入（或者只需要很简单的介入，比如点击审核通过）。
+The platform department of a large company serves a number of business lines, and each business line is assigned a unique id within the platform. The platform itself is also made up of multiple modules that need to share the same line of business definition (or else it's messed up). When the company opens a new product line, it needs to be able to get through the process of all platform systems in a short time. At this time, it is definitely too late for each system to go online. In addition, this kind of public configuration needs to be managed in a unified manner, and its addition and subtraction logic is also managed in a unified manner. When this information is changed, it is necessary to automatically notify the business party's system without human intervention (or only a very simple intervention, such as click auditing).
 
-除业务线管理之外，很多互联网公司会按照城市来铺展自己的业务。在某个城市未开城之前，理论上所有模块都应该认为带有该城市id的数据是脏数据并自动过滤掉。而如果业务开城，在系统中就应该自己把这个新的城市id自动加入到白名单中。这样业务流程便可以自动运转。
+In addition to line-of-business management, many Internet companies spread their business in accordance with the city. Before a city is opened, all modules in theory should think that the data with the city id is dirty data and is automatically filtered out. If the business is opened, the new city id should be automatically added to the whitelist in the system. This way the business process can run automatically.
 
-再举个例子，互联网公司的运营系统中会有各种类型的运营活动，有些运营活动推出后可能出现了超出预期的事件（比如公关危机），需要紧急将系统下线。这时候会用到一些开关来快速关闭相应的功能。或者快速将想要剔除的活动id从白名单中剔除。在Web章节中的AB测试一节中，我们也提到，有时需要有这样的系统来告诉我们当前需要放多少流量到相应的功能代码上。我们可以像那一节中，使用远程RPC来获知这些信息，但同时，也可以结合分布式配置系统，主动地拉取到这些信息。
+For another example, there are various types of operational activities in the operating system of an Internet company. Some operational activities may have unexpected events (such as public relations crisis), and the system needs to be urgently taken offline. At this time, some switches will be used to quickly turn off the corresponding functions. Or quickly remove the activity id you want to cull from the whitelist. In the AB Test section of the Web chapter, we also mentioned that sometimes there is a need to have such a system to tell us how much traffic is currently required to be put on the corresponding function code. We can use remote RPC to learn this information in the same section, but at the same time, we can actively pull this information in conjunction with the distributed configuration system.
 
-## 6.6.2 使用etcd实现配置更新
+## 6.6.2 Using etcd to implement configuration updates
 
-我们使用etcd实现一个简单的配置读取和动态更新流程，以此来了解线上的配置更新流程。
+We use etcd to implement a simple configuration read and dynamic update process to understand the online configuration update process.
 
-### 6.6.2.1 配置定义
+### 6.6.2.1 Configuration Definition
 
-简单的配置，可以将内容完全存储在etcd中。比如：
+Simple configuration, you can store the content completely in etcd. such as:
 
 ```shell
-etcdctl get /configs/remote_config.json
+Etcdctl get /configs/remote_config.json
 {
-	"addr" : "127.0.0.1:1080",
-	"aes_key" : "01B345B7A9ABC00F0123456789ABCDAF",
-	"https" : false,
-	"secret" : "",
-	"private_key_path" : "",
-	"cert_file_path" : ""
+"addr" : "127.0.0.1:1080",
+"aes_key" : "01B345B7A9ABC00F0123456789ABCDAF",
+"https" : false,
+"secret" : "",
+"private_key_path" : "",
+"cert_file_path" : ""
 }
 ```
 
-### 6.6.2.2 新建 etcd client
+### 6.6.2.2 Creating a new etcd client
 
 ```go
-cfg := client.Config{
-	Endpoints:               []string{"http://127.0.0.1:2379"},
-	Transport:               client.DefaultTransport,
-	HeaderTimeoutPerRequest: time.Second,
+Cfg := client.Config{
+Endpoints: []string{"http://127.0.0.1:2379"},
+Transport: client.DefaultTransport,
+HeaderTimeoutPerRequest: time.Second,
 }
 ```
 
-直接用etcd client包中的结构体初始化，没什么可说的。
+Directly initialized with the structure in the etcd client package, nothing to say.
 
-### 6.6.2.3 配置获取
+### 6.6.2.3 Configuration Acquisition
 
 ```go
-resp, err = kapi.Get(context.Background(), "/path/to/your/config", nil)
-if err != nil {
-	log.Fatal(err)
+Resp, err = kapi.Get(context.Background(), "/path/to/your/config", nil)
+If err != nil {
+log.Fatal(err)
 } else {
-	log.Printf("Get is done. Metadata is %q\n", resp)
-	log.Printf("%q key has %q value\n", resp.Node.Key, resp.Node.Value)
+log.Printf("Get is done. Metadata is %q\n", resp)
+log.Printf("%q key has %q value\n", resp.Node.Key, resp.Node.Value)
 }
 ```
 
-获取配置使用etcd KeysAPI的`Get()`方法，比较简单。
+Obtaining the `Get()` method that uses the etcd KeysAPI configuration is relatively simple.
 
-### 6.6.2.4 配置更新订阅
+### 6.6.2.4 Configuring an update subscription
 
 ```go
-kapi := client.NewKeysAPI(c)
+Kapi := client.NewKeysAPI(c)
 w := kapi.Watcher("/path/to/your/config", nil)
-go func() {
-	for {
-		resp, err := w.Next(context.Background())
-		log.Println(resp, err)
-		log.Println("new values is ", resp.Node.Value)
-	}
+Go func() {
+For {
+Resp, err := w.Next(context.Background())
+log.Println(resp, err)
+log.Println("new values ​​is ", resp.Node.Value)
+}
 }()
 ```
 
-通过订阅config路径的变动事件，在该路径下内容发生变化时，客户端侧可以收到变动通知，并收到变动后的字符串值。
+By subscribing to the change event of the config path, when the content changes in the path, the client side can receive the change notification and receive the changed string value.
 
-### 6.6.2.5 整合起来
+### 6.6.2.5 Integrate
 
 ```go
-package main
+Package main
 
-import (
-	"log"
-	"time"
+Import (
+"log"
+"time"
 
-	"golang.org/x/net/context"
-	"github.com/coreos/etcd/client"
+"golang.org/x/net/context"
+"github.com/coreos/etcd/client"
 )
 
-var configPath =  `/configs/remote_config.json`
-var kapi client.KeysAPI
+Var configPath = `/configs/remote_config.json`
+Var kapi client.KeysAPI
 
-type ConfigStruct struct {
-	Addr           string `json:"addr"`
-	AesKey         string `json:"aes_key"`
-	HTTPS          bool   `json:"https"`
-	Secret         string `json:"secret"`
-	PrivateKeyPath string `json:"private_key_path"`
-	CertFilePath   string `json:"cert_file_path"`
+Type ConfigStruct struct {
+Addr string `json:"addr"`
+AesKey string `json:"aes_key"`
+HTTPS bool `json:"https"`
+Secret string `json:"secret"`
+PrivateKeyPath string `json:"private_key_path"`
+CertFilePath string `json:"cert_file_path"`
 }
 
-var appConfig ConfigStruct
+Var appConfig ConfigStruct
 
-func init() {
-	cfg := client.Config{
-		Endpoints:               []string{"http://127.0.0.1:2379"},
-		Transport:               client.DefaultTransport,
-		HeaderTimeoutPerRequest: time.Second,
-	}
-
-	c, err := client.New(cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
-	kapi = client.NewKeysAPI(c)
-	initConfig()
+Func init() {
+Cfg := client.Config{
+Endpoints: []string{"http://127.0.0.1:2379"},
+Transport: client.DefaultTransport,
+HeaderTimeoutPerRequest: time.Second,
 }
 
-func watchAndUpdate() {
-	w := kapi.Watcher(configPath, nil)
-	go func() {
-		// watch 该节点下的每次变化
-		for {
-			resp, err := w.Next(context.Background())
-			if err != nil {
-				log.Fatal(err)
-			}
-			log.Println("new values is ", resp.Node.Value)
-
-			err = json.Unmarshal([]byte(resp.Node.Value), &appConfig)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-	}()
+c, err := client.New(cfg)
+If err != nil {
+log.Fatal(err)
+}
+Kapi = client.NewKeysAPI(c)
+initConfig()
 }
 
-func initConfig() {
-	resp, err = kapi.Get(context.Background(), configPath, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+Func watchAndUpdate() {
+w := kapi.Watcher(configPath, nil)
+Go func() {
+// watch every change under this node
+For {
+Resp, err := w.Next(context.Background())
+If err != nil {
+log.Fatal(err)
+}
+log.Println("new values ​​is ", resp.Node.Value)
 
-	err := json.Unmarshal(resp.Node.Value, &appConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
+Err = json.Unmarshal([]byte(resp.Node.Value), &appConfig)
+If err != nil {
+log.Fatal(err)
+}
+}
+}()
 }
 
-func getConfig() ConfigStruct {
-	return appConfig
+Func initConfig() {
+Resp, err = kapi.Get(context.Background(), configPath, nil)
+If err != nil {
+log.Fatal(err)
 }
 
-func main() {
-	// init your app
+Err := json.Unmarshal(resp.Node.Value, &appConfig)
+If err != nil {
+log.Fatal(err)
+}
+}
+
+Func getConfig() ConfigStruct {
+Return appConfig
+}
+
+Func main() {
+// init your app
 }
 ```
 
-如果业务规模不大，使用本节中的例子就可以实现功能了。
+If the business is small, use the examples in this section to implement the functionality.
 
-这里只需要注意一点，我们在更新配置时，进行了一系列操作：watch响应，json解析，这些操作都不具备原子性。当单个业务请求流程中多次获取config时，有可能因为中途config发生变化而导致单个请求前后逻辑不一致。因此，在使用类似这样的方式来更新配置时，需要在单个请求的生命周期内使用同样的配置。具体实现方式可以是只在请求开始的时候获取一次配置，然后依次向下透传等等，具体情况具体分析。
+Just to note here, we have a series of operations when updating the configuration: watch response, json parsing, these operations are not atomic. When the config is acquired multiple times in a single service request process, there may be a logical inconsistency between the individual requests before and after the config changes in the middle. Therefore, when you use a similar approach to update your configuration, you need to use the same configuration for the lifetime of a single request. The specific implementation manner may be that the configuration is obtained only once when the request starts, and then transparently transmitted downwards in sequence, etc., and the specific situation is specifically analyzed.
 
-## 6.6.3 配置膨胀
+## 6.6.3 Configuring bloat
 
-随着业务的发展，配置系统本身所承载的压力可能也会越来越大，配置文件可能成千上万。客户端同样上万，将配置内容存储在etcd内部便不再合适了。随着配置文件数量的膨胀，除了存储系统本身的吞吐量问题，还有配置信息的管理问题。我们需要对相应的配置进行权限管理，需要根据业务量进行配置存储的集群划分。如果客户端太多，导致了配置存储系统无法承受瞬时大量的QPS，那可能还需要在客户端侧进行缓存优化，等等。
+As the business grows, the pressure on the configuration system itself may become larger and larger, and the configuration files may be tens of thousands. The client is also tens of thousands, and storing the configuration content inside etcd is no longer appropriate. As the number of configuration files expands, in addition to the throughput problems of the storage system itself, there are management issues for configuration information. We need to manage the rights of the corresponding configuration, and we need to configure the storage cluster according to the traffic. If there are too many clients, which causes the configuration storage system to be unable to withstand a large amount of QPS, it may also need to perform cache optimization on the client side, and so on.
 
-这也就是为什么大公司都会针对自己的业务额外开发一套复杂配置系统的原因。
+That's why big companies have to develop a complex configuration system for their business.
 
-## 6.6.4 配置版本管理
+## 6.6.4 Configuring version management
 
-在配置管理过程中，难免出现用户误操作的情况，例如在更新配置时，输入了无法解析的配置。这种情况下我们可以通过配置校验来解决。
+In the configuration management process, it is inevitable that the user may misuse the operation. For example, when updating the configuration, a configuration that cannot be resolved is input. In this case we can solve by configuring the checksum.
 
-有时错误的配置可能不是格式上有问题，而是在逻辑上有问题。比如我们写SQL时少select了一个字段，更新配置时，不小心丢掉了json字符串中的一个field而导致程序无法理解新的配置而进入诡异的逻辑。为了快速止损，最快且最有效的办法就是进行版本管理，并支持按版本回滚。
+Sometimes the wrong configuration may not be a problem with the format, but a logical problem. For example, when we write SQL, we select a field less. When we update the configuration, we accidentally drop a field in the json string and cause the program to understand the new configuration and enter the weird logic. The fastest and most effective way to stop losses quickly is to version management and support rollback by version.
 
-在配置进行更新时，我们要为每份配置的新内容赋予一个版本号，并将修改前的内容和版本号记录下来，当发现新配置出问题时，能够及时地回滚回来。
+When the configuration is updated, we will assign a version number to each new content of the configuration, record the content and version number before the modification, and roll back in time when it finds a problem with the new configuration.
 
-常见的做法是，使用MySQL来存储配置文件或配置字符串的不同版本内容，在需要回滚时，只要进行简单的查询即可。
+A common practice is to use MySQL to store different versions of the configuration file or configuration string. When you need to roll back, just do a simple query.
 
-## 6.6.5 客户端容错
+## 6.6.5 Client Fault Tolerance
 
-在业务系统的配置被剥离到配置中心之后，并不意味着我们的系统可以高枕无忧了。当配置中心本身宕机时，我们也需要一定的容错能力，至少保证在其宕机期间，业务依然可以运转。这要求我们的系统能够在配置中心宕机时，也能拿到需要的配置信息。哪怕这些信息不够新。
+After the configuration of the business system is stripped to the configuration center, it does not mean that our system can sit back and relax. When the configuration center itself is down, we also need some fault tolerance, at least to ensure that the business can still operate during its downtime. This requires our system to get the required configuration information when the configuration center is down. Even if this information is not new enough.
 
-具体来讲，在给业务提供配置读取的SDK时，最好能够将拿到的配置在业务机器的磁盘上也缓存一份。这样远程配置中心不可用时，可以直接用硬盘上的内容来做兜底。当重新连接上配置中心时，再把相应的内容进行更新。
+Specifically, when providing a configuration read SDK for a service, it is preferable to cache the obtained configuration on the disk of the business machine. When the remote configuration center is not available, you can directly use the contents of the hard disk to do the bottom. When reconnecting the configuration center, the corresponding content is updated.
 
-加入缓存之后务必需要考虑的是数据一致性问题，当个别业务机器因为网络错误而与其它机器配置不一致时，我们也应该能够从监控系统中知晓。
+Be sure to consider the data consistency problem after adding the cache. When individual business machines are inconsistent with other machine configurations due to network errors, we should also be able to know from the monitoring system.
 
-我们使用一种手段解决了我们配置更新痛点，但同时可能因为使用的手段而带给我们新的问题。实际开发中，我们要对每一步决策多多思考，以使自己不在问题到来时手足无措。
+We use a means to solve the pain points of our configuration update, but at the same time we may bring us new problems because of the means used. In actual development, we have to think a lot about each step of the decision so that we are not at a loss when the problem comes.

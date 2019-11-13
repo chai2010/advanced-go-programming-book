@@ -1,149 +1,149 @@
-# 5.7 layout 常见大型 Web 项目分层
+# 5.7 layout Common large web project layering
 
-流行的Web框架大多数是MVC框架，MVC这个概念最早由Trygve Reenskaug在1978年提出，为了能够对GUI类型的应用进行方便扩展，将程序划分为：
+Most popular web frameworks are MVC frameworks. The concept of MVC was first proposed by Trygve Reenskaug in 1978. In order to facilitate the extension of GUI type applications, the program is divided into:
 
-1. 控制器（Controller）- 负责转发请求，对请求进行处理。
-2. 视图（View） - 界面设计人员进行图形界面设计。
-3. 模型（Model） - 程序员编写程序应有的功能（实现算法等等）、数据库专家进行数据管理和数据库设计（可以实现具体的功能）。
+1. Controller - Responsible for forwarding requests and processing requests.
+2. View - The interface designer makes the graphical interface design.
+3. Model - The programmer should write the functions (implementation algorithms, etc.), database experts for data management and database design (can achieve specific functions).
 
-随着时代的发展，前端也变成了越来越复杂的工程，为了更好地工程化，现在更为流行的一般是前后分离的架构。可以认为前后分离是把V层从MVC中抽离单独成为项目。这样一个后端项目一般就只剩下 M和C层了。前后端之间通过ajax来交互，有时候要解决跨域的问题，但也已经有了较为成熟的方案。*图 5-13* 是一个前后分离的系统的简易交互图。
+With the development of the times, the front end has become an increasingly complex project. In order to better engineer, the more popular ones are generally separated architectures. It can be considered that the separation before and after is to separate the V layer from the MVC into a separate item. Such a back-end project generally leaves only the M and C layers. The front and back ends interact with each other through ajax. Sometimes it is necessary to solve the cross-domain problem, but there are already more mature solutions. *Figure 5-13* is a simple interaction diagram of a system separated from front to back.
 
-![前后分离](../images/ch6-08-frontend-backend.png)
+![Separate before and after] (../images/ch6-08-frontend-backend.png)
 
-*图 5-13 前后分离交互图*
+*Figure 5-13 Separation interaction diagram before and after*
 
-图里的Vue和React是现在前端界比较流行的两个框架，因为我们的重点不在这里，所以前端项目内的组织我们就不强调了。事实上，即使是简单的项目，业界也并没有完全遵守MVC框架提出者对于M和C所定义的分工。有很多公司的项目会在Controller层塞入大量的逻辑，在Model层就只管理数据的存储。这往往来源于对于model层字面含义的某种擅自引申理解。认为字面意思，这一层就是处理某种建模，而模型是什么？就是数据呗！
+Vue and React in the picture are two popular frameworks in the front-end world, because our focus is not here, so the organization within the front-end project is not emphasized. In fact, even for simple projects, the industry does not fully comply with the division of labor defined by the MVC framework proposers for M and C. There are many companies that project a lot of logic in the Controller layer, and only manage the storage of data in the Model layer. This often comes from some kind of arbitrarily extended understanding of the literal meaning of the model layer. Think of the literal meaning, this layer is to deal with some kind of modeling, and what is the model? It’s the data!
 
-这种理解显然是有问题的，业务流程也算是一种“模型”，是对真实世界用户行为或者既有流程的一种建模，并非只有按格式组织的数据才能叫模型。不过按照MVC的创始人的想法，我们如果把和数据打交道的代码还有业务流程全部塞进MVC里的M层的话，这个M层又会显得有些过于臃肿。对于复杂的项目，一个C和一个M层显然是不够用的，现在比较流行的纯后端API模块一般采用下述划分方法：
+This kind of understanding is obviously problematic. A business process is also a kind of "model". It is a model of real-world user behavior or existing processes. It is not only the data organized by format can be called a model. However, according to the idea of ​​the founder of MVC, if we put the code that deals with the data and the business process all into the M layer in MVC, the M layer will appear too bloated. For complex projects, a C and an M layer are obviously not enough. The more popular pure backend API modules generally use the following partitioning methods:
 
-1. Controller，与上述类似，服务入口，负责处理路由，参数校验，请求转发。
-2. Logic/Service，逻辑（服务）层，一般是业务逻辑的入口，可以认为从这里开始，所有的请求参数一定是合法的。业务逻辑和业务流程也都在这一层中。常见的设计中会将该层称为 Business Rules。
-3. DAO/Repository，这一层主要负责和数据、存储打交道。将下层存储以更简单的函数、接口形式暴露给 Logic 层来使用。负责数据的持久化工作。
+1. Controller, similar to the above, service entry, responsible for processing routing, parameter verification, request forwarding.
+2. Logic/Service, the logical (service) layer, is generally the entry point of the business logic, it can be considered that from here on, all request parameters must be legal. Business logic and business processes are also in this layer. This layer is called Business Rules in a common design.
+3. DAO/Repository, this layer is mainly responsible for dealing with data and storage. The underlying storage is exposed to the Logic layer for use in a simpler function, interface form. Responsible for data persistence.
 
-每一层都会做好自己的工作，然后用请求当前的上下文构造下一层工作所需要的结构体或其它类型参数，然后调用下一层的函数。在工作完成之后，再把处理结果一层层地传出到入口，如*图 5-14所示*。
+Each layer will do its job, then construct the structure or other type parameters needed for the next layer of work by requesting the current context, and then call the function of the next layer. After the work is completed, the processing results are transmitted to the portal layer by layer, as shown in Figure 5-14.
 
 ![controller-logic-dao](../images/ch6-08-controller-logic-dao.png)
 
-*图 5-14 请求处理流程*
+*Figure 5-14 Request Processing Flow*
 
-划分为CLD三层之后，在C层之前我们可能还需要同时支持多种协议。本章前面讲到的thrift、gRPC和http并不是一定只选择其中一种，有时我们需要支持其中的两种，比如同一个接口，我们既需要效率较高的thrift，也需要方便debug的http入口。即除了CLD之外，还需要一个单独的protocol层，负责处理各种交互协议的细节。这样请求的流程会变成*图 5-15* 所示。
+After being divided into three layers of CLD, we may need to support multiple protocols at the same time before the C layer. The thrift, gRPC, and http mentioned earlier in this chapter are not necessarily only one of them. Sometimes we need to support two of them, such as the same interface. We need both efficient thrift and http hooks for debugging. That is, in addition to CLD, a separate protocol layer is required to handle the details of various interactive protocols. The process of this request will become *Figure 5-15*.
 
 ![control-flow](../images/ch6-08-control-flow.png)
 
-*图 5-15 多协议示意图*
+*Figure 5-15 Multi-Protocol Schematic*
 
-这样我们Controller中的入口函数就变成了下面这样：
+So the entry function in our Controller becomes like this:
 
 ```go
-func CreateOrder(ctx context.Context, req *CreateOrderStruct) (
-	*CreateOrderRespStruct, error,
+Func CreateOrder(ctx context.Context, req *CreateOrderStruct) (
+*CreateOrderRespStruct, error,
 ) {
-	// ...
+// ...
 }
 ```
 
-CreateOrder有两个参数，ctx用来传入trace_id一类的需要串联请求的全局参数，req里存储了我们创建订单所需要的所有输入信息。返回结果是一个响应结构体和错误。可以认为，我们的代码运行到Controller层之后，就没有任何与“协议”相关的代码了。在这里你找不到`http.Request`，也找不到`http.ResponseWriter`，也找不到任何与thrift或者gRPC相关的字眼。
+CreateOrder has two parameters. ctx is used to pass in global parameters such as trace_id that require a serial request. Req stores all the input information we need to create an order. The result returned is a response structure and an error. It can be argued that after our code runs into the Controller layer, there is no code associated with the "protocol". You can't find `http.Request` here, you can't find `http.ResponseWriter`, and you can't find any words related to thrift or gRPC.
 
-在协议(Protocol)层，处理http协议的大概代码如下：
+At the protocol layer, the approximate code for handling the http protocol is as follows:
 
 ```go
-// defined in protocol layer
-type CreateOrderRequest struct {
-	OrderID int64 `json:"order_id"`
-	// ...
+//defined in protocol layer
+Type CreateOrderRequest struct {
+OrderID int64 `json:"order_id"`
+// ...
 }
 
-// defined in controller
-type CreateOrderParams struct {
-	OrderID int64
+//defined in controller
+Type CreateOrderParams struct {
+OrderID int64
 }
 
-func HTTPCreateOrderHandler(wr http.ResponseWriter, r *http.Request) {
-	var req CreateOrderRequest
-	var params CreateOrderParams
-	ctx := context.TODO()
-	// bind data to req
-	bind(r, &req)
-	// map protocol binded to protocol-independent
-	map(req, params)
-	logicResp,err := controller.CreateOrder(ctx, &params)
-	if err != nil {}
-	// ...
+Func HTTPCreateOrderHandler(wr http.ResponseWriter, r *http.Request) {
+Var req CreateOrderRequest
+Var params CreateOrderParams
+Ctx := context.TODO()
+// bind data to req
+Bind(r, &req)
+// map protocol binded to protocol-independent
+Map(req, params)
+logicResp, err := controller.CreateOrder(ctx, &params)
+If err != nil {}
+// ...
 }
 ```
 
-理论上我们可以用同一个请求结构体组合上不同的tag，来达到一个结构体来给不同的协议复用的目的。不过遗憾的是在thrift中，请求结构体也是通过IDL生成的，其内容在自动生成的ttypes.go文件中，我们还是需要在thrift的入口将这个自动生成的结构体映射到我们logic入口所需要的结构体上。gRPC也是类似。这部分代码还是需要的。
+In theory, we can use the same request structure to combine different tags to achieve a structure to reuse different protocols. Unfortunately, in thrift, the request structure is also generated by IDL. The content is in the automatically generated ttypes.go file. We still need to map this automatically generated structure to our logic entry at the entrance of thrift. On the structure. gRPC is similar. This part of the code is still needed.
 
-聪明的读者可能已经可以看出来了，协议细节处理这一层有大量重复劳动，每一个接口在协议这一层的处理，无非是把数据从协议特定的结构体(例如`http.Request`，thrift的被包装过了) 读出来，再绑定到我们协议无关的结构体上，再把这个结构体映射到Controller入口的结构体上，这些代码长得都差不多。差不多的代码都遵循着某种模式，那么我们可以对这些模式进行简单的抽象，用代码生成的方式，把繁复的协议处理代码从工作内容中抽离出去。
+Smart readers may already be able to see that the protocol details handle this layer with a lot of repetitive work. The processing of each interface in the protocol layer is nothing more than data from the protocol-specific structure (for example, `http.Request`, Thrift is packaged.) Read out, bind to our protocol-independent structure, and map the structure to the structure of the Controller entry. The code looks similar. Almost the code follows a certain pattern, then we can simply abstract these patterns and use the code generation method to extract the complicated protocol processing code from the work content.
 
-先来看看HTTP对应的结构体、thrift对应的结构体和我们协议无关的结构体分别长什么样子：
+Let's take a look at the structure of the HTTP corresponding structure, the structure corresponding to thrift, and the structure of our protocol-independent structure.
 
 ```go
-// http 请求结构体
-type CreateOrder struct {
-	OrderID   int64  `json:"order_id" validate:"required"`
-	UserID    int64  `json:"user_id" validate:"required"`
-	ProductID int    `json:"prod_id" validate:"required"`
-	Addr      string `json:"addr" validate:"required"`
+// http request structure
+Type CreateOrder struct {
+OrderID int64 `json:"order_id" validate:"required"`
+UserID int64 `json:"user_id" validate:"required"`
+ProductID int `json:"prod_id" validate:"required"`
+Addr string `json:"addr" validate:"required"`
 }
 
-// thrift 请求结构体
-type FeatureSetParams struct {
-	DriverID  int64  `thrift:"driverID,1,required"`
-	OrderID   int64  `thrift:"OrderID,2,required"`
-	UserID    int64  `thrift:"UserID,3,required"`
-	ProductID int    `thrift:"ProductID,4,required"`
-	Addr      string `thrift:"Addr,5,required"`
+// thrift request structure
+Type FeatureSetParams struct {
+DriverID int64 `thrift:"driverID,1,required"
+OrderID int64 `thrift:"OrderID,2,required"
+UserID int64 `thrift:"UserID,3,required"`
+ProductID int `thrift:"ProductID,4,required"
+Addr string `thrift:"Addr,5,required"`
 }
 
 // controller input struct
-type CreateOrderParams struct {
-	OrderID int64
-	UserID int64
-	ProductID int
-	Addr string
+Type CreateOrderParams struct {
+OrderID int64
+UserID int64
+ProductID int
+Addr string
 }
 
 ```
 
-我们需要通过一个源结构体来生成我们需要的HTTP和thrift入口代码。再观察一下上面定义的三种结构体，我们只要能用一个结构体生成thrift的IDL，以及HTTP服务的“IDL（只要能包含json或form相关tag的结构体定义信息）” 就可以了。这个初始的结构体我们可以把结构体上的HTTP的tag和thrift的tag揉在一起：
+We need to generate the HTTP and thrift entry code we need through a source structure. Looking at the three structures defined above, we can use a structure to generate the IDL of thrift, and the "IDL of the HTTP service (as long as it can contain the structure definition information of the json or form related tags)". This initial structure we can put the HTTP tag on the structure and the thrift tag together:
 
 ```go
-type FeatureSetParams struct {
-	DriverID  int64  `thrift:"driverID,1,required" json:"driver_id"`
-	OrderID   int64  `thrift:"OrderID,2,required" json:"order_id"`
-	UserID    int64  `thrift:"UserID,3,required" json:"user_id"`
-	ProductID int    `thrift:"ProductID,4,required" json:"prod_id"`
-	Addr      string `thrift:"Addr,5,required" json:"addr"`
+Type FeatureSetParams struct {
+DriverID int64 `thrift:"driverID,1,required" json:"driver_id"`
+OrderID int64 `thrift:"OrderID,2,required" json:"order_id"`
+UserID int64 `thrift:"UserID,3,required" json:"user_id"`
+ProductID int `thrift:"ProductID,4,required" json:"prod_id"`
+Addr string `thrift:"Addr,5,required" json:"addr"`
 }
 ```
 
-然后通过代码生成把thrift的IDL和HTTP的请求结构体都生成出来，如*图 5-16所示*
+Then generate the IDL and HTTP request structure of thrift through code generation, as shown in Figure 5-16.
 
 ![code gen](../images/ch6-08-code-gen.png)
 
-*图 5-16 通过Go代码定义结构体生成项目入口*
+*Figure 5-16 Creating a project entry through the Go code definition structure *
 
-至于用什么手段来生成，你可以通过Go语言内置的Parser读取文本文件中的Go源代码，然后根据AST来生成目标代码，也可以简单地把这个源结构体和Generator的代码放在一起编译，让结构体作为Generator的输入参数（这样会更简单一些），都是可以的。
+As for the means to generate, you can read the Go source code in the text file through the Parser built in the Go language, and then generate the target code according to the AST, or simply compile the source structure and the Generator code together. It is ok to have the structure as the input parameter to the Generator (which will be simpler).
 
-当然这种思路并不是唯一选择，我们还可以通过解析thrift的IDL，生成一套HTTP接口的结构体。如果你选择这么做，那整个流程就变成了*图 5-17*所示。
+Of course, this idea is not the only option. We can also generate a set of HTTP interface structures by parsing the IDL of thrift. If you choose to do this, the entire process becomes *Figure 5-17*.
 
 ![code gen](../images/ch6-08-code-gen-2.png)
 
-*图 5-17 也可以从thrift生成其它部分*
+*Figure 5-17 can also generate other parts from thrift*
 
-看起来比之前的图顺畅一点，不过如果你选择了这么做，你需要自行对thrift的IDL进行解析，也就是相当于可能要手写一个thrift的IDL的Parser，虽然现在有Antlr或者peg能帮你简化这些Parser的书写工作，但在“解析”的这一步我们不希望引入太多的工作量，所以量力而行即可。
+It looks a bit smoother than the previous one, but if you choose to do this, you need to parse the IDL of thrift yourself, which is equivalent to the Parser that may have to handwritten a thrift IDL, although Antlr or peg can help you now. Simplify the writing of these Parser, but in the "parsing" step we don't want to introduce too much work, so we can do it.
 
-既然工作流已经成型，我们可以琢磨一下怎么让整个流程对用户更加友好。
+Now that the workflow has taken shape, we can figure out how to make the whole process more user-friendly.
 
-比如在前面的生成环境引入Web页面，只要让用户点点鼠标就能生成SDK，这些就靠读者自己去探索了。
+For example, in the previous generation environment to introduce Web pages, as long as the user can generate the SDK with a click of the mouse, these are explored by the readers themselves.
 
-虽然我们成功地使自己的项目在入口支持了多种交互协议，但是还有一些问题没有解决。本节中所叙述的分层没有将中间件作为项目的分层考虑进去。如果我们考虑中间件的话，请求的流程是什么样的？见*图 5-18*所示。
+Although we have successfully enabled our projects to support multiple interactive protocols at the portal, there are still some issues that remain unresolved. The layering described in this section does not take middleware into account as a layering of the project. If we consider middleware, what is the process of requesting? See *Figure 5-18*.
 
 ![control flow 2](../images/ch6-08-control-flow-2.png)
 
-*图 5-18 加入中间件后的控制流*
+*Figure 5-18 Control flow after adding middleware*
 
-之前我们学习的中间件是和HTTP协议强相关的，遗憾的是在thrift中看起来没有和HTTP中对等的解决这些非功能性逻辑代码重复问题的中间件。所以我们在图上写`thrift stuff`。这些`stuff`可能需要你手写去实现，然后每次增加一个新的thrift接口，就需要去写一遍这些非功能性代码。
+The middleware we learned before is strongly related to the HTTP protocol. Unfortunately, there is no middleware in thrift that solves these non-functional logic code duplication problems with HTTP. So we write `thrift on the map Stuff`. These `stuff`s may need to be handwritten to implement, and each time you add a new thrift interface, you need to write these non-functional code.
 
-这也是很多企业项目所面临的真实问题，遗憾的是开源界并没有这样方便的多协议中间件解决方案。当然了，前面我们也说过，很多时候我们给自己保留的HTTP接口只是用来做调试，并不会暴露给外人用。这种情况下，这些非功能性的代码只要在thrift的代码中完成即可。
+This is also a real problem faced by many enterprise projects. Unfortunately, the open source community does not have such a convenient multi-protocol middleware solution. Of course, as we said before, in many cases, the HTTP interface we reserved for ourselves is only used for debugging, and will not be exposed to outsiders. In this case, these non-functional code can be completed in the thrift code.

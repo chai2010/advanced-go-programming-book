@@ -1,14 +1,13 @@
-# 第3章 Go汇编语言
+# Chapter 3 Go Assembly Language
 
-*能跑就行，不行加机器。——rfyiamcool & 爱学习的孙老板*
+* Can run on the line, no machine. ——rfyiamcool & Sun boss who loves to learn*
 
-*跟对人，做对事。——Rhichy*
+* Follow the right person and do the right thing. - Rhichy*
 
-Go语言中很多设计思想和工具都是传承自Plan9操作系统，Go汇编语言也是基于Plan9汇编演化而来。根据Rob Pike的介绍，大神Ken Thompson在1986年为Plan9系统编写的C语言编译器输出的汇编伪代码就是Plan9汇编的前身。所谓的Plan9汇编语言只是便于以手工方式书写该C语言编译器输出的汇编伪代码而已。
+Many of the design ideas and tools in the Go language are inherited from the Plan9 operating system, and the Go assembly language is also based on the evolution of the Plan9 assembly. According to Rob Pike, the assembly pseudo code output by the C-compiler written by Ken Thompson for the Plan9 system in 1986 is the predecessor of Plan9 assembly. The so-called Plan9 assembly language is just a handy way to write the assembly pseudocode output by the C compiler.
 
-无论高级语言如何发展，作为最接近CPU的汇编语言的地位依然是无法彻底被替代的。只有通过汇编语言才能彻底挖掘CPU芯片的全部功能，因此操作系统的引导过程必须要依赖汇编语言的帮助。只有通过汇编语言才能彻底榨干CPU芯片的性能，因此很多底层的加密解密等对性能敏感的算法会考虑通过汇编语言进行性能优化。
+No matter how the high-level language develops, the status as the assembly language closest to the CPU is still not completely replaced. Only the assembly language can fully exploit the full functionality of the CPU chip, so the boot process of the operating system must rely on the help of assembly language. Only the assembly language can completely squeeze the performance of the CPU chip, so many performance-sensitive algorithms such as the underlying encryption and decryption will consider performance optimization through assembly language.
 
-对于每一个严肃的Gopher，Go汇编语言都是一个不可忽视的技术。因为哪怕只懂一点点汇编，也便于更好地理解计算机原理，也更容易理解Go语言中动态栈/接口等高级特性的实现原理。而且掌握了Go汇编语言之后，你将重新站在编程语言鄙视链的顶端，不用担心再被任何其它所谓的高级编程语言用户鄙视。
+For every serious Gopher, Go assembly language is a technology that cannot be ignored. Because even if you only understand a little bit of assembly, it is easier to understand the computer principle better, and it is easier to understand the implementation principle of advanced features such as dynamic stack/interface in Go language. And after mastering the Go assembly language, you will re-stand at the top of the programming language contempt chain, without worrying about being despised by any other so-called high-level programming language users.
 
-本章我们将以AMD64为主要开发环境，简单地探讨Go汇编语言的基础用法。
-
+In this chapter, we will use AMD64 as the main development environment to briefly explore the basic usage of Go assembly language.

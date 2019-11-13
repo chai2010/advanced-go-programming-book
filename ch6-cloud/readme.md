@@ -1,7 +1,7 @@
-# 第6章 分布式系统
+# Chapter 6 Distributed System
 
-*被别人指出问题时，别管别人能不能做到，看别人说的对不对，然后完善自己。别人能不能做到是别人的事情，自己能不能做到关系到自己能否发展的更好。——hustlihaifeng*
+* When someone else points out the problem, don't worry about whether others can do it, see what others are saying right, and then improve themselves. Whether others can do things that are others, can they be better about whether they can develop better. ——hustlihaifeng*
 
-Go语言号称是互联网时代的C语言。现在的互联网系统已经不是以前的一个主机搞定一切的时代，互联网时代的后台服务由大量的分布式系统构成，任何单一后台服务器节点的故障并不会导致整个系统的停机。同时以阿里云、腾讯云为代表的云厂商崛起标志着云时代的到来，在云时代分布式编程将成为一个基本技能。而基于Go语言构建的Docker、K8s等系统推动了云时代的提前到来。
+The Go language is known as the C language of the Internet age. Nowadays, the Internet system is not the era when a previous host has done everything. The background service in the Internet era consists of a large number of distributed systems. The failure of any single background server node will not cause the entire system to stop. At the same time, the rise of cloud vendors represented by Alibaba Cloud and Tencent Cloud marks the arrival of the cloud era. Distributed programming in the cloud era will become a basic skill. The Docker and K8s systems built on the Go language have promoted the early arrival of the cloud era.
 
-对于已经比较完善的分布式系统，我们会简单讲讲怎么通过使用它们来提高我们的工作效率。对于没有现成解决方案的系统，我们会按照自己的业务需求提出解决方案。
+For distributed systems that are already well-developed, we will briefly talk about how to use them to improve our work efficiency. For systems that do not have an off-the-shelf solution, we will propose a solution based on our business needs.

@@ -1,183 +1,182 @@
-# 3.2 计算机结构
+# 3.2 Computer Structure
 
-汇编语言是直面计算机的编程语言，因此理解计算机结构是掌握汇编语言的前提。当前流行的计算机基本采用的是冯·诺伊曼计算机体系结构（在某些特殊领域还有哈佛体系架构）。冯·诺依曼结构也称为普林斯顿结构，采用的是一种将程序指令和数据存储在一起的存储结构。冯·诺伊曼计算机中的指令和数据存储器其实指的是计算机中的内存，然后在配合CPU处理器就组成了一个最简单的计算机了。
+Assembly language is a programming language that faces the computer, so understanding the computer structure is a prerequisite for mastering assembly language. The current popular computer basically uses the von Neumann computer architecture (and Harvard architecture in some special areas). The von Neumann structure, also known as the Princeton structure, uses a storage structure that stores program instructions and data together. The instruction and data memory in the von Neumann computer actually refers to the memory in the computer, and then together with the CPU processor constitutes the simplest computer.
 
-汇编语言其实是一种非常简单的编程语言，因为它面向的计算机模型就是非常简单的。让人觉得汇编语言难学主要有几个原因：不同类型的CPU都有自己的一套指令；即使是相同的CPU，32位和64位的运行模式依然会有差异；不同的汇编工具同样有自己特有的汇编指令；不同的操作系统和高级编程语言和底层汇编的调用规范并不相同。本节将描述几个有趣的汇编语言模型，最后精简出一个适用于AMD64架构的精简指令集，以便于Go汇编语言的学习。
+Assembly language is actually a very simple programming language because the computer model it is oriented to is very simple. There are several reasons why people feel that assembly language is difficult to learn: different types of CPUs have their own set of instructions; even the same CPU, 32-bit and 64-bit modes of operation will still be different; different assembly tools also have Its own unique assembly instructions; different operating systems and high-level programming languages ​​and the underlying assembly call specifications are not the same. This section will describe several interesting assembly language models, and finally streamline a streamlined instruction set for the AMD64 architecture to facilitate the learning of Go assembly language.
 
 
-## 3.2.1 图灵机和BF语言
+## 3.2.1 Turing machine and BF language
 
-图灵机是由图灵提出的一种抽象计算模型。机器有一条无限长的纸带，纸带分成了一个一个的小方格，每个方格有不同的颜色，这类似于计算机中的内存。同时机器有一个探头在纸带上移来移去，类似于通过内存地址来读写内存上的数据。机器头有一组内部计算状态，还有一些固定的程序（更像一个哈佛结构）。在每个时刻，机器头都要从当前纸带上读入一个方格信息，然后根据自己的内部状态和当前要执行的程序指令将信息输出到纸带方格上，同时更新自己的内部状态并进行移动。
+The Turing machine is an abstract computing model proposed by Turing. The machine has an infinitely long strip of paper that is divided into small squares, each with a different color, similar to the memory in a computer. At the same time, the machine has a probe that moves around the tape, similar to reading and writing data on the memory through the memory address. The machine head has a set of internal calculation states, as well as some fixed programs (more like a Harvard structure). At each moment, the machine head reads a square message from the current tape, and then outputs the information to the tape square according to its internal state and the current program instructions to be executed, and updates its internal state. And move.
 
-图灵机虽然不容易编程，但是非常容易理解。有一种极小化的BrainFuck计算机语言，它的工作模式和图灵机非常相似。BrainFuck由Urban Müller在1993年创建的，简称为BF语言。Müller最初的设计目标是建立一种简单的、可以用最小的编译器来实现的、符合图灵完全思想的编程语言。这种语言由八种状态构成，早期为Amiga机器编写的编译器（第二版）只有240个字节大小！
+Although the Turing machine is not easy to program, it is very easy to understand. There is a minimalist BrainFuck computer language that works very similarly to the Turing machine. BrainFuck was founded in 1993 by Urban Müller, referred to as BF. Müller's original design goal was to create a simple programming language that was implemented in a minimal compiler with Turing's complete idea. This language consists of eight states. The compiler (second edition) written for the Amiga machine in the early days was only 240 bytes in size!
 
-就象它的名字所暗示的，brainfuck程序很难读懂。尽管如此，brainfuck图灵机一样可以完成任何计算任务。虽然brainfuck的计算方式如此与众不同，但它确实能够正确运行。这种语言基于一个简单的机器模型，除了指令，这个机器还包括：一个以字节为单位、被初始化为零的数组、一个指向该数组的指针（初始时指向数组的第一个字节）、以及用于输入输出的两个字节流。这是一种按照图灵完备的语言，它的主要设计思路是：用最小的概念实现一种“简单”的语言。BrainFuck 语言只有八种符号，所有的操作都由这八种符号的组合来完成。
+As its name suggests, the brainfuck program is hard to read. Still, the brainfuck Turing machine can do any computing task. Although brainfuck is so different in its calculations, it does work correctly. This language is based on a simple machine model. In addition to instructions, this machine also includes: an array initialized to zero in bytes, a pointer to the array (initially pointing to the first byte of the array) And two byte streams for input and output. This is a language that is well-formed according to Turing. Its main design idea is to implement a "simple" language with minimal concepts. The BrainFuck language has only eight symbols, and all operations are done by a combination of these eight symbols.
 
-下面是这八种状态的描述，其中每个状态由一个字符标识：
+The following is a description of these eight states, each of which is identified by a character:
 
-| 字符 | C语言类比          | 含义
+| Character | C language analogy | Meaning
 | --- | ----------------- | ------
-| `>` | `++ptr;`          | 指针加一
-| `<` | `--ptr;`          | 指针减一
-| `+` | `++*ptr;`         | 指针指向的字节的值加一
-| `-` | `--*ptr;`         | 指针指向的字节的值减一
-| `.` | `putchar(*ptr);`  | 输出指针指向的单元内容（ASCⅡ码）
-| `,` | `*ptr = getch();` | 输入内容到指针指向的单元（ASCⅡ码）
-| `[` | `while(*ptr) {}`  | 如果指针指向的单元值为零，向后跳转到对应的 `]` 指令的次一指令处
-| `]` |                   | 如果指针指向的单元值不为零，向前跳转到对应的 `[` 指令的次一指令处
+| `>` | `++ptr;` | Pointer plus one
+| `<` | `--ptr;` | pointer minus one
+| ``` | `++*ptr;` | The value of the byte pointed to by the pointer plus one
+| ``` | `--*ptr;` | The value of the byte pointed to by the pointer minus one
+|`.` | `putchar(*ptr);` | The unit content pointed to by the output pointer (ASCII code)
+| `,` | `*ptr = getch();` | Enter the content to the unit pointed to by the pointer (ASCII code)
+|`[` | `while(*ptr) {}` | If the pointer points to a zero value, jump back to the next instruction of the corresponding `]` instruction
+| `]` | | If the value of the cell pointed to by the pointer is not zero, jump forward to the next instruction of the corresponding `[` instruction
 
-下面是一个 brainfuck 程序，向标准输出打印"hi"字符串：
+Below is a brainfuck program that prints a "hi" string to standard output:
 
 ```
 ++++++++++[>++++++++++<-]>++++.+.
 ```
 
-理论上我们可以将BF语言当作目标机器语言，将其它高级语言编译为BF语言后就可以在BF机器上运行了。
+In theory, we can use the BF language as the target machine language. After compiling other high-level languages ​​into the BF language, we can run it on the BF machine.
 
-## 3.2.2 人力资源机器游戏
+## 3.2.2 Human Resources Machine Game
 
-《人力资源机器》（Human Resource Machine）是一款设计精良汇编语言编程游戏。在游戏中，玩家扮演一个职员角色，来模拟人力资源机器的运行。通过完成上司给的每一份任务来实现晋升的目标，完成任务的途径就是用游戏提供的11个机器指令编写正确的汇编程序，最终得到正确的输出结果。人力资源机器的汇编语言可以认为是跨平台、跨操作系统的通用的汇编语言，因为在macOS、Windows、Linux和iOS上该游戏的玩法都是完全一致的。
+"Human Resource Machine" is a well-designed assembly language programming game. In the game, the player plays a staff role to simulate the operation of the HR machine. By accomplishing every goal given by the boss to achieve the goal of promotion, the way to complete the task is to use the 11 machine instructions provided by the game to write the correct assembler, and finally get the correct output. The assembly language of the HR machine can be considered as a common assembly language across platforms and operating systems, because the gameplay is exactly the same on macOS, Windows, Linux and iOS.
 
-人力资源机器的机器模型非常简单：INBOX命令对应输入设备，OUTBOX对应输出设备，玩家小人对应一个寄存器，临时存放数据的地板对应内存，然后是数据传输、加减、跳转等基本的指令。总共有11个机器指令:
+The machine model of the human resource machine is very simple: the INBOX command corresponds to the input device, the OUTBOX corresponds to the output device, the player villain corresponds to a register, the floor corresponding to the temporary storage of data corresponds to the memory, and then the basic instructions of data transmission, addition, subtraction, and jump. There are a total of 11 machine instructions:
 
-| 名称      | 解释 |
+| Name | Explanation |
 | -------- | ---
-| INBOX    | 从输入通道取一个整数数据，放到手中(寄存器)
-| OUTBOX   | 将手中（寄存器）的数据放到输出通道，然后手中将没有数据（此时有些指令不能运行）
-| COPYFROM | 将地板上某个编号的格子中的数据复制到手中（手中之前的数据作废），地板格子必须有数据
-| COPYTO   | 将手中（寄存器）的数据复制到地板上某个编号的格子中，手中的数据不变
-| ADD      | 将手中（寄存器）的数据和某个编号对应的地板格子的数据相加，新数据放到手中（手中之前的数据作废）
-| SUB      | 将手中（寄存器）的数据和某个编号对应的地板格子的数据相减，新数据放到手中（手中之前的数据作废）
-| BUMP+    | 自加一
-| BUMP-    | 自减一
-| JUMP     | 跳转
-| JUMP =0  | 为零条件跳转
-| JUMP <0  | 为负条件跳转
+| INBOX | Take an integer data from the input channel and put it in the hand (register)
+| OUTBOX | Put the data in the hand (register) into the output channel, and then there will be no data in hand (some instructions cannot be run at this time)
+| COPYFROM | Copy the data from a numbered grid on the floor to the hand (the data before the hand is invalid), the floor grid must have data
+| COPYTO | Copy the data in the hands (registers) to a numbered grid on the floor, the data in the hand is unchanged
+| ADD | Add the data in the hand (register) to the data of the floor grid corresponding to a certain number, and put the new data in the hands (the data before the hand is invalid)
+| SUB | Subtracts the data in the hand (register) from the data of the floor grid corresponding to a number, and puts the new data in the hands (the previous data in the hands is invalid)
+| BUMP+ | Self-plus one
+| BUMP- | Self-reduction
+| JUMP | Jump
+| JUMP =0 | Zero conditional jump
+| JUMP <0 | is a negative conditional jump
 
-除了机器指令外，游戏中有些环节还提供类似寄存器的场所，用于存放临时的数据。人力资源机器游戏的机器指令主要分为以下几类：
+In addition to machine instructions, some parts of the game also provide a register-like place for storing temporary data. Machine instructions for human resource machine games are mainly divided into the following categories:
 
-- 输入/输出(INBOX, OUTBOX): 输入后手中将只有1份新拿到的数据, 输出后手中将没有数据。
-- 数据传输指令(COPYFROM/COPYTO): 主要用于仅有的1个寄存器（手中）和内存之间的数据传输，传输时要确保源数据是有效的
-- 算术相关(ADD/SUB/BUMP+/BUMP-)
-- 跳转指令: 如果是条件跳转，寄存器中必须要有数据
+- Input/Output (INBOX, OUTBOX): There will be only 1 new data in the hand after input, and there will be no data in the hand after the output.
+- Data transfer instruction (COPYFROM/COPYTO): It is mainly used for data transmission between only one register (hand) and memory. Make sure the source data is valid during transmission.
+- Arithmetic related (ADD/SUB/BUMP+/BUMP-)
+- Jump instruction: If it is a conditional jump, there must be data in the register
 
-主流的处理器也有类似的指令。除了基本的算术和逻辑预算指令外，再配合有条件跳转指令就可以实现分支、循环等常见控制流结构了。
+Mainstream processors have similar instructions. In addition to the basic arithmetic and logic budget instructions, with the conditional jump instructions, you can implement common control flow structures such as branches and loops.
 
-下图是某一层的任务：将输入数据的0剔除，非0的数据依次输出，右边部分是解决方案。
+The following figure is a task of a certain layer: the 0 of the input data is culled, the data of non-zero is sequentially output, and the right part is the solution.
 
 ![](../images/ch3-1-arch-hsm-zero.jpg)
 
-*图 3-1 人力资源机器*
+*Figure 3-1 Human Resources Machine*
 
 
-整个程序只有一个输入指令、一个输出指令和两个跳转指令共四个指令：
+The entire program has only one input instruction, one output instruction and two jump instructions.
 
 ```
 LOOP:
-	INBOX
-	JUMP-if-zero LOOP
-	OUTBOX
-	JUMP LOOP
+INBOX
+JUMP-if-zero LOOP
+OUTBOX
+JUMP LOOP
 ```
 
-首先通过INBOX指令读取一个数据包；然后判断包裹的数据是否为0，如果是0的话就跳转到开头继续读取下一个数据包；否则将输出数据包，然后再跳转到开头。以此循环无休止地处理数据包裹，直到任务完成晋升到更高一级的岗位，然后处理类似的但更复杂的任务。
+First, read a data packet through the INBOX instruction; then determine whether the data of the package is 0. If it is 0, jump to the beginning to continue reading the next data packet; otherwise, the data packet will be output, and then jump to the beginning. The data package is processed endlessly in this loop until the task is completed and promoted to a higher level, and then a similar but more complex task is handled.
 
 
-## 3.2.3 X86-64体系结构
+## 3.2.3 X86-64 architecture
 
-X86其实是是80X86的简称（后面三个字母），包括Intel 8086、80286、80386以及80486等指令集合，因此其架构被称为x86架构。x86-64是AMD公司于1999年设计的x86架构的64位拓展，向后兼容于16位及32位的x86架构。X86-64目前正式名称为AMD64，也就是Go语言中GOARCH环境变量指定的AMD64。如果没有特殊说明的话，本章中的汇编程序都是针对64位的X86-64环境。
+X86 is actually the abbreviation of 80X86 (the last three letters), including Intel 8086, 80286, 80386 and 80486 and other instruction sets, so its architecture is called x86 architecture. The x86-64 is a 64-bit extension of the x86 architecture designed by AMD in 1999 and is backward compatible with 16-bit and 32-bit x86 architectures. X86-64 is currently officially named AMD64, which is the AMD64 specified by the GOARCH environment variable in the Go language. The assembler in this chapter is for a 64-bit X86-64 environment, unless otherwise noted.
 
-在使用汇编语言之前必须要了解对应的CPU体系结构。下面是X86/AMD架构图：
+You must understand the corresponding CPU architecture before using assembly language. The following is an X86/AMD architecture diagram:
 
 ![](../images/ch3-2-arch-amd64-01.ditaa.png)
 
-*图 3-2 AMD64架构*
+*Figure 3-2 AMD64 Architecture*
 
 
-左边是内存部分是常见的内存布局。其中text一般对应代码段，用于存储要执行指令数据，代码段一般是只读的。然后是rodata和data数据段，数据段一般用于存放全局的数据，其中rodata是只读的数据段。而heap段则用于管理动态的数据，stack段用于管理每个函数调用时相关的数据。在汇编语言中一般重点关注text代码段和data数据段，因此Go汇编语言中专门提供了对应TEXT和DATA命令用于定义代码和数据。
+The memory section on the left is a common memory layout. The text generally corresponds to the code segment, and is used to store the instruction data to be executed, and the code segment is generally read-only. Then there is the data segment of rodata and data. The data segment is generally used to store global data, where rodata is a read-only data segment. The heap segment is used to manage dynamic data, and the stack segment is used to manage the data associated with each function call. In assembly language, the focus is mainly on the text code segment and the data segment. Therefore, the Go assembly language specifically provides the corresponding TEXT and DATA commands for defining code and data.
 
-中间是X86提供的寄存器。寄存器是CPU中最重要的资源，每个要处理的内存数据原则上需要先放到寄存器中才能由CPU处理，同时寄存器中处理完的结果需要再存入内存。X86中除了状态寄存器FLAGS和指令寄存器IP两个特殊的寄存器外，还有AX、BX、CX、DX、SI、DI、BP、SP几个通用寄存器。在X86-64中又增加了八个以R8-R15方式命名的通用寄存器。因为历史的原因R0-R7并不是通用寄存器，它们只是X87开始引入的MMX指令专有的寄存器。在通用寄存器中BP和SP是两个比较特殊的寄存器：其中BP用于记录当前函数帧的开始位置，和函数调用相关的指令会隐式地影响BP的值；SP则对应当前栈指针的位置，和栈相关的指令会隐式地影响SP的值；而某些调试工具需要BP寄存器才能正常工作。
+In the middle is the register provided by X86. Registers are the most important resources in the CPU. In principle, each memory data to be processed needs to be placed in a register before it can be processed by the CPU. At the same time, the processed result in the register needs to be stored in the memory. In addition to the special registers of the status register FLAGS and the instruction register IP, there are several general-purpose registers of AX, BX, CX, DX, SI, DI, BP, and SP. Eight more general-purpose registers named after R8-R15 have been added to the X86-64. For historical reasons, R0-R7 are not general-purpose registers, they are just registers specific to the MMX instructions that X87 began to introduce. In the general-purpose registers, BP and SP are two special registers: BP is used to record the start position of the current function frame, and the instruction related to the function call implicitly affects the value of BP; SP corresponds to the position of the current stack pointer. The stack-related instructions implicitly affect the SP value; some debug tools require a BP register to work properly.
 
-右边是X86的指令集。CPU是由指令和寄存器组成，指令是每个CPU内置的算法，指令处理的对象就是全部的寄存器和内存。我们可以将每个指令看作是CPU内置标准库中提供的一个个函数，然后基于这些函数构造更复杂的程序的过程就是用汇编语言编程的过程。
+On the right is the X86 instruction set. The CPU is composed of instructions and registers. The instructions are built-in algorithms for each CPU. The objects to be processed by the instructions are all registers and memory. We can think of each instruction as a function provided in the CPU built-in standard library, and then the process of constructing a more complex program based on these functions is the process of programming in assembly language.
 
 
-## 3.2.4 Go汇编中的伪寄存器
+## 3.2.4 Pseudo-registers in Go assembly
 
-Go汇编为了简化汇编代码的编写，引入了PC、FP、SP、SB四个伪寄存器。四个伪寄存器加其它的通用寄存器就是Go汇编语言对CPU的重新抽象，该抽象的结构也适用于其它非X86类型的体系结构。
+Go assembly In order to simplify the compilation of assembly code, four pseudo-registers of PC, FP, SP, and SB are introduced. The four pseudo-registers plus other general-purpose registers are the re-abstractions of the CPU by the Go assembly language. The abstract structure is also applicable to other non-X86-type architectures.
 
-四个伪寄存器和X86/AMD64的内存和寄存器的相互关系如下图：
+The relationship between the four pseudo registers and the memory and registers of X86/AMD64 is as follows:
 
 ![](../images/ch3-3-arch-amd64-02.ditaa.png)
 
-*图 3-3 Go汇编的伪寄存器*
+*Figure 3-3 Go assembly pseudo-register*
 
 
-在AMD64环境，伪PC寄存器其实是IP指令计数器寄存器的别名。伪FP寄存器对应的是函数的帧指针，一般用来访问函数的参数和返回值。伪SP栈指针对应的是当前函数栈帧的底部（不包括参数和返回值部分），一般用于定位局部变量。伪SP是一个比较特殊的寄存器，因为还存在一个同名的SP真寄存器。真SP寄存器对应的是栈的顶部，一般用于定位调用其它函数的参数和返回值。
+In the AMD64 environment, the pseudo PC register is actually an alias for the IP instruction counter register. The pseudo FP register corresponds to the frame pointer of the function, which is generally used to access the parameters and return values ​​of the function. The pseudo SP stack pointer corresponds to the bottom of the current function stack frame (excluding the parameters and return value parts), and is generally used to locate local variables. The pseudo SP is a special register because there is also an SP true register with the same name. The true SP register corresponds to the top of the stack and is generally used to locate parameters and return values ​​that call other functions.
 
-当需要区分伪寄存器和真寄存器的时候只需要记住一点：伪寄存器一般需要一个标识符和偏移量为前缀，如果没有标识符前缀则是真寄存器。比如`(SP)`、`+8(SP)`没有标识符前缀为真SP寄存器，而`a(SP)`、`b+8(SP)`有标识符为前缀表示伪寄存器。
+One thing to keep in mind when you need to distinguish between a pseudo-register and a true register is that a pseudo-register generally requires an identifier and an offset as a prefix, and if there is no identifier prefix, it is a true register. For example, `(SP)`, `+8(SP)` have no identifier prefix for the true SP register, and `a(SP)`, `b+8(SP)` have the identifier prefixed with the pseudo register.
 
-## 3.2.5 X86-64指令集
+## 3.2.5 X86-64 instruction set
 
-很多汇编语言的教程都会强调汇编语言是不可移植的。严格来说汇编语言是在不同的CPU类型、或不同的操作系统环境、或不同的汇编工具链下是不可移植的，而在同一种CPU中运行的机器指令是完全一样的。汇编语言这种不可移植性正是其普及的一个极大的障碍。虽然CPU指令集的差异是导致不好移植的较大因素，但是汇编语言的相关工具链对此也有不可推卸的责任。而源自Plan9的Go汇编语言对此做了一定的改进：首先Go汇编语言在相同CPU架构上是完全一致的，也就是屏蔽了操作系统的差异；同时Go汇编语言将一些基础并且类似的指令抽象为相同名字的伪指令，从而减少不同CPU架构下汇编代码的差异（寄存器名字和数量的差异是一直存在的）。本节的目的也是找出一个较小的精简指令集，以简化Go汇编语言的学习。
+Many assembly language tutorials emphasize that assembly language is not portable. Strictly speaking, assembly language is not portable under different CPU types, or different operating system environments, or different assembly tool chains, and the machine instructions running in the same CPU are exactly the same. The non-portability of assembly language is a great obstacle to its popularity. Although the difference in the CPU instruction set is a large factor that causes poor portability, the related toolchain of assembly language has an unshirkable responsibility for this. The Go assembly language from Plan9 has made some improvements: First, the Go assembly language is identical on the same CPU architecture, which shields the differences in the operating system; while the Go assembly language will have some basic and similar instructions. Abstraction is a pseudo-instruction of the same name, thereby reducing the difference in assembly code under different CPU architectures (the difference in register names and numbers is always present). The purpose of this section is also to find a smaller, reduced instruction set to simplify the learning of Go assembly language.
 
-X86是一个极其复杂的系统，有人统计x86-64中指令有将近一千个之多。不仅仅如此，X86中的很多单个指令的功能也非常强大，比如有论文证明了仅仅一个MOV指令就可以构成一个图灵完备的系统。以上这是两种极端情况，太多的指令和太少的指令都不利于汇编程序的编写，但是也从侧面体现了MOV指令的重要性。
+X86 is an extremely complicated system. Some people have statistics on x86-64.A thousand. Not only that, but many of the single instructions in X86 are also very powerful. For example, a paper proves that only one MOV instruction can form a Turing-complete system. These are two extreme cases. Too many instructions and too few instructions are not conducive to the preparation of the assembler, but also reflect the importance of the MOV instruction.
 
-通用的基础机器指令大概可以分为数据传输指令、算术运算和逻辑运算指令、控制流指令和其它指令等几类。因此我们可以尝试精简出一个X86-64指令集，以便于Go汇编语言的学习。
+General-purpose basic machine instructions can be roughly classified into data transfer instructions, arithmetic operations and logic operations instructions, control flow instructions, and other instructions. So we can try to streamline an X86-64 instruction set to facilitate the learning of Go assembly language.
 
-因此我们先看看重要的MOV指令。其中MOV指令可以用于将字面值移动到寄存器、字面值移到内存、寄存器之间的数据传输、寄存器和内存之间的数据传输。需要注意的是，MOV传输指令的内存操作数只能有一个，可以通过某个临时寄存器达到类似目的。最简单的是忽略符号位的数据传输操作，386和AMD64指令一样，不同的1、2、4和8字节宽度有不同的指令：
+So let's take a look at the important MOV instructions. The MOV instruction can be used to move a literal value to a register, a literal value to a memory, a data transfer between registers, and a data transfer between a register and a memory. It should be noted that the MOV transfer instruction can only have one memory operand, and can achieve similar purposes through a temporary register. The simplest is to ignore the data transfer operation of the sign bit. Like the AMD64 instruction, the 386 has different instructions for different widths of 1, 2, 4 and 8 bytes:
 
-| Data Type | 386/AMD64   | Comment       |
+| Data Type | 386/AMD64 | Comment |
 | --------- | ----------- | ------------- |
-| [1]byte   | MOVB        | B => Byte     |
-| [2]byte   | MOVW        | W => Word     |
-| [4]byte   | MOVL        | L => Long     |
-| [8]byte   | MOVQ        | Q => Quadword |
+| [1]byte | MOVB | B => Byte |
+| [2]byte | MOVW | W => Word |
+| [4]byte | MOVL | L => Long |
+| [8]byte | MOVQ | Q => Quadword |
 
-MOV指令它不仅仅用于在寄存器和内存之间传输数据，而且还可以用于处理数据的扩展和截断操作。当数据宽度和寄存器的宽度不同又需要处理符号位时，386和AMD64有各自不同的指令：
+The MOV instruction is not only used to transfer data between registers and memory, but it can also be used to handle data expansion and truncation operations. When the data width and the width of the register are different and the sign bit needs to be processed, 386 and AMD64 have different instructions:
 
-| Data Type | 386     | AMD64   | Comment       |
+| Data Type | 386 | AMD64 | Comment |
 | --------- | ------- | ------- | ------------- |
-| int8      | MOVBLSX | MOVBQSX | sign extend   |
-| uint8     | MOVBLZX | MOVBQZX | zero extend   |
-| int16     | MOVWLSX | MOVWQSX | sign extend   |
-| uint16    | MOVWLZX | MOVWQZX | zero extend   |
+| int8 | MOVBLSX | MOVBQSX | sign extend |
+| uint8 | MOVBLZX | MOVBQZX | zero extend |
+| int16 | MOVWLSX | MOVWQSX | sign extend |
+| uint16 | MOVWLZX | MOVWQZX | zero extend |
 
-比如当需要将一个int64类型的数据转为bool类型时，则需要使用MOVBQZX指令处理。
+For example, when you need to convert an int64 type data to a bool type, you need to use the MOVBQZX instruction.
 
-基础算术指令有ADD、SUB、MUL、DIV等指令。其中ADD、SUB、MUL、DIV用于加、减、乘、除运算，最终结果存入目标寄存器。基础的逻辑运算指令有AND、OR和NOT等几个指令，对应逻辑与、或和取反等几个指令。
+Basic arithmetic instructions include ADD, SUB, MUL, DIV, etc. Among them, ADD, SUB, MUL, and DIV are used for addition, subtraction, multiplication, and division, and the final result is stored in the target register. The basic logical operation instructions have several instructions such as AND, OR, and NOT, corresponding to several instructions such as logical AND, OR and inversion.
 
-| 名称    | 解释 |
+| Name | Explanation |
 | ------ | ---
-| ADD    | 加法
-| SUB    | 减法
-| MUL    | 乘法
-| DIV    | 除法
-| AND    | 逻辑与
-| OR     | 逻辑或
-| NOT    | 逻辑取反
+| ADD | Addition
+| SUB | Subtraction
+| MUL | Multiplication
+| DIV | Division
+| AND | Logic and
+| OR | Logical OR
+| NOT | Logic inversion
 
-其中算术和逻辑指令是顺序编程的基础。通过逻辑比较影响状态寄存器，再结合有条件跳转指令就可以实现更复杂的分支或循环结构。需要注意的是MUL和DIV等乘除法指令可能隐含使用了某些寄存器，指令细节请查阅相关手册。
+Among them, arithmetic and logic instructions are the basis of sequential programming. A more complex branch or loop structure can be implemented by a logical comparison affecting the status register, combined with a conditional jump instruction. It should be noted that multiply and divide instructions such as MUL and DIV may implicitly use some registers. Please refer to the relevant manual for details of the instructions.
 
-控制流指令有CMP、JMP-if-x、JMP、CALL、RET等指令。CMP指令用于两个操作数做减法，根据比较结果设置状态寄存器的符号位和零位，可以用于有条件跳转的跳转条件。JMP-if-x是一组有条件跳转指令，常用的有JL、JLZ、JE、JNE、JG、JGE等指令，对应小于、小于等于、等于、不等于、大于和大于等于等条件时跳转。JMP指令则对应无条件跳转，将要跳转的地址设置到IP指令寄存器就实现了跳转。而CALL和RET指令分别为调用函数和函数返回指令。
+Control flow instructions include CMP, JMP-if-x, JMP, CALL, and RET. The CMP instruction is used for subtraction of two operands. The sign bit and zero bit of the status register are set according to the comparison result, which can be used for the jump condition of conditional jump. JMP-if-x is a set of conditional jump instructions. Commonly used are JL, JLZ, JE, JNE, JG, JGE, etc., which are skipped when the conditions are less than, less than or equal to, equal to, not equal to, greater than, greater than or equal to turn. The JMP instruction corresponds to an unconditional jump, and the jump is set by setting the address to be jumped to the IP instruction register. The CALL and RET instructions return instructions for calling functions and functions, respectively.
 
-| 名称      | 解释 |
+| Name | Explanation |
 | -------- | ---
-| JMP      | 无条件跳转
-| JMP-if-x | 有条件跳转，JL、JLZ、JE、JNE、JG、JGE
-| CALL     | 调用函数
-| RET      | 函数返回
+| JMP | Unconditional Jump
+| JMP-if-x | Conditional Jump, JL, JLZ, JE, JNE, JG, JGE
+| CALL | Call function
+| RET | function returns
 
-无条件和有条件调整指令是实现分支和循环控制流的基础指令。理论上，我们也可以通过跳转指令实现函数的调用和返回功能。不过因为目前函数已经是现代计算机中的一个最基础的抽象，因此大部分的CPU都针对函数的调用和返回提供了专有的指令和寄存器。
+Unconditional and conditional adjustment instructions are the basic instructions for implementing branch and loop control flows. In theory, we can also implement the function call and return functions through jump instructions. However, because the current function is already the most basic abstraction in modern computers, most CPUs provide proprietary instructions and registers for function calls and returns.
 
-其它比较重要的指令有LEA、PUSH、POP等几个。其中LEA指令将标准参数格式中的内存地址加载到寄存器（而不是加载内存位置的内容）。PUSH和POP分别是压栈和出栈指令，通用寄存器中的SP为栈指针，栈是向低地址方向增长的。
+Other important instructions are LEA, PUSH, POP, etc. The LEA instruction loads the memory address in the standard parameter format into the register (instead of loading the contents of the memory location). PUSH and POP are push and pop instructions, respectively. SP in the general-purpose register is the stack pointer, and the stack grows toward the lower address.
 
-| 名称    | 解释 |
+| Name | Explanation |
 | ------ | ---
-| LEA    | 取地址
-| PUSH   | 压栈
-| POP    | 出栈
+| LEA | Address
+| PUSH | Push stack
+| POP | Popping
 
-当需要通过间接索引的方式访问数组或结构体等某些成员对应的内存时，可以用LEA指令先对目前内存取地址，然后在操作对应内存的数据。而栈指令则可以用于函数调整自己的栈空间大小。
+When you need to access the memory corresponding to some members such as an array or a structure by indirect indexing, you can use the LEA instruction to access the current internal access address first, and then operate the corresponding memory data. The stack instruction can be used to adjust the size of its stack space.
 
-最后需要说明的是，Go汇编语言可能并没有支持全部的CPU指令。如果遇到没有支持的CPU指令，可以通过Go汇编语言提供的BYTE命令将真实的CPU指令对应的机器码填充到对应的位置。完整的X86指令在 https://github.com/golang/arch/blob/master/x86/x86.csv 文件定义。同时Go汇编还正对一些指令定义了别名，具体可以参考这里 https://golang.org/src/cmd/internal/obj/x86/anames.go 。
-
+Finally, it should be noted that Go assembly language may not support all CPU instructions. If you encounter an unsupported CPU instruction, you can fill the corresponding machine code of the real CPU instruction to the corresponding location by the BYTE command provided by the Go assembly language. The full X86 instructions are defined in the https://github.com/golang/arch/blob/master/x86/x86.csv file. At the same time, Go assembly is also defining aliases for some instructions. For details, please refer to https://golang.org/src/cmd/internal/obj/x86/anames.go.

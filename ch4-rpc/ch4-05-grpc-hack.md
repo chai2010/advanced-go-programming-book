@@ -1,432 +1,431 @@
-# 4.5 gRPC进阶
+# 4.5 gRPC Advanced
 
-作为一个基础的RPC框架，安全和扩展是经常遇到的问题。本节将简单介绍如何对gRPC进行安全认证。然后介绍通过gRPC的截取器特性，以及如何通过截取器优雅地实现Token认证、调用跟踪以及Panic捕获等特性。最后介绍了gRPC服务如何和其他Web服务共存。
+As a basic RPC framework, security and extension are frequently encountered problems. This section will briefly describe how to securely authenticate gRPC. Then introduce the interceptor features through gRPC, and how to elegantly implement Token authentication, call tracking and Panic capture through the interceptor. Finally, how the gRPC service coexists with other web services is introduced.
 
-## 4.5.1 证书认证
+## 4.5.1 Certificate Certification
 
-gRPC建立在HTTP/2协议之上，对TLS提供了很好的支持。我们前面章节中gRPC的服务都没有提供证书支持，因此客户端在链接服务器中通过`grpc.WithInsecure()`选项跳过了对服务器证书的验证。没有启用证书的gRPC服务在和客户端进行的是明文通讯，信息面临被任何第三方监听的风险。为了保障gRPC通信不被第三方监听篡改或伪造，我们可以对服务器启动TLS加密特性。
+gRPC is built on top of the HTTP/2 protocol and provides good support for TLS. The gRPC service in our previous chapter did not provide certificate support, so the client skipped the verification of the server certificate in the linked server via the `grpc.WithInsecure()` option. A gRPC service that does not have a certificate enabled is in clear text communication with the client, and the information is at risk of being monitored by any third party. In order to ensure that gRPC communication is not tampered or forged by third parties, we can enable TLS encryption on the server.
 
-可以用以下命令为服务器和客户端分别生成私钥和证书：
+You can generate a private key and certificate for the server and client separately with the following command:
 
 ```
 $ openssl genrsa -out server.key 2048
 $ openssl req -new -x509 -days 3650 \
-	-subj "/C=GB/L=China/O=grpc-server/CN=server.grpc.io" \
-	-key server.key -out server.crt
+-subj "/C=GB/L=China/O=grpc-server/CN=server.grpc.io" \
+-key server.key -out server.crt
 
 $ openssl genrsa -out client.key 2048
 $ openssl req -new -x509 -days 3650 \
-	-subj "/C=GB/L=China/O=grpc-client/CN=client.grpc.io" \
-	-key client.key -out client.crt
+-subj "/C=GB/L=China/O=grpc-client/CN=client.grpc.io" \
+-key client.key -out client.crt
 ```
 
-以上命令将生成server.key、server.crt、client.key和client.crt四个文件。其中以.key为后缀名的是私钥文件，需要妥善保管。以.crt为后缀名是证书文件，也可以简单理解为公钥文件，并不需要秘密保存。在subj参数中的`/CN=server.grpc.io`表示服务器的名字为`server.grpc.io`，在验证服务器的证书时需要用到该信息。
+The above command will generate four files: server.key, server.crt, client.key, and client.crt. The private key file is suffixed with .key and needs to be kept safely. The .crt suffix is ​​a certificate file, which can also be simply understood as a public key file, and does not need to be secretly saved. The `/CN=server.grpc.io` in the subj parameter indicates that the server name is `server.grpc.io`, which is needed to verify the server's certificate.
 
-有了证书之后，我们就可以在启动gRPC服务时传入证书选项参数：
+With the certificate, we can pass in the certificate option parameters when starting the gRPC service:
 
 ```go
-func main() {
-	creds, err := credentials.NewServerTLSFromFile("server.crt", "server.key")
-	if err != nil {
-		log.Fatal(err)
-	}
+Func main() {
+Creds, err := credentials.NewServerTLSFromFile("server.crt", "server.key")
+If err != nil {
+log.Fatal(err)
+}
 
-	server := grpc.NewServer(grpc.Creds(creds))
+Server := grpc.NewServer(grpc.Creds(creds))
 
-	...
+...
 }
 ```
 
-其中credentials.NewServerTLSFromFile函数是从文件为服务器构造证书对象，然后通过grpc.Creds(creds)函数将证书包装为选项后作为参数传入grpc.NewServer函数。
+The credentials.NewServerTLSFromFile function constructs the certificate object from the file for the server, and then wraps the certificate as an option through the grpc.Creds(creds) function and passes it as a parameter to the grpc.NewServer function.
 
-在客户端基于服务器的证书和服务器名字就可以对服务器进行验证：
+The server can be authenticated on the client based on the server's certificate and server name:
 
 ```go
-func main() {
-	creds, err := credentials.NewClientTLSFromFile(
-		"server.crt", "server.grpc.io",
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
+Func main() {
+Creds, err := credentials.NewClientTLSFromFile(
+"server.crt", "server.grpc.io",
+)
+If err != nil {
+log.Fatal(err)
+}
 
-	conn, err := grpc.Dial("localhost:5000",
-		grpc.WithTransportCredentials(creds),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer conn.Close()
+Conn, err := grpc.Dial("localhost:5000",
+grpc.WithTransportCredentials(creds),
+)
+If err != nil {
+log.Fatal(err)
+}
+Defer conn.Close()
 
-	...
+...
 }
 ```
 
-其中redentials.NewClientTLSFromFile是构造客户端用的证书对象，第一个参数是服务器的证书文件，第二个参数是签发证书的服务器的名字。然后通过grpc.WithTransportCredentials(creds)将证书对象转为参数选项传人grpc.Dial函数。
+Where redentials.NewClientTLSFromFile is the certificate object used to construct the client. The first parameter is the server's certificate file, and the second parameter is the name of the server that issued the certificate. Then pass the grpc.WithTransportCredentials(creds) to convert the certificate object to the parameter option to pass the grpc.Dial function.
 
-以上这种方式，需要提前将服务器的证书告知客户端，这样客户端在链接服务器时才能进行对服务器证书认证。在复杂的网络环境中，服务器证书的传输本身也是一个非常危险的问题。如果在中间某个环节，服务器证书被监听或替换那么对服务器的认证也将不再可靠。
+In this way, the server's certificate needs to be notified to the client in advance, so that the client can authenticate the server certificate when the server is linked. In a complex network environment, the transmission of server certificates is itself a very dangerous issue. If the server certificate is monitored or replaced at some point in the middle, the authentication to the server will no longer be reliable.
 
-为了避免证书的传递过程中被篡改，可以通过一个安全可靠的根证书分别对服务器和客户端的证书进行签名。这样客户端或服务器在收到对方的证书后可以通过根证书进行验证证书的有效性。
+In order to avoid tampering during the delivery of the certificate, the server and client certificates can be signed separately by a secure and reliable root certificate. In this way, the client or server can verify the validity of the certificate through the root certificate after receiving the certificate of the other party.
 
-根证书的生成方式和自签名证书的生成方式类似：
+The root certificate is generated in a similar way to the self-signed certificate:
 
 ```
 $ openssl genrsa -out ca.key 2048
 $ openssl req -new -x509 -days 3650 \
-	-subj "/C=GB/L=China/O=gobook/CN=github.com" \
-	-key ca.key -out ca.crt
+-subj "/C=GB/L=China/O=gobook/CN=github.com" \
+-key ca.key -out ca.crt
 ```
 
-然后是重新对服务器端证书进行签名：
-
-```
-$ openssl req -new \
-	-subj "/C=GB/L=China/O=server/CN=server.io" \
-	-key server.key \
-	-out server.csr
-$ openssl x509 -req -sha256 \
-	-CA ca.crt -CAkey ca.key -CAcreateserial -days 3650 \
-	-in server.csr \
-	-out server.crt
-```
-
-签名的过程中引入了一个新的以.csr为后缀名的文件，它表示证书签名请求文件。在证书签名完成之后可以删除.csr文件。
-
-然后在客户端就可以基于CA证书对服务器进行证书验证：
-
-```go
-func main() {
-	certificate, err := tls.LoadX509KeyPair("client.crt", "client.key")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	certPool := x509.NewCertPool()
-	ca, err := ioutil.ReadFile("ca.crt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	if ok := certPool.AppendCertsFromPEM(ca); !ok {
-		log.Fatal("failed to append ca certs")
-	}
-
-	creds := credentials.NewTLS(&tls.Config{
-		Certificates:       []tls.Certificate{certificate},
-		ServerName:         tlsServerName, // NOTE: this is required!
-		RootCAs:            certPool,
-	})
-
-	conn, err := grpc.Dial(
-		"localhost:5000", grpc.WithTransportCredentials(creds),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer conn.Close()
-
-	...
-}
-```
-
-在新的客户端代码中，我们不再直接依赖服务器端证书文件。在credentials.NewTLS函数调用中，客户端通过引入一个CA根证书和服务器的名字来实现对服务器进行验证。客户端在链接服务器时会首先请求服务器的证书，然后使用CA根证书对收到的服务器端证书进行验证。
-
-如果客户端的证书也采用CA根证书签名的话，服务器端也可以对客户端进行证书认证。我们用CA根证书对客户端证书签名：
+Then re-sign the server-side certificate:
 
 ```
 $ openssl req -new \
-	-subj "/C=GB/L=China/O=client/CN=client.io" \
-	-key client.key \
-	-out client.csr
+-subj "/C=GB/L=China/O=server/CN=server.io" \
+-key server.key \
+-out server.csr
 $ openssl x509 -req -sha256 \
-	-CA ca.crt -CAkey ca.key -CAcreateserial -days 3650 \
-	-in client.csr \
-	-out client.crt
+-CA ca.crt -CAkey ca.key -CAcreateserial -days 3650 \
+-in server.csr \
+-out server.crt
 ```
 
-因为引入了CA根证书签名，在启动服务器时同样要配置根证书：
+The signature process introduces a new file with a .csr extension that represents the certificate signing request file. The .csr file can be deleted after the certificate signature is completed.
+
+Then the client can perform certificate verification on the server based on the CA certificate:
 
 ```go
-func main() {
-	certificate, err := tls.LoadX509KeyPair("server.crt", "server.key")
-	if err != nil {
-		log.Fatal(err)
-	}
+Func main() {
+Certificate, err := tls.LoadX509KeyPair("client.crt", "client.key")
+If err != nil {
+log.Fatal(err)
+}
 
-	certPool := x509.NewCertPool()
-	ca, err := ioutil.ReadFile("ca.crt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	if ok := certPool.AppendCertsFromPEM(ca); !ok {
-		log.Fatal("failed to append certs")
-	}
+certPool := x509.NewCertPool()
+Ca, err := ioutil.ReadFile("ca.crt")
+If err != nil {
+log.Fatal(err)
+}
+If ok := certPool.AppendCertsFromPEM(ca); !ok {
+log.Fatal("failed to append ca certs")
+}
 
-	creds := credentials.NewTLS(&tls.Config{
-		Certificates: []tls.Certificate{certificate},
-		ClientAuth:   tls.RequireAndVerifyClientCert, // NOTE: this is optional!
-		ClientCAs:    certPool,
-	})
+Creds := credentials.NewTLS(&tls.Config{
+Certificates: []tls.Certificate{certificate},
+ServerName: tlsServerName, // NOTE: this is required!
+RootCAs: certPool,
+})
 
-	server := grpc.NewServer(grpc.Creds(creds))
-	...
+Conn, err := grpc.Dial(
+"localhost:5000", grpc.WithTransportCredentials(creds),
+)
+If err != nil {
+log.Fatal(err)
+}
+Defer conn.Close()
+
+...
 }
 ```
 
-服务器端同样改用credentials.NewTLS函数生成证书，通过ClientCAs选择CA根证书，并通过ClientAuth选项启用对客户端进行验证。
+In the new client code, we no longer rely directly on server-side certificate files. In the credentials.NewTLS function call, the client authenticates the server by introducing a CA root certificate and the name of the server. When the client links to the server, it first requests the server's certificate, and then uses the CA root certificate to verify the received server-side certificate.
 
-到此我们就实现了一个服务器和客户端进行双向证书验证的通信可靠的gRPC系统。
+If the client's certificate is also signed by the CA root certificate, the server can also perform certificate authentication on the client. We use the CA root certificate to sign the client certificate:
 
-## 4.5.2 Token认证
+```
+$ openssl req -new \
+-subj "/C=GB/L=China/O=client/CN=client.io" \
+-key client.key \
+-out client.csr
+$ openssl x509 -req -sha256 \
+-CA ca.crt -CAkey ca.key -CAcreateserial -days 3650 \
+-in client.csr \
+-out client.crt
+```
 
-前面讲述的基于证书的认证是针对每个gRPC链接的认证。gRPC还为每个gRPC方法调用提供了认证支持，这样就基于用户Token对不同的方法访问进行权限管理。
-
-要实现对每个gRPC方法进行认证，需要实现grpc.PerRPCCredentials接口：
+Because the CA root certificate signature was introduced, the root certificate is also configured when starting the server:
 
 ```go
-type PerRPCCredentials interface {
-	// GetRequestMetadata gets the current request metadata, refreshing
-	// tokens if required. This should be called by the transport layer on
-	// each request, and the data should be populated in headers or other
-	// context. If a status code is returned, it will be used as the status
-	// for the RPC. uri is the URI of the entry point for the request.
-	// When supported by the underlying implementation, ctx can be used for
-	// timeout and cancellation.
-	// TODO(zhaoq): Define the set of the qualified keys instead of leaving
-	// it as an arbitrary string.
-	GetRequestMetadata(ctx context.Context, uri ...string) (
-		map[string]string,	error,
-	)
-	// RequireTransportSecurity indicates whether the credentials requires
-	// transport security.
-	RequireTransportSecurity() bool
+Func main() {
+Certificate, err := tls.LoadX509KeyPair("server.crt", "server.key")
+If err != nil {
+log.Fatal(err)
+}
+
+certPool := x509.NewCertPool()
+Ca, err := ioutil.ReadFile("ca.crt")
+If err != nil {
+log.Fatal(err)
+}
+If ok := certPool.AppendCertsFromPEM(ca); !ok {
+log.Fatal("failed to append certs")
+}
+
+Creds := credentials.NewTLS(&tls.Config{
+Certificates: []tls.Certificate{certificate},
+ClientAuth: tls.RequireAndVerifyClientCert, // NOTE: this is optional!
+ClientCAs: certPool,
+})
+
+Server := grpc.NewServer(grpc.Creds(creds))
+...
 }
 ```
 
-在GetRequestMetadata方法中返回认证需要的必要信息。RequireTransportSecurity方法表示是否要求底层使用安全链接。在真实的环境中建议必须要求底层启用安全的链接，否则认证信息有泄露和被篡改的风险。
+The server also uses the credentials.NewTLS function to generate a certificate, selects the CA root certificate through ClientCAs, and enables the client to be authenticated through the ClientAuth option.
 
-我们可以创建一个Authentication类型，用于实现用户名和密码的认证：
+At this point, we have implemented a reliable gRPC system for communication between the server and the client for two-way certificate verification.
+
+## 4.5.2 Token Certification
+
+The certificate-based authentication described above is for each gRPC link. gRPC also provides authentication support for each gRPC method call, so that rights management is performed on different method accesses based on the user token.
+
+To implement authentication for each gRPC method, you need to implement the grpc.PerRPCCredentials interface:
 
 ```go
-type Authentication struct {
-	User     string
-	Password string
+Type PerRPCCredentials interface {
+// GetRequestMetadata gets the current request metadata, refreshing
+// tokens if required. This should be called by the transport layer on
+// each request, and the data should be populated in headers or other
+// context. If a status code is returned, it will be used as the status
+// for the RPC. uri is the URI of the entry point for the request.
+// When supported by the underlying implementation, ctx can be used for
+// timeout and cancellation.
+// TODO(zhaoq): Define the set of the qualified keys instead of
+// it as an arbitrary string.
+GetRequestMetadata(ctx context.Context, uri ...string) (
+Map[string]string, error,
+)
+// RequireTransportSecurity indicates whether the credentials requires
+// transport security.
+RequireTransportSecurity() bool
+}
+```
+
+Returns the necessary information for authentication in the GetRequestMetadata method. The RequireTransportSecurity method indicates whether the underlying secure link is required. In a real environment, it is recommended that the underlying security-enabled links be required, otherwise the authentication information is at risk of being compromised and tampered with.
+
+We can create an Authentication type to authenticate the username and password:
+
+```go
+Type Authentication struct {
+User string
+Password string
 }
 
-func (a *Authentication) GetRequestMetadata(context.Context, ...string) (
-	map[string]string, error,
+Func (a *Authentication) GetRequestMetadata(context.Context, ...string) (
+Map[string]string, error,
 ) {
-	return map[string]string{"user":a.User, "password": a.Password}, nil
+Return map[string]string{"user":a.User, "password": a.Password}, ​​nil
 }
-func (a *Authentication) RequireTransportSecurity() bool {
-	return false
-}
-```
-
-在GetRequestMetadata方法中，我们返回地认证信息包装login和password两个信息。为了演示代码简单，RequireTransportSecurity方法表示不要求底层使用安全链接。
-
-然后在每次请求gRPC服务时就可以将Token信息作为参数选项传人：
-
-```go
-func main() {
-	auth := Authentication{
-		Login:    "gopher",
-		Password: "password",
-	}
-
-	conn, err := grpc.Dial("localhost"+port, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer conn.Close()
-
-	...
+Func (a *Authentication) RequireTransportSecurity() bool {
+Return false
 }
 ```
 
-通过grpc.WithPerRPCCredentials函数将Authentication对象转为grpc.Dial参数。因为这里没有启用安全链接，需要传人grpc.WithInsecure()表示忽略证书认证。
+In the GetRequestMetadata method, we return the local authentication information to wrap both login and password information. To demonstrate that the code is simple, the RequireTransportSecurity method means that the underlying secure link is not required.
 
-然后在gRPC服务端的每个方法中通过Authentication类型的Auth方法进行身份认证：
+The token information can then be passed as a parameter option each time the gRPC service is requested:
 
 ```go
-type grpcServer struct { auth *Authentication }
+Func main() {
+Auth := Authentication{
+Login: "gopher",
+Password: "password",
+}
 
-func (p *grpcServer) SomeMethod(
-	ctx context.Context, in *HelloRequest,
+Conn, err := grpc.Dial("localhost"+port, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
+If err != nil {
+log.Fatal(err)
+}
+Defer conn.Close()
+
+...
+}
+```
+
+The Authentication object is converted to the grpc.Dial parameter by the grpc.WithPerRPCCredentials function. Since the secure link is not enabled here, you need to pass the grpc.WithInsecure() to ignore the certificate authentication.
+
+Then, in each method of the gRPC server, the identity is authenticated by the Authentication method of the Auth method:
+
+```go
+Type grpcServer struct { auth *Authentication }
+
+Func (p *grpcServer) SomeMethod(
+Ctx context.Context, in *HelloRequest,
 ) (*HelloReply, error) {
-	if err := p.auth.Auth(ctx); err != nil {
-		return nil, err
-	}
-
-	return &HelloReply{Message: "Hello " + in.Name}, nil
+If err := p.auth.Auth(ctx); err != nil {
+Return nil, err
 }
 
-func (a *Authentication) Auth(ctx context.Context) error {
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return fmt.Errorf("missing credentials")
-	}
+Return &HelloReply{Message: "Hello " + in.Name}, nil
+}
 
-	var appid string
-	var appkey string
+Func (a *Authentication) Auth(ctx context.Context) error {
+Md, ok := metadata.FromIncomingContext(ctx)
+If !ok {
+Return fmt.Errorf("missing credentials")
+}
 
-	if val, ok := md["login"]; ok { appid = val[0] }
-	if val, ok := md["password"]; ok { appkey = val[0] }
+Var appid string
+Var appkey string
 
-	if appid != a.Login || appkey != a.Password {
-		return grpc.Errorf(codes.Unauthenticated, "invalid token")
-	}
+If val, ok := md["login"]; ok { appid = val[0] }
+If val, ok := md["password"]; ok { appkey = val[0] }
 
-	return nil
+If appid != a.Login || appkey != a.Password {
+Return grpc.Errorf(codes.Unauthenticated, "invalid token")
+}
+
+Return nil
 }
 ```
 
-详细地认证工作主要在Authentication.Auth方法中完成。首先通过metadata.FromIncomingContext从ctx上下文中获取元信息，然后取出相应的认证信息进行认证。如果认证失败，则返回一个codes.Unauthenticated类型地错误。
+The detailed authentication work is mainly done in the Authentication.Auth method. First, the meta information is obtained from the ctx context through the metadata.FromIncomingContext, and then the corresponding authentication information is taken out for authentication. If the authentication fails, it returns a code.Unauthenticated type error.
 
-## 4.5.3 截取器
+## 4.5.3 Interceptor
 
-gRPC中的grpc.UnaryInterceptor和grpc.StreamInterceptor分别对普通方法和流方法提供了截取器的支持。我们这里简单介绍普通方法的截取器用法。
+The grpc.UnaryInterceptor and grpc.StreamInterceptor in gRPC provide interceptor support for common methods and stream methods, respectively. Here we briefly introduce the use of interceptors for common methods.
 
-要实现普通方法的截取器，需要为grpc.UnaryInterceptor的参数实现一个函数：
+To implement an interceptor for a normal method, you need to implement a function for the argument to grpc.UnaryInterceptor:
 
 ```go
-func filter(ctx context.Context,
-	req interface{}, info *grpc.UnaryServerInfo,
-	handler grpc.UnaryHandler,
+Func filter(ctx context.Context,
+Req interface{}, info *grpc.UnaryServerInfo,
+Handler grpc.UnaryHandler,
 ) (resp interface{}, err error) {
-	log.Println("fileter:", info)
-	return handler(ctx, req)
+log.Println("fileter:", info)
+Return handler(ctx, req)
 }
 ```
 
-函数的ctx和req参数就是每个普通的RPC方法的前两个参数。第三个info参数表示当前是对应的那个gRPC方法，第四个handler参数对应当前的gRPC方法函数。上面的函数中首先是日志输出info参数，然后调用handler对应的gRPC方法函数。
+The ctx and req parameters of the function are the first two parameters of each normal RPC method. The third info parameter indicates that the corresponding gRPC method is currently in use, and the fourth handler parameter corresponds to the current gRPC method function. The first function in the above is the log output info parameter, and then call the corresponding gRPC method function of the handler.
 
-要使用filter截取器函数，只需要在启动gRPC服务时作为参数输入即可：
+To use the filter interceptor function, you only need to enter it as a parameter when starting the gRPC service:
 
 ```go
-server := grpc.NewServer(grpc.UnaryInterceptor(filter))
+Server := grpc.NewServer(grpc.UnaryInterceptor(filter))
 ```
 
-然后服务器在收到每个gRPC方法调用之前，会首先输出一行日志，然后再调用对方的方法。
+Then the server will first output a log before receiving each gRPC method call, and then call the other party's method.
 
-如果截取器函数返回了错误，那么该次gRPC方法调用将被视作失败处理。因此，我们可以在截取器中对输入的参数做一些简单的验证工作。同样，也可以对handler返回的结果做一些验证工作。截取器也非常适合前面对Token认证工作。
+If the interceptor function returns an error, then the gRPC method call will be treated as a failure. Therefore, we can do some simple verification work on the input parameters in the interceptor. Similarly, you can do some verification work on the results returned by the handler. The interceptor is also very suitable for the previous work on Token certification.
 
-下面是截取器增加了对gRPC方法异常的捕获：
+The following is an interceptor that adds an exception to the gRPC method exception:
 
 ```go
-func filter(
-	ctx context.Context, req interface{},
-	info *grpc.UnaryServerInfo,
-	handler grpc.UnaryHandler,
+Func filter(
+Ctx context.Context, req interface{},
+Info *grpc.UnaryServerInfo,
+Handler grpc.UnaryHandler,
 ) (resp interface{}, err error) {
-	log.Println("fileter:", info)
+log.Println("fileter:", info)
 
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("panic: %v", r)
-		}
-	}()
+Defer func() {
+If r := recover(); r != nil {
+Err = fmt.Errorf("panic: %v", r)
+}
+}()
 
-	return handler(ctx, req)
+Return handler(ctx, req)
 }
 ```
 
-不过gRPC框架中只能为每个服务设置一个截取器，因此所有的截取工作只能在一个函数中完成。开源的grpc-ecosystem项目中的go-grpc-middleware包已经基于gRPC对截取器实现了链式截取器的支持。
+However, only one interceptor can be set for each service in the gRPC framework, so all interception can only be done in one function. The go-grpc-middleware package in the open source grpc-ecosystem project has implemented chain interceptor support for interceptors based on gRPC.
 
-以下是go-grpc-middleware包中链式截取器的简单用法
+The following is a simple usage of the chain interceptor in the go-grpc-middleware package.
 
 ```go
-import "github.com/grpc-ecosystem/go-grpc-middleware"
+Import "github.com/grpc-ecosystem/go-grpc-middleware"
 
 myServer := grpc.NewServer(
-	grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-		filter1, filter2, ...
-	)),
-	grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
-		filter1, filter2, ...
-	)),
+grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+Filter1, filter2, ...
+)),
+grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
+Filter1, filter2, ...
+)),
 )
 ```
 
-感兴趣的同学可以参考go-grpc-middleware包的代码。
+Interested students can refer to the code of the go-grpc-middleware package.
 
-## 4.5.4 和Web服务共存
+## 4.5.4 Coexistence with Web Services
 
-gRPC构建在HTTP/2协议之上，因此我们可以将gRPC服务和普通的Web服务架设在同一个端口之上。
+gRPC is built on top of the HTTP/2 protocol, so we can put the gRPC service on the same port as the normal web service.
 
-对于没有启动TLS协议的服务则需要对HTTP2/2特性做适当的调整：
+For services that do not have the TLS protocol enabled, you need to make appropriate adjustments to the HTTP2/2 features:
 
 ```go
-func main() {
-	mux := http.NewServeMux()
+Func main() {
+Mux := http.NewServeMux()
 
-	h2Handler := h2c.NewHandler(mux, &http2.Server{})
-	server = &http.Server{Addr: ":3999", Handler: h2Handler}
-	server.ListenAndServe()
+h2Handler := h2c.NewHandler(mux, &http2.Server{})
+Server = &http.Server{Addr: ":3999", Handler: h2Handler}
+server.ListenAndServe()
 }
 ```
 
-启用普通的https服务器则非常简单：
+Enabling a normal https server is very simple:
 
 ```go
-func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintln(w, "hello")
-	})
+Func main() {
+Mux := http.NewServeMux()
+mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+fmt.Fprintln(w, "hello")
+})
 
-	http.ListenAndServeTLS(port, "server.crt", "server.key",
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			mux.ServeHTTP(w, r)
-			return
-		}),
-	)
+http.ListenAndServeTLS(port, "server.crt", "server.key",
+http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+mux.ServeHTTP(w, r)
+Return
+}),
+)
 }
 ```
 
-而单独启用带证书的gRPC服务也是同样的简单：
+It is equally simple to enable the gRPC service with certificates separately:
 
 ```go
-func main() {
-	creds, err := credentials.NewServerTLSFromFile("server.crt", "server.key")
-	if err != nil {
-		log.Fatal(err)
-	}
+Func main() {
+Creds, err := credentials.NewServerTLSFromFile("server.crt", "server.key")
+If err != nil {
+log.Fatal(err)
+}
 
-	grpcServer := grpc.NewServer(grpc.Creds(creds))
+grpcServer := grpc.NewServer(grpc.Creds(creds))
 
-	...
+...
 }
 ```
 
-因为gRPC服务已经实现了ServeHTTP方法，可以直接作为Web路由处理对象。如果将gRPC和Web服务放在一起，会导致gRPC和Web路径的冲突，在处理时我们需要区分两类服务。
+Because the gRPC service has implemented the ServeHTTP method, it can be directly used as a Web routing processing object. If you put gRPC and Web services together, it will lead to conflicts between gRPC and Web path. We need to distinguish between two types of services when processing.
 
-我们可以通过以下方式生成同时支持Web和gRPC协议的路由处理函数：
+We can generate routing handlers that support both the Web and gRPC protocols in the following ways:
 
 ```go
-func main() {
-	...
+Func main() {
+...
 
-	http.ListenAndServeTLS(port, "server.crt", "server.key",
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.ProtoMajor != 2 {
-				mux.ServeHTTP(w, r)
-				return
-			}
-			if strings.Contains(
-				r.Header.Get("Content-Type"), "application/grpc",
-			) {
-				grpcServer.ServeHTTP(w, r) // gRPC Server
-				return
-			}
+http.ListenAndServeTLS(port, "server.crt", "server.key",
+http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+If r.ProtoMajor != 2 {
+mux.ServeHTTP(w, r)
+Return
+}
+If strings.Contains(
+r.Header.Get("Content-Type"), "application/grpc",
+) {
+grpcServer.ServeHTTP(w, r) // gRPC Server
+Return
+}
 
-			mux.ServeHTTP(w, r)
-			return
-		}),
-	)
+mux.ServeHTTP(w, r)
+Return
+}),
+)
 }
 ```
 
-首先gRPC是建立在HTTP/2版本之上，如果HTTP不是HTTP/2协议则必然无法提供gRPC支持。同时，每个gRPC调用请求的Content-Type类型会被标注为"application/grpc"类型。
+First gRPC is built on top of the HTTP/2 version. If HTTP is not an HTTP/2 protocol, gRPC support will not be available. At the same time, the Content-Type type of each gRPC call request will be marked as "application/grpc" type.
 
-这样我们就可以在gRPC端口上同时提供Web服务了。
-
+This way we can provide web services on the gRPC port at the same time.

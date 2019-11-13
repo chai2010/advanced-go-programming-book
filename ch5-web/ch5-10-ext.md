@@ -1,7 +1,7 @@
-# 5.10 补充说明
+# 5.10 Additional instructions
 
-现代的软件工程是离不开Web的，广义地来讲，Web甚至可以不用非得基于http协议。只要是CS或者BS架构，都可以认为是Web系统。
+Modern software engineering is inseparable from the Web. Broadly speaking, the Web may not even need to be based on the http protocol. As long as it is a CS or BS architecture, it can be considered a Web system.
 
-即使是在看起来非常封闭的游戏系统里，因为玩家们与日俱增的联机需求，也同样会涉及到远程通信，这里面也会涉及到很多Web方面的技术。
+Even in a seemingly closed game system, because of the increasing online needs of players, it also involves remote communication, which also involves a lot of Web technologies.
 
-所以这个时代，Web编程是一个程序员所必须接触的知识领域。无论你的目标是成为架构师，是去创业，或是去当技术顾问。Web方面的知识都会成为你的硬通货。
+So in this era, Web programming is a field of knowledge that programmers must touch. Whether your goal is to become an architect, go to business or be a technical consultant. Knowledge of the web will become your hard currency.
