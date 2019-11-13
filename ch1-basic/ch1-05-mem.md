@@ -1,396 +1,396 @@
-# 1.5 面向并发的内存模型
+# 1.5 Concurrent-oriented memory model
 
-在早期，CPU都是以单核的形式顺序执行机器指令。Go语言的祖先C语言正是这种顺序编程语言的代表。顺序编程语言中的顺序是指：所有的指令都是以串行的方式执行，在相同的时刻有且仅有一个CPU在顺序执行程序的指令。
+In the early days, the CPU executed machine instructions in the form of a single core. The ancestor C language of the Go language is the representative of this sequential programming language. The order in a sequential programming language means that all instructions are executed in a serial manner, and there is only one CPU executing instructions of the program at the same time.
 
-随着处理器技术的发展，单核时代以提升处理器频率来提高运行效率的方式遇到了瓶颈，目前各种主流的CPU频率基本被锁定在了3GHZ附近。单核CPU的发展的停滞，给多核CPU的发展带来了机遇。相应地，编程语言也开始逐步向并行化的方向发展。Go语言正是在多核和网络化的时代背景下诞生的原生支持并发的编程语言。
+With the development of processor technology, the single-core era has encountered bottlenecks in ways to increase processor frequency to improve operational efficiency. Currently, various mainstream CPU frequencies are basically locked in the vicinity of 3GHZ. The stagnation of the development of single-core CPUs has brought opportunities for the development of multi-core CPUs. Accordingly, programming languages ​​are beginning to evolve in the direction of parallelization. The Go language is a native programming language that supports concurrency in the context of multi-core and networking.
 
-常见的并行编程有多种模型，主要有多线程、消息传递等。从理论上来看，多线程和基于消息的并发编程是等价的。由于多线程并发模型可以自然对应到多核的处理器，主流的操作系统因此也都提供了系统级的多线程支持，同时从概念上讲多线程似乎也更直观，因此多线程编程模型逐步被吸纳到主流的编程语言特性或语言扩展库中。而主流编程语言对基于消息的并发编程模型支持则相比较少，Erlang语言是支持基于消息传递并发编程模型的代表者，它的并发体之间不共享内存。Go语言是基于消息并发模型的集大成者，它将基于CSP模型的并发编程内置到了语言中，通过一个go关键字就可以轻易地启动一个Goroutine，与Erlang不同的是Go语言的Goroutine之间是共享内存的。
+Common parallel programming has a variety of models, mainly multi-threading, messaging, and so on. In theory, multithreading and message-based concurrent programming are equivalent. Since the multi-threaded concurrency model can naturally correspond to multi-core processors, the mainstream operating systems therefore provide system-level multi-threading support, and conceptually multi-threading seems to be more intuitive, so the multi-threaded programming model is gradually absorbed. Go to mainstream programming language features or language extension libraries. The mainstream programming language supports less of the message-based concurrent programming model. The Erlang language supports the representative of the message-based concurrent programming model, and its concurrency does not share memory. The Go language is a collection of message-concurrency models. It integrates CSP-based concurrency programming into the language. It is easy to start a Goroutine with a go keyword. Unlike Erlang, Gor language is shared between Go languages. Memory.
 
-## 1.5.1 Goroutine和系统线程
+## 1.5.1 Goroutine and system threads
 
-Goroutine是Go语言特有的并发体，是一种轻量级的线程，由go关键字启动。在真实的Go语言的实现中，goroutine和系统线程也不是等价的。尽管两者的区别实际上只是一个量的区别，但正是这个量变引发了Go语言并发编程质的飞跃。
+Goroutine is a unique concurrency of the Go language. It is a lightweight thread that is launched by the go keyword. In real Go implementations, goroutines and system threads are not equivalent. Although the difference between the two is actually only a quantitative difference, it is this quantitative change that has led to a qualitative leap in Go language programming.
 
-首先，每个系统级线程都会有一个固定大小的栈（一般默认可能是2MB），这个栈主要用来保存函数递归调用时参数和局部变量。固定了栈的大小导致了两个问题：一是对于很多只需要很小的栈空间的线程来说是一个巨大的浪费，二是对于少数需要巨大栈空间的线程来说又面临栈溢出的风险。针对这两个问题的解决方案是：要么降低固定的栈大小，提升空间的利用率；要么增大栈的大小以允许更深的函数递归调用，但这两者是没法同时兼得的。相反，一个Goroutine会以一个很小的栈启动（可能是2KB或4KB），当遇到深度递归导致当前栈空间不足时，Goroutine会根据需要动态地伸缩栈的大小（主流实现中栈的最大值可达到1GB）。因为启动的代价很小，所以我们可以轻易地启动成千上万个Goroutine。
+First, each system-level thread will have a fixed-size stack (generally the default may be 2MB). This stack is mainly used to store parameters and local variables when the function is recursively called. Fixed the size of the stack leads to two problems: one is a huge waste for many threads that only need a small stack space, and the other is the risk of stack overflow for a few threads that need huge stack space. . The solution to these two problems is to either reduce the fixed stack size and increase the space utilization; or increase the size of the stack to allow deeper function recursive calls, but the two cannot be combined at the same time. Instead, a Goroutine will start with a small stack (possibly 2KB or 4KB), and when it encounters deep recursion, the current stack space is insufficient, Goroutine will dynamically scale the stack as needed (the maximum stack size in the mainstream implementation) Can reach 1GB). Because the cost of booting is small, we can easily launch thousands of Goroutines.
 
-Go的运行时还包含了其自己的调度器，这个调度器使用了一些技术手段，可以在n个操作系统线程上多工调度m个Goroutine。Go调度器的工作和内核的调度是相似的，但是这个调度器只关注单独的Go程序中的Goroutine。Goroutine采用的是半抢占式的协作调度，只有在当前Goroutine发生阻塞时才会导致调度；同时发生在用户态，调度器会根据具体函数只保存必要的寄存器，切换的代价要比系统线程低得多。运行时有一个`runtime.GOMAXPROCS`变量，用于控制当前运行正常非阻塞Goroutine的系统线程数目。
+Go's runtime also includes its own scheduler, which uses a number of techniques to multiplex m Goroutines on n operating system threads. The work of the Go scheduler is similar to the scheduling of the kernel, but this scheduler only focuses on Goroutine in a separate Go program. Goroutine uses semi-preemptive cooperative scheduling, which only causes scheduling when the current Goroutine is blocked. At the same time, it occurs in the user mode. The scheduler only saves the necessary registers according to the specific function, and the switching cost is lower than the system thread. many. The runtime has a `runtime.GOMAXPROCS` variable that controls the number of system threads that are currently running a normal non-blocking Goroutine.
 
-在Go语言中启动一个Goroutine不仅和调用函数一样简单，而且Goroutine之间调度代价也很低，这些因素极大地促进了并发编程的流行和发展。
+Starting a Goroutine in Go is not only as simple as calling a function, but also the cost of scheduling between Goroutines. These factors greatly contribute to the popularity and development of concurrent programming.
 
-## 1.5.2 原子操作
+## 1.5.2 Atomic operation
 
-所谓的原子操作就是并发编程中“最小的且不可并行化”的操作。通常，如果多个并发体对同一个共享资源进行的操作是原子的话，那么同一时刻最多只能有一个并发体对该资源进行操作。从线程角度看，在当前线程修改共享资源期间，其它的线程是不能访问该资源的。原子操作对于多线程并发编程模型来说，不会发生有别于单线程的意外情况，共享资源的完整性可以得到保证。
+The so-called atomic operation is the "minimum and non-parallelizable" operation in concurrent programming. In general, if multiple concurrent operations on the same shared resource are atomic, then at most one concurrent entity can operate on the resource at the same time. From a thread perspective, other threads cannot access the resource while the current thread is modifying the shared resource. Atomic operations For multi-threaded concurrent programming models, there is no surprise that is different from single-threading, and the integrity of shared resources can be guaranteed.
 
-一般情况下，原子操作都是通过“互斥”访问来保证的，通常由特殊的CPU指令提供保护。当然，如果仅仅是想模拟下粗粒度的原子操作，我们可以借助于`sync.Mutex`来实现：
+In general, atomic operations are guaranteed by "mutually exclusive" access, usually protected by special CPU instructions. Of course, if you just want to simulate a coarse-grained atomic operation, we can do so with the help of `sync.Mutex`:
 
 ```go
-import (
-	"sync"
+Import (
+"sync"
 )
 
-var total struct {
-	sync.Mutex
-	value int
+Var total struct {
+sync.Mutex
+Value int
 }
 
-func worker(wg *sync.WaitGroup) {
-	defer wg.Done()
+Func worker(wg *sync.WaitGroup) {
+Defer wg.Done()
 
-	for i := 0; i <= 100; i++ {
-		total.Lock()
-		total.value += i
-		total.Unlock()
-	}
+For i := 0; i <= 100; i++ {
+total.Lock()
+Total.value += i
+total.Unlock()
+}
 }
 
-func main() {
-	var wg sync.WaitGroup
-	wg.Add(2)
-	go worker(&wg)
-	go worker(&wg)
-	wg.Wait()
+Func main() {
+Var wg sync.WaitGroup
+wg.Add(2)
+Go worker(&wg)
+Go worker(&wg)
+wg.Wait()
 
-	fmt.Println(total.value)
+fmt.Println(total.value)
 }
 ```
 
-在`worker`的循环中，为了保证`total.value += i`的原子性，我们通过`sync.Mutex`加锁和解锁来保证该语句在同一时刻只被一个线程访问。对于多线程模型的程序而言，进出临界区前后进行加锁和解锁都是必须的。如果没有锁的保护，`total`的最终值将由于多线程之间的竞争而可能会不正确。
+In the `worker` loop, in order to guarantee the atomicity of `total.value += i`, we lock and unlock by `sync.Mutex` to ensure that the statement is only accessed by one thread at a time. For programs with a multi-threaded model, it is necessary to lock and unlock before and after entering and leaving the critical section. Without the protection of locks, the final value of `total` will probably be incorrect due to competition between multiple threads.
 
-用互斥锁来保护一个数值型的共享资源，麻烦且效率低下。标准库的`sync/atomic`包对原子操作提供了丰富的支持。我们可以重新实现上面的例子：
+Using a mutex to protect a numeric shared resource is cumbersome and inefficient. The standard library's `sync/atomic` package provides rich support for atomic operations. We can reimplement the above example:
 
 ```go
-import (
-	"sync"
-	"sync/atomic"
+Import (
+"sync"
+"sync/atomic"
 )
 
-var total uint64
+Var total uint64
 
-func worker(wg *sync.WaitGroup) {
-	defer wg.Done()
+Func worker(wg *sync.WaitGroup) {
+Defer wg.Done()
 
-	var i uint64
-	for i = 0; i <= 100; i++ {
-		atomic.AddUint64(&total, i)
-	}
+Var i uint64
+For i = 0; i <= 100; i++ {
+atomic.AddUint64(&total, i)
+}
 }
 
-func main() {
-	var wg sync.WaitGroup
-	wg.Add(2)
+Func main() {
+Var wg sync.WaitGroup
+wg.Add(2)
 
-	go worker(&wg)
-	go worker(&wg)
-	wg.Wait()
+Go worker(&wg)
+Go worker(&wg)
+wg.Wait()
 }
 ```
 
-`atomic.AddUint64`函数调用保证了`total`的读取、更新和保存是一个原子操作，因此在多线程中访问也是安全的。
+The `atomic.AddUint64` function call guarantees that reading, updating, and saving of `total` is an atomic operation, so accessing in multiple threads is also safe.
 
-原子操作配合互斥锁可以实现非常高效的单件模式。互斥锁的代价比普通整数的原子读写高很多，在性能敏感的地方可以增加一个数字型的标志位，通过原子检测标志位状态降低互斥锁的使用次数来提高性能。
+Atomic operation with a mutex can achieve a very efficient single-piece mode. The cost of a mutex is much higher than that of a normal integer. You can add a numeric flag in a performance-sensitive place to improve performance by reducing the number of mutex locks by atomic detection.
 
 ```go
-type singleton struct {}
+Type singleton struct {}
 
-var (
-	instance    *singleton
-	initialized uint32
-	mu          sync.Mutex
+Var (
+Instance *singleton
+Initialized uint32
+Mu sync.Mutex
 )
 
-func Instance() *singleton {
-	if atomic.LoadUint32(&initialized) == 1 {
-		return instance
-	}
+Func Instance() *singleton {
+If atomic.LoadUint32(&initialized) == 1 {
+Return instance
+}
 
-	mu.Lock()
-	defer mu.Unlock()
+mu.Lock()
+Defer mu.Unlock()
 
-	if instance == nil {
-		defer atomic.StoreUint32(&initialized, 1)
-		instance = &singleton{}
-	}
-	return instance
+If instance == nil {
+Defer atomic.StoreUint32(&initialized, 1)
+Instance = &singleton{}
+}
+Return instance
 }
 ```
 
-我们可以将通用的代码提取出来，就成了标准库中`sync.Once`的实现：
+We can extract the generic code and become the implementation of `sync.Once` in the standard library:
 
 ```go
-type Once struct {
-	m    Mutex
-	done uint32
+Type Once struct {
+m Mutex
+Done uint32
 }
 
-func (o *Once) Do(f func()) {
-	if atomic.LoadUint32(&o.done) == 1 {
-		return
-	}
+Func (o *Once) Do(f func()) {
+If atomic.LoadUint32(&o.done) == 1 {
+Return
+}
 
-	o.m.Lock()
-	defer o.m.Unlock()
+o.m.Lock()
+Defer o.m.Unlock()
 
-	if o.done == 0 {
-		defer atomic.StoreUint32(&o.done, 1)
-		f()
-	}
+If o.done == 0 {
+Defer atomic.StoreUint32(&o.done, 1)
+f()
+}
 }
 ```
 
-基于`sync.Once`重新实现单件模式：
+Reimplementing the singleton mode based on `sync.Once`:
 
 ```go
-var (
-	instance *singleton
-	once     sync.Once
+Var (
+Instance *singleton
+Once sync.Once
 )
 
-func Instance() *singleton {
-	once.Do(func() {
-		instance = &singleton{}
-	})
-	return instance
+Func Instance() *singleton {
+once.Do(func() {
+Instance = &singleton{}
+})
+Return instance
 }
 ```
 
-`sync/atomic`包对基本的数值类型及复杂对象的读写都提供了原子操作的支持。`atomic.Value`原子对象提供了`Load`和`Store`两个原子方法，分别用于加载和保存数据，返回值和参数都是`interface{}`类型，因此可以用于任意的自定义复杂类型。
+The `sync/atomic` package provides atomic operations support for basic numeric types and reading and writing complex objects. The `atomic.Value` atomic object provides two atomic methods `Load` and `Store` for loading and saving data. The return value and parameters are both `interface{}` types, so they can be used for any customization. Complex type.
 
 ```go
-var config atomic.Value // 保存当前配置信息
+Var config atomic.Value // save the current configuration information
 
-// 初始化配置信息
+/ / Initialize the configuration information
 config.Store(loadConfig())
 
-// 启动一个后台线程, 加载更新后的配置信息
-go func() {
-	for {
-		time.Sleep(time.Second)
-		config.Store(loadConfig())
-	}
+/ / Start a background thread, load the updated configuration information
+Go func() {
+For {
+time.Sleep(time.Second)
+config.Store(loadConfig())
+}
 }()
 
-// 用于处理请求的工作者线程始终采用最新的配置信息
-for i := 0; i < 10; i++ {
-	go func() {
-		for r := range requests() {
-			c := config.Load()
-			// ...
-		}
-	}()
+// The worker thread used to process the request always uses the latest configuration information
+For i := 0; i < 10; i++ {
+Go func() {
+For r := range requests() {
+c := config.Load()
+// ...
+}
+}()
 }
 ```
 
-这是一个简化的生产者消费者模型：后台线程生成最新的配置信息；前台多个工作者线程获取最新的配置信息。所有线程共享配置信息资源。
+This is a simplified producer consumer model: the background thread generates the latest configuration information; the front-end multiple worker threads get the latest configuration information. All threads share configuration information resources.
 
-## 1.5.3 顺序一致性内存模型
+## 1.5.3 Sequential Consistent Memory Model
 
-如果只是想简单地在线程之间进行数据同步的话，原子操作已经为编程人员提供了一些同步保障。不过这种保障有一个前提：顺序一致性的内存模型。要了解顺序一致性，我们先看看一个简单的例子：
+If you just want to synchronize data between threads, atomic operations have provided some synchronization guarantees for programmers. However, this guarantee has a premise: a sequential consistency memory model. To understand the order consistency, let's take a look at a simple example:
 
 ```go
-var a string
-var done bool
+Var a string
+Var done bool
 
-func setup() {
-	a = "hello, world"
-	done = true
+Func setup() {
+a = "hello, world"
+Done = true
 }
 
-func main() {
-	go setup()
-	for !done {}
-	print(a)
+Func main() {
+Go setup()
+For !done {}
+Print(a)
 }
 ```
 
-我们创建了`setup`线程，用于对字符串`a`的初始化工作，初始化完成之后设置`done`标志为`true`。`main`函数所在的主线程中，通过`for !done {}`检测`done`变为`true`时，认为字符串初始化工作完成，然后进行字符串的打印工作。
+We created the `setup` thread for initializing the string `a`. After the initialization is complete, set the `done` flag to `true`. In the main thread where the `main` function is located, when `for !done {}` detects that `done` becomes `true`, the string initialization is considered complete, and then the string is printed.
 
-但是Go语言并不保证在`main`函数中观测到的对`done`的写入操作发生在对字符串`a`的写入的操作之后，因此程序很可能打印一个空字符串。更糟糕的是，因为两个线程之间没有同步事件，`setup`线程对`done`的写入操作甚至无法被`main`线程看到，`main`函数有可能陷入死循环中。
+However, the Go language does not guarantee that the write operation to `done` observed in the `main` function occurs after the write operation to the string `a`, so the program is likely to print an empty string. Worse, because there is no synchronization event between the two threads, the `setup` thread's write operation to `done` can't even be seen by the `main` thread, and the `main` function may fall into an infinite loop.
 
-在Go语言中，同一个Goroutine线程内部，顺序一致性内存模型是得到保证的。但是不同的Goroutine之间，并不满足顺序一致性内存模型，需要通过明确定义的同步事件来作为同步的参考。如果两个事件不可排序，那么就说这两个事件是并发的。为了最大化并行，Go语言的编译器和处理器在不影响上述规定的前提下可能会对执行语句重新排序（CPU也会对一些指令进行乱序执行）。
+In Go, the same sequential memory model is guaranteed inside the same Goroutine thread. However, between different Goroutines, the sequential consistency memory model is not satisfied, and a well-defined synchronization event is needed as a reference for synchronization. If two events are not sortable, then the two events are said to be concurrent. In order to maximize parallelism, the Go language compiler and processor may reorder the execution statements without affecting the above rules (the CPU will also perform some instructions out of order).
 
-因此，如果在一个Goroutine中顺序执行`a = 1; b = 2;`两个语句，虽然在当前的Goroutine中可以认为`a = 1;`语句先于`b = 2;`语句执行，但是在另一个Goroutine中`b = 2;`语句可能会先于`a = 1;`语句执行，甚至在另一个Goroutine中无法看到它们的变化（可能始终在寄存器中）。也就是说在另一个Goroutine看来, `a = 1; b = 2;`两个语句的执行顺序是不确定的。如果一个并发程序无法确定事件的顺序关系，那么程序的运行结果往往会有不确定的结果。比如下面这个程序：
+Therefore, if you execute `a = 1; b = 2;` two statements sequentially in a Goroutine, although the current Goroutine can be considered as `a = 1;` statement before the `b = 2;` statement, but In another Goroutine, the `b = 2;` statement may be executed before the `a = 1;` statement, and even in another Goroutine it is not visible (possibly always in the register). That is to say, in another Goroutine's view, `a = 1; b = 2;` The execution order of the two statements is undefined. If a concurrent program cannot determine the order relationship of events, then The results of the sequence often have uncertain results. For example, the following program:
 
 
 ```go
-func main() {
-	go println("你好, 世界")
+Func main() {
+Go println("Hello, World")
 }
 ```
 
-根据Go语言规范，`main`函数退出时程序结束，不会等待任何后台线程。因为Goroutine的执行和`main`函数的返回事件是并发的，谁都有可能先发生，所以什么时候打印，能否打印都是未知的。
+According to the Go language specification, the program ends when the `main` function exits, and does not wait for any background threads. Because the execution of Goroutine and the return event of the `main` function are concurrent, anyone can happen first, so when to print, whether it can be printed is unknown.
 
-用前面的原子操作并不能解决问题，因为我们无法确定两个原子操作之间的顺序。解决问题的办法就是通过同步原语来给两个事件明确排序：
+Using the previous atomic operation does not solve the problem because we cannot determine the order between the two atomic operations. The solution to the problem is to explicitly sort the two events by synchronizing the primitives:
 
 ```go
-func main() {
-	done := make(chan int)
+Func main() {
+Done := make(chan int)
 
-	go func(){
-		println("你好, 世界")
-		done <- 1
-	}()
+Go func(){
+Println("Hello, World")
+Done <- 1
+}()
 
-	<-done
+<-done
 }
 ```
 
-当`<-done`执行时，必然要求`done <- 1`也已经执行。根据同一个Gorouine依然满足顺序一致性规则，我们可以判断当`done <- 1`执行时，`println("你好, 世界")`语句必然已经执行完成了。因此，现在的程序确保可以正常打印结果。
+When `<-done` is executed, it is necessary to require `done <- 1` to be executed. According to the same Gorouine still meets the order consistency rules, we can judge that when `done <- 1` is executed, the `println("hello, world")` statement must have been executed. Therefore, the current program ensures that the results can be printed normally.
 
-当然，通过`sync.Mutex`互斥量也是可以实现同步的：
+Of course, synchronization can also be achieved with the `sync.Mutex` mutex:
 
 ```go
-func main() {
-	var mu sync.Mutex
+Func main() {
+Var mu sync.Mutex
 
-	mu.Lock()
-	go func(){
-		println("你好, 世界")
-		mu.Unlock()
-	}()
+mu.Lock()
+Go func(){
+Println("Hello, World")
+mu.Unlock()
+}()
 
-	mu.Lock()
+mu.Lock()
 }
 ```
 
-可以确定后台线程的`mu.Unlock()`必然在`println("你好, 世界")`完成后发生（同一个线程满足顺序一致性），`main`函数的第二个`mu.Lock()`必然在后台线程的`mu.Unlock()`之后发生（`sync.Mutex`保证），此时后台线程的打印工作已经顺利完成了。
+It can be determined that the `mu.Unlock()` of the background thread must occur after the completion of `println("hello, world") (the same thread satisfies the order consistency), the second `mu.Lock of the `main` function. () must occur after the background thread's `mu.Unlock()` (`sync.Mutex` guarantee), at this point the background thread's print job has been successfully completed.
 
-## 1.5.4 初始化顺序
+## 1.5.4 Initialization sequence
 
-前面函数章节中我们已经简单介绍过程序的初始化顺序，这是属于Go语言面向并发的内存模型的基础规范。
+In the previous function chapter, we have briefly introduced the initialization sequence of the program, which is the basic specification of the Go language-oriented concurrent memory model.
 
-Go程序的初始化和执行总是从`main.main`函数开始的。但是如果`main`包里导入了其它的包，则会按照顺序将它们包含进`main`包里（这里的导入顺序依赖具体实现，一般可能是以文件名或包路径名的字符串顺序导入）。如果某个包被多次导入的话，在执行的时候只会导入一次。当一个包被导入时，如果它还导入了其它的包，则先将其它的包包含进来，然后创建和初始化这个包的常量和变量。然后就是调用包里的`init`函数，如果一个包有多个`init`函数的话，实现可能是以文件名的顺序调用，同一个文件内的多个`init`则是以出现的顺序依次调用（`init`不是普通函数，可以定义有多个，所以不能被其它函数调用）。最终，在`main`包的所有包常量、包变量被创建和初始化，并且`init`函数被执行后，才会进入`main.main`函数，程序开始正常执行。下图是Go程序函数启动顺序的示意图：
+The initialization and execution of the Go program always starts with the `main.main` function. However, if other packages are imported into the `main` package, they will be included in the `main` package in order. The import order here depends on the implementation. It may be imported in the string order of the file name or package path name. ). If a package is imported multiple times, it will only be imported once during execution. When a package is imported, if it also imports other packages, it first includes the other packages, then creates and initializes the constants and variables of the package. Then is to call the `init` function in the package. If a package has multiple `init` functions, the implementation may be called in the order of file names. Multiple `init`s in the same file are in the order in which they appear. Call (`init` is not a normal function, you can define more than one, so it can't be called by other functions). Finally, all package constants, package variables in the `main` package are created and initialized, and the `init` function is executed before the `main.main` function is entered and the program starts executing normally. The following figure is a schematic diagram of the startup sequence of the Go program function:
 
 ![](../images/ch1-12-init.ditaa.png)
 
-*图 1-12 包初始化流程*
+*Figure 1-12 Package Initialization Process*
 
-要注意的是，在`main.main`函数执行之前所有代码都运行在同一个Goroutine中，也是运行在程序的主系统线程中。如果某个`init`函数内部用go关键字启动了新的Goroutine的话，新的Goroutine和`main.main`函数是并发执行的。
+It should be noted that all code runs in the same Goroutine before the main.main` function is executed, and is also running in the main system thread of the program. If a `init` function internally starts a new Goroutine with the go keyword, the new Goroutine and `main.main` functions are executed concurrently.
 
-因为所有的`init`函数和`main`函数都是在主线程完成，它们也是满足顺序一致性模型的。
+Because all of the `init` and `main` functions are done in the main thread, they also satisfy the order consistency model.
 
-## 1.5.5 Goroutine的创建
+## 1.5.5 Goroutine creation
 
-`go`语句会在当前Goroutine对应函数返回前创建新的Goroutine. 例如:
-
-
-```go
-var a string
-
-func f() {
-	print(a)
-}
-
-func hello() {
-	a = "hello, world"
-	go f()
-}
-```
-
-执行`go f()`语句创建Goroutine和`hello`函数是在同一个Goroutine中执行, 根据语句的书写顺序可以确定Goroutine的创建发生在`hello`函数返回之前, 但是新创建Goroutine对应的`f()`的执行事件和`hello`函数返回的事件则是不可排序的，也就是并发的。调用`hello`可能会在将来的某一时刻打印`"hello, world"`，也很可能是在`hello`函数执行完成后才打印。
-
-## 1.5.6 基于Channel的通信
-
-Channel通信是在Goroutine之间进行同步的主要方法。在无缓存的Channel上的每一次发送操作都有与其对应的接收操作相配对，发送和接收操作通常发生在不同的Goroutine上（在同一个Goroutine上执行2个操作很容易导致死锁）。**无缓存的Channel上的发送操作总在对应的接收操作完成前发生.**
+The `go` statement will create a new Goroutine before the current Goroutine counterpart returns. For example:
 
 
 ```go
-var done = make(chan bool)
-var msg string
+Var a string
 
-func aGoroutine() {
-	msg = "你好, 世界"
-	done <- true
+Func f() {
+Print(a)
 }
 
-func main() {
-	go aGoroutine()
-	<-done
-	println(msg)
+Func hello() {
+a = "hello, world"
+Go f()
 }
 ```
 
-可保证打印出“hello, world”。该程序首先对`msg`进行写入，然后在`done`管道上发送同步信号，随后从`done`接收对应的同步信号，最后执行`println`函数。
+Executing the `go f()` statement creates Goroutine and `hello` functions that are executed in the same Goroutine. Depending on the order in which the statements are written, it can be determined that Goroutine creation occurs before the `hello` function returns, but the newly created Goroutine corresponds to `f The execution events of () and the events returned by the `hello` function are not sortable, that is, concurrent. Calling `hello` may print `"hello, world"` at some point in the future, or it may be printed after the `hello` function has finished executing.
 
-若在关闭Channel后继续从中接收数据，接收者就会收到该Channel返回的零值。因此在这个例子中，用`close(c)`关闭管道代替`done <- false`依然能保证该程序产生相同的行为。
+## 1.5.6 Channel-based communication
+
+Channel communication is the primary method of synchronizing between Goroutines. Each send operation on an unbuffered Channel is paired with its corresponding receive operation. Send and receive operations usually occur on different Goroutines (two operations on the same Goroutine can easily lead to deadlocks). **Send operations on uncached channels always occur before the corresponding receive operation is completed.**
+
 
 ```go
-var done = make(chan bool)
-var msg string
+Var done = make(chan bool)
+Var msg string
 
-func aGoroutine() {
-	msg = "你好, 世界"
-	close(done)
+Func aGoroutine() {
+Msg = "Hello, the world"
+Done <- true
 }
 
-func main() {
-	go aGoroutine()
-	<-done
-	println(msg)
+Func main() {
+Go aGoroutine()
+<-done
+Println(msg)
 }
 ```
 
-**对于从无缓冲Channel进行的接收，发生在对该Channel进行的发送完成之前。**
+Guaranteed to print out "hello, world". The program first writes to `msg`, then sends a sync signal on the `done` pipeline, then receives the corresponding sync signal from `done`, and finally executes the `println` function.
 
-基于上面这个规则可知，交换两个Goroutine中的接收和发送操作也是可以的（但是很危险）：
+If the data is received from the channel after the channel is closed, the receiver will receive the zero value returned by the channel. So in this example, closing the pipe with `close(c)` instead of `done <- false` still guarantees that the program will behave the same.
 
 ```go
-var done = make(chan bool)
-var msg string
+Var done = make(chan bool)
+Var msg string
 
-func aGoroutine() {
-	msg = "hello, world"
-	<-done
+Func aGoroutine() {
+Msg = "Hello, the world"
+Close(done)
 }
-func main() {
-	go aGoroutine()
-	done <- true
-	println(msg)
+
+Func main() {
+Go aGoroutine()
+<-done
+Println(msg)
 }
 ```
 
-也可保证打印出“hello, world”。因为`main`线程中`done <- true`发送完成前，后台线程`<-done`接收已经开始，这保证`msg = "hello, world"`被执行了，所以之后`println(msg)`的msg已经被赋值过了。简而言之，后台线程首先对`msg`进行写入，然后从`done`中接收信号，随后`main`线程向`done`发送对应的信号，最后执行`println`函数完成。但是，若该Channel为带缓冲的（例如，`done = make(chan bool, 1)`），`main`线程的`done <- true`接收操作将不会被后台线程的`<-done`接收操作阻塞，该程序将无法保证打印出“hello, world”。
+** For reception from an unbuffered channel, occurs before the transmission to the Channel is completed. **
 
-对于带缓冲的Channel，**对于Channel的第`K`个接收完成操作发生在第`K+C`个发送操作完成之前，其中`C`是Channel的缓存大小。** 如果将`C`设置为0自然就对应无缓存的Channel，也即使第K个接收完成在第K个发送完成之前。因为无缓存的Channel只能同步发1个，也就简化为前面无缓存Channel的规则：**对于从无缓冲Channel进行的接收，发生在对该Channel进行的发送完成之前。**
-
-我们可以根据控制Channel的缓存大小来控制并发执行的Goroutine的最大数目, 例如:
+Based on the above rules, it is possible to exchange receive and send operations in two Goroutines (but it is dangerous):
 
 ```go
-var limit = make(chan int, 3)
+Var done = make(chan bool)
+Var msg string
 
-func main() {
-	for _, w := range work {
-		go func() {
-			limit <- 1
-			w()
-			<-limit
-		}()
-	}
-	select{}
+Func aGoroutine() {
+Msg = "hello, world"
+<-done
+}
+Func main() {
+Go aGoroutine()
+Done <- true
+Println(msg)
 }
 ```
 
-最后一句`select{}`是一个空的管道选择语句，该语句会导致`main`线程阻塞，从而避免程序过早退出。还有`for{}`、`<-make(chan int)`等诸多方法可以达到类似的效果。因为`main`线程被阻塞了，如果需要程序正常退出的话可以通过调用`os.Exit(0)`实现。
+It is also guaranteed to print "hello, world". Because the `done <- true` in the `main` thread is sent, the background thread `<-done` has already started, which guarantees that `msg = "hello, world"` is executed, so after `println(msg)` The msg has been assigned. In short, the background thread first writes to `msg`, then receives the signal from `done`, then the `main` thread sends the corresponding signal to `done`, and finally executes the `println` function. However, if the Channel is buffered (for example, `done = make(chan bool, 1)`), the `done <- true` receive operation of the `main` thread will not be ``ddone` by the background thread. The receiving operation is blocked and the program cannot guarantee to print out "hello, world".
 
-## 1.5.7 不靠谱的同步
+For buffered Channels, the `k` receive completion operations for the Channel occur before the completion of the `K+C' transmit operations, where `C` is the buffer size of the Channel. ** If `C` is set to 0, it corresponds to the unbuffered Channel, even if the Kth reception is completed before the Kth transmission is completed. Since the unbuffered Channel can only be sent synchronously, it is reduced to the rule of the previously unbuffered Channel: ** For the reception from the unbuffered Channel, before the transmission to the Channel is completed. **
 
-前面我们已经分析过，下面代码无法保证正常打印结果。实际的运行效果也是大概率不能正常输出结果。
+We can control the maximum number of concurrent Goroutines based on the size of the control channel's cache, for example:
 
 ```go
-func main() {
-	go println("你好, 世界")
+Var limit = make(chan int, 3)
+
+Func main() {
+For _, w := range work {
+Go func() {
+Limit <- 1
+w()
+<-limit
+}()
+}
+Select{}
 }
 ```
 
-刚接触Go语言的话，可能希望通过加入一个随机的休眠时间来保证正常的输出：
+The last sentence `select{}` is an empty pipe select statement that causes the `main` thread to block, preventing the program from exiting prematurely. There are also many methods such as `for{}`, `<-make(chan int)`, which can achieve similar effects. Because the `main` thread is blocked, it can be implemented by calling `os.Exit(0)` if the program needs to exit normally.
+
+## 1.5.7 Unreliable synchronization
+
+As we have analyzed before, the following code does not guarantee normal print results. The actual running effect is also a large probability that the result cannot be output normally.
 
 ```go
-func main() {
-	go println("hello, world")
-	time.Sleep(time.Second)
+Func main() {
+Go println("Hello, World")
 }
 ```
 
-因为主线程休眠了1秒钟，因此这个程序大概率是可以正常输出结果的。因此，很多人会觉得这个程序已经没有问题了。但是这个程序是不稳健的，依然有失败的可能性。我们先假设程序是可以稳定输出结果的。因为Go线程的启动是非阻塞的，`main`线程显式休眠了1秒钟退出导致程序结束，我们可以近似地认为程序总共执行了1秒多时间。现在假设`println`函数内部实现休眠的时间大于`main`线程休眠的时间的话，就会导致矛盾：后台线程既然先于`main`线程完成打印，那么执行时间肯定是小于`main`线程执行时间的。当然这是不可能的。
+Just contact Go, you may want to ensure normal output by adding a random sleep time:
 
-严谨的并发程序的正确性不应该是依赖于CPU的执行速度和休眠时间等不靠谱的因素的。严谨的并发也应该是可以静态推导出结果的：根据线程内顺序一致性，结合Channel或`sync`同步事件的可排序性来推导，最终完成各个线程各段代码的偏序关系排序。如果两个事件无法根据此规则来排序，那么它们就是并发的，也就是执行先后顺序不可靠的。
+```go
+Func main() {
+Go println("hello, world")
+time.Sleep(time.Second)
+}
+```
 
-解决同步问题的思路是相同的：使用显式的同步。
+Because the main thread sleeps for 1 second, this program has a high probability that it can output the result normally. Therefore, many people will feel that this program is no longer a problem. But this program is not stable and there is still the possibility of failure. Let us first assume that the program can stabilize the output. Because the start of the Go thread is non-blocking, the `main` thread explicitly sleeps for 1 second and the program ends. We can approximate that the program has executed more than 1 second. Now suppose that the internal sleep of the `println` function is longer than the sleep time of the `main` thread, which will lead to contradiction: since the background thread finishes printing before the `main` thread, the execution time is definitely less than the `main` thread execution time. of. Of course this is impossible.
+
+The correctness of a rigorous concurrent program should not be dependent on unreliable factors such as CPU execution speed and sleep time. Strict concurrency should also be able to statically derive results: according to the order consistency within the thread, combined with the sortability of the Channel or `sync` synchronization events to derive, and finally complete the ordering of the partial order of each thread of each thread. If two events cannot be sorted according to this rule, then they are concurrent, that is, the execution order is not reliable.
+
+The idea to solve the synchronization problem is the same: use explicit synchronization.

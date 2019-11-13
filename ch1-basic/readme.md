@@ -1,7 +1,7 @@
-# 第1章 语言基础
+# Chapter 1 Language Foundation
 
-*我不知道，你过去10年为什么不快乐。但相信我，抛掉过去的沉重，使用Go语言，体会最初的快乐！——469856321*
+*I don't know why you have been unhappy for the past 10 years. But believe me, throw away the heavyness of the past, use Go language, and experience the initial happiness! ——469856321*
 
-*搬砖民工也会建成自己的罗马帝国。——小张*
+* Moving brick workers will also build their own Roman Empire. ——Xiao Zhang*
 
-本章首先简要介绍Go语言的发展历史，并较详细地分析了“Hello World”程序在各个祖先语言中演化过程。然后，对以数组、字符串和切片为代表的基础结构，对以函数、方法和接口所体现的面向过程和鸭子对象的编程，以及Go语言特有的并发编程模型和错误处理哲学做了简单介绍。最后，针对macOS、Windows、Linux几个主流的开发平台，推荐了几个较友好的Go语言编辑器和集成开发环境，因为好的工具可以极大地提高我们的效率。
+This chapter begins with a brief introduction to the history of the Go language and a detailed analysis of the evolution of the "Hello World" program in each ancestor language. Then, for the infrastructure represented by arrays, strings, and slices, the process-oriented and duck-object programming represented by functions, methods, and interfaces, and the Go language-specific concurrent programming model and error handling philosophy are briefly introduced. . Finally, for several mainstream development platforms for macOS, Windows, and Linux, several friendly Go language editors and integrated development environments have been recommended, because good tools can greatly improve our efficiency.
