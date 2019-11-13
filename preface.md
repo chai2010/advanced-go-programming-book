@@ -33,13 +33,15 @@ If you like this book, welcome to Douban Comments:
 
 ## Netease Cloud Classroom·光谷码农课
 
-Https://study.163.com/provider/480000001914454/index.htm
+- https://study.163.com/provider/480000001914454/index.html
 
 ![](163study-go-master.jpg)
 
 ## Copyright Notice
 
-<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License Agreement" style="border-width:0" src ="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org /dc/terms/" property="dct:title">Go Language Advanced Programming</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="https://github. Com/chai2010/advanced-go-programming-book" property="cc:attributionName" rel="cc:attributionURL">Chai Shushan, Cao Chunhui</a> using <a rel="license" href="http:// Creativecommons.org/licenses/by-nc-nd/4.0/">Knowledge Sharing - Non-commercial Use - Prohibition of the interpretation of the 4.0 International License Agreement</a>.
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License Agreement" style="border-width:0" src ="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a>
+<br />
+<span xmlns:dct="http://purl.org /dc/terms/" property="dct:title">Go Language Advanced Programming</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="https://github. Com/chai2010/advanced-go-programming-book" property="cc:attributionName" rel="cc:attributionURL">Chai Shushan, Cao Chunhui</a> using <a rel="license" href="http:// Creativecommons.org/licenses/by-nc-nd/4.0/">Knowledge Sharing - Non-commercial Use - Prohibition of the interpretation of the 4.0 International License Agreement</a>.
 
 Any commercial use or reference to all or part of this document is strictly prohibited!
 

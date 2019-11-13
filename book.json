@@ -1,7 +1,7 @@
 {
 	"gitbook": "3.x",
-	"title": "Go语言高级编程",
-	"description": "Go语言高级编程",
+	"title": "Go language advanced programming",
+	"description": "Go language advanced programming",
 	"language": "zh-hans",
 
 	"structure": {
@@ -14,7 +14,5 @@
 		}
 	},
 
-	"plugins": [
-		"-search"
-	]
+	"plugins": ["-search"]
 }

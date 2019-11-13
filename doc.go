@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 //
-// 《Go语言高级编程》 开源图书 - by chai2010
+// "Go language advanced programming" open source book - by chai2010
 //
 //	https://github.com/chai2010/advanced-go-programming-book
 //

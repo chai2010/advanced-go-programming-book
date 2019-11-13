@@ -1,18 +1,17 @@
-# 序言
+# Preface
 
-2009年11月，Google发布了Go语言，在世界范围内引发了轰动。2015年和2016年中国区的Go语言大会分别在上海和北京召开，来自Go语言团队的开发人员均作了相关的报告。纵观这几年来的发展趋势，Go语言已经成为云计算、云存储时代最重要的基础编程语言。
+In November 2009, Google released the Go language, which caused a sensation in the world. In 2015 and 2016, the Go language conferences in China were held in Shanghai and Beijing respectively. The developers from the Go language team made relevant reports. Throughout the past few years, Go has become the most important basic programming language in the era of cloud computing and cloud storage.
 
-中国的Go语言社区是全球最大的Go语言社区，我们不仅仅从一开始就始终紧跟着Go语言的发展脚步，同时也为Go语言的发展作出了自己的巨大贡献。来自中国深圳的韦光京（vcc.163@gmail.com）在2010年前后，关于MinGW的工作奠定了Go语言对Windows平台的支持，同时也奠定了CGO对Windows平台的支持。同样来自中国的Minux（minux.ma@gmail.com）则作为Go语言核心团队的成员，他参与了大量的Go语言核心设计和开发评审工作。同时还有大量的国内Go语言爱好者积极参与了BUG的汇报和修复等工作（作者也是其中之一）。
+China's Go language community is the world's largest Go language community. We have not only followed the development of Go language from the beginning, but also made great contributions to the development of Go language. Wei Guangjing (vcc.163@gmail.com) from Shenzhen, China, around 2010, on the work of MinGW laid the support of the Go language for the Windows platform, and also laid the CGO support for the Windows platform. Minux (minux.ma@gmail.com), also from China, is a member of the Go core team and he has been involved in a number of Go core design and development reviews. At the same time, a large number of domestic Go language enthusiasts actively participated in the reporting and repair of BUG (the author is also one of them).
 
-截至2018年，中国出版的Go语言相关教程有近15本之多，内容主要涵盖Go语言基础编程、Web编程、并发编程和内部源码剖析等诸多领域。但作为Go语言的资深用户，作者关注的Go语言话题远远不止这些内容。其中CGO特性实现了Go语言对C语言和C++语言的支持，使得Go语言可以无缝继承C/C++世界数十年来积累的巨大软件资产。Go汇编语言更是提供了直接访问底层机器指令的方法，让我们可以无限压榨程序中热点代码的性能。目前国内互联网公司的新兴项目已经在逐渐向Go语言生态转移，大型分布式系统的开发实战经验也是大家关心的。这些高阶或前沿特性都是作者和本书所关注的话题。
+As of 2018, there are nearly 15 related Go language tutorials published in China. The content covers Go language basic programming, Web programming, concurrent programming and internal source code analysis. But as a veteran user of the Go language, the Go language topic that the author is concerned with is far more than that. The CGO feature implements Go language support for C language and C++ language, enabling Go language to seamlessly inherit the huge software assets accumulated in the C/C++ world for decades. Go assembly language provides a direct access to the underlying machine instructions, allowing us to infinitely squeeze the performance of hot code in the program. At present, the emerging projects of domestic Internet companies have gradually shifted to the Go language ecology, and the actual experience of the development of large-scale distributed systems is also of concern to everyone. These high-level or cutting-edge features are topics of interest to the author and this book.
 
-本书针对有一定Go语言经验，想深入了解Go语言各种高级用法的开发人员。对于Go语言新手，在阅读本书前建议先熟读D&K的[《The Go Programming Language》](https://gopl.io/)。最后，希望这本书能够帮助大家更深入地了解Go语言。
+This book is for developers who have a certain degree of Go language experience and want to know more about the various advanced usages of the Go language. For newcomers to Go, it is recommended to read D&K's [The Go Programming Language] (https://gopl.io/) before reading this book. Finally, I hope this book will help you get a deeper understanding of the Go language.
 
-chai2010 - 2018年 8 月 于 武汉
+Chai2010 - August 2018 in Wuhan
 
-# 致谢
+# Thank you
 
-首先感谢Go语言之父和每一个为Go语言提交过补丁的朋友。感谢fango的第一本以Go语言为主题的网络小说《胡文Go.ogle》和第一本中文Go语言图书《Go语言·云动力》，是你的分享让带起了大家学习Go语言的热情。感谢韦光京对Windows平台CGO的开创性工作，不然本书可能不会有专门的CGO章节。感谢为本书提交过issue或PR的朋友（特别是fuwensun、lewgun等），你们的关注和支持是作者写作的最大动力。
+First of all, thanks to the father of the Go language and every friend who has submitted a patch for the Go language. Thanks to fango's first online novel "Hu Wen Go.ogle" with Go language as the theme and the first Chinese Go language book "Go Language·Cloud Power". It is your sharing that brings everyone to learn Go language. enthusiasm. Thanks to Wei Guangjing for his pioneering work on the Windows platform CGO, otherwise the book may not have a dedicated CGO chapter. Thanks to the friends who submitted the issue or PR for this book (especially fuwensun, lewgun, etc.), your attention and support is the greatest motivation for the author's writing.
 
-谢谢大家！
-
+thank you all!
