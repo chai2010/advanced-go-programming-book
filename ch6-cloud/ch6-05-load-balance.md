@@ -21,47 +21,47 @@ Let's look at a load balancing case for a production environment.
 Considering that we need to randomly select the node that sends the request each time, and try to retry the other nodes when it encounters a downstream return error. So we design an index array with the same size and node array size. Every time we come to a new request, we shuffle the index array, then take the first element as the selected service node. If the request fails, then select the next node. Try again, and so on:
 
 ```go
-Var endpoints = []string {
-"100.69.62.1:3232",
-"100.69.62.32: 3232",
-"100.69.62.42: 3232",
-"100.69.62.81:3232",
-"100.69.62.11:3232",
-"100.69.62.113:3232",
-"100.69.62.101:3232",
+var endpoints = []string {
+	"100.69.62.1:3232",
+	"100.69.62.32:3232",
+	"100.69.62.42:3232",
+	"100.69.62.81:3232",
+	"100.69.62.11:3232",
+	"100.69.62.113:3232",
+	"100.69.62.101:3232",
 }
 
 // focus on this shuffle
-Func shuffle(slice []int) {
-For i := 0; i < len(slice); i++ {
-a := rand.Intn(len(slice))
-b := rand.Intn(len(slice))
-Slice[a], slice[b] = slice[b], slice[a]
-}
-}
-
-Func request(params map[string]interface{}) error {
-Var indexes = []int {0,1,2,3,4,5,6}
-Var err error
-
-Shuffle(indexes)
-maxRetryTimes := 3
-
-Idx := 0
-For i := 0; i < maxRetryTimes; i++ {
-Err = apiRequest(params, indexes[idx])
-If err == nil {
-Break
-}
-Idx++
+func shuffle(slice []int) {
+	for i := 0; i < len(slice); i++ {
+		a := rand.Intn(len(slice))
+		b := rand.Intn(len(slice))
+		slice[a], slice[b] = slice[b], slice[a]
+	}
 }
 
-If err != nil {
-// logging
-Return err
-}
+func request(params map[string]interface{}) error {
+	var indexes = []int {0,1,2,3,4,5,6}
+	var err error
 
-Return nil
+	shuffle(indexes)
+	maxRetryTimes := 3
+
+	idx := 0
+	for i := 0; i < maxRetryTimes; i++ {
+		err = apiRequest(params, endpoints[idx])
+		if err == nil {
+			break
+		}
+		idx++
+	}
+
+	if err != nil {
+		// logging
+		return err
+	}
+
+	return nil
 }
 ```
 
