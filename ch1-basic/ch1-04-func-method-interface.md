@@ -304,6 +304,26 @@ fmt.Println(cp.Y)       // "2"
 
 通过嵌入匿名的成员，我们不仅可以继承匿名成员的内部成员，而且可以继承匿名成员类型所对应的方法。我们一般会将Point看作基类，把ColoredPoint看作是它的继承类或子类。不过这种方式继承的方法并不能实现C++中虚函数的多态特性。所有继承来的方法的接收者参数依然是那个匿名成员本身，而不是当前的变量。
 
+
+```go
+
+type ColoredPoint struct {
+	Point
+	X float64 //增加与匿名成员的内部成员相同的字段名
+	Color color.RGBA
+}
+```
+
+```go
+var cp ColoredPoint
+cp.X = 1
+fmt.Println(cp.X) // "1"
+fmt.Println(cp.Point.X) // "0"
+```
+
+如果结构体成员包含与继承匿名成员的内部成员相同的字段，对此字段赋值将以结构体成员为优先。
+
+
 ```go
 type Cache struct {
 	m map[string]string
