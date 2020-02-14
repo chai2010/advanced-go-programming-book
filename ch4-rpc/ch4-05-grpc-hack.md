@@ -318,7 +318,7 @@ func filter(
 	info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler,
 ) (resp interface{}, err error) {
-	log.Println("fileter:", info)
+	log.Println("filter:", info)
 
 	defer func() {
 		if r := recover(); r != nil {
