@@ -212,7 +212,7 @@ func main() {
 
 ```go
 func main() {
-	go println("你好, 世界")
+	go println("hello, world")
 }
 ```
 
@@ -225,7 +225,7 @@ func main() {
 	done := make(chan int)
 
 	go func(){
-		println("你好, 世界")
+		println("hello, world")
 		done <- 1
 	}()
 
@@ -233,7 +233,7 @@ func main() {
 }
 ```
 
-当`<-done`执行时，必然要求`done <- 1`也已经执行。根据同一个Gorouine依然满足顺序一致性规则，我们可以判断当`done <- 1`执行时，`println("你好, 世界")`语句必然已经执行完成了。因此，现在的程序确保可以正常打印结果。
+当`<-done`执行时，必然要求`done <- 1`也已经执行。根据同一个Gorouine依然满足顺序一致性规则，我们可以判断当`done <- 1`执行时，`println("hello, world")`语句必然已经执行完成了。因此，现在的程序确保可以正常打印结果。
 
 当然，通过`sync.Mutex`互斥量也是可以实现同步的：
 
@@ -243,7 +243,7 @@ func main() {
 
 	mu.Lock()
 	go func(){
-		println("你好, 世界")
+		println("hello, world")
 		mu.Unlock()
 	}()
 
@@ -251,7 +251,7 @@ func main() {
 }
 ```
 
-可以确定后台线程的`mu.Unlock()`必然在`println("你好, 世界")`完成后发生（同一个线程满足顺序一致性），`main`函数的第二个`mu.Lock()`必然在后台线程的`mu.Unlock()`之后发生（`sync.Mutex`保证），此时后台线程的打印工作已经顺利完成了。
+可以确定后台线程的`mu.Unlock()`必然在`println("hello, world")`完成后发生（同一个线程满足顺序一致性），`main`函数的第二个`mu.Lock()`必然在后台线程的`mu.Unlock()`之后发生（`sync.Mutex`保证），此时后台线程的打印工作已经顺利完成了。
 
 ## 1.5.4 初始化顺序
 
@@ -297,7 +297,7 @@ var done = make(chan bool)
 var msg string
 
 func aGoroutine() {
-	msg = "你好, 世界"
+	msg = "hello, world"
 	done <- true
 }
 
@@ -317,7 +317,7 @@ var done = make(chan bool)
 var msg string
 
 func aGoroutine() {
-	msg = "你好, 世界"
+	msg = "hello, world"
 	close(done)
 }
 
@@ -376,7 +376,7 @@ func main() {
 
 ```go
 func main() {
-	go println("你好, 世界")
+	go println("hello, world")
 }
 ```
 
