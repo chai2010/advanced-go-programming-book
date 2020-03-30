@@ -17,8 +17,9 @@
 
 ## 购买链接：
 
-- 京东：https://item.m.jd.com/product/12647494.html
+- 京东：https://item.jd.com/12647494.html
 - 异步：https://www.epubit.com/book/detail/40090
+- 当当：http://product.dangdang.com/27896588.html
 
 如果你喜欢本书，欢迎到豆瓣评论：
 
