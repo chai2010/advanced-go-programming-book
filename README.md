@@ -1,12 +1,8 @@
 # Go语言高级编程 (Advanced Go Programming)
 
-*QQ群：102319854（中国最早的Go语言QQ群）*
-
-*推广: 欢迎关注 [网易云课堂·光谷码农课堂](https://study.163.com/provider/480000001914454/index.htm)*
-
-*推广: [《WebAssembly标准入门》开始预售了，欢迎关注！](https://github.com/chai2010/awesome-wasm-zh/blob/master/webassembly-primer.md)([京东购买](https://item.jd.com/12499372.html))*
-
-*推广: 欢迎关注 [光谷码农·每日新闻](https://guanggu-coder.cn/)*
+- *赞助 BTC: 1Cbd6oGAUUyBi7X7MaR4np4nTmQZXVgkCW*
+- *赞助 ETH: 0x623A3C3a72186A6336C79b18Ac1eD36e1c71A8a6*
+- *Go语言付费QQ群: 1055927514*
 
 ----
 
@@ -44,12 +40,6 @@
 - https://chai2010.cn/advanced-go-programming-book/
 - https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
 
-## 网易云课堂·光谷码农课堂
-
-https://study.163.com/provider/480000001914454/index.htm
-
-![](163study-go-master.jpg)
-
 ## 相关文章
 
 1. [GopherChina 2019大会推荐书单来啦](https://zhuanlan.zhihu.com/p/63910336)
@@ -62,18 +52,6 @@ https://study.163.com/provider/480000001914454/index.htm
 1. [GIAC: 2018 - Go 语言将要走向何方？](https://github.com/chai2010/awesome-go-zh/blob/master/chai2010/giac2018) - [chai2010](https://github.com/chai2010/awesome-go-zh/tree/master/chai2010) 上海·GIAC全球互联网架构大会 2018/11/23
 1. [Go语言并发编程](https://talks.godoc.org/github.com/chai2010/awesome-go-zh/chai2010/chai2010-golang-concurrency.slide) - [chai2010](https://github.com/chai2010/awesome-go-zh/tree/master/chai2010) 武汉·光谷猫友会 2018/09/16, [整理01](https://mp.weixin.qq.com/s/UaY9gJU85dq-dXlOhLYY1Q)/[整理02](https://mp.weixin.qq.com/s/_aKNO-H11GEDA-l0rycfQQ)
 1. 深入CGO编程: https://github.com/chai2010/gopherchina2018-cgo-talk
-
-## 关注微信公众号(光谷码农/guanggu-coder)
-
-![](https://chai2010.cn/advanced-go-programming-book/weixin-guanggu-coder-logo.png)
-
-**加入微信群：公众号底部菜单扫码进群。**
-
-## 开发者头条号
-
-https://toutiao.io/subjects/318517
-
-![](toutiao-318517-small.jpg)
 
 
 ## 版权声明
