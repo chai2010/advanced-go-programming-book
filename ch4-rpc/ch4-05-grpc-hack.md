@@ -269,10 +269,10 @@ func (a *Authentication) Auth(ctx context.Context) error {
 	var appid string
 	var appkey string
 
-	if val, ok := md["login"]; ok { appid = val[0] }
+	if val, ok := md["user"]; ok { appid = val[0] }
 	if val, ok := md["password"]; ok { appkey = val[0] }
 
-	if appid != a.Login || appkey != a.Password {
+	if appid != a.User || appkey != a.Password {
 		return grpc.Errorf(codes.Unauthenticated, "invalid token")
 	}
 
