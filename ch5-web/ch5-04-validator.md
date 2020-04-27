@@ -79,8 +79,10 @@ func register(req RegisterReq) error{
 
 > https://github.com/go-playground/validator
 
+使用 `go get github.com/go-playground/validator/v10` 可以下载 validator 库。
+
 ```go
-import "gopkg.in/go-playground/validator.v9"
+import "github.com/go-playground/validator/v10"
 
 type RegisterReq struct {
 	// 字符串的 gt=0 表示长度必须 > 0，gt = greater than
@@ -93,9 +95,9 @@ type RegisterReq struct {
 	Email          string   `validate:"email"`
 }
 
-validate := validator.New()
+var validate = validator.New()
 
-func validate(req RegisterReq) error {
+func validateFunc(req RegisterReq) error {
 	err := validate.Struct(req)
 	if err != nil {
 		doSomething()
@@ -120,7 +122,7 @@ var req = RegisterReq {
 	Email          : "alex@abc.com",
 }
 
-err := validate(req)
+err := validateFunc(req)
 fmt.Println(err)
 
 // Key: 'RegisterReq.PasswordRepeat' Error:Field validation for
