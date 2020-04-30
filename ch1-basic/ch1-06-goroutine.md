@@ -587,14 +587,14 @@ func main() {
 我们通过`close`来关闭`cancel`管道向多个Goroutine广播退出的指令。不过这个程序依然不够稳健：当每个Goroutine收到退出指令退出时一般会进行一定的清理工作，但是退出的清理工作并不能保证被完成，因为`main`线程并没有等待各个工作Goroutine退出工作完成的机制。我们可以结合`sync.WaitGroup`来改进:
 
 ```go
-func worker(wg *sync.WaitGroup, cannel chan bool) {
+func worker(wg *sync.WaitGroup, cancel chan bool) {
 	defer wg.Done()
 
 	for {
 		select {
 		default:
 			fmt.Println("hello")
-		case <-cannel:
+		case <-cancel:
 			return
 		}
 	}
