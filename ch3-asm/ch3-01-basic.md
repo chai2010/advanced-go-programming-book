@@ -72,7 +72,9 @@ var Id int
 我们将完整的汇编代码放到pkg_amd64.s文件中：
 
 ```
-GLOBL ·Id(SB),$8
+#include "textflag.h"
+
+GLOBL ·Id(SB),NOPTR,$8
 
 DATA ·Id+0(SB)/1,$0x37
 DATA ·Id+1(SB)/1,$0x25
@@ -97,6 +99,7 @@ func main() {
 	println(pkg.Id)
 }
 ```
+
 
 对于Go包的用户来说，用Go汇编语言或Go语言实现并无任何区别。
 
