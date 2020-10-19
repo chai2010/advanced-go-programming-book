@@ -62,7 +62,7 @@ func main() {
 }
 ```
 
-其中redentials.NewClientTLSFromFile是构造客户端用的证书对象，第一个参数是服务器的证书文件，第二个参数是签发证书的服务器的名字。然后通过grpc.WithTransportCredentials(creds)将证书对象转为参数选项传人grpc.Dial函数。
+其中credentials.NewClientTLSFromFile是构造客户端用的证书对象，第一个参数是服务器的证书文件，第二个参数是签发证书的服务器的名字。然后通过grpc.WithTransportCredentials(creds)将证书对象转为参数选项传人grpc.Dial函数。
 
 以上这种方式，需要提前将服务器的证书告知客户端，这样客户端在链接服务器时才能进行对服务器证书认证。在复杂的网络环境中，服务器证书的传输本身也是一个非常危险的问题。如果在中间某个环节，服务器证书被监听或替换那么对服务器的认证也将不再可靠。
 

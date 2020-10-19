@@ -194,7 +194,7 @@ func main() {
 
 ```go
 	for i, e := range err.(errors.Error).Wraped() {
-		fmt.Printf("wraped(%d): %v\n", i, e)
+		fmt.Printf("wrapped(%d): %v\n", i, e)
 	}
 ```
 
