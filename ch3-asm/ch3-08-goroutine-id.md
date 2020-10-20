@@ -156,7 +156,7 @@ var g_goid_offset = func() int64 {
 			return off
 		}
 	}
-	panic("unsupport go verion:"+goversion)
+	panic("unsupported go version:"+goversion)
 }()
 ```
 
