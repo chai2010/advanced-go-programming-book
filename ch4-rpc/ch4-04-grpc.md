@@ -300,7 +300,7 @@ type PubsubService_SubscribeServer interface {
 }
 ```
 
-因为Subscribe是服务端的单向流，因此生成的HelloService_SubscribeServer接口中只有Send方法。
+因为Subscribe是服务端的单向流，因此生成的PubsubService_SubscribeServer接口中只有Send方法。
 
 然后就可以实现发布和订阅服务了：
 
