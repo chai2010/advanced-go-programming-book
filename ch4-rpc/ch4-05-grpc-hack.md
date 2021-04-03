@@ -353,7 +353,7 @@ myServer := grpc.NewServer(
 
 gRPC构建在HTTP/2协议之上，因此我们可以将gRPC服务和普通的Web服务架设在同一个端口之上。
 
-对于没有启动TLS协议的服务则需要对HTTP2/2特性做适当的调整：
+对于没有启动TLS协议的服务则需要对HTTP/2特性做适当的调整：
 
 ```go
 func main() {
