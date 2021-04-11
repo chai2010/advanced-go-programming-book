@@ -233,8 +233,10 @@ type Router struct {
 	mux map[string] http.Handler
 }
 
-func NewRouter() *Router{
-	return &Router{}
+func NewRouter() *Router {
+	return &Router{
+		mux: make(map[string]http.Handler),
+	}
 }
 
 func (r *Router) Use(m middleware) {
