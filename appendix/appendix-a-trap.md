@@ -146,7 +146,7 @@ func main() {
 
 ## 独占CPU导致其它Goroutine饿死
 
-Goroutine是协作式抢占调度，Goroutine本身不会主动放弃CPU：
+Goroutine 是协作式抢占调度（Go1.14版本之前），Goroutine本身不会主动放弃CPU：
 
 ```go
 func main() {
@@ -196,6 +196,8 @@ func main() {
 	select{}
 }
 ```
+
+Go1.14 版本引入基于系统信号的异步抢占调度，可以避免 Goroutine 饿死的情况。
 
 ## 不同Goroutine之间不满足顺序一致性内存模型
 
