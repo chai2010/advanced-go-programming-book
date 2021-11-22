@@ -365,11 +365,11 @@ var work = []func(){
 
 func main() {
 	for _, w := range work {
+		limit <- 1
 		go func(w func()) {
-			limit <- 1
 			w()
-			<-limit
 		}(w)
+		<-limit
 	}
 	select{}
 }
