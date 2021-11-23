@@ -32,8 +32,8 @@ func doClientWork(client *rpc.Client) {
 	}
 
 	args := helloCall.Args.(string)
-	reply := helloCall.Reply.(string)
-	fmt.Println(args, reply)
+	reply := helloCall.Reply.(*string)
+	fmt.Println(args, *reply)
 }
 ```
 
@@ -246,7 +246,7 @@ func doClientWork(clientChan <-chan *rpc.Client) {
 	defer client.Close()
 
 	var reply string
-	err = client.Call("HelloService.Hello", "hello", &reply)
+	err := client.Call("HelloService.Hello", "hello", &reply)
 	if err != nil {
 		log.Fatal(err)
 	}
