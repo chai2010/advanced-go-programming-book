@@ -706,4 +706,210 @@ func main() {
 
 当main函数完成工作前，通过调用`cancel()`来通知后台Goroutine退出，这样就避免了Goroutine的泄漏。
 
+然而，上面这个例子只是展示了`cancel()`的基础用法，实际上这个例子会导致Goroutine死锁，不能正常退出。
+我们可以给上面这个例子添加`sync.WaitGroup`来复现这个问题。
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"sync"
+)
+
+// 返回生成自然数序列的管道: 2, 3, 4, ...
+func GenerateNatural(ctx context.Context, wg *sync.WaitGroup) chan int {
+	ch := make(chan int)
+	go func() {
+		defer wg.Done()
+		for i := 2; ; i++ {
+			select {
+			case <-ctx.Done():
+				return
+			case ch <- i:
+			}
+		}
+	}()
+	return ch
+}
+
+// 管道过滤器: 删除能被素数整除的数
+func PrimeFilter(ctx context.Context, in <-chan int, prime int, wg *sync.WaitGroup) chan int {
+	out := make(chan int)
+	go func() {
+		defer wg.Done()
+		for {
+			if i := <-in; i%prime != 0 {
+				select {
+				case <-ctx.Done():
+					return
+				case out <- i:
+				}
+			}
+		}
+	}()
+	return out
+}
+
+func main() {
+	wg := sync.WaitGroup{}
+	// 通过 Context 控制后台Goroutine状态
+	ctx, cancel := context.WithCancel(context.Background())
+	wg.Add(1)
+	ch := GenerateNatural(ctx, &wg) // 自然数序列: 2, 3, 4, ...
+	for i := 0; i < 100; i++ {
+		prime := <-ch // 新出现的素数
+		fmt.Printf("%v: %v\n", i+1, prime)
+		wg.Add(1)
+		ch = PrimeFilter(ctx, ch, prime, &wg) // 基于新素数构造的过滤器
+	}
+
+	cancel()
+	wg.Wait()
+}
+```
+
+执行上面这个例子很容易就复现了死锁的问题，原因是素数筛中的`ctx.Done()`位于`if i := <-in; i%prime != 0`判断之内，
+而这个判断可能会一直阻塞，导致goroutine无法正常退出。让我们来解决这个问题。
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"sync"
+)
+
+// 返回生成自然数序列的管道: 2, 3, 4, ...
+func GenerateNatural(ctx context.Context, wg *sync.WaitGroup) chan int {
+	ch := make(chan int)
+	go func() {
+		defer wg.Done()
+		for i := 2; ; i++ {
+			select {
+			case <-ctx.Done():
+				return
+			case ch <- i:
+			}
+		}
+	}()
+	return ch
+}
+
+// 管道过滤器: 删除能被素数整除的数
+func PrimeFilter(ctx context.Context, in <-chan int, prime int, wg *sync.WaitGroup) chan int {
+	out := make(chan int)
+	go func() {
+		defer wg.Done()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case i := <-in:
+				if i%prime != 0 {
+					select {
+					case <-ctx.Done():
+						return
+					case out <- i:
+					}
+				}
+			}
+
+		}
+	}()
+	return out
+}
+
+func main() {
+	wg := sync.WaitGroup{}
+	// 通过 Context 控制后台Goroutine状态
+	ctx, cancel := context.WithCancel(context.Background())
+	wg.Add(1)
+	ch := GenerateNatural(ctx, &wg) // 自然数序列: 2, 3, 4, ...
+	for i := 0; i < 100; i++ {
+		prime := <-ch // 新出现的素数
+		fmt.Printf("%v: %v\n", i+1, prime)
+		wg.Add(1)
+		ch = PrimeFilter(ctx, ch, prime, &wg) // 基于新素数构造的过滤器
+	}
+
+	cancel()
+	wg.Wait()
+}
+```
+
+如上所示，我们可以通过将`i := <-in`放入select，在这个select内也执行`<-ctx.Done()`来解决阻塞导致的死锁。
+不过上面这个例子并不优美，让我们换一种方式。
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"sync"
+)
+
+// 返回生成自然数序列的管道: 2, 3, 4, ...
+func GenerateNatural(ctx context.Context, wg *sync.WaitGroup) chan int {
+	ch := make(chan int)
+	go func() {
+		defer wg.Done()
+		defer close(ch)
+		for i := 2; ; i++ {
+			select {
+			case <-ctx.Done():
+				return
+			case ch <- i:
+			}
+		}
+	}()
+	return ch
+}
+
+// 管道过滤器: 删除能被素数整除的数
+func PrimeFilter(ctx context.Context, in <-chan int, prime int, wg *sync.WaitGroup) chan int {
+	out := make(chan int)
+	go func() {
+		defer wg.Done()
+		defer close(out)
+		for i := range in {
+			if i%prime != 0 {
+				select {
+				case <-ctx.Done():
+					return
+				case out <- i:
+				}
+			}
+		}
+	}()
+	return out
+}
+
+func main() {
+	wg := sync.WaitGroup{}
+	// 通过 Context 控制后台Goroutine状态
+	ctx, cancel := context.WithCancel(context.Background())
+	wg.Add(1)
+	ch := GenerateNatural(ctx, &wg) // 自然数序列: 2, 3, 4, ...
+	for i := 0; i < 100; i++ {
+		prime := <-ch // 新出现的素数
+		fmt.Printf("%v: %v\n", i+1, prime)
+		wg.Add(1)
+		ch = PrimeFilter(ctx, ch, prime, &wg) // 基于新素数构造的过滤器
+	}
+
+	cancel()
+	wg.Wait()
+}
+```
+
+在上面这个例子中主要有以下几点需要关注：
+1. 通过`for range`循环保证了输入管道被关闭时，循环能退出，不会出现死循环；
+2. 通过`defer close`保证了无论是输入管道被关闭，还是ctx被取消，只要素数筛退出，都会关闭输出管道。
+
+至此，我们终于足够优美地解决了这个死锁问题。
+
 并发是一个非常大的主题，我们这里只是展示几个非常基础的并发编程的例子。官方文档也有很多关于并发编程的讨论，国内也有专门讨论Go语言并发编程的书籍。读者可以根据自己的需求查阅相关的文献。
