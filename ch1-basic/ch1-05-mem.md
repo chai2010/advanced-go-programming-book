@@ -367,7 +367,7 @@ func main() {
 	for _, w := range work {
 		limit <- 1
 		go func(w func()) {
-			defer <-limit
+			defer func() { <-limit }()
 			w()
 		}(w)
 	}
