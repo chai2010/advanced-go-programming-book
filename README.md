@@ -6,9 +6,7 @@
 
 ----
 
-**蚂蚁招聘（联系方式 chaishushan@gmail.com, shushan.css@alibaba-inc.com）：**
-- [PaaS平台开发专家-杭州/上海/成都](https://talent.alibaba.com/off-campus-position/731561)
-- 编程语言方向岗位(杭州/P7)：云原生方向要求熟悉k8s配套工具，如kubectl、kustomize、kubebuilder，operator；编程语言方向要求对语言对语言解释器（如py/js/lua/wasm等）、工具链、配套SDK有一定兴趣和实践经验。
+- [蚂蚁 - 可信原生技术部 - 云原生运维专家(杭州P7-8)](https://github.com/chai2010/ugo-compiler-book/blob/master/jobs.md)
 
 ----
 
