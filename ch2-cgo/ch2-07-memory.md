@@ -54,11 +54,15 @@ cgo之所以存在的一大因素是为了方便在Go语言中接纳吸收过去
 package main
 
 /*
+#include <stdlib.h>
+#include <stdio.h>
+
 void printString(const char* s) {
 	printf("%s", s);
 }
 */
 import "C"
+import "unsafe"
 
 func printString(s string) {
 	cs := C.CString(s)
