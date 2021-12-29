@@ -320,7 +320,7 @@ func makechan(chanType *byte, size int) (hchan chan any)
 *图 3-7 结构体变量定义*
 
 
-变量也时在data段分配空间，变量结构体成员的地址也是依次从低向高排列。
+变量也是在data段分配空间，变量结构体成员的地址也是依次从低向高排列。
 
 因此`[2]int`和`image.Point`类型底层有着近似相同的内存布局。
 
