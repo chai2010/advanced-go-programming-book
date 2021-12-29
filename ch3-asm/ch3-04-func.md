@@ -159,11 +159,11 @@ Foo函数的参数和返回值的大小和内存布局：
 
 ```
 TEXT ·Foo(SB), $0
-	MOVEQ a+0(FP),       AX // a
-	MOVEQ b+2(FP),       BX // b
-	MOVEQ c_dat+8*1(FP), CX // c.Data
-	MOVEQ c_len+8*2(FP), DX // c.Len
-	MOVEQ c_cap+8*3(FP), DI // c.Cap
+	MOVQ a+0(FP),       AX // a
+	MOVQ b+2(FP),       BX // b
+	MOVQ c_dat+8*1(FP), CX // c.Data
+	MOVQ c_len+8*2(FP), DX // c.Len
+	MOVQ c_cap+8*3(FP), DI // c.Cap
 	RET
 ```
 
