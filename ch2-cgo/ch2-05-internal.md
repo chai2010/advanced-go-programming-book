@@ -113,7 +113,7 @@ void _cgo_506f45f9fa85_Cfunc_sum(void *v) {
 }
 ```
 
-这个函数参数只有一个void范型的指针，函数没有返回值。真实的sum函数的函数参数和返回值均通过唯一的参数指针类实现。
+这个函数参数只有一个void泛型的指针，函数没有返回值。真实的sum函数的函数参数和返回值均通过唯一的参数指针类实现。
 
 `_cgo_506f45f9fa85_Cfunc_sum`函数的指针指向的结构为：
 
@@ -159,7 +159,7 @@ func sum(a, b C.int) C.int {
 func main() {}
 ```
 
-CGO的语法细节不在赘述。为了在C语言中使用sum函数，我们需要将Go代码编译为一个C静态库：
+CGO的语法细节不再赘述。为了在C语言中使用sum函数，我们需要将Go代码编译为一个C静态库：
 
 ```
 $ go build -buildmode=c-archive -o sum.a main.go
