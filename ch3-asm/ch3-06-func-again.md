@@ -361,7 +361,7 @@ func asmFunTwiceClosureBody() int
 
 然后用Go汇编语言实现以上三个辅助函数：
 
-```s
+```
 #include "textflag.h"
 
 TEXT ·ptrToFunc(SB), NOSPLIT, $0-16
