@@ -289,6 +289,8 @@ L_END:
 Go语言的编译器在生成函数的机器代码时，会在开头插入一小段代码。因为sum函数也需要深度递归调用，因此我们删除了NOSPLIT标志，让汇编器为我们自动生成一个栈扩容的代码：
 
 ```
+#include "funcdata.h"
+
 // func sum(n int) int
 TEXT ·sum(SB), $16-16
 	NO_LOCAL_POINTERS
@@ -359,7 +361,7 @@ func asmFunTwiceClosureBody() int
 
 然后用Go汇编语言实现以上三个辅助函数：
 
-```s
+```
 #include "textflag.h"
 
 TEXT ·ptrToFunc(SB), NOSPLIT, $0-16
