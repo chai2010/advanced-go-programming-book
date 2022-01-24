@@ -77,7 +77,7 @@ type Plugin interface {
 }
 ```
 
-我们需要在 Generate 和 GenerateImports 函数中分别生成相关的代码。而 Protobuf 文件的全部信息都在 * generator.FileDescriptor 类型函数参数中描述，因此我们需要从函数参数中提前扩展定义的元数据。
+我们需要在 Generate 和 GenerateImports 函数中分别生成相关的代码。而 Protobuf 文件的全部信息都在 `*generator.FileDescriptor` 类型函数参数中描述，因此我们需要从函数参数中提前扩展定义的元数据。
 
 pbgo 框架中的插件对象是 pbgoPlugin，在 Generate 方法中首先需要遍历 Protobuf 文件中定义的全部服务，然后再遍历每个服务的每个方法。在得到方法结构之后再通过自定义的 getServiceMethodOption 方法提取 rest 扩展信息：
 
