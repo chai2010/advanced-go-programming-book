@@ -1,12 +1,12 @@
-# 5.4 validator请求校验
+# 5.4 validator 请求校验
 
-社区里曾经有人用*图 5-10*来嘲笑PHP：
+社区里曾经有人用 *图 5-10* 来嘲笑 PHP：
 
 ![validate 流程](../images/ch6-04-validate.jpg)
 
-*图 5-10 validator流程*
+*图 5-10 validator 流程*
 
-这其实是一个语言无关的场景，需要进行字段校验的情况有很多，Web系统的Form或JSON提交只是一个典型的例子。我们用Go来写一个类似上图的校验示例。然后研究怎么一步步对其进行改进。
+这其实是一个语言无关的场景，需要进行字段校验的情况有很多，Web 系统的 Form 或 JSON 提交只是一个典型的例子。我们用 Go 来写一个类似上图的校验示例。然后研究怎么一步步对其进行改进。
 
 ## 5.4.1 重构请求校验函数
 
@@ -42,7 +42,7 @@ func register(req RegisterReq) error{
 }
 ```
 
-我们用Go里成功写出了波动拳开路的箭头型代码。。这种代码一般怎么进行优化呢？
+我们用 Go 里成功写出了波动拳开路的箭头型代码。。这种代码一般怎么进行优化呢？
 
 很简单，在《重构》一书中已经给出了方案：[Guard Clauses](https://refactoring.com/catalog/replaceNestedConditionalWithGuardClauses.html)。
 
@@ -69,13 +69,13 @@ func register(req RegisterReq) error{
 }
 ```
 
-代码更清爽，看起来也不那么别扭了。这是比较通用的重构理念。虽然使用了重构方法使我们的校验过程代码看起来优雅了，但我们还是得为每一个`http`请求都去写这么一套差不多的`validate()`函数，有没有更好的办法来帮助我们解除这项体力劳动？答案就是validator。
+代码更清爽，看起来也不那么别扭了。这是比较通用的重构理念。虽然使用了重构方法使我们的校验过程代码看起来优雅了，但我们还是得为每一个 `http` 请求都去写这么一套差不多的 `validate()` 函数，有没有更好的办法来帮助我们解除这项体力劳动？答案就是 validator。
 
-## 5.4.2 用validator解放体力劳动
+## 5.4.2 用 validator 解放体力劳动
 
-从设计的角度讲，我们一定会为每个请求都声明一个结构体。前文中提到的校验场景我们都可以通过validator完成工作。还以前文中的结构体为例。为了美观起见，我们先把json tag省略掉。
+从设计的角度讲，我们一定会为每个请求都声明一个结构体。前文中提到的校验场景我们都可以通过 validator 完成工作。还以前文中的结构体为例。为了美观起见，我们先把 json tag 省略掉。
 
-这里我们引入一个新的validator库：
+这里我们引入一个新的 validator 库：
 
 > https://github.com/go-playground/validator
 
@@ -108,7 +108,7 @@ func validateFunc(req RegisterReq) error {
 
 ```
 
-这样就不需要在每个请求进入业务逻辑之前都写重复的`validate()`函数了。本例中只列出了这个校验器非常简单的几个功能。
+这样就不需要在每个请求进入业务逻辑之前都写重复的 `validate()` 函数了。本例中只列出了这个校验器非常简单的几个功能。
 
 我们试着跑一下这个程序，输入参数设置为：
 
@@ -129,7 +129,7 @@ fmt.Println(err)
 // 'PasswordRepeat' failed on the 'eqfield' tag
 ```
 
-如果觉得这个`validator`提供的错误信息不够人性化，例如要把错误信息返回给用户，那就不应该直接显示英文了。可以针对每种tag进行错误信息定制，读者可以自行探索。
+如果觉得这个 `validator` 提供的错误信息不够人性化，例如要把错误信息返回给用户，那就不应该直接显示英文了。可以针对每种 tag 进行错误信息定制，读者可以自行探索。
 
 ## 5.4.3 原理
 
@@ -145,7 +145,7 @@ type T struct {
 }
 ```
 
-把这个结构体画成一棵树，见*图 5-11*：
+把这个结构体画成一棵树，见 *图 5-11*：
 
 ![struct-tree](../images/ch6-04-validate-struct-tree.png)
 
@@ -188,7 +188,7 @@ func validate(v interface{}) (bool, string) {
 	errmsg := "success"
 	vt := reflect.TypeOf(v)
 	vv := reflect.ValueOf(v)
-	for i := 0; i < vv.NumField(); i++ {
+	for i := 0; i <vv.NumField(); i++ {
 		fieldVal := vv.Field(i)
 		tagContent := vt.Field(i).Tag.Get("validate")
 		k := fieldVal.Kind()
@@ -199,7 +199,7 @@ func validate(v interface{}) (bool, string) {
 			tagValStr := strings.Split(tagContent, "=")
 			tagVal, _ := strconv.ParseInt(tagValStr[1], 10, 64)
 			if val != tagVal {
-				errmsg = "validate int failed, tag is: "+ strconv.FormatInt(
+				errmsg = "validate int failed, tag is:"+ strconv.FormatInt(
 					tagVal, 10,
 				)
 				validateResult = false
@@ -211,7 +211,7 @@ func validate(v interface{}) (bool, string) {
 			case "email":
 				nestedResult := validateEmail(val)
 				if nestedResult == false {
-					errmsg = "validate mail failed, field val is: "+ val
+					errmsg = "validate mail failed, field val is:"+ val
 					validateResult = false
 				}
 			}
@@ -237,8 +237,8 @@ func main() {
 }
 ```
 
-这里我们简单地对`eq=x`和`email`这两个tag进行了支持，读者可以对这个程序进行简单的修改以查看具体的validate效果。为了演示精简掉了错误处理和复杂情况的处理，例如`reflect.Int8/16/32/64`，`reflect.Ptr`等类型的处理，如果给生产环境编写校验库的话，请务必做好功能的完善和容错。
+这里我们简单地对 `eq=x` 和 `email` 这两个 tag 进行了支持，读者可以对这个程序进行简单的修改以查看具体的 validate 效果。为了演示精简掉了错误处理和复杂情况的处理，例如 `reflect.Int8/16/32/64`，`reflect.Ptr` 等类型的处理，如果给生产环境编写校验库的话，请务必做好功能的完善和容错。
 
-在前一小节中介绍的开源校验组件在功能上要远比我们这里的例子复杂的多。但原理很简单，就是用反射对结构体进行树形遍历。有心的读者这时候可能会产生一个问题，我们对结构体进行校验时大量使用了反射，而Go的反射在性能上不太出众，有时甚至会影响到我们程序的性能。这样的考虑确实有一些道理，但需要对结构体进行大量校验的场景往往出现在Web服务，这里并不一定是程序的性能瓶颈所在，实际的效果还是要从pprof中做更精确的判断。
+在前一小节中介绍的开源校验组件在功能上要远比我们这里的例子复杂的多。但原理很简单，就是用反射对结构体进行树形遍历。有心的读者这时候可能会产生一个问题，我们对结构体进行校验时大量使用了反射，而 Go 的反射在性能上不太出众，有时甚至会影响到我们程序的性能。这样的考虑确实有一些道理，但需要对结构体进行大量校验的场景往往出现在 Web 服务，这里并不一定是程序的性能瓶颈所在，实际的效果还是要从 pprof 中做更精确的判断。
 
-如果基于反射的校验真的成为了你服务的性能瓶颈怎么办？现在也有一种思路可以避免反射：使用Go内置的Parser对源代码进行扫描，然后根据结构体的定义生成校验代码。我们可以将所有需要校验的结构体放在单独的包内。这就交给读者自己去探索了。
+如果基于反射的校验真的成为了你服务的性能瓶颈怎么办？现在也有一种思路可以避免反射：使用 Go 内置的 Parser 对源代码进行扫描，然后根据结构体的定义生成校验代码。我们可以将所有需要校验的结构体放在单独的包内。这就交给读者自己去探索了。
