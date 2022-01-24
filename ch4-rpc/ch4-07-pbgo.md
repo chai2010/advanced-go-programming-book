@@ -1,12 +1,12 @@
-# 4.7 pbgo: 基于Protobuf的框架
+# 4.7 pbgo: 基于 Protobuf 的框架
 
-pbgo是我们专门针对本节内容设计的较为完整的迷你框架，它基于Protobuf的扩展语法，通过插件自动生成rpc和rest相关代码。在本章第二节我们已经展示过如何定制一个Protobuf代码生成插件，并生成了rpc部分的代码。在本节我们将重点讲述pbgo中和Protobuf扩展语法相关的rest部分的工作原理。
+pbgo 是我们专门针对本节内容设计的较为完整的迷你框架，它基于 Protobuf 的扩展语法，通过插件自动生成 rpc 和 rest 相关代码。在本章第二节我们已经展示过如何定制一个 Protobuf 代码生成插件，并生成了 rpc 部分的代码。在本节我们将重点讲述 pbgo 中和 Protobuf 扩展语法相关的 rest 部分的工作原理。
 
-## 4.7.1 Protobuf扩展语法
+## 4.7.1 Protobuf 扩展语法
 
-目前Protobuf相关的很多开源项目都使用到了Protobuf的扩展语法。在前一节中提到的验证器就是通过给结构体成员增加扩展元信息实现验证。在grpc-gateway项目中，则是通过为服务的每个方法增加Http相关的映射规则实现对Rest接口的支持。pbgo也是通过Protobuf的扩展语法来为rest接口增加元信息。
+目前 Protobuf 相关的很多开源项目都使用到了 Protobuf 的扩展语法。在前一节中提到的验证器就是通过给结构体成员增加扩展元信息实现验证。在 grpc-gateway 项目中，则是通过为服务的每个方法增加 Http 相关的映射规则实现对 Rest 接口的支持。pbgo 也是通过 Protobuf 的扩展语法来为 rest 接口增加元信息。
 
-pbgo的扩展语法在`github.com/chai2010/pbgo/pbgo.proto`文件定义：
+pbgo 的扩展语法在 `github.com/chai2010/pbgo/pbgo.proto` 文件定义：
 
 ```protobuf
 syntax = "proto3";
@@ -29,11 +29,11 @@ message HttpRule {
 }
 ```
 
-pbgo.proto文件是pbgo框架的一个部分，需要被其他的proto文件导入。Protobuf本身自有一套完整的包体系，在这里包的路径就是pbgo。Go语言也有自己的一套包体系，我们需要通过go_package的扩展语法定义Protobuf和Go语言之间包的映射关系。定义Protobuf和Go语言之间包的映射关系之后，其他导入pbgo.ptoto包的Protobuf文件在生成Go语言时，会生成pbgo.proto映射的Go语言包路径。
+pbgo.proto 文件是 pbgo 框架的一个部分，需要被其他的 proto 文件导入。Protobuf 本身自有一套完整的包体系，在这里包的路径就是 pbgo。Go 语言也有自己的一套包体系，我们需要通过 go_package 的扩展语法定义 Protobuf 和 Go 语言之间包的映射关系。定义 Protobuf 和 Go 语言之间包的映射关系之后，其他导入 pbgo.ptoto 包的 Protobuf 文件在生成 Go 语言时，会生成 pbgo.proto 映射的 Go 语言包路径。
 
-Protobuf扩展语法有五种类型，分别是针对文件的扩展信息、针对message的扩展信息、针对message成员的扩展信息、针对service的扩展信息和针对service方法的扩展信息。在使用扩展前首先需要通过extend关键字定义扩展的类型和可以用于扩展的成员。扩展成员可以是基础类型，也可以是一个结构体类型。pbgo中只定义了service的方法的扩展，只定义了一个名为rest_api的扩展成员，类型是HttpRule结构体。
+Protobuf 扩展语法有五种类型，分别是针对文件的扩展信息、针对 message 的扩展信息、针对 message 成员的扩展信息、针对 service 的扩展信息和针对 service 方法的扩展信息。在使用扩展前首先需要通过 extend 关键字定义扩展的类型和可以用于扩展的成员。扩展成员可以是基础类型，也可以是一个结构体类型。pbgo 中只定义了 service 的方法的扩展，只定义了一个名为 rest_api 的扩展成员，类型是 HttpRule 结构体。
 
-定义好扩展之后，我们就可以从其他的Protobuf文件中使用pbgo的扩展。创建一个hello.proto文件：
+定义好扩展之后，我们就可以从其他的 Protobuf 文件中使用 pbgo 的扩展。创建一个 hello.proto 文件：
 
 ```protobuf
 syntax = "proto3";
@@ -54,11 +54,11 @@ service HelloService {
 }
 ```
 
-首先我们通过导入`github.com/chai2010/pbgo/pbgo.proto`文件引入扩展定义，然后在HelloService的Hello方法中使用了pbgo定义的扩展。Hello方法扩展的信息表示该方法对应一个REST接口，只有一个GET方法对应"/hello/:value"路径。在REST方法的路径中采用了httprouter路由包的语法规则，":value"表示路径中的该字段对应的是参数中同名的成员。
+首先我们通过导入 `github.com/chai2010/pbgo/pbgo.proto` 文件引入扩展定义，然后在 HelloService 的 Hello 方法中使用了 pbgo 定义的扩展。Hello 方法扩展的信息表示该方法对应一个 REST 接口，只有一个 GET 方法对应 "/hello/:value" 路径。在 REST 方法的路径中采用了 httprouter 路由包的语法规则，":value" 表示路径中的该字段对应的是参数中同名的成员。
 
 ## 4.7.2 插件中读取扩展信息
 
-在本章的第二节我们已经简单讲述过Protobuf插件的工作原理，并且展示了如何生成RPC必要的代码。插件是一个generator.Plugin接口：
+在本章的第二节我们已经简单讲述过 Protobuf 插件的工作原理，并且展示了如何生成 RPC 必要的代码。插件是一个 generator.Plugin 接口：
 
 ```go
 type Plugin interface {
@@ -77,9 +77,9 @@ type Plugin interface {
 }
 ```
 
-我们需要在Generate和GenerateImports函数中分别生成相关的代码。而Protobuf文件的全部信息都在*generator.FileDescriptor类型函数参数中描述，因此我们需要从函数参数中提前扩展定义的元数据。
+我们需要在 Generate 和 GenerateImports 函数中分别生成相关的代码。而 Protobuf 文件的全部信息都在 * generator.FileDescriptor 类型函数参数中描述，因此我们需要从函数参数中提前扩展定义的元数据。
 
-pbgo框架中的插件对象是pbgoPlugin，在Generate方法中首先需要遍历Protobuf文件中定义的全部服务，然后再遍历每个服务的每个方法。在得到方法结构之后再通过自定义的getServiceMethodOption方法提取rest扩展信息：
+pbgo 框架中的插件对象是 pbgoPlugin，在 Generate 方法中首先需要遍历 Protobuf 文件中定义的全部服务，然后再遍历每个服务的每个方法。在得到方法结构之后再通过自定义的 getServiceMethodOption 方法提取 rest 扩展信息：
 
 ```go
 func (p *pbgoPlugin) Generate(file *generator.FileDescriptor) {
@@ -92,7 +92,7 @@ func (p *pbgoPlugin) Generate(file *generator.FileDescriptor) {
 }
 ```
 
-在讲述getServiceMethodOption方法之前我们先回顾下方法扩展的定义：
+在讲述 getServiceMethodOption 方法之前我们先回顾下方法扩展的定义：
 
 ```protobuf
 extend google.protobuf.MethodOptions {
@@ -100,9 +100,9 @@ extend google.protobuf.MethodOptions {
 }
 ```
 
-pbgo为服务的方法定义了一个rest_api名字的扩展，在最终生成的Go语言代码中会包含一个pbgo.E_RestApi全局变量，通过该全局变量可以获取用户定义的扩展信息。
+pbgo 为服务的方法定义了一个 rest_api 名字的扩展，在最终生成的 Go 语言代码中会包含一个 pbgo.E_RestApi 全局变量，通过该全局变量可以获取用户定义的扩展信息。
 
-下面是getServiceMethodOption方法的实现：
+下面是 getServiceMethodOption 方法的实现：
 
 ```go
 func (p *pbgoPlugin) getServiceMethodOption(
@@ -120,15 +120,15 @@ func (p *pbgoPlugin) getServiceMethodOption(
 }
 ```
 
-首先通过proto.HasExtension函数判断每个方法是否定义了扩展，然后通过proto.GetExtension函数获取用户定义的扩展信息。在获取到扩展信息之后，我们再将扩展转型为pbgo.HttpRule类型。
+首先通过 proto.HasExtension 函数判断每个方法是否定义了扩展，然后通过 proto.GetExtension 函数获取用户定义的扩展信息。在获取到扩展信息之后，我们再将扩展转型为 pbgo.HttpRule 类型。
 
-有了扩展信息之后，我们就可以参考第二节中生成RPC代码的方式生成REST相关的代码。
+有了扩展信息之后，我们就可以参考第二节中生成 RPC 代码的方式生成 REST 相关的代码。
 
-## 4.7.3 生成REST代码
+## 4.7.3 生成 REST 代码
 
-pbgo框架同时也提供了一个插件用于生成REST代码。不过我们的目的是学习pbgo框架的设计过程，因此我们先尝试手写Hello方法对应的REST代码，然后插件再根据手写的代码构造模板自动生成代码。
+pbgo 框架同时也提供了一个插件用于生成 REST 代码。不过我们的目的是学习 pbgo 框架的设计过程，因此我们先尝试手写 Hello 方法对应的 REST 代码，然后插件再根据手写的代码构造模板自动生成代码。
 
-HelloService只有一个Hello方法，Hello方法只定义了一个GET方式的REST接口：
+HelloService 只有一个 Hello 方法，Hello 方法只定义了一个 GET 方式的 REST 接口：
 
 ```protobuf
 message String {
@@ -144,7 +144,7 @@ service HelloService {
 }
 ```
 
-为了方便最终的用户，我们需要为HelloService构造一个路由。因此我们希望有个一个类似HelloServiceHandler的函数，可以基于HelloServiceInterface服务的接口生成一个路由处理器：
+为了方便最终的用户，我们需要为 HelloService 构造一个路由。因此我们希望有个一个类似 HelloServiceHandler 的函数，可以基于 HelloServiceInterface 服务的接口生成一个路由处理器：
 
 ```go
 type HelloServiceInterface interface {
@@ -158,7 +158,7 @@ func HelloServiceHandler(svc HelloServiceInterface) http.Handler {
 }
 ```
 
-代码中选择的是开源中比较流行的httprouter路由引擎。其中_handle_HelloService_Hello_get函数用于将Hello方法注册到路由处理器：
+代码中选择的是开源中比较流行的 httprouter 路由引擎。其中_handle_HelloService_Hello_get 函数用于将 Hello 方法注册到路由处理器：
 
 ```go
 func _handle_HelloService_Hello_get(
@@ -188,13 +188,13 @@ func _handle_HelloService_Hello_get(
 }
 ```
 
-首先通过router.Handle方法注册路由函数。在路由函数内部首先通过`ps.ByName("value")`从URL中加载value参数，然后通过pbgo.PopulateFieldFromPath辅助函数设置value参数对应的成员。当输入参数准备就绪之后就可以调用HelloService服务的Hello方法，最终将Hello方法返回的结果用json编码返回。
+首先通过 router.Handle 方法注册路由函数。在路由函数内部首先通过 `ps.ByName("value")` 从 URL 中加载 value 参数，然后通过 pbgo.PopulateFieldFromPath 辅助函数设置 value 参数对应的成员。当输入参数准备就绪之后就可以调用 HelloService 服务的 Hello 方法，最终将 Hello 方法返回的结果用 json 编码返回。
 
-在手工构造完成最终代码的结构之后，就可以在此基础上构造插件生成代码的模板。完整的插件代码和模板在`protoc-gen-pbgo/pbgo.go`文件，读者可以自行参考。
+在手工构造完成最终代码的结构之后，就可以在此基础上构造插件生成代码的模板。完整的插件代码和模板在 `protoc-gen-pbgo/pbgo.go` 文件，读者可以自行参考。
 
-## 4.7.4 启动REST服务
+## 4.7.4 启动 REST 服务
 
-虽然从头构造pbgo框架的过程比较繁琐，但是使用pbgo构造REST服务却是异常简单。首先要构造一个满足HelloServiceInterface接口的服务对象：
+虽然从头构造 pbgo 框架的过程比较繁琐，但是使用 pbgo 构造 REST 服务却是异常简单。首先要构造一个满足 HelloServiceInterface 接口的服务对象：
 
 ```go
 import (
@@ -209,7 +209,7 @@ func (p *HelloService) Hello(request *hello_pb.String, reply *hello_pb.String) e
 }
 ```
 
-和RPC代码一样，在Hello方法中简单返回结果。然后调用该服务对应的HelloServiceHandler函数生成路由处理器，并启动服务：
+和 RPC 代码一样，在 Hello 方法中简单返回结果。然后调用该服务对应的 HelloServiceHandler 函数生成路由处理器，并启动服务：
 
 ```go
 func main() {
@@ -218,10 +218,10 @@ func main() {
 }
 ```
 
-然后在命令行测试REST服务：
+然后在命令行测试 REST 服务：
 
 ```
 $ curl localhost:8080/hello/vgo
 ```
 
-这样一个超级简单的pbgo框架就完成了！
+这样一个超级简单的 pbgo 框架就完成了！
