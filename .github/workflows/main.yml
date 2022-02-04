@@ -1,0 +1,17 @@
+name: 'Gitbook Action Build'
+on:
+  push:
+    branches:
+      - master  # trigger branch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout action
+      uses: actions/checkout@v2
+    - name: Gitbook Action           # https://github.com/ZanderZhao/gitbook-action/releases
+      uses: ZanderZhao/gitbook-action@v1.2.4  # -> or ZanderZhao/gitbook-action@master.  If not use master click above, use latest please 
+      with:                                   #    or fork this repo and use YourName/gitbook-action@master
+        token: ${{ secrets.PERSONAL_TOKEN }}  # -> remember add this in settings/secrets as following
+        publish_branch: gh-pages
+        time_zone: Asia/Shanghai
