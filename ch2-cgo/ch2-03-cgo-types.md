@@ -396,7 +396,7 @@ p = (*X)(unsafe.Pointer(q)) // *Y => *X
 
 不同类型指针间的转换看似复杂，但是在 cgo 中已经算是比较简单的了。在 C 语言中经常遇到用普通数值表示指针的场景，也就是说如何实现数值和指针的转换也是 cgo 需要面对的一个问题。
 
-为了严格控制指针的使用，Go 语言禁止将数值类型直接转为指针类型！不过，Go 语言针对 `unsafe.Pointr` 指针类型特别定义了一个 uintptr 类型。我们可以 uintptr 为中介，实现数值类型到 `unsafe.Pointr` 指针类型到转换。再结合前面提到的方法，就可以实现数值和指针的转换了。
+为了严格控制指针的使用，Go 语言禁止将数值类型直接转为指针类型！不过，Go 语言针对 `unsafe.Pointer` 指针类型特别定义了一个 uintptr 类型。我们可以 uintptr 为中介，实现数值类型到 `unsafe.Pointer` 指针类型到转换。再结合前面提到的方法，就可以实现数值和指针的转换了。
 
 下面流程图演示了如何实现 int32 类型到 C 语言的 `char*` 字符串指针类型的相互转换：
 
@@ -405,7 +405,7 @@ p = (*X)(unsafe.Pointer(q)) // *Y => *X
 *图 2-2 int32 和 `char*` 指针转换*
 
 
-转换分为几个阶段，在每个阶段实现一个小目标：首先是 int32 到 uintptr 类型，然后是 uintptr 到 `unsafe.Pointr` 指针类型，最后是 `unsafe.Pointr` 指针类型到 `*C.char` 类型。
+转换分为几个阶段，在每个阶段实现一个小目标：首先是 int32 到 uintptr 类型，然后是 uintptr 到 `unsafe.Pointer` 指针类型，最后是 `unsafe.Pointer` 指针类型到 `*C.char` 类型。
 
 ## 2.3.7 切片间的转换
 
