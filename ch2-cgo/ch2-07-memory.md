@@ -23,7 +23,7 @@ import "unsafe"
 
 func makeByteSlice(n int) []byte {
 	p := C.makeslice(C.size_t(n))
-	return ((*[1 << 31]byte)(p))[0:n:n]
+	return ((*[1 << 33]byte)(p))[0:n:n]
 }
 
 func freeByteSlice(p []byte) {
