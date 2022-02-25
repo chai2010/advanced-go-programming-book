@@ -222,14 +222,14 @@ func (a *Authentication) RequireTransportSecurity() bool {
 }
 ```
 
-在 GetRequestMetadata 方法中，我们返回地认证信息包装 login 和 password 两个信息。为了演示代码简单，RequireTransportSecurity 方法表示不要求底层使用安全链接。
+在 GetRequestMetadata 方法中，我们返回地认证信息包装 user 和 password 两个信息。为了演示代码简单，RequireTransportSecurity 方法表示不要求底层使用安全链接。
 
 然后在每次请求 gRPC 服务时就可以将 Token 信息作为参数选项传人：
 
 ```go
 func main() {
 	auth := Authentication{
-		Login:    "gopher",
+		User:    "gopher",
 		Password: "password",
 	}
 
