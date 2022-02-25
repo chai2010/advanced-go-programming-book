@@ -229,7 +229,7 @@ func (a *Authentication) RequireTransportSecurity() bool {
 ```go
 func main() {
 	auth := Authentication{
-		Login:    "gopher",
+		User:    "gopher",
 		Password: "password",
 	}
 
