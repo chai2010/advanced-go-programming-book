@@ -77,7 +77,7 @@ func main() {
 
 每一个 handler 里都有之前提到的记录运行时间的代码，每次增加新的路由我们也同样需要把这些看起来长得差不多的代码拷贝到我们需要的地方去。因为代码不太多，所以实施起来也没有遇到什么大问题。
 
-渐渐的我们的系统增加到了 30 个路由和 `handler` 函数，每次增加新的 handler，我们的第一件工作就是把之前写的所有和业务逻辑无关的周边代码先拷贝过来。
+渐渐的我们的系统增加到了 30 个路由和 handler 函数，每次增加新的 handler，我们的第一件工作就是把之前写的所有和业务逻辑无关的周边代码先拷贝过来。
 
 接下来系统安稳地运行了一段时间，突然有一天，老板找到你，我们最近找人新开发了监控系统，为了系统运行可以更加可控，需要把每个接口运行的耗时数据主动上报到我们的监控系统里。给监控系统起个名字吧，叫 metrics。现在你需要修改代码并把耗时通过 HTTP Post 的方式发给 metrics 系统了。我们来修改一下 `helloHandler()`：
 
@@ -153,7 +153,7 @@ func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request) {
 func (ResponseWriter, *Request)
 ```
 
-那么这个 `handler` 和 `http.HandlerFunc()` 就有了一致的函数签名，可以将该 `handler()` 函数进行类型转换，转为 `http.HandlerFunc`。而 `http.HandlerFunc` 实现了 `http.Handler` 这个接口。在 `http` 库需要调用你的 handler 函数来处理 http 请求时，会调用 `HandlerFunc()` 的 `ServeHTTP()` 函数，可见一个请求的基本调用链是这样的：
+那么这个 handler 和 `http.HandlerFunc()` 就有了一致的函数签名，可以将该 `handler()` 函数进行类型转换，转为 `http.HandlerFunc`。而 `http.HandlerFunc` 实现了 `http.Handler` 这个接口。在 `http` 库需要调用你的 handler 函数来处理 http 请求时，会调用 `HandlerFunc()` 的 `ServeHTTP()` 函数，可见一个请求的基本调用链是这样的：
 
 ```go
 h = getHandler() => h.ServeHTTP(w, r) => h(w, r)
