@@ -2,6 +2,8 @@
 
 - *Go语言QQ群: 102319854, 1055927514*
 - *光谷码农课堂: https://study.163.com/provider/480000001914454/index.htm*
+- *KusonStack一站式可编程配置技术栈: https://github.com/KusionStack/kusion*
+- *KCL配置编程语言: https://github.com/KusionStack/KCLVM*
 
 ----
 
