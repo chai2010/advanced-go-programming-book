@@ -34,7 +34,7 @@ $ go get github.com/fullstorydev/grpcurl
 $ go install github.com/fullstorydev/grpcurl/cmd/grpcurl
 ```
 
-grpcurl 中最常使用的是 list 命令，用于获取服务或服务方法的列表。比如 `grpcurl localhost:1234 list` 命令将获取本地 1234 端口上的 grpc 服务的列表。在使用 grpcurl 时，需要通过 `-cert` 和 `-key` 参数设置公钥和私钥文件，链接启用了 tls 协议的服务。对于没有没用 tls 协议的 grpc 服务，通过 `-plaintext` 参数忽略 tls 证书的验证过程。如果是 Unix Socket 协议，则需要指定 `-unix` 参数。
+grpcurl 中最常使用的是 list 命令，用于获取服务或服务方法的列表。比如 `grpcurl localhost:1234 list` 命令将获取本地 1234 端口上的 grpc 服务的列表。在使用 grpcurl 时，需要通过 `-cert` 和 `-key` 参数设置公钥和私钥文件，连接启用了 tls 协议的服务。对于没有没用 tls 协议的 grpc 服务，通过 `-plaintext` 参数忽略 tls 证书的验证过程。如果是 Unix Socket 协议，则需要指定 `-unix` 参数。
 
 如果没有配置好公钥和私钥文件，也没有忽略证书的验证过程，那么将会遇到类似以下的错误：
 
@@ -179,7 +179,7 @@ $ grpcurl -plaintext -d '{"value":"gopher"}' \
 
 如果 `-d` 参数是 `@` 则表示从标准输入读取 json 输入参数，这一般用于比较输入复杂的 json 数据，也可以用于测试流方法。
 
-下面命令是链接 Channel 流方法，通过从标准输入读取输入流参数：
+下面命令是连接 Channel 流方法，通过从标准输入读取输入流参数：
 
 ```shell
 $ grpcurl -plaintext -d @ localhost:1234 HelloService.HelloService/Channel

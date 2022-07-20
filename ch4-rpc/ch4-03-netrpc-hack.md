@@ -58,7 +58,7 @@ func (client *Client) Go(
 }
 ```
 
-首先是构造一个表示当前调用的 call 变量，然后通过 `client.send` 将 call 的完整参数发送到 RPC 框架。`client.send` 方法调用是线程安全的，因此可以从多个 Goroutine 同时向同一个 RPC 链接发送调用指令。
+首先是构造一个表示当前调用的 call 变量，然后通过 `client.send` 将 call 的完整参数发送到 RPC 框架。`client.send` 方法调用是线程安全的，因此可以从多个 Goroutine 同时向同一个 RPC 连接发送调用指令。
 
 当调用完成或者发生错误时，将调用 `call.done` 方法通知完成：
 
@@ -187,7 +187,7 @@ func doClientWork(client *rpc.Client) {
 
 ## 4.3.3 反向 RPC
 
-通常的 RPC 是基于 C/S 结构，RPC 的服务端对应网络的服务器，RPC 的客户端也对应网络客户端。但是对于一些特殊场景，比如在公司内网提供一个 RPC 服务，但是在外网无法链接到内网的服务器。这种时候我们可以参考类似反向代理的技术，首先从内网主动链接到外网的 TCP 服务器，然后基于 TCP 链接向外网提供 RPC 服务。
+通常的 RPC 是基于 C/S 结构，RPC 的服务端对应网络的服务器，RPC 的客户端也对应网络客户端。但是对于一些特殊场景，比如在公司内网提供一个 RPC 服务，但是在外网无法连接到内网的服务器。这种时候我们可以参考类似反向代理的技术，首先从内网主动连接到外网的 TCP 服务器，然后基于 TCP 连接向外网提供 RPC 服务。
 
 以下是启动反向 RPC 服务的代码：
 
@@ -208,9 +208,9 @@ func main() {
 }
 ```
 
-反向 RPC 的内网服务将不再主动提供 TCP 监听服务，而是首先主动链接到对方的 TCP 服务器。然后基于每个建立的 TCP 链接向对方提供 RPC 服务。
+反向 RPC 的内网服务将不再主动提供 TCP 监听服务，而是首先主动连接到对方的 TCP 服务器。然后基于每个建立的 TCP 连接向对方提供 RPC 服务。
 
-而 RPC 客户端则需要在一个公共的地址提供一个 TCP 服务，用于接受 RPC 服务器的链接请求：
+而 RPC 客户端则需要在一个公共的地址提供一个 TCP 服务，用于接受 RPC 服务器的连接请求：
 
 ```go
 func main() {
@@ -236,7 +236,7 @@ func main() {
 }
 ```
 
-当每个链接建立后，基于网络链接构造 RPC 客户端对象并发送到 clientChan 管道。
+当每个连接建立后，基于网络连接构造 RPC 客户端对象并发送到 clientChan 管道。
 
 客户端执行 RPC 调用的操作在 doClientWork 函数完成：
 
@@ -260,9 +260,9 @@ func doClientWork(clientChan <-chan *rpc.Client) {
 
 ## 4.3.4 上下文信息
 
-基于上下文我们可以针对不同客户端提供定制化的 RPC 服务。我们可以通过为每个链接提供独立的 RPC 服务来实现对上下文特性的支持。
+基于上下文我们可以针对不同客户端提供定制化的 RPC 服务。我们可以通过为每个连接提供独立的 RPC 服务来实现对上下文特性的支持。
 
-首先改造 HelloService，里面增加了对应链接的 conn 成员：
+首先改造 HelloService，里面增加了对应连接的 conn 成员：
 
 ```go
 type HelloService struct {
@@ -270,7 +270,7 @@ type HelloService struct {
 }
 ```
 
-然后为每个链接启动独立的 RPC 服务：
+然后为每个连接启动独立的 RPC 服务：
 
 ```go
 func main() {
@@ -296,7 +296,7 @@ func main() {
 }
 ```
 
-Hello 方法中就可以根据 conn 成员识别不同链接的 RPC 调用：
+Hello 方法中就可以根据 conn 成员识别不同连接的 RPC 调用：
 
 ```go
 func (p *HelloService) Hello(request string, reply *string) error {
@@ -331,4 +331,4 @@ func (p *HelloService) Hello(request string, reply *string) error {
 }
 ```
 
-这样可以要求在客户端链接 RPC 服务时，首先要执行登陆操作，登陆成功后才能正常执行其他的服务。
+这样可以要求在客户端连接 RPC 服务时，首先要执行登陆操作，登陆成功后才能正常执行其他的服务。

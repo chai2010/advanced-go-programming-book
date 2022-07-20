@@ -4,7 +4,7 @@
 
 ## 4.5.1 证书认证
 
-gRPC 建立在 HTTP/2 协议之上，对 TLS 提供了很好的支持。我们前面章节中 gRPC 的服务都没有提供证书支持，因此客户端在链接服务器中通过 `grpc.WithInsecure()` 选项跳过了对服务器证书的验证。没有启用证书的 gRPC 服务在和客户端进行的是明文通讯，信息面临被任何第三方监听的风险。为了保障 gRPC 通信不被第三方监听篡改或伪造，我们可以对服务器启动 TLS 加密特性。
+gRPC 建立在 HTTP/2 协议之上，对 TLS 提供了很好的支持。我们前面章节中 gRPC 的服务都没有提供证书支持，因此客户端在连接服务器中通过 `grpc.WithInsecure()` 选项跳过了对服务器证书的验证。没有启用证书的 gRPC 服务在和客户端进行的是明文通讯，信息面临被任何第三方监听的风险。为了保障 gRPC 通信不被第三方监听篡改或伪造，我们可以对服务器启动 TLS 加密特性。
 
 可以用以下命令为服务器和客户端分别生成私钥和证书：
 
@@ -64,7 +64,7 @@ func main() {
 
 其中 credentials.NewClientTLSFromFile 是构造客户端用的证书对象，第一个参数是服务器的证书文件，第二个参数是签发证书的服务器的名字。然后通过 grpc.WithTransportCredentials(creds) 将证书对象转为参数选项传人 grpc.Dial 函数。
 
-以上这种方式，需要提前将服务器的证书告知客户端，这样客户端在链接服务器时才能进行对服务器证书认证。在复杂的网络环境中，服务器证书的传输本身也是一个非常危险的问题。如果在中间某个环节，服务器证书被监听或替换那么对服务器的认证也将不再可靠。
+以上这种方式，需要提前将服务器的证书告知客户端，这样客户端在连接服务器时才能进行对服务器证书认证。在复杂的网络环境中，服务器证书的传输本身也是一个非常危险的问题。如果在中间某个环节，服务器证书被监听或替换那么对服务器的认证也将不再可靠。
 
 为了避免证书的传递过程中被篡改，可以通过一个安全可靠的根证书分别对服务器和客户端的证书进行签名。这样客户端或服务器在收到对方的证书后可以通过根证书进行验证证书的有效性。
 
@@ -128,7 +128,7 @@ func main() {
 }
 ```
 
-在新的客户端代码中，我们不再直接依赖服务器端证书文件。在 credentials.NewTLS 函数调用中，客户端通过引入一个 CA 根证书和服务器的名字来实现对服务器进行验证。客户端在链接服务器时会首先请求服务器的证书，然后使用 CA 根证书对收到的服务器端证书进行验证。
+在新的客户端代码中，我们不再直接依赖服务器端证书文件。在 credentials.NewTLS 函数调用中，客户端通过引入一个 CA 根证书和服务器的名字来实现对服务器进行验证。客户端在连接服务器时会首先请求服务器的证书，然后使用 CA 根证书对收到的服务器端证书进行验证。
 
 如果客户端的证书也采用 CA 根证书签名的话，服务器端也可以对客户端进行证书认证。我们用 CA 根证书对客户端证书签名：
 
@@ -178,7 +178,7 @@ func main() {
 
 ## 4.5.2 Token 认证
 
-前面讲述的基于证书的认证是针对每个 gRPC 链接的认证。gRPC 还为每个 gRPC 方法调用提供了认证支持，这样就基于用户 Token 对不同的方法访问进行权限管理。
+前面讲述的基于证书的认证是针对每个 gRPC 连接的认证。gRPC 还为每个 gRPC 方法调用提供了认证支持，这样就基于用户 Token 对不同的方法访问进行权限管理。
 
 要实现对每个 gRPC 方法进行认证，需要实现 grpc.PerRPCCredentials 接口：
 
@@ -202,7 +202,7 @@ type PerRPCCredentials interface {
 }
 ```
 
-在 GetRequestMetadata 方法中返回认证需要的必要信息。RequireTransportSecurity 方法表示是否要求底层使用安全链接。在真实的环境中建议必须要求底层启用安全的链接，否则认证信息有泄露和被篡改的风险。
+在 GetRequestMetadata 方法中返回认证需要的必要信息。RequireTransportSecurity 方法表示是否要求底层使用安全连接。在真实的环境中建议必须要求底层启用安全的连接，否则认证信息有泄露和被篡改的风险。
 
 我们可以创建一个 Authentication 类型，用于实现用户名和密码的认证：
 
@@ -222,7 +222,7 @@ func (a *Authentication) RequireTransportSecurity() bool {
 }
 ```
 
-在 GetRequestMetadata 方法中，我们返回地认证信息包装 user 和 password 两个信息。为了演示代码简单，RequireTransportSecurity 方法表示不要求底层使用安全链接。
+在 GetRequestMetadata 方法中，我们返回地认证信息包装 user 和 password 两个信息。为了演示代码简单，RequireTransportSecurity 方法表示不要求底层使用安全连接。
 
 然后在每次请求 gRPC 服务时就可以将 Token 信息作为参数选项传人：
 
@@ -243,7 +243,7 @@ func main() {
 }
 ```
 
-通过 grpc.WithPerRPCCredentials 函数将 Authentication 对象转为 grpc.Dial 参数。因为这里没有启用安全链接，需要传人 grpc.WithInsecure() 表示忽略证书认证。
+通过 grpc.WithPerRPCCredentials 函数将 Authentication 对象转为 grpc.Dial 参数。因为这里没有启用安全连接，需要传人 grpc.WithInsecure() 表示忽略证书认证。
 
 然后在 gRPC 服务端的每个方法中通过 Authentication 类型的 Auth 方法进行身份认证：
 

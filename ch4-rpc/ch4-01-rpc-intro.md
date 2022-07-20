@@ -39,7 +39,7 @@ func main() {
 }
 ```
 
-其中 rpc.Register 函数调用会将对象类型中所有满足 RPC 规则的对象方法注册为 RPC 函数，所有注册的方法会放在 “HelloService” 服务空间之下。然后我们建立一个唯一的 TCP 链接，并且通过 rpc.ServeConn 函数在该 TCP 链接上为对方提供 RPC 服务。
+其中 rpc.Register 函数调用会将对象类型中所有满足 RPC 规则的对象方法注册为 RPC 函数，所有注册的方法会放在 “HelloService” 服务空间之下。然后我们建立一个唯一的 TCP 连接，并且通过 rpc.ServeConn 函数在该 TCP 连接上为对方提供 RPC 服务。
 
 下面是客户端请求 HelloService 服务的代码：
 
@@ -60,7 +60,7 @@ func main() {
 }
 ```
 
-首先是通过 rpc.Dial 拨号 RPC 服务，然后通过 client.Call 调用具体的 RPC 方法。在调用 client.Call 时，第一个参数是用点号链接的 RPC 服务名字和方法名字，第二和第三个参数分别我们定义 RPC 方法的两个参数。
+首先是通过 rpc.Dial 拨号 RPC 服务，然后通过 client.Call 调用具体的 RPC 方法。在调用 client.Call 时，第一个参数是用点号连接的 RPC 服务名字和方法名字，第二和第三个参数分别我们定义 RPC 方法的两个参数。
 
 由这个例子可以看出 RPC 的使用其实非常简单。
 
@@ -175,7 +175,7 @@ func main() {
 }
 ```
 
-在新的 RPC 服务端实现中，我们用 RegisterHelloService 函数来注册函数，这样不仅可以避免命名服务名称的工作，同时也保证了传入的服务对象满足了 RPC 接口的定义。最后我们新的服务改为支持多个 TCP 链接，然后为每个 TCP 链接提供 RPC 服务。
+在新的 RPC 服务端实现中，我们用 RegisterHelloService 函数来注册函数，这样不仅可以避免命名服务名称的工作，同时也保证了传入的服务对象满足了 RPC 接口的定义。最后我们新的服务改为支持多个 TCP 连接，然后为每个 TCP 连接提供 RPC 服务。
 
 
 ## 4.1.3 跨语言的 RPC
@@ -229,7 +229,7 @@ func main() {
 }
 ```
 
-先手工调用 net.Dial 函数建立 TCP 链接，然后基于该链接建立针对客户端的 json 编解码器。
+先手工调用 net.Dial 函数建立 TCP 连接，然后基于该连接建立针对客户端的 json 编解码器。
 
 在确保客户端可以正常调用 RPC 服务的方法之后，我们用一个普通的 TCP 服务代替 Go 语言版本的 RPC 服务，这样可以查看客户端调用时发送的数据格式。比如通过 nc 命令 `nc -l 1234` 在同样的端口启动一个 TCP 服务。然后再次执行一次 RPC 调用将会发现 nc 输出了以下的信息：
 
@@ -315,7 +315,7 @@ func main() {
 
 RPC 的服务架设在 “/jsonrpc” 路径，在处理函数中基于 http.ResponseWriter 和 http.Request 类型的参数构造一个 io.ReadWriteCloser 类型的 conn 通道。然后基于 conn 构建针对服务端的 json 编码解码器。最后通过 rpc.ServeRequest 函数为每次请求处理一次 RPC 方法调用。
 
-模拟一次 RPC 调用的过程就是向该链接发送一个 json 字符串：
+模拟一次 RPC 调用的过程就是向该连接发送一个 json 字符串：
 
 ```
 $ curl localhost:1234/jsonrpc -X POST \
