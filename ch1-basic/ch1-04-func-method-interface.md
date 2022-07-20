@@ -152,7 +152,7 @@ func f(x int) *int {
 }
 
 func g() int {
-	x = new(int)
+	x := new(int)
 	return *x
 }
 ```
