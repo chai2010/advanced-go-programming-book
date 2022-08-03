@@ -13,7 +13,7 @@
 #
 
 default:
-	gitbook build
+	mdbook build
 
 macos:
 	gitbook build --gitbook=3.2.3

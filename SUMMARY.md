@@ -1,6 +1,11 @@
 # 目录
 
+[Go语言定制指南](index.md)
+[前言](preface.md)
+
 * [第1章 语言基础](ch1-basic/readme.md)
+
+<!--
    * [1.1 Go语言创世纪](ch1-basic/ch1-01-genesis.md)
    * [1.2 Hello, World 的革命](ch1-basic/ch1-02-hello-revolution.md)
    * [1.3 数组、字符串和切片](ch1-basic/ch1-03-array-string-and-slice.md)
@@ -66,3 +71,4 @@
    * [附录A: Go语言常见坑](appendix/appendix-a-trap.md)
    * [附录B: 有趣的代码片段](appendix/appendix-b-gems.md)
    * [附录C: 作者简介](appendix/appendix-c-author.md)
+-->
