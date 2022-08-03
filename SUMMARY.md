@@ -1,6 +1,6 @@
 # 目录
 
-[Go语言定制指南](index.md)
+[Go语言高级编程](index.md)
 [前言](preface.md)
 
 - [语言基础](ch1-basic/readme.md)
