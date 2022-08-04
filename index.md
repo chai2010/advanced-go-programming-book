@@ -1,7 +1,7 @@
 # Go语言高级编程(Advanced Go Programming)
 
-- *KusonStack一站式可编程配置技术栈: https://github.com/KusionStack/kusion*
-- *凹语言™: https://github.com/wa-lang/wa*
+- *KusonStack一站式可编程配置技术栈: [https://github.com/KusionStack/kusion](https://github.com/KusionStack/kusion)*
+- *凹语言™: [https://github.com/wa-lang/wa](https://github.com/wa-lang/wa)*
 
 ---
 
