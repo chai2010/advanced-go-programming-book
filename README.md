@@ -29,19 +29,14 @@
 - 作者：柴树杉，Github [@chai2010](https://github.com/chai2010)，Twitter [@chaishushan](https://twitter.com/chaishushan)，主页 https://chai2010.cn/about
 - 作者：曹春晖，Github [@cch123](https://github.com/cch123)，主页 [xargin](http://xargin.com)
 - 网址：https://github.com/chai2010/advanced-go-programming-book
-- Star历史：https://starcharts.herokuapp.com/chai2010/advanced-go-programming-book.svg
+- 在线阅读：https://chai2010.cn/advanced-go-programming-book
+- 豆瓣：- https://book.douban.com/subject/34442131/
 
 ## 购买链接：
 
 - 京东：https://item.jd.com/12647494.html
 - 异步：https://www.epubit.com/book/detail/40090
 - 当当：http://product.dangdang.com/27896588.html
-
-如果你喜欢本书，欢迎到豆瓣评论：
-
-[![](douban.png)](https://book.douban.com/subject/34442131/)
-
-- https://book.douban.com/subject/34442131/
 
 <!--
 
@@ -51,17 +46,10 @@
 
 -->
 
-## 在线阅读
-
-- [SUMMARY.md](SUMMARY.md)
-- https://chai2010.cn/advanced-go-programming-book/
-- https://www.gitbook.com/book/chai2010/advanced-go-programming-book/
-
 ## 相关文章
 
 1. [GopherChina 2019大会推荐书单来啦](https://zhuanlan.zhihu.com/p/63910336)
 1. [深入Go的底层，带你走近一群有追求的人](https://mp.weixin.qq.com/s/obnnVkO2EiFnuXk_AIDHWw)
-
 
 ## 相关报告
 

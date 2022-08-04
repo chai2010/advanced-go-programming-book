@@ -15,35 +15,5 @@
 default:
 	mdbook serve
 
-macos:
-	gitbook build --gitbook=3.2.3
-
-macos-pdf:
-	mv preface.md preface-bak.md && mv preface-pdf.md preface.md
-	gitbook pdf --gitbook=3.2.3
-	mv preface.md preface-pdf.md && mv preface-bak.md preface.md
-
-server:
-	go run server.go
-
-cover:
-	convert A20181610.jpg cover.png
-	convert -resize 1800x2360! A20181610.jpg cover.jpg
-	convert -resize 200x262!   A20181610.jpg cover_small.jpg
-
-
-# https://chai2010.cn/advanced-go-programming-book
-deploy:
-	-rm -rf _book
-	gitbook build
-
-	cd _book && \
-		git init && \
-		git add . && \
-		git commit -m "Update github pages" && \
-		git push --force --quiet "https://github.com/chai2010/advanced-go-programming-book.git" master:gh-pages
-
-	@echo deploy done
-
 clean:
-	-rm -rf _book
+	-rm -rf book
