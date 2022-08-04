@@ -6,13 +6,13 @@
 
 - 作者：柴树杉，Github [@chai2010](https://github.com/chai2010)，Twitter [@chaishushan](https://twitter.com/chaishushan)
 - 作者：曹春晖，Github [@cch123](https://github.com/cch123)
-- 网址：https://github.com/chai2010/advanced-go-programming-book
-- 在线阅读：https://chai2010.cn/advanced-go-programming-book
-- 豆瓣：- https://book.douban.com/subject/34442131/
+- 网址：[https://github.com/chai2010/advanced-go-programming-book](https://github.com/chai2010/advanced-go-programming-book)
+- 在线阅读：[https://chai2010.cn/advanced-go-programming-book](https://chai2010.cn/advanced-go-programming-book)
+- 豆瓣：[https://book.douban.com/subject/34442131](https://book.douban.com/subject/34442131)
 
 购买链接：
 
-- 京东：https://item.m.jd.com/product/12647494.html
-- 异步：https://www.epubit.com/book/detail/40090
-- 当当：http://product.dangdang.com/27896588.html
+- 京东：[https://item.m.jd.com/product/12647494.html](https://item.m.jd.com/product/12647494.html)
+- 异步：[https://www.epubit.com/book/detail/40090](https://www.epubit.com/book/detail/40090)
+- 当当：[http://product.dangdang.com/27896588.html](http://product.dangdang.com/27896588.html)
 
