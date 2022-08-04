@@ -30,7 +30,6 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.MY_DEPLOY_KEY }}
-          external_repository: KusionStack/kusionstack.github.io
           publish_dir: ./book
           publish_branch: gh-pages
           user_name: 'github-actions[bot]'
