@@ -23,7 +23,8 @@ jobs:
         with:
           mdbook-version: '0.4.10'
           # mdbook-version: 'latest'
-
+      - run: apt update && apt install chromium-browser
+      - run: cargo install mdbook-pdf
       - run: mdbook build
 
       - name: Deploy
