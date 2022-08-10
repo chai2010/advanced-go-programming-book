@@ -31,7 +31,7 @@ jobs:
           rm mdbook*.zip
           chmod +x mdbook-pdf
           sudo mv mdbook-pdf /bin
-      - run: mdbook build
+      - run: mdbook build && ls -l book/
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
