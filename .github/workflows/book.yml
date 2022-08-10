@@ -1,0 +1,36 @@
+name: mdbook
+on:
+  push:
+    branches:
+      - main
+      - master
+      - "releases/*"
+  pull_request:
+    branches:
+      - main
+      - master
+    types:
+    - closed
+jobs:
+  deploy:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Setup mdBook
+        uses: peaceiris/actions-mdbook@v1
+        with:
+          mdbook-version: '0.4.10'
+          # mdbook-version: 'latest'
+
+      - run: mdbook build
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.MY_DEPLOY_KEY }}
+          publish_dir: ./book
+          publish_branch: gh-pages
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'

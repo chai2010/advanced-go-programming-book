@@ -1,6 +1,6 @@
 # 4.4 gRPC 入门
 
-gRPC 是 Google 公司基于 Protobuf 开发的跨语言的开源 RPC 框架。gRPC 基于 HTTP/2 协议设计，可以基于一个 HTTP/2 链接提供多个服务，对于移动设备更加友好。本节将讲述 gRPC 的简单用法。
+gRPC 是 Google 公司基于 Protobuf 开发的跨语言的开源 RPC 框架。gRPC 基于 HTTP/2 协议设计，可以基于一个 HTTP/2 连接提供多个服务，对于移动设备更加友好。本节将讲述 gRPC 的简单用法。
 
 ## 4.4.1 gRPC 技术栈
 
@@ -82,7 +82,7 @@ func main() {
 
 首先是通过 `grpc.NewServer()` 构造一个 gRPC 服务对象，然后通过 gRPC 插件生成的 RegisterHelloServiceServer 函数注册我们实现的 HelloServiceImpl 服务。然后通过 `grpcServer.Serve(lis)` 在一个监听端口上提供 gRPC 服务。
 
-然后就可以通过客户端链接 gRPC 服务了：
+然后就可以通过客户端连接 gRPC 服务了：
 
 ```go
 func main() {
@@ -101,9 +101,9 @@ func main() {
 }
 ```
 
-其中 grpc.Dial 负责和 gRPC 服务建立链接，然后 NewHelloServiceClient 函数基于已经建立的链接构造 HelloServiceClient 对象。返回的 client 其实是一个 HelloServiceClient 接口对象，通过接口定义的方法就可以调用服务端对应的 gRPC 服务提供的方法。
+其中 grpc.Dial 负责和 gRPC 服务建立连接，然后 NewHelloServiceClient 函数基于已经建立的连接构造 HelloServiceClient 对象。返回的 client 其实是一个 HelloServiceClient 接口对象，通过接口定义的方法就可以调用服务端对应的 gRPC 服务提供的方法。
 
-gRPC 和标准库的 RPC 框架有一个区别，gRPC 生成的接口并不支持异步调用。不过我们可以在多个 Goroutine 之间安全地共享 gRPC 底层的 HTTP/2 链接，因此可以通过在另一个 Goroutine 阻塞调用的方式模拟异步调用。
+gRPC 和标准库的 RPC 框架有一个区别，gRPC 生成的接口并不支持异步调用。不过我们可以在多个 Goroutine 之间安全地共享 gRPC 底层的 HTTP/2 连接，因此可以通过在另一个 Goroutine 阻塞调用的方式模拟异步调用。
 
 ## 4.4.3 gRPC 流
 

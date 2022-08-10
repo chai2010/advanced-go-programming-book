@@ -1,0 +1,19 @@
+# https://giscus.app
+
+[book]
+title = "Go语言高级编程"
+authors = ["柴树杉", "曹春晖"]
+description = "Go语言高级编程"
+language = "zh"
+multilingual = false
+src = "."
+
+[build]
+build-dir = "book"
+
+[output.html]
+additional-css = ["style.css"]
+additional-js = ["js/custom.js", "js/bigPicture.js"]
+git-repository-url = "https://github.com/chai2010/advanced-go-programming-book"
+edit-url-template = "https://github.com/chai2010/advanced-go-programming-book/edit/master/{path}"
+git-repository-icon = "fa-github"

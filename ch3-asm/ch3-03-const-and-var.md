@@ -261,9 +261,9 @@ var helloworld []byte
 
 ```
 GLOBL ·helloworld(SB),$24            // var helloworld []byte("Hello World!")
-DATA ·helloworld+0(SB)/8,$text<>(SB) // StringHeader.Data
-DATA ·helloworld+8(SB)/8,$12         // StringHeader.Len
-DATA ·helloworld+16(SB)/8,$16        // StringHeader.Cap
+DATA ·helloworld+0(SB)/8,$text<>(SB) // SliceHeader.Data
+DATA ·helloworld+8(SB)/8,$12         // SliceHeader.Len
+DATA ·helloworld+16(SB)/8,$16        // SliceHeader.Cap
 
 GLOBL text<>(SB),$16
 DATA text<>+0(SB)/8,$"Hello Wo"      // ...string data...
