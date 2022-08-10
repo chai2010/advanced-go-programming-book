@@ -36,7 +36,7 @@ DELETE /user/starred/:owner/:repo
 
 ## 5.2.1 httprouter
 
-较流行的开源 go Web 框架大多使用 httprouter，或是基于 httprouter 的变种对路由进行支持。前面提到的 github 的参数式路由在 httprouter 中都是可以支持的。
+较流行的开源 go Web 框架大多使用 httprouter，或是基于 httprouter 的变种对路由进行支持。前面提到的 Github 的参数式路由在 httprouter 中都是可以支持的。
 
 因为 httprouter 中使用的是显式匹配，所以在设计路由的时候需要规避一些会导致路由冲突的情况，例如：
 
@@ -50,7 +50,7 @@ GET /user/info/:name
 POST /user/:id
 ```
 
-简单来讲的话，如果两个路由拥有一致的 http 方法 (指 GET/POST/PUT/DELETE) 和请求路径前缀，且在某个位置出现了 A 路由是 wildcard（指: id 这种形式）参数，B 路由则是普通字符串，那么就会发生路由冲突。路由冲突会在初始化阶段直接 panic：
+简单来讲的话，如果两个路由拥有一致的 http 方法 (指 `GET`、`POST`、`PUT`、`DELETE`) 和请求路径前缀，且在某个位置出现了 A 路由是 wildcard（指 `:id` 这种形式）参数，B 路由则是普通字符串，那么就会发生路由冲突。路由冲突会在初始化阶段直接 panic：
 
 ```shell
 panic: wildcard route ':id' conflicts with existing children in path '/user/:id'

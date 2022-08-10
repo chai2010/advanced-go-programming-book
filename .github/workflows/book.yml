@@ -13,7 +13,7 @@ on:
     - closed
 jobs:
   deploy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
@@ -23,14 +23,34 @@ jobs:
         with:
           mdbook-version: '0.4.10'
           # mdbook-version: 'latest'
-
-      - run: mdbook build
-
+      # 安装 build pdf 依赖和中文字体
+      - run: sudo apt update && sudo apt install chromium-browser wget unzip fonts-wqy-microhei ttf-wqy-zenhei -y
+      # 下载 mdbook-pdf 二进制文件, 编译太花时间了
+      - run: |
+          export mdbook_download_url=$(curl -s 'https://api.github.com/repos/HollowMan6/mdbook-pdf/releases?per_page=1&page=1' | python3 -c "import sys, json;import pprint;tmp=[print(x['browser_download_url']) if 'x86_64-unknown-linux-gnu' in x['name'] else None for x in json.load(sys.stdin)[0]['assets']]")
+          wget $mdbook_download_url
+          unzip mdbook*.zip
+          rm mdbook*.zip
+          chmod +x mdbook-pdf
+          sudo mv mdbook-pdf /bin
+      # build
+      - run: |
+          mdbook build
+          mv book/pdf/output.pdf ./Go语言高级编程.pdf
+          rm -r book/pdf/ && mv book/html/* book/ && rm -r book/html
+      - name: Automatic Releases
+        uses: marvinpinto/action-automatic-releases@v1.2.1
+        with:
+          # 将 pdf 文件 release
+          repo_token: ${{ secrets.MY_DEPLOY_KEY }}
+          automatic_release_tag: AutoBuild
+          title: Go语言高级编程PDF
+          files: "Go语言高级编程.pdf"
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.MY_DEPLOY_KEY }}
-          publish_dir: ./book
+          publish_dir: ./book/
           publish_branch: gh-pages
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
