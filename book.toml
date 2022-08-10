@@ -17,3 +17,5 @@ additional-js = ["js/custom.js", "js/bigPicture.js"]
 git-repository-url = "https://github.com/chai2010/advanced-go-programming-book"
 edit-url-template = "https://github.com/chai2010/advanced-go-programming-book/edit/master/{path}"
 git-repository-icon = "fa-github"
+
+[output.pdf]
