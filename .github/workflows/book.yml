@@ -29,7 +29,8 @@ jobs:
           wget $mdbook_download_url
           unzip mdbook*.zip
           rm mdbook*.zip
-          ls -l
+          chmod +x mdbook-pdf
+          sudo mv mdbook-pdf /bin
       - run: mdbook build
 
       - name: Deploy
