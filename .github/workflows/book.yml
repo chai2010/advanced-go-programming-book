@@ -24,8 +24,9 @@ jobs:
           mdbook-version: '0.4.10'
           # mdbook-version: 'latest'
       - run: sudo apt update && sudo apt install chromium-browser wget unzip -y
-      - run: export mdbook_download_url=$(curl -s 'https://api.github.com/repos/HollowMan6/mdbook-pdf/releases?per_page=1&page=1' | python3 -c "import sys, json;import pprint;tmp=[print(x['browser_download_url']) if 'x86_64-unknown-linux-gnu' in x['name'] else None for x in json.load(sys.stdin)[0]['assets']]")
-      - run: wget $mdbook_download_url && ls -lh
+      - run: |
+          export mdbook_download_url=$(curl -s 'https://api.github.com/repos/HollowMan6/mdbook-pdf/releases?per_page=1&page=1' | python3 -c "import sys, json;import pprint;tmp=[print(x['browser_download_url']) if 'x86_64-unknown-linux-gnu' in x['name'] else None for x in json.load(sys.stdin)[0]['assets']]")
+          wget $mdbook_download_url && ls -lh
       - run: mdbook build
 
       - name: Deploy
