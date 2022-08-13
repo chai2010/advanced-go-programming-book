@@ -58,6 +58,6 @@
           |                           |
           +---------------------------+
           |      cAAA                 |
-          |       caller's BP         |
+          |       callee's BP         |
           | (if framepointer_enabled) |
           +---------------------------+
