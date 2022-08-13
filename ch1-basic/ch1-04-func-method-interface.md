@@ -8,7 +8,7 @@ Go 语言程序的初始化和执行总是从 `main.main` 函数开始的。但�
 
 *图 1-11 包初始化流程*
 
-要注意的是，在 `main.main` 函数执行之前所有代码都运行在同一个goroutine，也就是程序的主系统线程中。因此，如果某个 `init` 函数内部用 go 关键字启动了新的 goroutine 的话，新的 goroutine 只有在进入 `main.main` 函数之后才可能被执行到。
+要注意的是，在 `main.main` 函数执行之前所有代码都运行在同一个 Goroutine 中，也是运行在程序的主系统线程中。如果某个 `init` 函数内部用 go 关键字启动了新的 Goroutine 的话，新的 Goroutine 和 `main.main` 函数是并发执行的。
 
 ## 1.4.1 函数
 
