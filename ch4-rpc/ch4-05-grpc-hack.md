@@ -20,7 +20,7 @@ $ openssl req -new -x509 -days 3650 \
 	-key client.key -out client.crt
 ```
 
-以上命令将生成 server.key、server.crt、client.key 和 client.crt 四个文件。其中以. key 为后缀名的是私钥文件，需要妥善保管。以. crt 为后缀名是证书文件，也可以简单理解为公钥文件，并不需要秘密保存。在 subj 参数中的 `/CN=server.grpc.io` 表示服务器的名字为 `server.grpc.io`，在验证服务器的证书时需要用到该信息。
+以上命令将生成 server.key、server.crt、client.key 和 client.crt 四个文件。其中以 .key 为后缀名的是私钥文件，需要妥善保管。以 .crt 为后缀名是证书文件，也可以简单理解为公钥文件，并不需要秘密保存。在 subj 参数中的 `/CN=server.grpc.io` 表示服务器的名字为 `server.grpc.io`，在验证服务器的证书时需要用到该信息。
 
 有了证书之后，我们就可以在启动 gRPC 服务时传入证书选项参数：
 
@@ -90,7 +90,7 @@ $ openssl x509 -req -sha256 \
 	-out server.crt
 ```
 
-签名的过程中引入了一个新的以. csr 为后缀名的文件，它表示证书签名请求文件。在证书签名完成之后可以删除. csr 文件。
+签名的过程中引入了一个新的以 .csr 为后缀名的文件，它表示证书签名请求文件。在证书签名完成之后可以删除 .csr 文件。
 
 然后在客户端就可以基于 CA 证书对服务器进行证书验证：
 
@@ -172,7 +172,7 @@ func main() {
 }
 ```
 
-服务器端同样改用 credentials.NewTLS 函数生成证书，通过 ClientCAs 选择 CA 根证书，并通过 ClientAuth 选项启用对客户端进行验证。
+服务器端同样改用 `credentials.NewTLS` 函数生成证书，通过 ClientCAs 选择 CA 根证书，并通过 ClientAuth 选项启用对客户端进行验证。
 
 到此我们就实现了一个服务器和客户端进行双向证书验证的通信可靠的 gRPC 系统。
 
@@ -180,7 +180,7 @@ func main() {
 
 前面讲述的基于证书的认证是针对每个 gRPC 连接的认证。gRPC 还为每个 gRPC 方法调用提供了认证支持，这样就基于用户 Token 对不同的方法访问进行权限管理。
 
-要实现对每个 gRPC 方法进行认证，需要实现 grpc.PerRPCCredentials 接口：
+要实现对每个 gRPC 方法进行认证，需要实现 `grpc.PerRPCCredentials` 接口：
 
 ```go
 type PerRPCCredentials interface {
@@ -202,9 +202,9 @@ type PerRPCCredentials interface {
 }
 ```
 
-在 GetRequestMetadata 方法中返回认证需要的必要信息。RequireTransportSecurity 方法表示是否要求底层使用安全连接。在真实的环境中建议必须要求底层启用安全的连接，否则认证信息有泄露和被篡改的风险。
+在 `GetRequestMetadata` 方法中返回认证需要的必要信息。`RequireTransportSecurity` 方法表示是否要求底层使用安全连接。在真实的环境中建议必须要求底层启用安全的连接，否则认证信息有泄露和被篡改的风险。
 
-我们可以创建一个 Authentication 类型，用于实现用户名和密码的认证：
+我们可以创建一个 `Authentication` 类型，用于实现用户名和密码的认证：
 
 ```go
 type Authentication struct {
@@ -222,18 +222,18 @@ func (a *Authentication) RequireTransportSecurity() bool {
 }
 ```
 
-在 GetRequestMetadata 方法中，我们返回地认证信息包装 user 和 password 两个信息。为了演示代码简单，RequireTransportSecurity 方法表示不要求底层使用安全连接。
+在 `GetRequestMetadata` 方法中，我们返回地认证信息包装 `user` 和 `password` 两个信息。为了演示代码简单，`RequireTransportSecurity` 方法表示不要求底层使用安全连接。
 
-然后在每次请求 gRPC 服务时就可以将 Token 信息作为参数选项传人：
+然后在每次请求 gRPC 服务时就可以将 `Token` 信息作为参数选项传人：
 
 ```go
 func main() {
 	auth := Authentication{
-		User:    "gopher",
+		User:     "gopher",
 		Password: "password",
 	}
 
-	conn, err := grpc.Dial("localhost"+port, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
+	conn, err := grpc.Dial("localhost" + port, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -243,9 +243,9 @@ func main() {
 }
 ```
 
-通过 grpc.WithPerRPCCredentials 函数将 Authentication 对象转为 grpc.Dial 参数。因为这里没有启用安全连接，需要传人 grpc.WithInsecure() 表示忽略证书认证。
+通过 `grpc.WithPerRPCCredentials` 函数将 `Authentication` 对象转为 `grpc.Dial` 参数。因为这里没有启用安全连接，需要传人 `grpc.WithInsecure()` 表示忽略证书认证。
 
-然后在 gRPC 服务端的每个方法中通过 Authentication 类型的 Auth 方法进行身份认证：
+然后在 gRPC 服务端的每个方法中通过 `Authentication` 类型的 `Auth` 方法进行身份认证：
 
 ```go
 type grpcServer struct {auth *Authentication}
@@ -280,13 +280,13 @@ func (a *Authentication) Auth(ctx context.Context) error {
 }
 ```
 
-详细地认证工作主要在 Authentication.Auth 方法中完成。首先通过 metadata.FromIncomingContext 从 ctx 上下文中获取元信息，然后取出相应的认证信息进行认证。如果认证失败，则返回一个 codes.Unauthenticated 类型地错误。
+详细地认证工作主要在 `Authentication.Auth` 方法中完成。首先通过 `metadata.FromIncomingContext` 从 ctx 上下文中获取元信息，然后取出相应的认证信息进行认证。如果认证失败，则返回一个 `codes.Unauthenticated` 类型地错误。
 
 ## 4.5.3 截取器
 
-gRPC 中的 grpc.UnaryInterceptor 和 grpc.StreamInterceptor 分别对普通方法和流方法提供了截取器的支持。我们这里简单介绍普通方法的截取器用法。
+gRPC 中的 `grpc.UnaryInterceptor` 和 `grpc.StreamInterceptor` 分别对普通方法和流方法提供了截取器的支持。我们这里简单介绍普通方法的截取器用法。
 
-要实现普通方法的截取器，需要为 grpc.UnaryInterceptor 的参数实现一个函数：
+要实现普通方法的截取器，需要为 `grpc.UnaryInterceptor` 的参数实现一个函数：
 
 ```go
 func filter(ctx context.Context,
@@ -298,9 +298,9 @@ func filter(ctx context.Context,
 }
 ```
 
-函数的 ctx 和 req 参数就是每个普通的 RPC 方法的前两个参数。第三个 info 参数表示当前是对应的那个 gRPC 方法，第四个 handler 参数对应当前的 gRPC 方法函数。上面的函数中首先是日志输出 info 参数，然后调用 handler 对应的 gRPC 方法函数。
+函数的 `ctx` 和 `req` 参数就是每个普通的 RPC 方法的前两个参数。第三个 `info` 参数表示当前是对应的那个 gRPC 方法，第四个 `handler` 参数对应当前的 gRPC 方法函数。上面的函数中首先是日志输出 `info` 参数，然后调用 `handler` 对应的 gRPC 方法函数。
 
-要使用 filter 截取器函数，只需要在启动 gRPC 服务时作为参数输入即可：
+要使用 `filter` 截取器函数，只需要在启动 gRPC 服务时作为参数输入即可：
 
 ```go
 server := grpc.NewServer(grpc.UnaryInterceptor(filter))
@@ -308,7 +308,7 @@ server := grpc.NewServer(grpc.UnaryInterceptor(filter))
 
 然后服务器在收到每个 gRPC 方法调用之前，会首先输出一行日志，然后再调用对方的方法。
 
-如果截取器函数返回了错误，那么该次 gRPC 方法调用将被视作失败处理。因此，我们可以在截取器中对输入的参数做一些简单的验证工作。同样，也可以对 handler 返回的结果做一些验证工作。截取器也非常适合前面对 Token 认证工作。
+如果截取器函数返回了错误，那么该次 gRPC 方法调用将被视作失败处理。因此，我们可以在截取器中对输入的参数做一些简单的验证工作。同样，也可以对 `handler` 返回的结果做一些验证工作。截取器也非常适合前面对 Token 认证工作。
 
 下面是截取器增加了对 gRPC 方法异常的捕获：
 
@@ -398,7 +398,7 @@ func main() {
 }
 ```
 
-因为 gRPC 服务已经实现了 ServeHTTP 方法，可以直接作为 Web 路由处理对象。如果将 gRPC 和 Web 服务放在一起，会导致 gRPC 和 Web 路径的冲突，在处理时我们需要区分两类服务。
+因为 gRPC 服务已经实现了 `ServeHTTP` 方法，可以直接作为 Web 路由处理对象。如果将 gRPC 和 Web 服务放在一起，会导致 gRPC 和 Web 路径的冲突，在处理时我们需要区分两类服务。
 
 我们可以通过以下方式生成同时支持 Web 和 gRPC 协议的路由处理函数：
 
@@ -426,7 +426,6 @@ func main() {
 }
 ```
 
-首先 gRPC 是建立在 HTTP/2 版本之上，如果 HTTP 不是 HTTP/2 协议则必然无法提供 gRPC 支持。同时，每个 gRPC 调用请求的 Content-Type 类型会被标注为 "application/grpc" 类型。
+首先 gRPC 是建立在 HTTP/2 版本之上，如果 HTTP 不是 HTTP/2 协议则必然无法提供 gRPC 支持。同时，每个 gRPC 调用请求的 `Content-Type` 类型会被标注为 `application/grpc` 类型。
 
 这样我们就可以在 gRPC 端口上同时提供 Web 服务了。
-

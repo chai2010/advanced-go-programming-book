@@ -8,12 +8,11 @@
 
 在一个 Go 源文件中，如果出现了 `import "C"` 指令则表示将调用 cgo 命令生成对应的中间文件。下图是 cgo 生成的中间文件的简单示意图：
 
-![](../images/ch2-4-cgo-generated-files.dot.png)
+![图 2-4 cgo 生成的中间文件](../images/ch2-4-cgo-generated-files.dot.png)
 
 *图 2-4 cgo 生成的中间文件*
 
-
-包中有 4 个 Go 文件，其中 nocgo 开头的文件中没有 `import "C"` 指令，其它的 2 个文件则包含了 cgo 代码。cgo 命令会为每个包含了 cgo 代码的 Go 文件创建 2 个中间文件，比如 main.go 会分别创建 main.cgo1.go 和 main.cgo2.c 两个中间文件。然后会为整个包创建一个 `_cgo_gotypes.go` Go 文件，其中包含 Go 语言部分辅助代码。此外还会创建一个 `_cgo_export.h` 和 `_cgo_export.c` 文件，对应 Go 语言导出到 C 语言的类型和函数。
+包中有 4 个 Go 文件，其中 nocgo 开头的文件中没有 `import "C"` 指令，其它的 2 个文件则包含了 cgo 代码。cgo 命令会为每个包含了 CGO 代码的 Go 文件创建 2 个中间文件，比如 `main.go` 会分别创建 `main.cgo1.go` 和 `main.cgo2.c` 两个中间文件。然后会为整个包创建一个 `_cgo_gotypes.go` Go 文件，其中包含 Go 语言部分辅助代码。此外还会创建一个 `_cgo_export.h` 和 `_cgo_export.c` 文件，对应 Go 语言导出到 C 语言的类型和函数。
 
 ## 2.5.2 Go 调用 C 函数
 
@@ -54,7 +53,7 @@ main.cgo2.c
 
 其中 `_cgo_.o`、`_cgo_flags` 和 `_cgo_main.c` 文件和我们的代码没有直接的逻辑关联，可以暂时忽略。
 
-我们先查看 `main.cgo1.go` 文件，它是 main.go 文件展开虚拟 C 包相关函数和变量后的 Go 代码：
+我们先查看 `main.cgo1.go` 文件，它是 `main.go` 文件展开虚拟 C 包相关函数和变量后的 Go 代码：
 
 ```go
 package main
