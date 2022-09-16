@@ -222,7 +222,7 @@ func (a *Authentication) RequireTransportSecurity() bool {
 }
 ```
 
-在 GetRequestMetadata 方法中，我们返回地认证信息包装 user 和 password 两个信息。为了演示代码简单，RequireTransportSecurity 方法表示不要求底层使用安全连接。
+在 GetRequestMetadata 方法中，我们返回的认证信息包装 user 和 password 两个信息。为了演示代码简单，RequireTransportSecurity 方法表示不要求底层使用安全连接。
 
 然后在每次请求 gRPC 服务时就可以将 Token 信息作为参数选项传人：
 
@@ -280,7 +280,7 @@ func (a *Authentication) Auth(ctx context.Context) error {
 }
 ```
 
-详细地认证工作主要在 Authentication.Auth 方法中完成。首先通过 metadata.FromIncomingContext 从 ctx 上下文中获取元信息，然后取出相应的认证信息进行认证。如果认证失败，则返回一个 codes.Unauthenticated 类型地错误。
+详细的认证工作主要在 Authentication.Auth 方法中完成。首先通过 metadata.FromIncomingContext 从 ctx 上下文中获取元信息，然后取出相应的认证信息进行认证。如果认证失败，则返回一个 codes.Unauthenticated 类型的错误。
 
 ## 4.5.3 截取器
 
