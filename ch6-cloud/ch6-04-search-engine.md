@@ -142,7 +142,7 @@ if field_1 == 1 && field_2 == 2 && field_3 == 3 && field_4 == 4 {
         {
           "match": {
             "field_2": {
-              "query": "3",
+              "query": "2",
               "type": "phrase"
             }
           }
