@@ -174,7 +174,7 @@ func SayHello(s *C.char) {
 ```go
 package main
 
-//#include <hello.h>
+//#include "hello.h"
 import "C"
 
 func main() {
