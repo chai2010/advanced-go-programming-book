@@ -98,6 +98,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println(reply)
 }
 ```
 
@@ -141,6 +142,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println(reply)
 }
 ```
 
