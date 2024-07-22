@@ -1,7 +1,6 @@
 # Go语言高级编程 (Advanced Go Programming)
 
 - *凹语言(专为 WebAssembly 设计): https://github.com/wa-lang/wa*
-- *KCL 配置语言(Rust): https://github.com/kcl-lang/kcl*
 
 ----
 
