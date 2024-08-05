@@ -15,5 +15,27 @@
 default:
 	mdbook serve
 
+
+build:
+	-rm book
+	mdbook build
+	-rm book/.gitignore
+	-rm book/.nojekyll
+	-rm -rf book/.git
+
+deploy:
+	-@make clean
+	mnbook build
+	-rm book/.gitignore
+	-rm -rf book/.git
+	-rm -rf book/examples
+
+	cd book && git init
+	cd book && git add .
+	cd book && git commit -m "first commit"
+	cd book && git branch -M gh-pages
+	cd book && git remote add origin git@github.com:chai2010/advanced-go-programming-book.git
+	cd book && git push -f origin gh-pages
+
 clean:
 	-rm -rf book
