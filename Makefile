@@ -3,22 +3,16 @@
 # license that can be found in the LICENSE file.
 
 #
-# fix gitbook build error on macOS(node@8.x and gitbook@2.6.7)
-#
-# gitbook fetch 3.2.3
-# gitbook build --gitbook=3.2.3
-#
-# https://github.com/GitbookIO/gitbook/issues/1774
-# https://github.com/GitbookIO/gitbook-cli/blob/master/README.md
+# MnBook: Mini Markdown Book
+# https://github.com/wa-lang/mnbook
 #
 
 default:
-	mdbook serve
-
+	mnbook serve
 
 build:
 	-rm book
-	mdbook build
+	mnbook build
 	-rm book/.gitignore
 	-rm book/.nojekyll
 	-rm -rf book/.git
