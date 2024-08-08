@@ -11,6 +11,13 @@ src = "."
 [build]
 build-dir = "book"
 
+[giscus]
+enaled = true
+data_repo = "chai2010/advanced-go-programming-book"
+data_repo_id = "MDEwOlJlcG9zaXRvcnkxMTU4NTc5NTQ="
+data_category = "General"
+data_category_id = "DIC_kwDOBufaIs4CAwFi"
+
 [output.html]
 additional-css = ["style.css"]
 additional-js = ["js/custom.js", "js/bigPicture.js"]
