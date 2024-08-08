@@ -1,0 +1,34 @@
+@startuml interface-impl
+
+interface OrderCreator
+
+OrderCreator <|-- O2OOrderCreator
+OrderCreator <|-- B2BOrderCreator
+
+interface OrderCreator {
+    ValidateDistrict()
+    ValidateVIPProduct()
+    GetUserInfo()
+    GetProductDesc()
+    DecrementStorage()
+    CreateOrderSnapshot()
+}
+
+class O2OOrderCreator {
+    ValidateDistrict()
+    ValidateVIPProduct()
+    GetUserInfo()
+    GetProductDesc()
+    DecrementStorage()
+    CreateOrderSnapshot()
+}
+
+class B2BOrderCreator {
+    ValidateDistrict()
+    ValidateVIPProduct()
+    GetUserInfo()
+    GetProductDesc()
+    DecrementStorage()
+    CreateOrderSnapshot()
+}
+@enduml

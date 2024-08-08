@@ -1,0 +1,29 @@
+' Copyright 2017 <chaishushan{AT}gmail.com>. All rights reserved.
+' Use of this source code is governed by a Apache
+' license that can be found in the LICENSE file.
+
+@startuml
+
+title int32 <=> *C.char
+
+participant int32
+participant uintptr
+participant unsafe.Pointer as unsafe_Pointer
+participant "~*C.char" as c_char_ptr
+
+== Go ==
+
+int32 -> uintptr: int32 to uintptr
+uintptr -> unsafe_Pointer: uintptr to unsafe.Pointer
+
+== CGO ==
+
+unsafe_Pointer -> c_char_ptr: unsafe.Pointer to *C.char
+c_char_ptr -> unsafe_Pointer: ~*C.char to unsafe.Pointer
+
+== Go ==
+
+unsafe_Pointer -> uintptr: unsafe.Pointer to uintptr
+uintptr -> int32: uintptr to int32
+
+@enduml

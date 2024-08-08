@@ -1,0 +1,25 @@
+' Copyright 2018 <cao1988228{AT}163.com>. All rights reserved.
+' Use of this source code is governed by a Apache
+' license that can be found in the LICENSE file.
+
+@startuml controller-logic-dao
+scale 1366*768
+
+
+activate Controller
+Controller -> Controller: validate input
+
+Controller -> Logic : build struct needed by logic, call function in logic
+activate Logic
+Logic -> Logic: logic check, use design patterns to work
+Logic -> Dao: call save order func
+activate Dao
+Dao -> Storage: save order
+Storage -> Dao: save order result
+Dao -> Logic: return save result
+deactivate Dao
+Logic -> Controller: return result
+deactivate Logic
+
+deactivate Controller
+@enduml

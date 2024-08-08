@@ -1,0 +1,63 @@
+' Copyright 2017 <chaishushan{AT}gmail.com>. All rights reserved.
+' Use of this source code is governed by a Apache
+' license that can be found in the LICENSE file.
+
+@startuml
+
+title c call go func
+
+|_testmain.c|
+:int main() {
+	extern int sum(int a, int b)
+	sum(1, 2)
+	return 0
+};
+-[#green,dashed]->
+
+fork
+
+|#AntiqueWhite|_cgo_export.c|
+:int sum(int p0, int p1) {
+	struct { int p0, p1, r0; } a
+	_cgo_ctxt = _cgo_wait_runtime_init_done()
+	crosscall2(_cgoexp_xxx_sum, &a, 16, _cgo_ctxt)
+	_cgo_release_context(_cgo_ctxt)
+	return a.r0
+};
+
+|runtime/cgo/*.asm|
+:TEXT crosscall2(SB),NOSPLIT,$0;
+
+fork
+
+|#AntiqueWhite|_cgo_types.go|
+:func _cgoexp_xxx_sum(a unsafe.Pointer, n int32, ctxt uintptr) {
+	fn := _cgoexpwrap_xxx_sum
+	_cgo_runtime_cgocallback(
+		_cgoexpwrap_xxx_sum,
+		...
+	)
+};
+
+|#AntiqueWhite|_cgo_types.go|
+:func _cgoexpwrap_xxx_sum(p0, p1) r0 {
+	return sum(p0, p1)
+};
+
+|main.go|
+://export sum
+func sum(a, b C.int) C.int {
+	return a + b
+};
+
+endfork
+
+|runtime/cgo/*.asm|
+:TEXT crosscall2(SB),NOSPLIT,$0;
+
+endfork
+
+|_testmain.c|
+stop
+
+@enduml

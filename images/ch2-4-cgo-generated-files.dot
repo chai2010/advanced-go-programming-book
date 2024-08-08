@@ -1,0 +1,37 @@
+// Copyright 2018 <chaishushan{AT}gmail.com>. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+digraph G {
+	subgraph cluster_cgo_package_main {
+		label = "package main";
+
+		nocgo_x[label="nocgo_x.go", style=filled, color=gray];
+		hello_go[label="hello.go", style=filled, color=orangered4];
+		main_go[label="main.go", style=filled, color=darkgreen];
+		nocgo_1[label="nocgo_1.go", style=filled, color=gray];
+	}
+
+	subgraph cluster_cgo_generated_files {
+		label = "cgo: generated fileds";
+
+		main_cgo2_c[label="main.cgo2.c", style=filled, color=green];
+		main_cgo1_go[label="main.cgo1.go", style=filled, color=green];
+
+		hello_cgo2_c[label="hello.cgo2.c", style=filled, color=red];
+		hello_cgo1_go[label="hello.cgo1.go", style=filled, color=red];
+
+		_cgo_gotypes_go[label="_cgo_gotypes.go", shape=box, style=filled, color=dodgerblue];
+		_cgo_export_h[label="_cgo_export.h", shape=box, style=filled, color=dodgerblue];
+		_cgo_export_c[label="_cgo_export.c", shape=box, style=filled, color=dodgerblue];
+
+		main_go -> main_cgo1_go -> _cgo_gotypes_go;
+		main_go -> main_cgo2_c -> _cgo_gotypes_go;
+
+		hello_go -> hello_cgo1_go -> _cgo_gotypes_go;
+		hello_go -> hello_cgo2_c -> _cgo_gotypes_go;
+
+		_cgo_gotypes_go -> _cgo_export_h;
+		_cgo_gotypes_go -> _cgo_export_c;
+	}
+}
