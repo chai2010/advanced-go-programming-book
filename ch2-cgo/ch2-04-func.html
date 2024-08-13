@@ -1,0 +1,551 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using https://github.com/wa-lang/wabook -->
+        <meta charset="UTF-8">
+        <title>函数调用 - Go语言高级编程</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../static/wabook/css/variables.css">
+        <link rel="stylesheet" href="../static/wabook/css/general.css">
+        <link rel="stylesheet" href="../static/wabook/css/chrome.css">
+        <link rel="stylesheet" href="../static/wabook/css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../static/wabook/FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../static/wabook/fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../static/wabook/highlight.css">
+        <link rel="stylesheet" href="../static/wabook/tomorrow-night.css">
+        <link rel="stylesheet" href="../static/wabook/ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('wabook-theme');
+                var sidebar = localStorage.getItem('wabook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('wabook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('wabook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('wabook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('wabook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter">
+  <li class="chapter-item expanded ">
+    <a href="../index.html" >Go语言高级编程</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../preface.html" >前言</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../ch1-basic/readme.html" ><strong aria-hidden="true">1.</strong> 语言基础</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-01-genesis.html" ><strong aria-hidden="true">1.1.</strong> Go语言创世纪</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-02-hello-revolution.html" ><strong aria-hidden="true">1.2.</strong> Hello, World 的革命</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-03-array-string-and-slice.html" ><strong aria-hidden="true">1.3.</strong> 数组、字符串和切片</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-04-func-method-interface.html" ><strong aria-hidden="true">1.4.</strong> 函数、方法和接口</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-05-mem.html" ><strong aria-hidden="true">1.5.</strong> 面向并发的内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-06-goroutine.html" ><strong aria-hidden="true">1.6.</strong> 常见的并发模式</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-07-error-and-panic.html" ><strong aria-hidden="true">1.7.</strong> 错误和异常</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-08-ext.html" ><strong aria-hidden="true">1.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch2-cgo/readme.html" ><strong aria-hidden="true">2.</strong> CGO编程</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-01-hello-cgo.html" ><strong aria-hidden="true">2.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-02-basic.html" ><strong aria-hidden="true">2.2.</strong> CGO基础</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-03-cgo-types.html" ><strong aria-hidden="true">2.3.</strong> 类型转换</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-04-func.html" class="active"><strong aria-hidden="true">2.4.</strong> 函数调用</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-05-internal.html" ><strong aria-hidden="true">2.5.</strong> 内部机制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-06-qsort.html" ><strong aria-hidden="true">2.6.</strong> 实战: 封装qsort</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-07-memory.html" ><strong aria-hidden="true">2.7.</strong> CGO内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-08-class.html" ><strong aria-hidden="true">2.8.</strong> C++类包装</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-09-static-shared-lib.html" ><strong aria-hidden="true">2.9.</strong> 静态库和动态库</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-10-link.html" ><strong aria-hidden="true">2.10.</strong> 编译和链接参数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-11-ext.html" ><strong aria-hidden="true">2.11.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch3-asm/readme.html" ><strong aria-hidden="true">3.</strong> 汇编语言</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-01-basic.html" ><strong aria-hidden="true">3.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-02-arch.html" ><strong aria-hidden="true">3.2.</strong> 计算机结构</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-03-const-and-var.html" ><strong aria-hidden="true">3.3.</strong> 常量和全局变量</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-04-func.html" ><strong aria-hidden="true">3.4.</strong> 函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-05-control-flow.html" ><strong aria-hidden="true">3.5.</strong> 控制流</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-06-func-again.html" ><strong aria-hidden="true">3.6.</strong> 再论函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-07-hack-asm.html" ><strong aria-hidden="true">3.7.</strong> 汇编语言的威力</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-08-goroutine-id.html" ><strong aria-hidden="true">3.8.</strong> 例子：Goroutine ID</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-09-debug.html" ><strong aria-hidden="true">3.9.</strong> Delve调试器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-10-ext.html" ><strong aria-hidden="true">3.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch4-rpc/readme.html" ><strong aria-hidden="true">4.</strong> 第4章 RPC和Protobuf</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-01-rpc-intro.html" ><strong aria-hidden="true">4.1.</strong> RPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-02-pb-intro.html" ><strong aria-hidden="true">4.2.</strong> Protobuf</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-03-netrpc-hack.html" ><strong aria-hidden="true">4.3.</strong> 玩转RPC</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-04-grpc.html" ><strong aria-hidden="true">4.4.</strong> gRPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-05-grpc-hack.html" ><strong aria-hidden="true">4.5.</strong> gRPC进阶</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-06-grpc-ext.html" ><strong aria-hidden="true">4.6.</strong> gRPC和Protobuf扩展</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-07-pbgo.html" ><strong aria-hidden="true">4.7.</strong> pbgo: 基于Protobuf的框架</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-08-grpcurl.html" ><strong aria-hidden="true">4.8.</strong> grpcurl工具</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-09-ext.html" ><strong aria-hidden="true">4.9.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch5-web/readme.html" ><strong aria-hidden="true">5.</strong> Go和Web</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-01-introduction.html" ><strong aria-hidden="true">5.1.</strong> Web开发简介</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-02-router.html" ><strong aria-hidden="true">5.2.</strong> 请求路由</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-03-middleware.html" ><strong aria-hidden="true">5.3.</strong> 中间件</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-04-validator.html" ><strong aria-hidden="true">5.4.</strong> 请求校验</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-05-database.html" ><strong aria-hidden="true">5.5.</strong> 和数据库打交道</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-06-ratelimit.html" ><strong aria-hidden="true">5.6.</strong> 服务流量限制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-07-layout-of-web-project.html" ><strong aria-hidden="true">5.7.</strong> 大型Web项目分层</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-08-interface-and-web.html" ><strong aria-hidden="true">5.8.</strong> 接口和表驱动开发</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-09-gated-launch.html" ><strong aria-hidden="true">5.9.</strong> 灰度发布和A/B测试</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-10-ext.html" ><strong aria-hidden="true">5.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch6-cloud/readme.html" ><strong aria-hidden="true">6.</strong> 分布式系统</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-01-dist-id.html" ><strong aria-hidden="true">6.1.</strong> 分布式 id 生成器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-02-lock.html" ><strong aria-hidden="true">6.2.</strong> 分布式锁</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-03-delay-job.html" ><strong aria-hidden="true">6.3.</strong> 延时任务系统</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-04-search-engine.html" ><strong aria-hidden="true">6.4.</strong> 分布式搜索引擎</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-05-load-balance.html" ><strong aria-hidden="true">6.5.</strong> 负载均衡</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-06-config.html" ><strong aria-hidden="true">6.6.</strong> 分布式配置管理</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-07-crawler.html" ><strong aria-hidden="true">6.7.</strong> 分布式爬虫</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-08-ext.html" ><strong aria-hidden="true">6.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../appendix/readme.html" ><strong aria-hidden="true">7.</strong> 附录</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-a-trap.html" ><strong aria-hidden="true">7.1.</strong> 附录A: Go语言常见坑</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-b-gems.html" ><strong aria-hidden="true">7.2.</strong> 附录B: 有趣的代码片段</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-c-author.html" ><strong aria-hidden="true">7.3.</strong> 附录C: 作者简介</a>
+    </li>
+  </ol>
+</ol>
+
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                    </div>
+
+                    <h1 class="menu-title"><a href="../index.html">Go语言高级编程</a></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/chai2010/advanced-go-programming-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/chai2010/advanced-go-programming-book/edit/master/ch2-cgo/ch2-04-func.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+
+                    <main>
+                        <ul dir="auto"><li><em>凹语言(Go实现, 面向WASM设计): <a href="https://github.com/wa-lang/wa">https://github.com/wa-lang/wa</a></em></li><li><em>WaBook(Go语言实现的MD电子书构建工具): <a href="https://github.com/wa-lang/wabook">https://github.com/wa-lang/wabook</a></em></li></ul><hr>
+
+                        <h1>2.4 函数调用</h1>
+<p>函数是 C 语言编程的核心，通过 CGO 技术我们不仅仅可以在 Go 语言中调用 C 语言函数，也可以将 Go 语言函数导出为 C 语言函数。</p>
+<h2>2.4.1 Go 调用 C 函数</h2>
+<p>对于一个启用 CGO 特性的程序，CGO 会构造一个虚拟的 C 包。通过这个虚拟的 C 包可以调用 C 语言函数。</p>
+<pre><code class="language-go">/*
+static int add(int a, int b) {
+	return a+b;
+}
+*/
+import &quot;C&quot;
+
+func main() {
+	C.add(1, 1)
+}
+</code></pre>
+<p>以上的 CGO 代码首先定义了一个当前文件内可见的 add 函数，然后通过 <code>C.add</code>。</p>
+<h2>2.4.2 C 函数的返回值</h2>
+<p>对于有返回值的 C 函数，我们可以正常获取返回值。</p>
+<pre><code class="language-go">/*
+static int div(int a, int b) {
+	return a/b;
+}
+*/
+import &quot;C&quot;
+import &quot;fmt&quot;
+
+func main() {
+	v := C.div(6, 3)
+	fmt.Println(v)
+}
+</code></pre>
+<p>上面的 div 函数实现了一个整数除法的运算，然后通过返回值返回除法的结果。</p>
+<p>不过对于除数为 0 的情形并没有做特殊处理。如果希望在除数为 0 的时候返回一个错误，其他时候返回正常的结果。因为 C 语言不支持返回多个结果，因此 <code>&lt;errno.h&gt;</code> 标准库提供了一个 <code>errno</code> 宏用于返回错误状态。我们可以近似地将 <code>errno</code> 看成一个线程安全的全局变量，可以用于记录最近一次错误的状态码。</p>
+<p>改进后的 div 函数实现如下：</p>
+<pre><code class="language-c">#include &lt;errno.h&gt;
+
+int div(int a, int b) {
+	if(b == 0) {
+		errno = EINVAL;
+		return 0;
+	}
+	return a/b;
+}
+</code></pre>
+<p>CGO 也针对 <code>&lt;errno.h&gt;</code> 标准库的 <code>errno</code> 宏做的特殊支持：在 CGO 调用 C 函数时如果有两个返回值，那么第二个返回值将对应 <code>errno</code> 错误状态。</p>
+<pre><code class="language-go">/*
+#include &lt;errno.h&gt;
+
+static int div(int a, int b) {
+	if(b == 0) {
+		errno = EINVAL;
+		return 0;
+	}
+	return a/b;
+}
+*/
+import &quot;C&quot;
+import &quot;fmt&quot;
+
+func main() {
+	v0, err0 := C.div(2, 1)
+	fmt.Println(v0, err0)
+
+	v1, err1 := C.div(1, 0)
+	fmt.Println(v1, err1)
+}
+</code></pre>
+<p>运行这个代码将会产生以下输出：</p>
+<pre><code>2 &lt;nil&gt;
+0 invalid argument
+</code></pre>
+<p>我们可以近似地将 div 函数看作为以下类型的函数：</p>
+<pre><code class="language-go">func C.div(a, b C.int) (C.int, [error])
+</code></pre>
+<p>第二个返回值是可忽略的 error 接口类型，底层对应 <code>syscall.Errno</code> 错误类型。</p>
+<h2>2.4.3 void 函数的返回值</h2>
+<p>C 语言函数还有一种没有返回值类型的函数，用 void 表示返回值类型。一般情况下，我们无法获取 void 类型函数的返回值，因为没有返回值可以获取。前面的例子中提到，cgo 对 errno 做了特殊处理，可以通过第二个返回值来获取 C 语言的错误状态。对于 void 类型函数，这个特性依然有效。</p>
+<p>以下的代码是获取没有返回值函数的错误状态码：</p>
+<pre><code class="language-go">//static void noreturn() {}
+import &quot;C&quot;
+import &quot;fmt&quot;
+
+func main() {
+	_, err := C.noreturn()
+	fmt.Println(err)
+}
+</code></pre>
+<p>此时，我们忽略了第一个返回值，只获取第二个返回值对应的错误码。</p>
+<p>我们也可以尝试获取第一个返回值，它对应的是 C 语言的 void 对应的 Go 语言类型：</p>
+<pre><code class="language-go">//static void noreturn() {}
+import &quot;C&quot;
+import &quot;fmt&quot;
+
+func main() {
+	v, _ := C.noreturn()
+	fmt.Printf(&quot;%#v&quot;, v)
+}
+</code></pre>
+<p>运行这个代码将会产生以下输出：</p>
+<pre><code>main._Ctype_void{}
+</code></pre>
+<p>我们可以看出 C 语言的 void 类型对应的是当前的 main 包中的 <code>_Ctype_void</code> 类型。其实也将 C 语言的 noreturn 函数看作是返回 <code>_Ctype_void</code> 类型的函数，这样就可以直接获取 void 类型函数的返回值：</p>
+<pre><code class="language-go">//static void noreturn() {}
+import &quot;C&quot;
+import &quot;fmt&quot;
+
+func main() {
+	fmt.Println(C.noreturn())
+}
+</code></pre>
+<p>运行这个代码将会产生以下输出：</p>
+<pre><code>[]
+</code></pre>
+<p>其实在 CGO 生成的代码中，<code>_Ctype_void</code> 类型对应一个 0 长的数组类型 <code>[0]byte</code>，因此 <code>fmt.Println</code> 输出的是一个表示空数值的方括弧。</p>
+<p>以上有效特性虽然看似有些无聊，但是通过这些例子我们可以精确掌握 CGO 代码的边界，可以从更深层次的设计的角度来思考产生这些奇怪特性的原因。</p>
+<h2>2.4.4 C 调用 Go 导出函数</h2>
+<p>CGO 还有一个强大的特性：将 Go 函数导出为 C 语言函数。这样的话我们可以定义好 C 语言接口，然后通过 Go 语言实现。在本章的第一节快速入门部分我们已经展示过 Go 语言导出 C 语言函数的例子。</p>
+<p>下面是用 Go 语言重新实现本节开始的 add 函数：</p>
+<pre><code class="language-go">import &quot;C&quot;
+
+//export add
+func add(a, b C.int) C.int {
+	return a+b
+}
+</code></pre>
+<p>add 函数名以小写字母开头，对于 Go 语言来说是包内的私有函数。但是从 C 语言角度来看，导出的 add 函数是一个可全局访问的 C 语言函数。如果在两个不同的 Go 语言包内，都存在一个同名的要导出为 C 语言函数的 add 函数，那么在最终的链接阶段将会出现符号重名的问题。</p>
+<p>CGO 生成的 <code>_cgo_export.h</code> 文件会包含导出后的 C 语言函数的声明。我们可以在纯 C 源文件中包含 <code>_cgo_export.h</code> 文件来引用导出的 add 函数。如果希望在当前的 CGO 文件中马上使用导出的 C 语言 add 函数，则无法引用 <code>_cgo_export.h</code> 文件。因为 <code>_cgo_export.h</code> 文件的生成需要依赖当前文件可以正常构建，而如果当前文件内部循环依赖还未生成的 <code>_cgo_export.h</code> 文件将会导致 cgo 命令错误。</p>
+<pre><code class="language-c">#include &quot;_cgo_export.h&quot;
+
+void foo() {
+	add(1, 1);
+}
+</code></pre>
+<p>当导出 C 语言接口时，需要保证函数的参数和返回值类型都是 C 语言友好的类型，同时返回值不得直接或间接包含 Go 语言内存空间的指针。</p>
+
+
+                        <hr><table><tr><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/css.png"></td><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/cch.png"></td></tr></table>
+
+                        
+                            <div id="giscus-container"></div>
+                        
+
+                        
+                            <footer class="page-footer">
+                                <span>© 2019-2022 | <a href="https://github.com/chai2010/advanced-go-programming-book">柴树杉、曹春晖</a> 保留所有权利</span>
+                            </footer>
+                        
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../ch2-cgo/ch2-03-cgo-types.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                        
+                            <!-- ../ch2-cgo/ch2-05-internal.html -->
+                            <a rel="next" href="../ch2-cgo/ch2-05-internal.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../ch2-cgo/ch2-03-cgo-types.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                
+                    <a rel="next" href="../ch2-cgo/ch2-05-internal.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../static/wabook/mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/book.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script type="text/javascript" charset="utf-8">
+            var pagePath = "ch2-cgo/ch2-04-func.md"
+        </script>
+
+        <!-- Custom JS scripts -->
+        
+            <script src="../static/wabook/giscus.js" type="text/javascript" charset="utf-8"></script>
+        
+
+    </body>
+</html>

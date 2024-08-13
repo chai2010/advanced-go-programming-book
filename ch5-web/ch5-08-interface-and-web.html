@@ -1,0 +1,626 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using https://github.com/wa-lang/wabook -->
+        <meta charset="UTF-8">
+        <title>接口和表驱动开发 - Go语言高级编程</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../static/wabook/css/variables.css">
+        <link rel="stylesheet" href="../static/wabook/css/general.css">
+        <link rel="stylesheet" href="../static/wabook/css/chrome.css">
+        <link rel="stylesheet" href="../static/wabook/css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../static/wabook/FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../static/wabook/fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../static/wabook/highlight.css">
+        <link rel="stylesheet" href="../static/wabook/tomorrow-night.css">
+        <link rel="stylesheet" href="../static/wabook/ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('wabook-theme');
+                var sidebar = localStorage.getItem('wabook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('wabook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('wabook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('wabook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('wabook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter">
+  <li class="chapter-item expanded ">
+    <a href="../index.html" >Go语言高级编程</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../preface.html" >前言</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../ch1-basic/readme.html" ><strong aria-hidden="true">1.</strong> 语言基础</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-01-genesis.html" ><strong aria-hidden="true">1.1.</strong> Go语言创世纪</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-02-hello-revolution.html" ><strong aria-hidden="true">1.2.</strong> Hello, World 的革命</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-03-array-string-and-slice.html" ><strong aria-hidden="true">1.3.</strong> 数组、字符串和切片</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-04-func-method-interface.html" ><strong aria-hidden="true">1.4.</strong> 函数、方法和接口</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-05-mem.html" ><strong aria-hidden="true">1.5.</strong> 面向并发的内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-06-goroutine.html" ><strong aria-hidden="true">1.6.</strong> 常见的并发模式</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-07-error-and-panic.html" ><strong aria-hidden="true">1.7.</strong> 错误和异常</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-08-ext.html" ><strong aria-hidden="true">1.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch2-cgo/readme.html" ><strong aria-hidden="true">2.</strong> CGO编程</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-01-hello-cgo.html" ><strong aria-hidden="true">2.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-02-basic.html" ><strong aria-hidden="true">2.2.</strong> CGO基础</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-03-cgo-types.html" ><strong aria-hidden="true">2.3.</strong> 类型转换</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-04-func.html" ><strong aria-hidden="true">2.4.</strong> 函数调用</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-05-internal.html" ><strong aria-hidden="true">2.5.</strong> 内部机制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-06-qsort.html" ><strong aria-hidden="true">2.6.</strong> 实战: 封装qsort</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-07-memory.html" ><strong aria-hidden="true">2.7.</strong> CGO内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-08-class.html" ><strong aria-hidden="true">2.8.</strong> C++类包装</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-09-static-shared-lib.html" ><strong aria-hidden="true">2.9.</strong> 静态库和动态库</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-10-link.html" ><strong aria-hidden="true">2.10.</strong> 编译和链接参数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-11-ext.html" ><strong aria-hidden="true">2.11.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch3-asm/readme.html" ><strong aria-hidden="true">3.</strong> 汇编语言</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-01-basic.html" ><strong aria-hidden="true">3.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-02-arch.html" ><strong aria-hidden="true">3.2.</strong> 计算机结构</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-03-const-and-var.html" ><strong aria-hidden="true">3.3.</strong> 常量和全局变量</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-04-func.html" ><strong aria-hidden="true">3.4.</strong> 函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-05-control-flow.html" ><strong aria-hidden="true">3.5.</strong> 控制流</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-06-func-again.html" ><strong aria-hidden="true">3.6.</strong> 再论函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-07-hack-asm.html" ><strong aria-hidden="true">3.7.</strong> 汇编语言的威力</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-08-goroutine-id.html" ><strong aria-hidden="true">3.8.</strong> 例子：Goroutine ID</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-09-debug.html" ><strong aria-hidden="true">3.9.</strong> Delve调试器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-10-ext.html" ><strong aria-hidden="true">3.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch4-rpc/readme.html" ><strong aria-hidden="true">4.</strong> 第4章 RPC和Protobuf</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-01-rpc-intro.html" ><strong aria-hidden="true">4.1.</strong> RPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-02-pb-intro.html" ><strong aria-hidden="true">4.2.</strong> Protobuf</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-03-netrpc-hack.html" ><strong aria-hidden="true">4.3.</strong> 玩转RPC</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-04-grpc.html" ><strong aria-hidden="true">4.4.</strong> gRPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-05-grpc-hack.html" ><strong aria-hidden="true">4.5.</strong> gRPC进阶</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-06-grpc-ext.html" ><strong aria-hidden="true">4.6.</strong> gRPC和Protobuf扩展</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-07-pbgo.html" ><strong aria-hidden="true">4.7.</strong> pbgo: 基于Protobuf的框架</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-08-grpcurl.html" ><strong aria-hidden="true">4.8.</strong> grpcurl工具</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-09-ext.html" ><strong aria-hidden="true">4.9.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch5-web/readme.html" ><strong aria-hidden="true">5.</strong> Go和Web</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-01-introduction.html" ><strong aria-hidden="true">5.1.</strong> Web开发简介</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-02-router.html" ><strong aria-hidden="true">5.2.</strong> 请求路由</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-03-middleware.html" ><strong aria-hidden="true">5.3.</strong> 中间件</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-04-validator.html" ><strong aria-hidden="true">5.4.</strong> 请求校验</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-05-database.html" ><strong aria-hidden="true">5.5.</strong> 和数据库打交道</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-06-ratelimit.html" ><strong aria-hidden="true">5.6.</strong> 服务流量限制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-07-layout-of-web-project.html" ><strong aria-hidden="true">5.7.</strong> 大型Web项目分层</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-08-interface-and-web.html" class="active"><strong aria-hidden="true">5.8.</strong> 接口和表驱动开发</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-09-gated-launch.html" ><strong aria-hidden="true">5.9.</strong> 灰度发布和A/B测试</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-10-ext.html" ><strong aria-hidden="true">5.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch6-cloud/readme.html" ><strong aria-hidden="true">6.</strong> 分布式系统</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-01-dist-id.html" ><strong aria-hidden="true">6.1.</strong> 分布式 id 生成器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-02-lock.html" ><strong aria-hidden="true">6.2.</strong> 分布式锁</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-03-delay-job.html" ><strong aria-hidden="true">6.3.</strong> 延时任务系统</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-04-search-engine.html" ><strong aria-hidden="true">6.4.</strong> 分布式搜索引擎</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-05-load-balance.html" ><strong aria-hidden="true">6.5.</strong> 负载均衡</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-06-config.html" ><strong aria-hidden="true">6.6.</strong> 分布式配置管理</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-07-crawler.html" ><strong aria-hidden="true">6.7.</strong> 分布式爬虫</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-08-ext.html" ><strong aria-hidden="true">6.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../appendix/readme.html" ><strong aria-hidden="true">7.</strong> 附录</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-a-trap.html" ><strong aria-hidden="true">7.1.</strong> 附录A: Go语言常见坑</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-b-gems.html" ><strong aria-hidden="true">7.2.</strong> 附录B: 有趣的代码片段</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-c-author.html" ><strong aria-hidden="true">7.3.</strong> 附录C: 作者简介</a>
+    </li>
+  </ol>
+</ol>
+
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                    </div>
+
+                    <h1 class="menu-title"><a href="../index.html">Go语言高级编程</a></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/chai2010/advanced-go-programming-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/chai2010/advanced-go-programming-book/edit/master/ch5-web/ch5-08-interface-and-web.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+
+                    <main>
+                        <ul dir="auto"><li><em>凹语言(Go实现, 面向WASM设计): <a href="https://github.com/wa-lang/wa">https://github.com/wa-lang/wa</a></em></li><li><em>WaBook(Go语言实现的MD电子书构建工具): <a href="https://github.com/wa-lang/wabook">https://github.com/wa-lang/wabook</a></em></li></ul><hr>
+
+                        <h1>5.8 接口和表驱动开发</h1>
+<p>在 Web 项目中经常会遇到外部依赖环境的变化，比如：</p>
+<ol>
+<li>公司的老存储系统年久失修，现在已经没有人维护了，新的系统上线也没有考虑平滑迁移，但最后通牒已下，要求 N 天之内迁移完毕。</li>
+<li>平台部门的老用户系统年久失修，现在已经没有人维护了，真是悲伤的故事。新系统上线没有考虑兼容老接口，但最后通牒已下，要求 N 个月之内迁移完毕。</li>
+<li>公司的老消息队列人走茶凉，年久失修，新来的技术精英们没有考虑向前兼容，但最后通牒已下，要求半年之内迁移完毕。</li>
+</ol>
+<p>嗯，所以你看到了，我们的外部依赖总是为了自己爽而不断地做升级，且不想做向前兼容，然后来给我们下最后通牒。如果我们的部门工作饱和，领导强势，那么有时候也可以倒逼依赖方来做兼容。但世事不一定如人愿，即使我们的领导强势，读者朋友的领导也还是可能认怂的。</p>
+<p>我们可以思考一下怎么缓解这个问题。</p>
+<h2>5.8.1 业务系统的发展过程</h2>
+<p>互联网公司只要可以活过三年，工程方面面临的首要问题就是代码膨胀。系统的代码膨胀之后，可以将系统中与业务本身流程无关的部分做拆解和异步化。什么算是业务无关呢，比如一些统计、反作弊、营销发券、价格计算、用户状态更新等等需求。这些需求往往依赖于主流程的数据，但又只是挂在主流程上的旁支，自成体系。</p>
+<p>这时候我们就可以把这些旁支拆解出去，作为独立的系统来部署、开发以及维护。这些旁支流程的时延如若非常敏感，比如用户在界面上点了按钮，需要立刻返回（价格计算、支付），那么需要与主流程系统进行 RPC 通信，并且在通信失败时，要将结果直接返回给用户。如果时延不敏感，比如抽奖系统，结果稍后公布的这种，或者非实时的统计类系统，那么就没有必要在主流程里为每一套系统做一套 RPC 流程。我们只要将下游需要的数据打包成一条消息，传入消息队列，之后的事情与主流程一概无关（当然，与用户的后续交互流程还是要做的）。</p>
+<p>通过拆解和异步化虽然解决了一部分问题，但并不能解决所有问题。随着业务发展，单一职责的模块也会变得越来越复杂，这是必然的趋势。一件事情本身变的复杂的话，这时候拆解和异步化就不灵了。我们还是要对事情本身进行一定程度的封装抽象。</p>
+<h2>5.8.2 使用函数封装业务流程</h2>
+<p>最基本的封装过程，我们把相似的行为放在一起，然后打包成一个一个的函数，让自己杂乱无章的代码变成下面这个样子：</p>
+<pre><code class="language-go">func BusinessProcess(ctx context.Context, params Params) (resp, error){
+	ValidateLogin()
+	ValidateParams()
+	AntispamCheck()
+	GetPrice()
+	CreateOrder()
+	UpdateUserStatus()
+	NotifyDownstreamSystems()
+}
+</code></pre>
+<p>不管是多么复杂的业务，系统内的逻辑都是可以分解为 <code>step1 -&gt; step2 -&gt; step3 ...</code> 这样的流程的。</p>
+<p>每一个步骤内部也会有复杂的流程，比如：</p>
+<pre><code class="language-go">func CreateOrder() {
+	ValidateDistrict()    // 判断是否是地区限定商品
+	ValidateVIPProduct()  // 检查是否是只提供给 vip 的商品
+	GetUserInfo()         // 从用户系统获取更详细的用户信息
+	GetProductDesc()      // 从商品系统中获取商品在该时间点的详细信息
+	DecrementStorage()    // 扣减库存
+	CreateOrderSnapshot() // 创建订单快照
+	return CreateSuccess
+}
+</code></pre>
+<p>在阅读业务流程代码时，我们只要阅读其函数名就能知晓在该流程中完成了哪些操作，如果需要修改细节，那么就继续深入到每一个业务步骤去看具体的流程。写得稀烂的业务流程代码则会将所有过程都堆积在少数的几个函数中，从而导致几百甚至上千行的函数。这种意大利面条式的代码阅读和维护都会非常痛苦。在开发的过程中，一旦有条件应该立即进行类似上面这种方式的简单封装。</p>
+<h2>5.8.3 使用接口来做抽象</h2>
+<p>业务发展的早期，是不适宜引入接口（interface）的，很多时候业务流程变化很大，过早引入接口会使业务系统本身增加很多不必要的分层，从而导致每次修改几乎都要全盘否定之前的工作。</p>
+<p>当业务发展到一定阶段，主流程稳定之后，就可以适当地使用接口来进行抽象了。这里的稳定，是指主流程的大部分业务步骤已经确定，即使再进行修改，也不会进行大规模的变动，而只是小修小补，或者只是增加或删除少量业务步骤。</p>
+<p>如果我们在开发过程中，已经对业务步骤进行了良好的封装，这时候进行接口抽象化就会变的非常容易，伪代码：</p>
+<pre><code class="language-go">// OrderCreator 创建订单流程
+type OrderCreator interface {
+	ValidateDistrict()    // 判断是否是地区限定商品
+	ValidateVIPProduct()  // 检查是否是只提供给 vip 的商品
+	GetUserInfo()         // 从用户系统获取更详细的用户信息
+	GetProductDesc()      // 从商品系统中获取商品在该时间点的详细信息
+	DecrementStorage()    // 扣减库存
+	CreateOrderSnapshot() // 创建订单快照
+}
+</code></pre>
+<p>我们只要把之前写过的步骤函数签名都提到一个接口中，就可以完成抽象了。</p>
+<p>在进行抽象之前，我们应该想明白的一点是，引入接口对我们的系统本身是否有意义，这是要按照场景去进行分析的。假如我们的系统只服务一条产品线，并且内部的代码只是针对很具体的场景进行定制化开发，那么引入接口是不会带来任何收益的。至于说是否方便测试，这一点我们会在之后的章节来讲。</p>
+<p>如果我们正在做的是平台系统，需要由平台来定义统一的业务流程和业务规范，那么基于接口的抽象就是有意义的。举个例子：</p>
+<p><img src="../images/ch6-interface-impl.uml.png" alt="interface-impl"></p>
+<p><em>图 5-19 实现公有的接口</em></p>
+<p>平台需要服务多条业务线，但数据定义需要统一，所以希望都能走平台定义的流程。作为平台方，我们可以定义一套类似上文的接口，然后要求接入方的业务必须将这些接口都实现。如果接口中有其不需要的步骤，那么只要返回 <code>nil</code>，或者忽略就好。</p>
+<p>在业务进行迭代时，平台的代码是不用修改的，这样我们便把这些接入业务当成了平台代码的插件（plugin）引入进来了。如果没有接口的话，我们会怎么做？</p>
+<pre><code class="language-go">import (
+	&quot;sample.com/travelorder&quot;
+	&quot;sample.com/marketorder&quot;
+)
+
+func CreateOrder() {
+	switch businessType {
+	case TravelBusiness:
+		travelorder.CreateOrder()
+	case MarketBusiness:
+		marketorder.CreateOrderForMarket()
+	default:
+		return errors.New(&quot;not supported business&quot;)
+	}
+}
+
+func ValidateUser() {
+	switch businessType {
+	case TravelBusiness:
+		travelorder.ValidateUserVIP()
+	case MarketBusiness:
+		marketorder.ValidateUserRegistered()
+	default:
+		return errors.New(&quot;not supported business&quot;)
+	}
+}
+
+// ...
+switch ...
+switch ...
+switch ...
+</code></pre>
+<p>没错，就是无穷无尽的 <code>switch</code>，和没完没了的垃圾代码。引入了接口之后，我们的 <code>switch</code> 只需要在业务入口做一次。</p>
+<pre><code class="language-go">type BusinessInstance interface {
+	ValidateLogin()
+	ValidateParams()
+	AntispamCheck()
+	GetPrice()
+	CreateOrder()
+	UpdateUserStatus()
+	NotifyDownstreamSystems()
+}
+
+func entry() {
+	var bi BusinessInstance
+	switch businessType {
+		case TravelBusiness:
+			bi = travelorder.New()
+		case MarketBusiness:
+			bi = marketorder.New()
+		default:
+			return errors.New(&quot;not supported business&quot;)
+	}
+}
+
+func BusinessProcess(bi BusinessInstance) {
+	bi.ValidateLogin()
+	bi.ValidateParams()
+	bi.AntispamCheck()
+	bi.GetPrice()
+	bi.CreateOrder()
+	bi.UpdateUserStatus()
+	bi.NotifyDownstreamSystems()
+}
+</code></pre>
+<p>面向接口编程，不用关心具体的实现。如果对应的业务在迭代中发生了修改，所有的逻辑对平台方来说也是完全透明的。</p>
+<h2>5.8.4 接口的优缺点</h2>
+<p>Go 被人称道的最多的地方是其接口设计的正交性，模块之间不需要知晓相互的存在，A 模块定义接口，B 模块实现这个接口就可以。如果接口中没有 A 模块中定义的数据类型，那 B 模块中甚至都不用 <code>import A</code>。比如标准库中的 <code>io.Writer</code>：</p>
+<pre><code class="language-go">type Writer interface {
+	Write(p []byte) (n int, err error)
+}
+</code></pre>
+<p>我们可以在自己的模块中实现 <code>io.Writer</code> 接口：</p>
+<pre><code class="language-go">type MyType struct {}
+
+func (m MyType) Write(p []byte) (n int, err error) {
+	return 0, nil
+}
+</code></pre>
+<p>那么我们就可以把我们自己的 <code>MyType</code> 传给任何使用 <code>io.Writer</code> 作为参数的函数来使用了，比如：</p>
+<pre><code class="language-go">package log
+
+func SetOutput(w io.Writer) {
+	output = w
+}
+</code></pre>
+<p>然后：</p>
+<pre><code class="language-go">package my-business
+
+import &quot;xy.com/log&quot;
+
+func init() {
+	log.SetOutput(MyType)
+}
+</code></pre>
+<p>在 <code>MyType</code> 定义的地方，不需要 <code>import &quot;io&quot;</code> 就可以直接实现 <code>io.Writer</code> 接口，我们还可以随意地组合很多函数，以实现各种类型的接口，同时接口实现方和接口定义方都不用建立 import 产生的依赖关系。因此很多人认为 Go 的这种正交是一种很优秀的设计。</p>
+<p>但这种 “正交” 性也会给我们带来一些麻烦。当我们接手了一个几十万行的系统时，如果看到定义了很多接口，例如订单流程的接口，我们希望能直接找到这些接口都被哪些对象实现了。但直到现在，这个简单的需求也就只有 Goland 实现了，并且体验尚可。Visual Studio Code 则需要对项目进行全局扫描，来看到底有哪些结构体实现了该接口的全部函数。那些显式实现接口的语言，对于 IDE 的接口查找来说就友好多了。另一方面，我们看到一个结构体，也希望能够立刻知道这个结构体实现了哪些接口，但也有着和前面提到的相同的问题。</p>
+<p>虽有不便，接口带给我们的好处也是不言而喻的：一是依赖反转，这是接口在大多数语言中对软件项目所能产生的影响，在 Go 的正交接口的设计场景下甚至可以去除依赖；二是由编译器来帮助我们在编译期就能检查到类似 “未完全实现接口” 这样的错误，如果业务未实现某个流程，但又将其实例作为接口强行来使用的话：</p>
+<pre><code class="language-go">package main
+
+type OrderCreator interface {
+	ValidateUser()
+	CreateOrder()
+}
+
+type BookOrderCreator struct{}
+
+func (boc BookOrderCreator) ValidateUser() {}
+
+func createOrder(oc OrderCreator) {
+	oc.ValidateUser()
+	oc.CreateOrder()
+}
+
+func main() {
+	createOrder(BookOrderCreator{})
+}
+</code></pre>
+<p>会报出下述错误。</p>
+<pre><code class="language-shell"># command-line-arguments
+./a.go:18:30: cannot use BookOrderCreator literal (type BookOrderCreator) as type OrderCreator in argument to createOrder:
+	BookOrderCreator does not implement OrderCreator (missing CreateOrder method)
+</code></pre>
+<p>所以接口也可以认为是一种编译期进行检查的保证类型安全的手段。</p>
+<h2>5.8.5 表驱动开发</h2>
+<p>熟悉开源 lint 工具的同学应该见到过圈复杂度的说法，在函数中如果有 <code>if</code> 和 <code>switch</code> 的话，会使函数的圈复杂度上升，所以有强迫症的同学即使在入口一个函数中有 <code>switch</code>，还是想要干掉这个 <code>switch</code>，有没有什么办法呢？当然有，用表驱动的方式来存储我们需要实例：</p>
+<pre><code class="language-go">func entry() {
+	var bi BusinessInstance
+	switch businessType {
+	case TravelBusiness:
+		bi = travelorder.New()
+	case MarketBusiness:
+		bi = marketorder.New()
+	default:
+		return errors.New(&quot;not supported business&quot;)
+	}
+}
+</code></pre>
+<p>可以修改为：</p>
+<pre><code class="language-go">var businessInstanceMap = map[int]BusinessInstance {
+	TravelBusiness : travelorder.New(),
+	MarketBusiness : marketorder.New(),
+}
+
+func entry() {
+	bi := businessInstanceMap[businessType]
+}
+</code></pre>
+<p>表驱动的设计方式，很多设计模式相关的书籍并没有把它作为一种设计模式来讲，但我认为这依然是一种非常重要的帮助我们来简化代码的手段。在日常的开发工作中可以多多思考，哪些不必要的 <code>switch case</code> 可以用一个字典和一行代码就可以轻松搞定。</p>
+<p>当然，表驱动也不是没有缺点，因为需要对输入 <code>key</code> 计算哈希，在性能敏感的场合，需要多加斟酌。</p>
+
+
+                        <hr><table><tr><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/css.png"></td><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/cch.png"></td></tr></table>
+
+                        
+                            <div id="giscus-container"></div>
+                        
+
+                        
+                            <footer class="page-footer">
+                                <span>© 2019-2022 | <a href="https://github.com/chai2010/advanced-go-programming-book">柴树杉、曹春晖</a> 保留所有权利</span>
+                            </footer>
+                        
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../ch5-web/ch5-07-layout-of-web-project.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                        
+                            <!-- ../ch5-web/ch5-09-gated-launch.html -->
+                            <a rel="next" href="../ch5-web/ch5-09-gated-launch.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../ch5-web/ch5-07-layout-of-web-project.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                
+                    <a rel="next" href="../ch5-web/ch5-09-gated-launch.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../static/wabook/mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/book.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script type="text/javascript" charset="utf-8">
+            var pagePath = "ch5-web/ch5-08-interface-and-web.md"
+        </script>
+
+        <!-- Custom JS scripts -->
+        
+            <script src="../static/wabook/giscus.js" type="text/javascript" charset="utf-8"></script>
+        
+
+    </body>
+</html>

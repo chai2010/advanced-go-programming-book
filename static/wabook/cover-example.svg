@@ -1,0 +1,35 @@
+<!-- 
+// copyright @2023 wabook cover image
+// https://github.com/wa-lang/wabook
+-->
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 660">
+
+<!-- 外边框 -->
+<polyline points="1,1 519,1 519,659 1,659 1,1" style="fill:none;stroke:black;stroke-width:1"/>
+
+<!-- 顶部横条 -->
+<rect x="50" y="1" width="420" height="10" style="fill:LightSeaGreen;stroke:none;"/>
+
+<!-- 系列图书 -->
+<text x="190" y="25" fill="black" font-style="italic">Markdown Books</text>
+
+<!-- 标题横条 -->
+<rect x="50" y="80" width="420" height="150" style="fill:LightSeaGreen;stroke:none;"/>
+
+<!-- 主标题 -->
+<text x="60" y="180" fill="white" font-size="70px" font-weight="bold">MD图书教程</text>
+
+<!-- 副标题 -->
+<text x="65" y="260" fill="black" font-size="30px">如何用Markdown来写一本书</text>
+
+<!-- 中间图像 -->
+<image x="150" y="320" width="220" height="220" href="./favicon.png" />
+
+<!-- 出版社 -->
+<text x="40" y="620" fill="black" font-style="italic" font-size="20px">开源出版社</text>
+
+<!-- 作者 -->
+<text x="400" y="620" fill="black" font-style="italic" font-size="20px">作者 著</text>
+
+</svg>

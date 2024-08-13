@@ -1,0 +1,669 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using https://github.com/wa-lang/wabook -->
+        <meta charset="UTF-8">
+        <title>RPC入门 - Go语言高级编程</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../static/wabook/css/variables.css">
+        <link rel="stylesheet" href="../static/wabook/css/general.css">
+        <link rel="stylesheet" href="../static/wabook/css/chrome.css">
+        <link rel="stylesheet" href="../static/wabook/css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../static/wabook/FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../static/wabook/fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../static/wabook/highlight.css">
+        <link rel="stylesheet" href="../static/wabook/tomorrow-night.css">
+        <link rel="stylesheet" href="../static/wabook/ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('wabook-theme');
+                var sidebar = localStorage.getItem('wabook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('wabook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('wabook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('wabook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('wabook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter">
+  <li class="chapter-item expanded ">
+    <a href="../index.html" >Go语言高级编程</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../preface.html" >前言</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../ch1-basic/readme.html" ><strong aria-hidden="true">1.</strong> 语言基础</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-01-genesis.html" ><strong aria-hidden="true">1.1.</strong> Go语言创世纪</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-02-hello-revolution.html" ><strong aria-hidden="true">1.2.</strong> Hello, World 的革命</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-03-array-string-and-slice.html" ><strong aria-hidden="true">1.3.</strong> 数组、字符串和切片</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-04-func-method-interface.html" ><strong aria-hidden="true">1.4.</strong> 函数、方法和接口</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-05-mem.html" ><strong aria-hidden="true">1.5.</strong> 面向并发的内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-06-goroutine.html" ><strong aria-hidden="true">1.6.</strong> 常见的并发模式</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-07-error-and-panic.html" ><strong aria-hidden="true">1.7.</strong> 错误和异常</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-08-ext.html" ><strong aria-hidden="true">1.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch2-cgo/readme.html" ><strong aria-hidden="true">2.</strong> CGO编程</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-01-hello-cgo.html" ><strong aria-hidden="true">2.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-02-basic.html" ><strong aria-hidden="true">2.2.</strong> CGO基础</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-03-cgo-types.html" ><strong aria-hidden="true">2.3.</strong> 类型转换</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-04-func.html" ><strong aria-hidden="true">2.4.</strong> 函数调用</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-05-internal.html" ><strong aria-hidden="true">2.5.</strong> 内部机制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-06-qsort.html" ><strong aria-hidden="true">2.6.</strong> 实战: 封装qsort</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-07-memory.html" ><strong aria-hidden="true">2.7.</strong> CGO内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-08-class.html" ><strong aria-hidden="true">2.8.</strong> C++类包装</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-09-static-shared-lib.html" ><strong aria-hidden="true">2.9.</strong> 静态库和动态库</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-10-link.html" ><strong aria-hidden="true">2.10.</strong> 编译和链接参数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-11-ext.html" ><strong aria-hidden="true">2.11.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch3-asm/readme.html" ><strong aria-hidden="true">3.</strong> 汇编语言</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-01-basic.html" ><strong aria-hidden="true">3.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-02-arch.html" ><strong aria-hidden="true">3.2.</strong> 计算机结构</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-03-const-and-var.html" ><strong aria-hidden="true">3.3.</strong> 常量和全局变量</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-04-func.html" ><strong aria-hidden="true">3.4.</strong> 函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-05-control-flow.html" ><strong aria-hidden="true">3.5.</strong> 控制流</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-06-func-again.html" ><strong aria-hidden="true">3.6.</strong> 再论函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-07-hack-asm.html" ><strong aria-hidden="true">3.7.</strong> 汇编语言的威力</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-08-goroutine-id.html" ><strong aria-hidden="true">3.8.</strong> 例子：Goroutine ID</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-09-debug.html" ><strong aria-hidden="true">3.9.</strong> Delve调试器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-10-ext.html" ><strong aria-hidden="true">3.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch4-rpc/readme.html" ><strong aria-hidden="true">4.</strong> 第4章 RPC和Protobuf</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-01-rpc-intro.html" class="active"><strong aria-hidden="true">4.1.</strong> RPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-02-pb-intro.html" ><strong aria-hidden="true">4.2.</strong> Protobuf</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-03-netrpc-hack.html" ><strong aria-hidden="true">4.3.</strong> 玩转RPC</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-04-grpc.html" ><strong aria-hidden="true">4.4.</strong> gRPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-05-grpc-hack.html" ><strong aria-hidden="true">4.5.</strong> gRPC进阶</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-06-grpc-ext.html" ><strong aria-hidden="true">4.6.</strong> gRPC和Protobuf扩展</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-07-pbgo.html" ><strong aria-hidden="true">4.7.</strong> pbgo: 基于Protobuf的框架</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-08-grpcurl.html" ><strong aria-hidden="true">4.8.</strong> grpcurl工具</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-09-ext.html" ><strong aria-hidden="true">4.9.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch5-web/readme.html" ><strong aria-hidden="true">5.</strong> Go和Web</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-01-introduction.html" ><strong aria-hidden="true">5.1.</strong> Web开发简介</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-02-router.html" ><strong aria-hidden="true">5.2.</strong> 请求路由</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-03-middleware.html" ><strong aria-hidden="true">5.3.</strong> 中间件</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-04-validator.html" ><strong aria-hidden="true">5.4.</strong> 请求校验</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-05-database.html" ><strong aria-hidden="true">5.5.</strong> 和数据库打交道</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-06-ratelimit.html" ><strong aria-hidden="true">5.6.</strong> 服务流量限制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-07-layout-of-web-project.html" ><strong aria-hidden="true">5.7.</strong> 大型Web项目分层</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-08-interface-and-web.html" ><strong aria-hidden="true">5.8.</strong> 接口和表驱动开发</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-09-gated-launch.html" ><strong aria-hidden="true">5.9.</strong> 灰度发布和A/B测试</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-10-ext.html" ><strong aria-hidden="true">5.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch6-cloud/readme.html" ><strong aria-hidden="true">6.</strong> 分布式系统</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-01-dist-id.html" ><strong aria-hidden="true">6.1.</strong> 分布式 id 生成器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-02-lock.html" ><strong aria-hidden="true">6.2.</strong> 分布式锁</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-03-delay-job.html" ><strong aria-hidden="true">6.3.</strong> 延时任务系统</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-04-search-engine.html" ><strong aria-hidden="true">6.4.</strong> 分布式搜索引擎</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-05-load-balance.html" ><strong aria-hidden="true">6.5.</strong> 负载均衡</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-06-config.html" ><strong aria-hidden="true">6.6.</strong> 分布式配置管理</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-07-crawler.html" ><strong aria-hidden="true">6.7.</strong> 分布式爬虫</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-08-ext.html" ><strong aria-hidden="true">6.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../appendix/readme.html" ><strong aria-hidden="true">7.</strong> 附录</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-a-trap.html" ><strong aria-hidden="true">7.1.</strong> 附录A: Go语言常见坑</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-b-gems.html" ><strong aria-hidden="true">7.2.</strong> 附录B: 有趣的代码片段</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-c-author.html" ><strong aria-hidden="true">7.3.</strong> 附录C: 作者简介</a>
+    </li>
+  </ol>
+</ol>
+
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                    </div>
+
+                    <h1 class="menu-title"><a href="../index.html">Go语言高级编程</a></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/chai2010/advanced-go-programming-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/chai2010/advanced-go-programming-book/edit/master/ch4-rpc/ch4-01-rpc-intro.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+
+                    <main>
+                        <ul dir="auto"><li><em>凹语言(Go实现, 面向WASM设计): <a href="https://github.com/wa-lang/wa">https://github.com/wa-lang/wa</a></em></li><li><em>WaBook(Go语言实现的MD电子书构建工具): <a href="https://github.com/wa-lang/wabook">https://github.com/wa-lang/wabook</a></em></li></ul><hr>
+
+                        <h1>4.1 RPC 入门</h1>
+<p>RPC 是远程过程调用的简称，是分布式系统中不同节点间流行的通信方式。在互联网时代，RPC 已经和 IPC 一样成为一个不可或缺的基础构件。因此 Go 语言的标准库也提供了一个简单的 RPC 实现，我们将以此为入口学习 RPC 的各种用法。</p>
+<h2>4.1.1 RPC 版 “Hello, World”</h2>
+<p>Go 语言的 RPC 包的路径为 net/rpc，也就是放在了 net 包目录下面。因此我们可以猜测该 RPC 包是建立在 net 包基础之上的。在第一章 “Hello, World” 革命一节最后，我们基于 http 实现了一个打印例子。下面我们尝试基于 rpc 实现一个类似的例子。</p>
+<p>我们先构造一个 HelloService 类型，其中的 Hello 方法用于实现打印功能：</p>
+<pre><code class="language-go">type HelloService struct {}
+
+func (p *HelloService) Hello(request string, reply *string) error {
+	*reply = &quot;hello:&quot; + request
+	return nil
+}
+</code></pre>
+<p>其中 Hello 方法必须满足 Go 语言的 RPC 规则：方法只能有两个可序列化的参数，其中第二个参数是指针类型，并且返回一个 error 类型，同时必须是公开的方法。</p>
+<p>然后就可以将 HelloService 类型的对象注册为一个 RPC 服务：</p>
+<pre><code class="language-go">func main() {
+	rpc.RegisterName(&quot;HelloService&quot;, new(HelloService))
+
+	listener, err := net.Listen(&quot;tcp&quot;, &quot;:1234&quot;)
+	if err != nil {
+		log.Fatal(&quot;ListenTCP error:&quot;, err)
+	}
+
+	conn, err := listener.Accept()
+	if err != nil {
+		log.Fatal(&quot;Accept error:&quot;, err)
+	}
+
+	rpc.ServeConn(conn)
+}
+</code></pre>
+<p>其中 rpc.Register 函数调用会将对象类型中所有满足 RPC 规则的对象方法注册为 RPC 函数，所有注册的方法会放在 “HelloService” 服务空间之下。然后我们建立一个唯一的 TCP 连接，并且通过 rpc.ServeConn 函数在该 TCP 连接上为对方提供 RPC 服务。</p>
+<p>下面是客户端请求 HelloService 服务的代码：</p>
+<pre><code class="language-go">func main() {
+	client, err := rpc.Dial(&quot;tcp&quot;, &quot;localhost:1234&quot;)
+	if err != nil {
+		log.Fatal(&quot;dialing:&quot;, err)
+	}
+
+	var reply string
+	err = client.Call(&quot;HelloService.Hello&quot;, &quot;hello&quot;, &amp;reply)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(reply)
+}
+</code></pre>
+<p>首先是通过 rpc.Dial 拨号 RPC 服务，然后通过 client.Call 调用具体的 RPC 方法。在调用 client.Call 时，第一个参数是用点号连接的 RPC 服务名字和方法名字，第二和第三个参数分别我们定义 RPC 方法的两个参数。</p>
+<p>由这个例子可以看出 RPC 的使用其实非常简单。</p>
+<h2>4.1.2 更安全的 RPC 接口</h2>
+<p>在涉及 RPC 的应用中，作为开发人员一般至少有三种角色：首先是服务端实现 RPC 方法的开发人员，其次是客户端调用 RPC 方法的人员，最后也是最重要的是制定服务端和客户端 RPC 接口规范的设计人员。在前面的例子中我们为了简化将以上几种角色的工作全部放到了一起，虽然看似实现简单，但是不利于后期的维护和工作的切割。</p>
+<p>如果要重构 HelloService 服务，第一步需要明确服务的名字和接口：</p>
+<pre><code class="language-go">const HelloServiceName = &quot;path/to/pkg.HelloService&quot;
+
+type HelloServiceInterface interface {
+	Hello(request string, reply *string) error
+}
+
+func RegisterHelloService(svc HelloServiceInterface) error {
+	return rpc.RegisterName(HelloServiceName, svc)
+}
+</code></pre>
+<p>我们将 RPC 服务的接口规范分为三个部分：首先是服务的名字，然后是服务要实现的详细方法列表，最后是注册该类型服务的函数。为了避免名字冲突，我们在 RPC 服务的名字中增加了包路径前缀（这个是 RPC 服务抽象的包路径，并非完全等价 Go 语言的包路径）。RegisterHelloService 注册服务时，编译器会要求传入的对象满足 HelloServiceInterface 接口。</p>
+<p>在定义了 RPC 服务接口规范之后，客户端就可以根据规范编写 RPC 调用的代码了：</p>
+<pre><code class="language-go">func main() {
+	client, err := rpc.Dial(&quot;tcp&quot;, &quot;localhost:1234&quot;)
+	if err != nil {
+		log.Fatal(&quot;dialing:&quot;, err)
+	}
+
+	var reply string
+	err = client.Call(HelloServiceName+&quot;.Hello&quot;, &quot;hello&quot;, &amp;reply)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(reply)
+}
+</code></pre>
+<p>其中唯一的变化是 client.Call 的第一个参数用 HelloServiceName+&quot;.Hello&quot; 代替了 &quot;HelloService.Hello&quot;。然而通过 client.Call 函数调用 RPC 方法依然比较繁琐，同时参数的类型依然无法得到编译器提供的安全保障。</p>
+<p>为了简化客户端用户调用 RPC 函数，我们在可以在接口规范部分增加对客户端的简单包装：</p>
+<pre><code class="language-go">type HelloServiceClient struct {
+	*rpc.Client
+}
+
+var _ HelloServiceInterface = (*HelloServiceClient)(nil)
+
+func DialHelloService(network, address string) (*HelloServiceClient, error) {
+	c, err := rpc.Dial(network, address)
+	if err != nil {
+		return nil, err
+	}
+	return &amp;HelloServiceClient{Client: c}, nil
+}
+
+func (p *HelloServiceClient) Hello(request string, reply *string) error {
+	return p.Client.Call(HelloServiceName+&quot;.Hello&quot;, request, reply)
+}
+</code></pre>
+<p>我们在接口规范中针对客户端新增加了 HelloServiceClient 类型，该类型也必须满足 HelloServiceInterface 接口，这样客户端用户就可以直接通过接口对应的方法调用 RPC 函数。同时提供了一个 DialHelloService 方法，直接拨号 HelloService 服务。</p>
+<p>基于新的客户端接口，我们可以简化客户端用户的代码：</p>
+<pre><code class="language-go">func main() {
+	client, err := DialHelloService(&quot;tcp&quot;, &quot;localhost:1234&quot;)
+	if err != nil {
+		log.Fatal(&quot;dialing:&quot;, err)
+	}
+
+	var reply string
+	err = client.Hello(&quot;hello&quot;, &amp;reply)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(reply)
+}
+</code></pre>
+<p>现在客户端用户不用再担心 RPC 方法名字或参数类型不匹配等低级错误的发生。</p>
+<p>最后是基于 RPC 接口规范编写真实的服务端代码：</p>
+<pre><code class="language-go">type HelloService struct {}
+
+func (p *HelloService) Hello(request string, reply *string) error {
+	*reply = &quot;hello:&quot; + request
+	return nil
+}
+
+func main() {
+	RegisterHelloService(new(HelloService))
+
+	listener, err := net.Listen(&quot;tcp&quot;, &quot;:1234&quot;)
+	if err != nil {
+		log.Fatal(&quot;ListenTCP error:&quot;, err)
+	}
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Fatal(&quot;Accept error:&quot;, err)
+		}
+
+		go rpc.ServeConn(conn)
+	}
+}
+</code></pre>
+<p>在新的 RPC 服务端实现中，我们用 RegisterHelloService 函数来注册函数，这样不仅可以避免命名服务名称的工作，同时也保证了传入的服务对象满足了 RPC 接口的定义。最后我们新的服务改为支持多个 TCP 连接，然后为每个 TCP 连接提供 RPC 服务。</p>
+<h2>4.1.3 跨语言的 RPC</h2>
+<p>标准库的 RPC 默认采用 Go 语言特有的 gob 编码，因此从其它语言调用 Go 语言实现的 RPC 服务将比较困难。在互联网的微服务时代，每个 RPC 以及服务的使用者都可能采用不同的编程语言，因此跨语言是互联网时代 RPC 的一个首要条件。得益于 RPC 的框架设计，Go 语言的 RPC 其实也是很容易实现跨语言支持的。</p>
+<p>Go 语言的 RPC 框架有两个比较有特色的设计：一个是 RPC 数据打包时可以通过插件实现自定义的编码和解码；另一个是 RPC 建立在抽象的 io.ReadWriteCloser 接口之上的，我们可以将 RPC 架设在不同的通讯协议之上。这里我们将尝试通过官方自带的 net/rpc/jsonrpc 扩展实现一个跨语言的 RPC。</p>
+<p>首先是基于 json 编码重新实现 RPC 服务：</p>
+<pre><code class="language-go">func main() {
+	rpc.RegisterName(&quot;HelloService&quot;, new(HelloService))
+
+	listener, err := net.Listen(&quot;tcp&quot;, &quot;:1234&quot;)
+	if err != nil {
+		log.Fatal(&quot;ListenTCP error:&quot;, err)
+	}
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Fatal(&quot;Accept error:&quot;, err)
+		}
+
+		go rpc.ServeCodec(jsonrpc.NewServerCodec(conn))
+	}
+}
+</code></pre>
+<p>代码中最大的变化是用 rpc.ServeCodec 函数替代了 rpc.ServeConn 函数，传入的参数是针对服务端的 json 编解码器。</p>
+<p>然后是实现 json 版本的客户端：</p>
+<pre><code class="language-go">func main() {
+	conn, err := net.Dial(&quot;tcp&quot;, &quot;localhost:1234&quot;)
+	if err != nil {
+		log.Fatal(&quot;net.Dial:&quot;, err)
+	}
+
+	client := rpc.NewClientWithCodec(jsonrpc.NewClientCodec(conn))
+
+	var reply string
+	err = client.Call(&quot;HelloService.Hello&quot;, &quot;hello&quot;, &amp;reply)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(reply)
+}
+</code></pre>
+<p>先手工调用 net.Dial 函数建立 TCP 连接，然后基于该连接建立针对客户端的 json 编解码器。</p>
+<p>在确保客户端可以正常调用 RPC 服务的方法之后，我们用一个普通的 TCP 服务代替 Go 语言版本的 RPC 服务，这样可以查看客户端调用时发送的数据格式。比如通过 nc 命令 <code>nc -l 1234</code> 在同样的端口启动一个 TCP 服务。然后再次执行一次 RPC 调用将会发现 nc 输出了以下的信息：</p>
+<pre><code class="language-json">{&quot;method&quot;:&quot;HelloService.Hello&quot;,&quot;params&quot;:[&quot;hello&quot;],&quot;id&quot;:0}
+</code></pre>
+<p>这是一个 json 编码的数据，其中 method 部分对应要调用的 rpc 服务和方法组合成的名字，params 部分的第一个元素为参数，id 是由调用端维护的一个唯一的调用编号。</p>
+<p>请求的 json 数据对象在内部对应两个结构体：客户端是 clientRequest，服务端是 serverRequest。clientRequest 和 serverRequest 结构体的内容基本是一致的：</p>
+<pre><code class="language-go">type clientRequest struct {
+	Method string         `json:&quot;method&quot;`
+	Params [1]interface{} `json:&quot;params&quot;`
+	Id     uint64         `json:&quot;id&quot;`
+}
+
+type serverRequest struct {
+	Method string           `json:&quot;method&quot;`
+	Params *json.RawMessage `json:&quot;params&quot;`
+	Id     *json.RawMessage `json:&quot;id&quot;`
+}
+</code></pre>
+<p>在获取到 RPC 调用对应的 json 数据后，我们可以通过直接向架设了 RPC 服务的 TCP 服务器发送 json 数据模拟 RPC 方法调用：</p>
+<pre><code>$ echo -e '{&quot;method&quot;:&quot;HelloService.Hello&quot;,&quot;params&quot;:[&quot;hello&quot;],&quot;id&quot;:1}' | nc localhost 1234
+</code></pre>
+<p>返回的结果也是一个 json 格式的数据：</p>
+<pre><code class="language-json">{&quot;id&quot;:1,&quot;result&quot;:&quot;hello:hello&quot;,&quot;error&quot;:null}
+</code></pre>
+<p>其中 id 对应输入的 id 参数，result 为返回的结果，error 部分在出问题时表示错误信息。对于顺序调用来说，id 不是必须的。但是 Go 语言的 RPC 框架支持异步调用，当返回结果的顺序和调用的顺序不一致时，可以通过 id 来识别对应的调用。</p>
+<p>返回的 json 数据也是对应内部的两个结构体：客户端是 clientResponse，服务端是 serverResponse。两个结构体的内容同样也是类似的：</p>
+<pre><code class="language-go">type clientResponse struct {
+	Id     uint64           `json:&quot;id&quot;`
+	Result *json.RawMessage `json:&quot;result&quot;`
+	Error  interface{}      `json:&quot;error&quot;`
+}
+
+type serverResponse struct {
+	Id     *json.RawMessage `json:&quot;id&quot;`
+	Result interface{}      `json:&quot;result&quot;`
+	Error  interface{}      `json:&quot;error&quot;`
+}
+</code></pre>
+<p>因此无论采用何种语言，只要遵循同样的 json 结构，以同样的流程就可以和 Go 语言编写的 RPC 服务进行通信。这样我们就实现了跨语言的 RPC。</p>
+<h2>4.1.4 Http 上的 RPC</h2>
+<p>Go 语言内在的 RPC 框架已经支持在 Http 协议上提供 RPC 服务。但是框架的 http 服务同样采用了内置的 gob 协议，并且没有提供采用其它协议的接口，因此从其它语言依然无法访问的。在前面的例子中，我们已经实现了在 TCP 协议之上运行 jsonrpc 服务，并且通过 nc 命令行工具成功实现了 RPC 方法调用。现在我们尝试在 http 协议上提供 jsonrpc 服务。</p>
+<p>新的 RPC 服务其实是一个类似 REST 规范的接口，接收请求并采用相应处理流程：</p>
+<pre><code class="language-go">func main() {
+	rpc.RegisterName(&quot;HelloService&quot;, new(HelloService))
+
+	http.HandleFunc(&quot;/jsonrpc&quot;, func(w http.ResponseWriter, r *http.Request) {
+		var conn io.ReadWriteCloser = struct {
+			io.Writer
+			io.ReadCloser
+		}{
+			ReadCloser: r.Body,
+			Writer:     w,
+		}
+
+		rpc.ServeRequest(jsonrpc.NewServerCodec(conn))
+	})
+
+	http.ListenAndServe(&quot;:1234&quot;, nil)
+}
+</code></pre>
+<p>RPC 的服务架设在 “/jsonrpc” 路径，在处理函数中基于 http.ResponseWriter 和 http.Request 类型的参数构造一个 io.ReadWriteCloser 类型的 conn 通道。然后基于 conn 构建针对服务端的 json 编码解码器。最后通过 rpc.ServeRequest 函数为每次请求处理一次 RPC 方法调用。</p>
+<p>模拟一次 RPC 调用的过程就是向该连接发送一个 json 字符串：</p>
+<pre><code>$ curl localhost:1234/jsonrpc -X POST \
+	--data '{&quot;method&quot;:&quot;HelloService.Hello&quot;,&quot;params&quot;:[&quot;hello&quot;],&quot;id&quot;:0}'
+</code></pre>
+<p>返回的结果依然是 json 字符串：</p>
+<pre><code class="language-json">{&quot;id&quot;:0,&quot;result&quot;:&quot;hello:hello&quot;,&quot;error&quot;:null}
+</code></pre>
+<p>这样就可以很方便地从不同语言中访问 RPC 服务了。</p>
+
+
+                        <hr><table><tr><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/css.png"></td><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/cch.png"></td></tr></table>
+
+                        
+                            <div id="giscus-container"></div>
+                        
+
+                        
+                            <footer class="page-footer">
+                                <span>© 2019-2022 | <a href="https://github.com/chai2010/advanced-go-programming-book">柴树杉、曹春晖</a> 保留所有权利</span>
+                            </footer>
+                        
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../ch4-rpc/readme.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                        
+                            <!-- ../ch4-rpc/ch4-02-pb-intro.html -->
+                            <a rel="next" href="../ch4-rpc/ch4-02-pb-intro.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../ch4-rpc/readme.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                
+                    <a rel="next" href="../ch4-rpc/ch4-02-pb-intro.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../static/wabook/mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/book.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script type="text/javascript" charset="utf-8">
+            var pagePath = "ch4-rpc/ch4-01-rpc-intro.md"
+        </script>
+
+        <!-- Custom JS scripts -->
+        
+            <script src="../static/wabook/giscus.js" type="text/javascript" charset="utf-8"></script>
+        
+
+    </body>
+</html>

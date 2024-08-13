@@ -1,0 +1,805 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using https://github.com/wa-lang/wabook -->
+        <meta charset="UTF-8">
+        <title>C++类包装 - Go语言高级编程</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../static/wabook/css/variables.css">
+        <link rel="stylesheet" href="../static/wabook/css/general.css">
+        <link rel="stylesheet" href="../static/wabook/css/chrome.css">
+        <link rel="stylesheet" href="../static/wabook/css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../static/wabook/FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../static/wabook/fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../static/wabook/highlight.css">
+        <link rel="stylesheet" href="../static/wabook/tomorrow-night.css">
+        <link rel="stylesheet" href="../static/wabook/ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('wabook-theme');
+                var sidebar = localStorage.getItem('wabook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('wabook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('wabook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('wabook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('wabook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter">
+  <li class="chapter-item expanded ">
+    <a href="../index.html" >Go语言高级编程</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../preface.html" >前言</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../ch1-basic/readme.html" ><strong aria-hidden="true">1.</strong> 语言基础</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-01-genesis.html" ><strong aria-hidden="true">1.1.</strong> Go语言创世纪</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-02-hello-revolution.html" ><strong aria-hidden="true">1.2.</strong> Hello, World 的革命</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-03-array-string-and-slice.html" ><strong aria-hidden="true">1.3.</strong> 数组、字符串和切片</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-04-func-method-interface.html" ><strong aria-hidden="true">1.4.</strong> 函数、方法和接口</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-05-mem.html" ><strong aria-hidden="true">1.5.</strong> 面向并发的内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-06-goroutine.html" ><strong aria-hidden="true">1.6.</strong> 常见的并发模式</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-07-error-and-panic.html" ><strong aria-hidden="true">1.7.</strong> 错误和异常</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-08-ext.html" ><strong aria-hidden="true">1.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch2-cgo/readme.html" ><strong aria-hidden="true">2.</strong> CGO编程</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-01-hello-cgo.html" ><strong aria-hidden="true">2.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-02-basic.html" ><strong aria-hidden="true">2.2.</strong> CGO基础</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-03-cgo-types.html" ><strong aria-hidden="true">2.3.</strong> 类型转换</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-04-func.html" ><strong aria-hidden="true">2.4.</strong> 函数调用</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-05-internal.html" ><strong aria-hidden="true">2.5.</strong> 内部机制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-06-qsort.html" ><strong aria-hidden="true">2.6.</strong> 实战: 封装qsort</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-07-memory.html" ><strong aria-hidden="true">2.7.</strong> CGO内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-08-class.html" class="active"><strong aria-hidden="true">2.8.</strong> C++类包装</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-09-static-shared-lib.html" ><strong aria-hidden="true">2.9.</strong> 静态库和动态库</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-10-link.html" ><strong aria-hidden="true">2.10.</strong> 编译和链接参数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-11-ext.html" ><strong aria-hidden="true">2.11.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch3-asm/readme.html" ><strong aria-hidden="true">3.</strong> 汇编语言</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-01-basic.html" ><strong aria-hidden="true">3.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-02-arch.html" ><strong aria-hidden="true">3.2.</strong> 计算机结构</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-03-const-and-var.html" ><strong aria-hidden="true">3.3.</strong> 常量和全局变量</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-04-func.html" ><strong aria-hidden="true">3.4.</strong> 函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-05-control-flow.html" ><strong aria-hidden="true">3.5.</strong> 控制流</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-06-func-again.html" ><strong aria-hidden="true">3.6.</strong> 再论函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-07-hack-asm.html" ><strong aria-hidden="true">3.7.</strong> 汇编语言的威力</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-08-goroutine-id.html" ><strong aria-hidden="true">3.8.</strong> 例子：Goroutine ID</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-09-debug.html" ><strong aria-hidden="true">3.9.</strong> Delve调试器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-10-ext.html" ><strong aria-hidden="true">3.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch4-rpc/readme.html" ><strong aria-hidden="true">4.</strong> 第4章 RPC和Protobuf</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-01-rpc-intro.html" ><strong aria-hidden="true">4.1.</strong> RPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-02-pb-intro.html" ><strong aria-hidden="true">4.2.</strong> Protobuf</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-03-netrpc-hack.html" ><strong aria-hidden="true">4.3.</strong> 玩转RPC</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-04-grpc.html" ><strong aria-hidden="true">4.4.</strong> gRPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-05-grpc-hack.html" ><strong aria-hidden="true">4.5.</strong> gRPC进阶</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-06-grpc-ext.html" ><strong aria-hidden="true">4.6.</strong> gRPC和Protobuf扩展</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-07-pbgo.html" ><strong aria-hidden="true">4.7.</strong> pbgo: 基于Protobuf的框架</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-08-grpcurl.html" ><strong aria-hidden="true">4.8.</strong> grpcurl工具</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-09-ext.html" ><strong aria-hidden="true">4.9.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch5-web/readme.html" ><strong aria-hidden="true">5.</strong> Go和Web</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-01-introduction.html" ><strong aria-hidden="true">5.1.</strong> Web开发简介</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-02-router.html" ><strong aria-hidden="true">5.2.</strong> 请求路由</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-03-middleware.html" ><strong aria-hidden="true">5.3.</strong> 中间件</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-04-validator.html" ><strong aria-hidden="true">5.4.</strong> 请求校验</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-05-database.html" ><strong aria-hidden="true">5.5.</strong> 和数据库打交道</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-06-ratelimit.html" ><strong aria-hidden="true">5.6.</strong> 服务流量限制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-07-layout-of-web-project.html" ><strong aria-hidden="true">5.7.</strong> 大型Web项目分层</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-08-interface-and-web.html" ><strong aria-hidden="true">5.8.</strong> 接口和表驱动开发</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-09-gated-launch.html" ><strong aria-hidden="true">5.9.</strong> 灰度发布和A/B测试</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-10-ext.html" ><strong aria-hidden="true">5.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch6-cloud/readme.html" ><strong aria-hidden="true">6.</strong> 分布式系统</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-01-dist-id.html" ><strong aria-hidden="true">6.1.</strong> 分布式 id 生成器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-02-lock.html" ><strong aria-hidden="true">6.2.</strong> 分布式锁</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-03-delay-job.html" ><strong aria-hidden="true">6.3.</strong> 延时任务系统</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-04-search-engine.html" ><strong aria-hidden="true">6.4.</strong> 分布式搜索引擎</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-05-load-balance.html" ><strong aria-hidden="true">6.5.</strong> 负载均衡</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-06-config.html" ><strong aria-hidden="true">6.6.</strong> 分布式配置管理</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-07-crawler.html" ><strong aria-hidden="true">6.7.</strong> 分布式爬虫</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-08-ext.html" ><strong aria-hidden="true">6.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../appendix/readme.html" ><strong aria-hidden="true">7.</strong> 附录</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-a-trap.html" ><strong aria-hidden="true">7.1.</strong> 附录A: Go语言常见坑</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-b-gems.html" ><strong aria-hidden="true">7.2.</strong> 附录B: 有趣的代码片段</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-c-author.html" ><strong aria-hidden="true">7.3.</strong> 附录C: 作者简介</a>
+    </li>
+  </ol>
+</ol>
+
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                    </div>
+
+                    <h1 class="menu-title"><a href="../index.html">Go语言高级编程</a></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/chai2010/advanced-go-programming-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/chai2010/advanced-go-programming-book/edit/master/ch2-cgo/ch2-08-class.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+
+                    <main>
+                        <ul dir="auto"><li><em>凹语言(Go实现, 面向WASM设计): <a href="https://github.com/wa-lang/wa">https://github.com/wa-lang/wa</a></em></li><li><em>WaBook(Go语言实现的MD电子书构建工具): <a href="https://github.com/wa-lang/wabook">https://github.com/wa-lang/wabook</a></em></li></ul><hr>
+
+                        <h1>2.8 C++ 类包装</h1>
+<p>CGO 是 C 语言和 Go 语言之间的桥梁，原则上无法直接支持 C++ 的类。CGO 不支持 C++ 语法的根本原因是 C++ 至今为止还没有一个二进制接口规范 (ABI)。一个 C++ 类的构造函数在编译为目标文件时如何生成链接符号名称、方法在不同平台甚至是 C++ 的不同版本之间都是不一样的。但是 C++ 是兼容 C 语言，所以我们可以通过增加一组 C 语言函数接口作为 C++ 类和 CGO 之间的桥梁，这样就可以间接地实现 C++ 和 Go 之间的互联。当然，因为 CGO 只支持 C 语言中值类型的数据类型，所以我们是无法直接使用 C++ 的引用参数等特性的。</p>
+<h2>2.8.1 C++ 类到 Go 语言对象</h2>
+<p>实现 C++ 类到 Go 语言对象的包装需要经过以下几个步骤：首先是用纯 C 函数接口包装该 C++ 类；其次是通过 CGO 将纯 C 函数接口映射到 Go 函数；最后是做一个 Go 包装对象，将 C++ 类到方法用 Go 对象的方法实现。</p>
+<h3>2.8.1.1 准备一个 C++ 类</h3>
+<p>为了演示简单，我们基于 <code>std::string</code> 做一个最简单的缓存类 MyBuffer。除了构造函数和析构函数之外，只有两个成员函数分别是返回底层的数据指针和缓存的大小。因为是二进制缓存，所以我们可以在里面中放置任意数据。</p>
+<pre><code class="language-c++">// my_buffer.h
+#include &lt;string&gt;
+
+struct MyBuffer {
+	std::string* s_;
+
+	MyBuffer(int size) {
+		this-&gt;s_ = new std::string(size, char('\0'));
+	}
+	~MyBuffer() {
+		delete this-&gt;s_;
+	}
+
+	int Size() const {
+		return this-&gt;s_-&gt;size();
+	}
+	char* Data() {
+		return (char*)this-&gt;s_-&gt;data();
+	}
+};
+</code></pre>
+<p>我们在构造函数中指定缓存的大小并分配空间，在使用完之后通过析构函数释放内部分配的内存空间。下面是简单的使用方式：</p>
+<pre><code class="language-c++">int main() {
+	auto pBuf = new MyBuffer(1024);
+
+	auto data = pBuf-&gt;Data();
+	auto size = pBuf-&gt;Size();
+
+	delete pBuf;
+}
+</code></pre>
+<p>为了方便向 C 语言接口过渡，在此处我们故意没有定义 C++ 的拷贝构造函数。我们必须以 new 和 delete 来分配和释放缓存对象，而不能以值风格的方式来使用。</p>
+<h3>2.8.1.2 用纯 C 函数接口封装 C++ 类</h3>
+<p>如果要将上面的 C++ 类用 C 语言函数接口封装，我们可以从使用方式入手。我们可以将 new 和 delete 映射为 C 语言函数，将对象的方法也映射为 C 语言函数。</p>
+<p>在 C 语言中我们期望 MyBuffer 类可以这样使用：</p>
+<pre><code class="language-c">int main() {
+	MyBuffer* pBuf = NewMyBuffer(1024);
+
+	char* data = MyBuffer_Data(pBuf);
+	auto size = MyBuffer_Size(pBuf);
+
+	DeleteMyBuffer(pBuf);
+}
+</code></pre>
+<p>先从 C 语言接口用户的角度思考需要什么样的接口，然后创建 <code>my_buffer_capi.h</code> 头文件接口规范：</p>
+<pre><code class="language-c++">// my_buffer_capi.h
+typedef struct MyBuffer_T MyBuffer_T;
+
+MyBuffer_T* NewMyBuffer(int size);
+void DeleteMyBuffer(MyBuffer_T* p);
+
+char* MyBuffer_Data(MyBuffer_T* p);
+int MyBuffer_Size(MyBuffer_T* p);
+</code></pre>
+<p>然后就可以基于 C++ 的 MyBuffer 类定义这些 C 语言包装函数。我们创建对应的 <code>my_buffer_capi.cc</code> 文件如下：</p>
+<pre><code class="language-c++">// my_buffer_capi.cc
+
+#include &quot;./my_buffer.h&quot;
+
+extern &quot;C&quot; {
+	#include &quot;./my_buffer_capi.h&quot;
+}
+
+struct MyBuffer_T: MyBuffer {
+	MyBuffer_T(int size): MyBuffer(size) {}
+	~MyBuffer_T() {}
+};
+
+MyBuffer_T* NewMyBuffer(int size) {
+	auto p = new MyBuffer_T(size);
+	return p;
+}
+void DeleteMyBuffer(MyBuffer_T* p) {
+	delete p;
+}
+
+char* MyBuffer_Data(MyBuffer_T* p) {
+	return p-&gt;Data();
+}
+int MyBuffer_Size(MyBuffer_T* p) {
+	return p-&gt;Size();
+}
+</code></pre>
+<p>因为头文件 <code>my_buffer_capi.h</code> 是用于 CGO，必须是采用 C 语言规范的名字修饰规则。在 C++ 源文件包含时需要用 <code>extern &quot;C&quot;</code> 语句说明。另外 MyBuffer_T 的实现只是从 MyBuffer 继承的类，这样可以简化包装代码的实现。同时和 CGO 通信时必须通过 <code>MyBuffer_T</code> 指针，我们无法将具体的实现暴露给 CGO，因为实现中包含了 C++ 特有的语法，CGO 无法识别 C++ 特性。</p>
+<p>将 C++ 类包装为纯 C 接口之后，下一步的工作就是将 C 函数转为 Go 函数。</p>
+<h3>2.8.1.3 将纯 C 接口函数转为 Go 函数</h3>
+<p>将纯 C 函数包装为对应的 Go 函数的过程比较简单。需要注意的是，因为我们的包中包含 C++11 的语法，因此需要通过 <code>#cgo CXXFLAGS: -std=c++11</code> 打开 C++11 的选项。</p>
+<pre><code class="language-go">// my_buffer_capi.go
+
+package main
+
+/*
+#cgo CXXFLAGS: -std=c++11
+
+#include &quot;my_buffer_capi.h&quot;
+*/
+import &quot;C&quot;
+
+type cgo_MyBuffer_T C.MyBuffer_T
+
+func cgo_NewMyBuffer(size int) *cgo_MyBuffer_T {
+	p := C.NewMyBuffer(C.int(size))
+	return (*cgo_MyBuffer_T)(p)
+}
+
+func cgo_DeleteMyBuffer(p *cgo_MyBuffer_T) {
+	C.DeleteMyBuffer((*C.MyBuffer_T)(p))
+}
+
+func cgo_MyBuffer_Data(p *cgo_MyBuffer_T) *C.char {
+	return C.MyBuffer_Data((*C.MyBuffer_T)(p))
+}
+
+func cgo_MyBuffer_Size(p *cgo_MyBuffer_T) C.int {
+	return C.MyBuffer_Size((*C.MyBuffer_T)(p))
+}
+</code></pre>
+<p>为了区分，我们在 Go 中的每个类型和函数名称前面增加了 <code>cgo_</code> 前缀，比如 cgo_MyBuffer_T 是对应 C 中的 MyBuffer_T 类型。</p>
+<p>为了处理简单，在包装纯 C 函数到 Go 函数时，除了 cgo_MyBuffer_T 类型外，对输入参数和返回值的基础类型，我们依然是用的 C 语言的类型。</p>
+<h3>2.8.1.4 包装为 Go 对象</h3>
+<p>在将纯 C 接口包装为 Go 函数之后，我们就可以很容易地基于包装的 Go 函数构造出 Go 对象来。因为 cgo_MyBuffer_T 是从 C 语言空间导入的类型，它无法定义自己的方法，因此我们构造了一个新的 MyBuffer 类型，里面的成员持有 cgo_MyBuffer_T 指向的 C 语言缓存对象。</p>
+<pre><code class="language-go">// my_buffer.go
+
+package main
+
+import &quot;unsafe&quot;
+
+type MyBuffer struct {
+	cptr *cgo_MyBuffer_T
+}
+
+func NewMyBuffer(size int) *MyBuffer {
+	return &amp;MyBuffer{
+		cptr: cgo_NewMyBuffer(size),
+	}
+}
+
+func (p *MyBuffer) Delete() {
+	cgo_DeleteMyBuffer(p.cptr)
+}
+
+func (p *MyBuffer) Data() []byte {
+	data := cgo_MyBuffer_Data(p.cptr)
+	size := cgo_MyBuffer_Size(p.cptr)
+	return ((*[1 &lt;&lt; 31]byte)(unsafe.Pointer(data)))[0:int(size):int(size)]
+}
+</code></pre>
+<p>同时，因为 Go 语言的切片本身含有长度信息，我们将 cgo_MyBuffer_Data 和 cgo_MyBuffer_Size 两个函数合并为 <code>MyBuffer.Data</code> 方法，它返回一个对应底层 C 语言缓存空间的切片。</p>
+<p>现在我们就可以很容易在 Go 语言中使用包装后的缓存对象了（底层是基于 C++ 的 <code>std::string</code> 实现）：</p>
+<pre><code class="language-go">package main
+
+//#include &lt;stdio.h&gt;
+import &quot;C&quot;
+import &quot;unsafe&quot;
+
+func main() {
+	buf := NewMyBuffer(1024)
+	defer buf.Delete()
+
+	copy(buf.Data(), []byte(&quot;hello\x00&quot;))
+	C.puts((*C.char)(unsafe.Pointer(&amp;(buf.Data()[0]))))
+}
+</code></pre>
+<p>例子中，我们创建了一个 1024 字节大小的缓存，然后通过 copy 函数向缓存填充了一个字符串。为了方便 C 语言字符串函数处理，我们在填充字符串的默认用'\0'表示字符串结束。最后我们直接获取缓存的底层数据指针，用 C 语言的 puts 函数打印缓存的内容。</p>
+<h2>2.8.2 Go 语言对象到 C++ 类</h2>
+<p>要实现 Go 语言对象到 C++ 类的包装需要经过以下几个步骤：首先是将 Go 对象映射为一个 id；然后基于 id 导出对应的 C 接口函数；最后是基于 C 接口函数包装为 C++ 对象。</p>
+<h3>2.8.2.1 构造一个 Go 对象</h3>
+<p>为了便于演示，我们用 Go 语言构建了一个 Person 对象，每个 Person 可以有名字和年龄信息：</p>
+<pre><code class="language-go">package main
+
+type Person struct {
+	name string
+	age  int
+}
+
+func NewPerson(name string, age int) *Person {
+	return &amp;Person{
+		name: name,
+		age:  age,
+	}
+}
+
+func (p *Person) Set(name string, age int) {
+	p.name = name
+	p.age = age
+}
+
+func (p *Person) Get() (name string, age int) {
+	return p.name, p.age
+}
+</code></pre>
+<p>Person 对象如果想要在 C/C++ 中访问，需要通过 cgo 导出 C 接口来访问。</p>
+<h3>2.8.2.2 导出 C 接口</h3>
+<p>我们前面仿照 C++ 对象到 C 接口的过程，也抽象一组 C 接口描述 Person 对象。创建一个 <code>person_capi.h</code> 文件，对应 C 接口规范文件：</p>
+<pre><code class="language-c">// person_capi.h
+#include &lt;stdint.h&gt;
+
+typedef uintptr_t person_handle_t;
+
+person_handle_t person_new(char* name, int age);
+void person_delete(person_handle_t p);
+
+void person_set(person_handle_t p, char* name, int age);
+char* person_get_name(person_handle_t p, char* buf, int size);
+int person_get_age(person_handle_t p);
+</code></pre>
+<p>然后是在 Go 语言中实现这一组 C 函数。</p>
+<p>需要注意的是，通过 CGO 导出 C 函数时，输入参数和返回值类型都不支持 const 修饰，同时也不支持可变参数的函数类型。同时如内存模式一节所述，我们无法在 C/C++ 中直接长期访问 Go 内存对象。因此我们使用前一节所讲述的技术将 Go 对象映射为一个整数 id。</p>
+<p>下面是 <code>person_capi.go</code> 文件，对应 C 接口函数的实现：</p>
+<pre><code class="language-go">// person_capi.go
+package main
+
+//#include &quot;./person_capi.h&quot;
+import &quot;C&quot;
+import &quot;unsafe&quot;
+
+//export person_new
+func person_new(name *C.char, age C.int) C.person_handle_t {
+	id := NewObjectId(NewPerson(C.GoString(name), int(age)))
+	return C.person_handle_t(id)
+}
+
+//export person_delete
+func person_delete(h C.person_handle_t) {
+	ObjectId(h).Free()
+}
+
+//export person_set
+func person_set(h C.person_handle_t, name *C.char, age C.int) {
+	p := ObjectId(h).Get().(*Person)
+	p.Set(C.GoString(name), int(age))
+}
+
+//export person_get_name
+func person_get_name(h C.person_handle_t, buf *C.char, size C.int) *C.char {
+	p := ObjectId(h).Get().(*Person)
+	name, _ := p.Get()
+
+	n := int(size) - 1
+	bufSlice := ((*[1 &lt;&lt; 31]byte)(unsafe.Pointer(buf)))[0:n:n]
+	n = copy(bufSlice, []byte(name))
+	bufSlice[n] = 0
+
+	return buf
+}
+
+//export person_get_age
+func person_get_age(h C.person_handle_t) C.int {
+	p := ObjectId(h).Get().(*Person)
+	_, age := p.Get()
+	return C.int(age)
+}
+</code></pre>
+<p>在创建 Go 对象后，我们通过 NewObjectId 将 Go 对应映射为 id。然后将 id 强制转义为 person_handle_t 类型返回。其它的接口函数则是根据 person_handle_t 所表示的 id，让根据 id 解析出对应的 Go 对象。</p>
+<h3>2.8.2.3 封装 C++ 对象</h3>
+<p>有了 C 接口之后封装 C++ 对象就比较简单了。常见的做法是新建一个 Person 类，里面包含一个 person_handle_t 类型的成员对应真实的 Go 对象，然后在 Person 类的构造函数中通过 C 接口创建 Go 对象，在析构函数中通过 C 接口释放 Go 对象。下面是采用这种技术的实现：</p>
+<pre><code class="language-c++">extern &quot;C&quot; {
+	#include &quot;./person_capi.h&quot;
+}
+
+struct Person {
+	person_handle_t goobj_;
+
+	Person(const char* name, int age) {
+		this-&gt;goobj_ = person_new((char*)name, age);
+	}
+	~Person() {
+		person_delete(this-&gt;goobj_);
+	}
+
+	void Set(char* name, int age) {
+		person_set(this-&gt;goobj_, name, age);
+	}
+	char* GetName(char* buf, int size) {
+		return person_get_name(this-&gt;goobj_ buf, size);
+	}
+	int GetAge() {
+		return person_get_age(this-&gt;goobj_);
+	}
+}
+</code></pre>
+<p>包装后我们就可以像普通 C++ 类那样使用了：</p>
+<pre><code class="language-c++">#include &quot;person.h&quot;
+
+#include &lt;stdio.h&gt;
+
+int main() {
+	auto p = new Person(&quot;gopher&quot;, 10);
+
+	char buf[64];
+	char* name = p-&gt;GetName(buf, sizeof(buf)-1);
+	int age = p-&gt;GetAge();
+
+	printf(&quot;%s, %d years old.\n&quot;, name, age);
+	delete p;
+
+	return 0;
+}
+</code></pre>
+<h3>2.8.2.4 封装 C++ 对象改进</h3>
+<p>在前面的封装 C++ 对象的实现中，每次通过 new 创建一个 Person 实例需要进行两次内存分配：一次是针对 C++ 版本的 Person，再一次是针对 Go 语言版本的 Person。其实 C++ 版本的 Person 内部只有一个 person_handle_t 类型的 id，用于映射 Go 对象。我们完全可以将 person_handle_t 直接当中 C++ 对象来使用。</p>
+<p>下面时改进后的包装方式：</p>
+<pre><code class="language-c++">extern &quot;C&quot; {
+	#include &quot;./person_capi.h&quot;
+}
+
+struct Person {
+	static Person* New(const char* name, int age) {
+		return (Person*)person_new((char*)name, age);
+	}
+	void Delete() {
+		person_delete(person_handle_t(this));
+	}
+
+	void Set(char* name, int age) {
+		person_set(person_handle_t(this), name, age);
+	}
+	char* GetName(char* buf, int size) {
+		return person_get_name(person_handle_t(this), buf, size);
+	}
+	int GetAge() {
+		return person_get_age(person_handle_t(this));
+	}
+};
+</code></pre>
+<p>我们在 Person 类中增加了一个叫 New 静态成员函数，用于创建新的 Person 实例。在 New 函数中通过调用 person_new 来创建 Person 实例，返回的是 <code>person_handle_t</code> 类型的 id，我们将其强制转型作为 <code>Person*</code> 类型指针返回。在其它的成员函数中，我们通过将 this 指针再反向转型为 <code>person_handle_t</code> 类型，然后通过 C 接口调用对应的函数。</p>
+<p>到此，我们就达到了将 Go 对象导出为 C 接口，然后基于 C 接口再包装为 C++ 对象以便于使用的目的。</p>
+<h2>2.8.3 彻底解放 C++ 的 this 指针</h2>
+<p>熟悉 Go 语言的用法会发现 Go 语言中方法是绑定到类型的。比如我们基于 int 定义一个新的 Int 类型，就可以有自己的方法：</p>
+<pre><code class="language-go">type Int int
+
+func (p Int) Twice() int {
+	return int(p)*2
+}
+
+func main() {
+	var x = Int(42)
+	fmt.Println(int(x))
+	fmt.Println(x.Twice())
+}
+</code></pre>
+<p>这样就可以在不改变原有数据底层内存结构的前提下，自由切换 int 和 Int 类型来使用变量。</p>
+<p>而在 C++ 中要实现类似的特性，一般会采用以下实现：</p>
+<pre><code class="language-c++">class Int {
+	int v_;
+
+	Int(v int) { this.v_ = v; }
+	int Twice() const{ return this.v_*2;}
+};
+
+int main() {
+	Int v(42);
+
+	printf(&quot;%d\n&quot;, v); // error
+	printf(&quot;%d\n&quot;, v.Twice());
+}
+</code></pre>
+<p>新包装后的 Int 类虽然增加了 Twice 方法，但是失去了自由转回 int 类型的权利。这时候不仅连 printf 都无法输出 Int 本身的值，而且也失去了 int 类型运算的所有特性。这就是 C++ 构造函数的邪恶之处：以失去原有的一切特性的代价换取 class 的施舍。</p>
+<p>造成这个问题的根源是 C++ 中 this 被固定为 class 的指针类型了。我们重新回顾下 this 在 Go 语言中的本质：</p>
+<pre><code class="language-go">func (this Int) Twice() int
+func Int_Twice(this Int) int
+</code></pre>
+<p>在 Go 语言中，和 this 有着相似功能的类型接收者参数其实只是一个普通的函数参数，我们可以自由选择值或指针类型。</p>
+<p>如果以 C 语言的角度来思考，this 也只是一个普通的 <code>void*</code> 类型的指针，我们可以随意自由地将 this 转换为其它类型。</p>
+<pre><code class="language-c++">struct Int {
+	int Twice() {
+		const int* p = (int*)(this);
+		return (*p) * 2;
+	}
+};
+int main() {
+	int x = 42;
+	printf(&quot;%d\n&quot;, x);
+	printf(&quot;%d\n&quot;, ((Int*)(&amp;x))-&gt;Twice());
+	return 0;
+}
+</code></pre>
+<p>这样我们就可以通过将 int 类型指针强制转为 Int 类型指针，代替通过默认的构造函数后 new 来构造 Int 对象。
+在 Twice 函数的内部，以相反的操作将 this 指针转回 int 类型的指针，就可以解析出原有的 int 类型的值了。
+这时候 Int 类型只是编译时的一个壳子，并不会在运行时占用额外的空间。</p>
+<p>因此 C++ 的方法其实也可以用于普通非 class 类型，C++ 到普通成员函数其实也是可以绑定到类型的。
+只有纯虚方法是绑定到对象，那就是接口。</p>
+
+
+                        <hr><table><tr><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/css.png"></td><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/cch.png"></td></tr></table>
+
+                        
+                            <div id="giscus-container"></div>
+                        
+
+                        
+                            <footer class="page-footer">
+                                <span>© 2019-2022 | <a href="https://github.com/chai2010/advanced-go-programming-book">柴树杉、曹春晖</a> 保留所有权利</span>
+                            </footer>
+                        
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../ch2-cgo/ch2-07-memory.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                        
+                            <!-- ../ch2-cgo/ch2-09-static-shared-lib.html -->
+                            <a rel="next" href="../ch2-cgo/ch2-09-static-shared-lib.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../ch2-cgo/ch2-07-memory.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                
+                    <a rel="next" href="../ch2-cgo/ch2-09-static-shared-lib.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../static/wabook/mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/book.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script type="text/javascript" charset="utf-8">
+            var pagePath = "ch2-cgo/ch2-08-class.md"
+        </script>
+
+        <!-- Custom JS scripts -->
+        
+            <script src="../static/wabook/giscus.js" type="text/javascript" charset="utf-8"></script>
+        
+
+    </body>
+</html>

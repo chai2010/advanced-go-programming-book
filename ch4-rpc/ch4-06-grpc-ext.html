@@ -1,0 +1,656 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using https://github.com/wa-lang/wabook -->
+        <meta charset="UTF-8">
+        <title>gRPC和Protobuf扩展 - Go语言高级编程</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../static/wabook/css/variables.css">
+        <link rel="stylesheet" href="../static/wabook/css/general.css">
+        <link rel="stylesheet" href="../static/wabook/css/chrome.css">
+        <link rel="stylesheet" href="../static/wabook/css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../static/wabook/FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../static/wabook/fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../static/wabook/highlight.css">
+        <link rel="stylesheet" href="../static/wabook/tomorrow-night.css">
+        <link rel="stylesheet" href="../static/wabook/ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('wabook-theme');
+                var sidebar = localStorage.getItem('wabook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('wabook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('wabook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('wabook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('wabook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter">
+  <li class="chapter-item expanded ">
+    <a href="../index.html" >Go语言高级编程</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../preface.html" >前言</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../ch1-basic/readme.html" ><strong aria-hidden="true">1.</strong> 语言基础</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-01-genesis.html" ><strong aria-hidden="true">1.1.</strong> Go语言创世纪</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-02-hello-revolution.html" ><strong aria-hidden="true">1.2.</strong> Hello, World 的革命</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-03-array-string-and-slice.html" ><strong aria-hidden="true">1.3.</strong> 数组、字符串和切片</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-04-func-method-interface.html" ><strong aria-hidden="true">1.4.</strong> 函数、方法和接口</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-05-mem.html" ><strong aria-hidden="true">1.5.</strong> 面向并发的内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-06-goroutine.html" ><strong aria-hidden="true">1.6.</strong> 常见的并发模式</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-07-error-and-panic.html" ><strong aria-hidden="true">1.7.</strong> 错误和异常</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-08-ext.html" ><strong aria-hidden="true">1.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch2-cgo/readme.html" ><strong aria-hidden="true">2.</strong> CGO编程</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-01-hello-cgo.html" ><strong aria-hidden="true">2.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-02-basic.html" ><strong aria-hidden="true">2.2.</strong> CGO基础</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-03-cgo-types.html" ><strong aria-hidden="true">2.3.</strong> 类型转换</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-04-func.html" ><strong aria-hidden="true">2.4.</strong> 函数调用</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-05-internal.html" ><strong aria-hidden="true">2.5.</strong> 内部机制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-06-qsort.html" ><strong aria-hidden="true">2.6.</strong> 实战: 封装qsort</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-07-memory.html" ><strong aria-hidden="true">2.7.</strong> CGO内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-08-class.html" ><strong aria-hidden="true">2.8.</strong> C++类包装</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-09-static-shared-lib.html" ><strong aria-hidden="true">2.9.</strong> 静态库和动态库</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-10-link.html" ><strong aria-hidden="true">2.10.</strong> 编译和链接参数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-11-ext.html" ><strong aria-hidden="true">2.11.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch3-asm/readme.html" ><strong aria-hidden="true">3.</strong> 汇编语言</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-01-basic.html" ><strong aria-hidden="true">3.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-02-arch.html" ><strong aria-hidden="true">3.2.</strong> 计算机结构</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-03-const-and-var.html" ><strong aria-hidden="true">3.3.</strong> 常量和全局变量</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-04-func.html" ><strong aria-hidden="true">3.4.</strong> 函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-05-control-flow.html" ><strong aria-hidden="true">3.5.</strong> 控制流</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-06-func-again.html" ><strong aria-hidden="true">3.6.</strong> 再论函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-07-hack-asm.html" ><strong aria-hidden="true">3.7.</strong> 汇编语言的威力</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-08-goroutine-id.html" ><strong aria-hidden="true">3.8.</strong> 例子：Goroutine ID</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-09-debug.html" ><strong aria-hidden="true">3.9.</strong> Delve调试器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-10-ext.html" ><strong aria-hidden="true">3.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch4-rpc/readme.html" ><strong aria-hidden="true">4.</strong> 第4章 RPC和Protobuf</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-01-rpc-intro.html" ><strong aria-hidden="true">4.1.</strong> RPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-02-pb-intro.html" ><strong aria-hidden="true">4.2.</strong> Protobuf</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-03-netrpc-hack.html" ><strong aria-hidden="true">4.3.</strong> 玩转RPC</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-04-grpc.html" ><strong aria-hidden="true">4.4.</strong> gRPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-05-grpc-hack.html" ><strong aria-hidden="true">4.5.</strong> gRPC进阶</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-06-grpc-ext.html" class="active"><strong aria-hidden="true">4.6.</strong> gRPC和Protobuf扩展</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-07-pbgo.html" ><strong aria-hidden="true">4.7.</strong> pbgo: 基于Protobuf的框架</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-08-grpcurl.html" ><strong aria-hidden="true">4.8.</strong> grpcurl工具</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-09-ext.html" ><strong aria-hidden="true">4.9.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch5-web/readme.html" ><strong aria-hidden="true">5.</strong> Go和Web</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-01-introduction.html" ><strong aria-hidden="true">5.1.</strong> Web开发简介</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-02-router.html" ><strong aria-hidden="true">5.2.</strong> 请求路由</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-03-middleware.html" ><strong aria-hidden="true">5.3.</strong> 中间件</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-04-validator.html" ><strong aria-hidden="true">5.4.</strong> 请求校验</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-05-database.html" ><strong aria-hidden="true">5.5.</strong> 和数据库打交道</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-06-ratelimit.html" ><strong aria-hidden="true">5.6.</strong> 服务流量限制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-07-layout-of-web-project.html" ><strong aria-hidden="true">5.7.</strong> 大型Web项目分层</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-08-interface-and-web.html" ><strong aria-hidden="true">5.8.</strong> 接口和表驱动开发</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-09-gated-launch.html" ><strong aria-hidden="true">5.9.</strong> 灰度发布和A/B测试</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-10-ext.html" ><strong aria-hidden="true">5.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch6-cloud/readme.html" ><strong aria-hidden="true">6.</strong> 分布式系统</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-01-dist-id.html" ><strong aria-hidden="true">6.1.</strong> 分布式 id 生成器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-02-lock.html" ><strong aria-hidden="true">6.2.</strong> 分布式锁</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-03-delay-job.html" ><strong aria-hidden="true">6.3.</strong> 延时任务系统</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-04-search-engine.html" ><strong aria-hidden="true">6.4.</strong> 分布式搜索引擎</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-05-load-balance.html" ><strong aria-hidden="true">6.5.</strong> 负载均衡</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-06-config.html" ><strong aria-hidden="true">6.6.</strong> 分布式配置管理</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-07-crawler.html" ><strong aria-hidden="true">6.7.</strong> 分布式爬虫</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-08-ext.html" ><strong aria-hidden="true">6.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../appendix/readme.html" ><strong aria-hidden="true">7.</strong> 附录</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-a-trap.html" ><strong aria-hidden="true">7.1.</strong> 附录A: Go语言常见坑</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-b-gems.html" ><strong aria-hidden="true">7.2.</strong> 附录B: 有趣的代码片段</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-c-author.html" ><strong aria-hidden="true">7.3.</strong> 附录C: 作者简介</a>
+    </li>
+  </ol>
+</ol>
+
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                    </div>
+
+                    <h1 class="menu-title"><a href="../index.html">Go语言高级编程</a></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/chai2010/advanced-go-programming-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/chai2010/advanced-go-programming-book/edit/master/ch4-rpc/ch4-06-grpc-ext.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+
+                    <main>
+                        <ul dir="auto"><li><em>凹语言(Go实现, 面向WASM设计): <a href="https://github.com/wa-lang/wa">https://github.com/wa-lang/wa</a></em></li><li><em>WaBook(Go语言实现的MD电子书构建工具): <a href="https://github.com/wa-lang/wabook">https://github.com/wa-lang/wabook</a></em></li></ul><hr>
+
+                        <h1>4.6 gRPC 和 Protobuf 扩展</h1>
+<p>目前开源社区已经围绕 Protobuf 和 gRPC 开发出众多扩展，形成了庞大的生态。本节我们将简单介绍验证器和 REST 接口扩展。</p>
+<h2>4.6.1 验证器</h2>
+<p>到目前为止，我们接触的全部是第三版的 Protobuf 语法。第二版的 Protobuf 有个默认值特性，可以为字符串或数值类型的成员定义默认值。</p>
+<p>我们采用第二版的 Protobuf 语法创建文件：</p>
+<pre><code class="language-protobuf">syntax = &quot;proto2&quot;;
+
+package main;
+
+message Message {
+	optional string name = 1 [default = &quot;gopher&quot;];
+	optional int32 age = 2 [default = 10];
+}
+</code></pre>
+<p>内置的默认值语法其实是通过 Protobuf 的扩展选项特性实现。在第三版的 Protobuf 中不再支持默认值特性，但是我们可以通过扩展选项自己模拟默认值特性。</p>
+<p>下面是用 proto3 语法的扩展特性重新改写上述的 proto 文件：</p>
+<pre><code class="language-protobuf">syntax = &quot;proto3&quot;;
+
+package main;
+
+import &quot;google/protobuf/descriptor.proto&quot;;
+
+extend google.protobuf.FieldOptions {
+	string default_string = 50000;
+	int32 default_int = 50001;
+}
+
+message Message {
+	string name = 1 [(default_string) = &quot;gopher&quot;];
+	int32 age = 2[(default_int) = 10];
+}
+</code></pre>
+<p>其中成员后面的方括号内部的就是扩展语法。重新生成 Go 语言代码，里面会包含扩展选项相关的元信息：</p>
+<pre><code class="language-go">var E_DefaultString = &amp;proto.ExtensionDesc{
+	ExtendedType:  (*descriptor.FieldOptions)(nil),
+	ExtensionType: (*string)(nil),
+	Field:         50000,
+	Name:          &quot;main.default_string&quot;,
+	Tag:           &quot;bytes,50000,opt,name=default_string,json=defaultString&quot;,
+	Filename:      &quot;helloworld.proto&quot;,
+}
+
+var E_DefaultInt = &amp;proto.ExtensionDesc{
+	ExtendedType:  (*descriptor.FieldOptions)(nil),
+	ExtensionType: (*int32)(nil),
+	Field:         50001,
+	Name:          &quot;main.default_int&quot;,
+	Tag:           &quot;varint,50001,opt,name=default_int,json=defaultInt&quot;,
+	Filename:      &quot;helloworld.proto&quot;,
+}
+</code></pre>
+<p>我们可以在运行时通过类似反射的技术解析出 Message 每个成员定义的扩展选项，然后从每个扩展的相关联的信息中解析出我们定义的默认值。</p>
+<p>在开源社区中，github.com/mwitkow/go-proto-validators 已经基于 Protobuf 的扩展特性实现了功能较为强大的验证器功能。要使用该验证器首先需要下载其提供的代码生成插件：</p>
+<pre><code>$ go get github.com/mwitkow/go-proto-validators/protoc-gen-govalidators
+</code></pre>
+<p>然后基于 go-proto-validators 验证器的规则为 Message 成员增加验证规则：</p>
+<pre><code class="language-protobuf">syntax = &quot;proto3&quot;;
+
+package main;
+
+import &quot;github.com/mwitkow/go-proto-validators/validator.proto&quot;;
+
+message Message {
+	string important_string = 1 [
+		(validator.field) = {regex: &quot;^[a-z]{2,5}$&quot;}
+	];
+	int32 age = 2 [
+		(validator.field) = {int_gt: 0, int_lt: 100}
+	];
+}
+</code></pre>
+<p>在方括弧表示的成员扩展中，validator.field 表示扩展是 validator 包中定义的名为 field 扩展选项。validator.field 的类型是 FieldValidator 结构体，在导入的 validator.proto 文件中定义。</p>
+<p>所有的验证规则都由 validator.proto 文件中的 FieldValidator 定义：</p>
+<pre><code class="language-protobuf">syntax = &quot;proto2&quot;;
+package validator;
+
+import &quot;google/protobuf/descriptor.proto&quot;;
+
+extend google.protobuf.FieldOptions {
+	optional FieldValidator field = 65020;
+}
+
+message FieldValidator {
+	// Uses a Golang RE2-syntax regex to match the field contents.
+	optional string regex = 1;
+	// Field value of integer strictly greater than this value.
+	optional int64 int_gt = 2;
+	// Field value of integer strictly smaller than this value.
+	optional int64 int_lt = 3;
+
+	// ... more ...
+}
+</code></pre>
+<p>从 FieldValidator 定义的注释中我们可以看到验证器扩展的一些语法：其中 regex 表示用于字符串验证的正则表达式，int_gt 和 int_lt 表示数值的范围。</p>
+<p>然后采用以下的命令生成验证函数代码：</p>
+<pre><code>protoc  \
+	--proto_path=${GOPATH}/src \
+	--proto_path=${GOPATH}/src/github.com/google/protobuf/src \
+	--proto_path=. \
+	--govalidators_out=. --go_out=plugins=grpc:.\
+	hello.proto
+</code></pre>
+<blockquote>
+<p>windows: 替换 <code>${GOPATH}</code> 为 <code>%GOPATH%</code> 即可.</p>
+</blockquote>
+<p>以上的命令会调用 protoc-gen-govalidators 程序，生成一个独立的名为 hello.validator.pb.go 的文件：</p>
+<pre><code class="language-go">var _regex_Message_ImportantString = regexp.MustCompile(&quot;^[a-z]{2,5}$&quot;)
+
+func (this *Message) Validate() error {
+	if !_regex_Message_ImportantString.MatchString(this.ImportantString) {
+		return go_proto_validators.FieldError(&quot;ImportantString&quot;, fmt.Errorf(
+			`value '%v' must be a string conforming to regex &quot;^[a-z]{2,5}$&quot;`,
+			this.ImportantString,
+		))
+	}
+	if !(this.Age&gt; 0) {
+		return go_proto_validators.FieldError(&quot;Age&quot;, fmt.Errorf(
+			`value '%v' must be greater than '0'`, this.Age,
+		))
+	}
+	if !(this.Age &lt; 100) {
+		return go_proto_validators.FieldError(&quot;Age&quot;, fmt.Errorf(
+			`value '%v' must be less than '100'`, this.Age,
+		))
+	}
+	return nil
+}
+</code></pre>
+<p>生成的代码为 Message 结构体增加了一个 Validate 方法，用于验证该成员是否满足 Protobuf 中定义的条件约束。无论采用何种类型，所有的 Validate 方法都用相同的签名，因此可以满足相同的验证接口。</p>
+<p>通过生成的验证函数，并结合 gRPC 的截取器，我们可以很容易为每个方法的输入参数和返回值进行验证。</p>
+<h2>4.6.2 REST 接口</h2>
+<p>gRPC 服务一般用于集群内部通信，如果需要对外暴露服务一般会提供等价的 REST 接口。通过 REST 接口比较方便前端 JavaScript 和后端交互。开源社区中的 grpc-gateway 项目就实现了将 gRPC 服务转为 REST 服务的能力。</p>
+<p>grpc-gateway 的工作原理如下图：</p>
+<p><img src="../images/ch4-2-grpc-gateway.png" alt=""></p>
+<p><em>图 4-2 gRPC-Gateway 工作流程</em></p>
+<p>通过在 Protobuf 文件中添加路由相关的元信息，通过自定义的代码插件生成路由相关的处理代码，最终将 REST 请求转给更后端的 gRPC 服务处理。</p>
+<p>路由扩展元信息也是通过 Protobuf 的元数据扩展用法提供：</p>
+<pre><code class="language-protobuf">syntax = &quot;proto3&quot;;
+
+package main;
+
+import &quot;google/api/annotations.proto&quot;;
+
+message StringMessage {
+  string value = 1;
+}
+
+service RestService {
+	rpc Get(StringMessage) returns (StringMessage) {
+		option (google.api.http) = {
+			get: &quot;/get/{value}&quot;
+		};
+	}
+	rpc Post(StringMessage) returns (StringMessage) {
+		option (google.api.http) = {
+			post: &quot;/post&quot;
+			body: &quot;*&quot;
+		};
+	}
+}
+</code></pre>
+<p>我们首先为 gRPC 定义了 Get 和 Post 方法，然后通过元扩展语法在对应的方法后添加路由信息。其中 “/get/{value}” 路径对应的是 Get 方法，<code>{value}</code> 部分对应参数中的 value 成员，结果通过 json 格式返回。Post 方法对应 “/post” 路径，body 中包含 json 格式的请求信息。</p>
+<p>然后通过以下命令安装 protoc-gen-grpc-gateway 插件：</p>
+<pre><code>go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+</code></pre>
+<p>再通过插件生成 grpc-gateway 必须的路由处理代码：</p>
+<pre><code>$ protoc -I/usr/local/include -I. \
+	-I$GOPATH/src \
+	-I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+	--grpc-gateway_out=. --go_out=plugins=grpc:.\
+	hello.proto
+</code></pre>
+<blockquote>
+<p>windows: 替换 <code>${GOPATH}</code> 为 <code>%GOPATH%</code> 即可.</p>
+</blockquote>
+<p>插件会为 RestService 服务生成对应的 RegisterRestServiceHandlerFromEndpoint 函数：</p>
+<pre><code class="language-go">func RegisterRestServiceHandlerFromEndpoint(
+	ctx context.Context, mux *runtime.ServeMux, endpoint string,
+	opts []grpc.DialOption,
+) (err error) {
+	...
+}
+</code></pre>
+<p>RegisterRestServiceHandlerFromEndpoint 函数用于将定义了 Rest 接口的请求转发到真正的 gRPC 服务。注册路由处理函数之后就可以启动 Web 服务了：</p>
+<pre><code class="language-go">func main() {
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	mux := runtime.NewServeMux()
+
+	err := RegisterRestServiceHandlerFromEndpoint(
+		ctx, mux, &quot;localhost:5000&quot;,
+		[]grpc.DialOption{grpc.WithInsecure()},
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.ListenAndServe(&quot;:8080&quot;, mux)
+}
+</code></pre>
+<p>启动 grpc 服务 , 端口 5000</p>
+<pre><code class="language-go">type RestServiceImpl struct{}
+
+func (r *RestServiceImpl) Get(ctx context.Context, message *StringMessage) (*StringMessage, error) {
+	return &amp;StringMessage{Value: &quot;Get hi:&quot; + message.Value + &quot;#&quot;}, nil
+}
+
+func (r *RestServiceImpl) Post(ctx context.Context, message *StringMessage) (*StringMessage, error) {
+	return &amp;StringMessage{Value: &quot;Post hi:&quot; + message.Value + &quot;@&quot;}, nil
+}
+func main() {
+	grpcServer := grpc.NewServer()
+	RegisterRestServiceServer(grpcServer, new(RestServiceImpl))
+	lis, _ := net.Listen(&quot;tcp&quot;, &quot;:5000&quot;)
+	grpcServer.Serve(lis)
+}
+
+</code></pre>
+<p>首先通过 runtime.NewServeMux() 函数创建路由处理器，然后通过 RegisterRestServiceHandlerFromEndpoint 函数将 RestService 服务相关的 REST 接口中转到后面的 gRPC 服务。grpc-gateway 提供的 runtime.ServeMux 类也实现了 http.Handler 接口，因此可以和标准库中的相关函数配合使用。</p>
+<p>当 gRPC 和 REST 服务全部启动之后，就可以用 curl 请求 REST 服务了：</p>
+<pre><code>$ curl localhost:8080/get/gopher
+{&quot;value&quot;:&quot;Get: gopher&quot;}
+
+$ curl localhost:8080/post -X POST --data '{&quot;value&quot;:&quot;grpc&quot;}'
+{&quot;value&quot;:&quot;Post: grpc&quot;}
+</code></pre>
+<p>在对外公布 REST 接口时，我们一般还会提供一个 Swagger 格式的文件用于描述这个接口规范。</p>
+<pre><code>$ go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+
+$ protoc -I. \
+  -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+  --swagger_out=. \
+  hello.proto
+</code></pre>
+<p>然后会生成一个 hello.swagger.json 文件。这样的话就可以通过 swagger-ui 这个项目，在网页中提供 REST 接口的文档和测试等功能。</p>
+<h2>4.6.3 Nginx</h2>
+<p>最新的 Nginx 对 gRPC 提供了深度支持。可以通过 Nginx 将后端多个 gRPC 服务聚合到一个 Nginx 服务。同时 Nginx 也提供了为同一种 gRPC 服务注册多个后端的功能，这样可以轻松实现 gRPC 负载均衡的支持。Nginx 的 gRPC 扩展是一个较大的主题，感兴趣的读者可以自行参考相关文档。</p>
+
+
+                        <hr><table><tr><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/css.png"></td><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/cch.png"></td></tr></table>
+
+                        
+                            <div id="giscus-container"></div>
+                        
+
+                        
+                            <footer class="page-footer">
+                                <span>© 2019-2022 | <a href="https://github.com/chai2010/advanced-go-programming-book">柴树杉、曹春晖</a> 保留所有权利</span>
+                            </footer>
+                        
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../ch4-rpc/ch4-05-grpc-hack.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                        
+                            <!-- ../ch4-rpc/ch4-07-pbgo.html -->
+                            <a rel="next" href="../ch4-rpc/ch4-07-pbgo.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../ch4-rpc/ch4-05-grpc-hack.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                
+                    <a rel="next" href="../ch4-rpc/ch4-07-pbgo.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../static/wabook/mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/book.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script type="text/javascript" charset="utf-8">
+            var pagePath = "ch4-rpc/ch4-06-grpc-ext.md"
+        </script>
+
+        <!-- Custom JS scripts -->
+        
+            <script src="../static/wabook/giscus.js" type="text/javascript" charset="utf-8"></script>
+        
+
+    </body>
+</html>

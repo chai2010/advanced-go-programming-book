@@ -1,0 +1,36 @@
+' Copyright 2017 <chaishushan{AT}gmail.com>. All rights reserved.
+' Use of this source code is governed by a Apache
+' license that can be found in the LICENSE file.
+
+
+'var p []X
+'var q []Y // q = p
+
+'pHdr := (*reflect.SliceHeader)(unsafe.Pointer(&p))
+'qHdr := (*reflect.SliceHeader)(unsafe.Pointer(&q))
+
+'pHdr.Data = qHdr.Data
+'pHdr.Len = qHdr.Len * unsafe.Sizeof(q[0]) / unsafe.Sizeof(p[0])
+'pHdr.Cap = qHdr.Cap * unsafe.Sizeof(q[0]) / unsafe.Sizeof(p[0])
+
+
+@startuml
+
+title []X <=> []Y
+
+participant "var x []X\nvar y []Y" as slice
+participant "var px *SliceHeader\nvar py *SliceHeader" as slice_header
+
+== []X and []Y to *reflect.SliceHeader  ==
+
+slice -> slice_header: px := (*reflect.SliceHeader)(unsafe.Pointer(&x))\npy := (*reflect.SliceHeader)(unsafe.Pointer(&y))
+
+== copy *px to *py ==
+
+slice_header -> slice_header: ~*py = *px
+
+== y changed by *py ==
+
+slice -> slice: y = x
+
+@enduml

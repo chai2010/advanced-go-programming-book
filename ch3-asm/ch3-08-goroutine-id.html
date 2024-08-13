@@ -1,0 +1,681 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using https://github.com/wa-lang/wabook -->
+        <meta charset="UTF-8">
+        <title>例子：Goroutine ID - Go语言高级编程</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../static/wabook/css/variables.css">
+        <link rel="stylesheet" href="../static/wabook/css/general.css">
+        <link rel="stylesheet" href="../static/wabook/css/chrome.css">
+        <link rel="stylesheet" href="../static/wabook/css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../static/wabook/FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../static/wabook/fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../static/wabook/highlight.css">
+        <link rel="stylesheet" href="../static/wabook/tomorrow-night.css">
+        <link rel="stylesheet" href="../static/wabook/ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('wabook-theme');
+                var sidebar = localStorage.getItem('wabook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('wabook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('wabook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('wabook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('wabook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter">
+  <li class="chapter-item expanded ">
+    <a href="../index.html" >Go语言高级编程</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../preface.html" >前言</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../ch1-basic/readme.html" ><strong aria-hidden="true">1.</strong> 语言基础</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-01-genesis.html" ><strong aria-hidden="true">1.1.</strong> Go语言创世纪</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-02-hello-revolution.html" ><strong aria-hidden="true">1.2.</strong> Hello, World 的革命</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-03-array-string-and-slice.html" ><strong aria-hidden="true">1.3.</strong> 数组、字符串和切片</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-04-func-method-interface.html" ><strong aria-hidden="true">1.4.</strong> 函数、方法和接口</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-05-mem.html" ><strong aria-hidden="true">1.5.</strong> 面向并发的内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-06-goroutine.html" ><strong aria-hidden="true">1.6.</strong> 常见的并发模式</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-07-error-and-panic.html" ><strong aria-hidden="true">1.7.</strong> 错误和异常</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-08-ext.html" ><strong aria-hidden="true">1.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch2-cgo/readme.html" ><strong aria-hidden="true">2.</strong> CGO编程</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-01-hello-cgo.html" ><strong aria-hidden="true">2.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-02-basic.html" ><strong aria-hidden="true">2.2.</strong> CGO基础</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-03-cgo-types.html" ><strong aria-hidden="true">2.3.</strong> 类型转换</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-04-func.html" ><strong aria-hidden="true">2.4.</strong> 函数调用</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-05-internal.html" ><strong aria-hidden="true">2.5.</strong> 内部机制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-06-qsort.html" ><strong aria-hidden="true">2.6.</strong> 实战: 封装qsort</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-07-memory.html" ><strong aria-hidden="true">2.7.</strong> CGO内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-08-class.html" ><strong aria-hidden="true">2.8.</strong> C++类包装</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-09-static-shared-lib.html" ><strong aria-hidden="true">2.9.</strong> 静态库和动态库</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-10-link.html" ><strong aria-hidden="true">2.10.</strong> 编译和链接参数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-11-ext.html" ><strong aria-hidden="true">2.11.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch3-asm/readme.html" ><strong aria-hidden="true">3.</strong> 汇编语言</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-01-basic.html" ><strong aria-hidden="true">3.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-02-arch.html" ><strong aria-hidden="true">3.2.</strong> 计算机结构</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-03-const-and-var.html" ><strong aria-hidden="true">3.3.</strong> 常量和全局变量</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-04-func.html" ><strong aria-hidden="true">3.4.</strong> 函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-05-control-flow.html" ><strong aria-hidden="true">3.5.</strong> 控制流</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-06-func-again.html" ><strong aria-hidden="true">3.6.</strong> 再论函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-07-hack-asm.html" ><strong aria-hidden="true">3.7.</strong> 汇编语言的威力</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-08-goroutine-id.html" class="active"><strong aria-hidden="true">3.8.</strong> 例子：Goroutine ID</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-09-debug.html" ><strong aria-hidden="true">3.9.</strong> Delve调试器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-10-ext.html" ><strong aria-hidden="true">3.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch4-rpc/readme.html" ><strong aria-hidden="true">4.</strong> 第4章 RPC和Protobuf</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-01-rpc-intro.html" ><strong aria-hidden="true">4.1.</strong> RPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-02-pb-intro.html" ><strong aria-hidden="true">4.2.</strong> Protobuf</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-03-netrpc-hack.html" ><strong aria-hidden="true">4.3.</strong> 玩转RPC</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-04-grpc.html" ><strong aria-hidden="true">4.4.</strong> gRPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-05-grpc-hack.html" ><strong aria-hidden="true">4.5.</strong> gRPC进阶</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-06-grpc-ext.html" ><strong aria-hidden="true">4.6.</strong> gRPC和Protobuf扩展</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-07-pbgo.html" ><strong aria-hidden="true">4.7.</strong> pbgo: 基于Protobuf的框架</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-08-grpcurl.html" ><strong aria-hidden="true">4.8.</strong> grpcurl工具</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-09-ext.html" ><strong aria-hidden="true">4.9.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch5-web/readme.html" ><strong aria-hidden="true">5.</strong> Go和Web</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-01-introduction.html" ><strong aria-hidden="true">5.1.</strong> Web开发简介</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-02-router.html" ><strong aria-hidden="true">5.2.</strong> 请求路由</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-03-middleware.html" ><strong aria-hidden="true">5.3.</strong> 中间件</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-04-validator.html" ><strong aria-hidden="true">5.4.</strong> 请求校验</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-05-database.html" ><strong aria-hidden="true">5.5.</strong> 和数据库打交道</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-06-ratelimit.html" ><strong aria-hidden="true">5.6.</strong> 服务流量限制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-07-layout-of-web-project.html" ><strong aria-hidden="true">5.7.</strong> 大型Web项目分层</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-08-interface-and-web.html" ><strong aria-hidden="true">5.8.</strong> 接口和表驱动开发</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-09-gated-launch.html" ><strong aria-hidden="true">5.9.</strong> 灰度发布和A/B测试</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-10-ext.html" ><strong aria-hidden="true">5.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch6-cloud/readme.html" ><strong aria-hidden="true">6.</strong> 分布式系统</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-01-dist-id.html" ><strong aria-hidden="true">6.1.</strong> 分布式 id 生成器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-02-lock.html" ><strong aria-hidden="true">6.2.</strong> 分布式锁</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-03-delay-job.html" ><strong aria-hidden="true">6.3.</strong> 延时任务系统</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-04-search-engine.html" ><strong aria-hidden="true">6.4.</strong> 分布式搜索引擎</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-05-load-balance.html" ><strong aria-hidden="true">6.5.</strong> 负载均衡</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-06-config.html" ><strong aria-hidden="true">6.6.</strong> 分布式配置管理</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-07-crawler.html" ><strong aria-hidden="true">6.7.</strong> 分布式爬虫</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-08-ext.html" ><strong aria-hidden="true">6.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../appendix/readme.html" ><strong aria-hidden="true">7.</strong> 附录</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-a-trap.html" ><strong aria-hidden="true">7.1.</strong> 附录A: Go语言常见坑</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-b-gems.html" ><strong aria-hidden="true">7.2.</strong> 附录B: 有趣的代码片段</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-c-author.html" ><strong aria-hidden="true">7.3.</strong> 附录C: 作者简介</a>
+    </li>
+  </ol>
+</ol>
+
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                    </div>
+
+                    <h1 class="menu-title"><a href="../index.html">Go语言高级编程</a></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/chai2010/advanced-go-programming-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/chai2010/advanced-go-programming-book/edit/master/ch3-asm/ch3-08-goroutine-id.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+
+                    <main>
+                        <ul dir="auto"><li><em>凹语言(Go实现, 面向WASM设计): <a href="https://github.com/wa-lang/wa">https://github.com/wa-lang/wa</a></em></li><li><em>WaBook(Go语言实现的MD电子书构建工具): <a href="https://github.com/wa-lang/wabook">https://github.com/wa-lang/wabook</a></em></li></ul><hr>
+
+                        <h1>3.8 例子：Goroutine ID</h1>
+<p>在操作系统中，每个进程都会有一个唯一的进程编号，每个线程也有自己唯一的线程编号。同样在 Go 语言中，每个 Goroutine 也有自己唯一的 Go 程编号，这个编号在 panic 等场景下经常遇到。虽然 Goroutine 有内在的编号，但是 Go 语言却刻意没有提供获取该编号的接口。本节我们尝试通过 Go 汇编语言获取 Goroutine ID。</p>
+<h2>3.8.1 故意设计没有 goid</h2>
+<p>根据官方的相关资料显示，Go 语言刻意没有提供 goid 的原因是为了避免被滥用。因为大部分用户在轻松拿到 goid 之后，在之后的编程中会不自觉地编写出强依赖 goid 的代码。强依赖 goid 将导致这些代码不好移植，同时也会导致并发模型复杂化。同时，Go 语言中可能同时存在海量的 Goroutine，但是每个 Goroutine 何时被销毁并不好实时监控，这也会导致依赖 goid 的资源无法很好地自动回收（需要手工回收）。不过如果你是 Go 汇编语言用户，则完全可以忽略这些借口。</p>
+<h2>3.8.2 纯 Go 方式获取 goid</h2>
+<p>为了便于理解，我们先尝试用纯 Go 的方式获取 goid。使用纯 Go 的方式获取 goid 的方式虽然性能较低，但是代码有着很好的移植性，同时也可以用于测试验证其它方式获取的 goid 是否正确。</p>
+<p>每个 Go 语言用户应该都知道 panic 函数。调用 panic 函数将导致 Goroutine 异常，如果 panic 在传递到 Goroutine 的根函数还没有被 recover 函数处理掉，那么运行时将打印相关的异常和栈信息并退出 Goroutine。</p>
+<p>下面我们构造一个简单的例子，通过 panic 来输出 goid：</p>
+<pre><code class="language-go">package main
+
+func main() {
+	panic(&quot;goid&quot;)
+}
+</code></pre>
+<p>运行后将输出以下信息：</p>
+<pre><code>panic: goid
+
+goroutine 1 [running]:
+main.main()
+	/path/to/main.go:4 +0x40
+</code></pre>
+<p>我们可以猜测 Panic 输出信息 <code>goroutine 1 [running]</code> 中的 1 就是 goid。但是如何才能在程序中获取 panic 的输出信息呢？其实上述信息只是当前函数调用栈帧的文字化描述，runtime.Stack 函数提供了获取该信息的功能。</p>
+<p>我们基于 runtime.Stack 函数重新构造一个例子，通过输出当前栈帧的信息来输出 goid：</p>
+<pre><code class="language-go">package main
+
+import &quot;runtime&quot;
+
+func main() {
+	var buf = make([]byte, 64)
+	var stk = buf[:runtime.Stack(buf, false)]
+	print(string(stk))
+}
+</code></pre>
+<p>运行后将输出以下信息：</p>
+<pre><code>goroutine 1 [running]:
+main.main()
+	/path/to/main.g
+</code></pre>
+<p>因此从 runtime.Stack 获取的字符串中就可以很容易解析出 goid 信息：</p>
+<pre><code class="language-go">func GetGoid() int64 {
+	var (
+		buf [64]byte
+		n   = runtime.Stack(buf[:], false)
+		stk = strings.TrimPrefix(string(buf[:n]), &quot;goroutine&quot;)
+	)
+
+	idField := strings.Fields(stk)[0]
+	id, err := strconv.Atoi(idField)
+	if err != nil {
+		panic(fmt.Errorf(&quot;can not get goroutine id: %v&quot;, err))
+	}
+
+	return int64(id)
+}
+</code></pre>
+<p>GetGoid 函数的细节我们不再赘述。需要补充说明的是 <code>runtime.Stack</code> 函数不仅仅可以获取当前 Goroutine 的栈信息，还可以获取全部 Goroutine 的栈信息（通过第二个参数控制）。同时在 Go 语言内部的 <a href="https://github.com/golang/net/blob/master/http2/gotrack.go">net/http2.curGoroutineID</a> 函数正是采用类似方式获取的 goid。</p>
+<h2>3.8.3 从 g 结构体获取 goid</h2>
+<p>根据官方的 Go 汇编语言文档，每个运行的 Goroutine 结构的 g 指针保存在当前运行 Goroutine 的系统线程的局部存储 TLS 中。可以先获取 TLS 线程局部存储，然后再从 TLS 中获取 g 结构的指针，最后从 g 结构中取出 goid。</p>
+<p>下面是参考 runtime 包中定义的 get_tls 宏获取 g 指针：</p>
+<pre><code>get_tls(CX)
+MOVQ g(CX), AX     // Move g into AX.
+</code></pre>
+<p>其中 get_tls 是一个宏函数，在 <a href="https://github.com/golang/go/blob/master/src/runtime/go_tls.h">runtime/go_tls.h</a> 头文件中定义。</p>
+<p>对于 AMD64 平台，get_tls 宏函数定义如下：</p>
+<pre><code>#ifdef GOARCH_amd64
+#define	get_tls(r)	MOVQ TLS, r
+#define	g(r)	0(r)(TLS*1)
+#endif
+</code></pre>
+<p>将 get_tls 宏函数展开之后，获取 g 指针的代码如下：</p>
+<pre><code>MOVQ TLS, CX
+MOVQ 0(CX)(TLS*1), AX
+</code></pre>
+<p>其实 TLS 类似线程局部存储的地址，地址对应的内存里的数据才是 g 指针。我们还可以更直接一点:</p>
+<pre><code>MOVQ (TLS), AX
+</code></pre>
+<p>基于上述方法可以包装一个 getg 函数，用于获取 g 指针：</p>
+<pre><code>// func getg() unsafe.Pointer
+TEXT ·getg(SB), NOSPLIT, $0-8
+	MOVQ (TLS), AX
+	MOVQ AX, ret+0(FP)
+	RET
+</code></pre>
+<p>然后在 Go 代码中通过 goid 成员在 g 结构体中的偏移量来获取 goid 的值：</p>
+<pre><code class="language-go">const g_goid_offset = 152 // Go1.10
+
+func GetGroutineId() int64 {
+	g := getg()
+	p := (*int64)(unsafe.Pointer(uintptr(g) + g_goid_offset))
+	return *p
+}
+</code></pre>
+<p>其中 <code>g_goid_offset</code> 是 goid 成员的偏移量，g 结构参考 <a href="https://github.com/golang/go/blob/master/src/runtime/runtime2.go">runtime/runtime2.go</a>。</p>
+<p>在 Go1.10 版本，goid 的偏移量是 152 字节。因此上述代码只能正确运行在 goid 偏移量也是 152 字节的 Go 版本中。根据汤普森大神的神谕，枚举和暴力穷举是解决一切疑难杂症的万金油。我们也可以将 goid 的偏移保存到表格中，然后根据 Go 版本号查询 goid 的偏移量。</p>
+<p>下面是改进后的代码：</p>
+<pre><code class="language-go">var offsetDictMap = map[string]int64{
+	&quot;go1.10&quot;: 152,
+	&quot;go1.9&quot;:  152,
+	&quot;go1.8&quot;:  192,
+}
+
+var g_goid_offset = func() int64 {
+	goversion := runtime.Version()
+	for key, off := range offsetDictMap {
+		if goversion == key || strings.HasPrefix(goversion, key) {
+			return off
+		}
+	}
+	panic(&quot;unsupported go version:&quot;+goversion)
+}()
+</code></pre>
+<p>现在的 goid 偏移量已经终于可以自动适配已经发布的 Go 语言版本。</p>
+<h2>3.8.4 获取 g 结构体对应的接口对象</h2>
+<p>枚举和暴力穷举虽然够直接，但是对于正在开发中的未发布的 Go 版本支持并不好，我们无法提前知晓开发中的某个版本的 goid 成员的偏移量。</p>
+<p>如果是在 runtime 包内部，我们可以通过 <code>unsafe.OffsetOf(g.goid)</code> 直接获取成员的偏移量。也可以通过反射获取 g 结构体的类型，然后通过类型查询某个成员的偏移量。因为 g 结构体是一个内部类型，Go 代码无法从外部包获取 g 结构体的类型信息。但是在 Go 汇编语言中，我们是可以看到全部的符号的，因此理论上我们也可以获取 g 结构体的类型信息。</p>
+<p>在任意的类型被定义之后，Go 语言都会为该类型生成对应的类型信息。比如 g 结构体会生成一个 <code>type·runtime·g</code> 标识符表示 g 结构体的值类型信息，同时还有一个 <code>type·*runtime·g</code> 标识符表示指针类型的信息。如果 g 结构体带有方法，那么同时还会生成 <code>go.itab.runtime.g</code> 和 <code>go.itab.*runtime.g</code> 类型信息，用于表示带方法的类型信息。</p>
+<p>如果我们能够拿到表示 g 结构体类型的 <code>type·runtime·g</code> 和 g 指针，那么就可以构造 g 对象的接口。下面是改进的 getg 函数，返回 g 指针对象的接口：</p>
+<pre><code>// func getg() interface{}
+TEXT ·getg(SB), NOSPLIT, $32-16
+	// get runtime.g
+	MOVQ (TLS), AX
+	// get runtime.g type
+	MOVQ $type·runtime·g(SB), BX
+
+	// convert (*g) to interface{}
+	MOVQ AX, 8(SP)
+	MOVQ BX, 0(SP)
+	CALL runtime·convT2E(SB)
+	MOVQ 16(SP), AX
+	MOVQ 24(SP), BX
+
+	// return interface{}
+	MOVQ AX, ret+0(FP)
+	MOVQ BX, ret+8(FP)
+	RET
+</code></pre>
+<p>其中 AX 寄存器对应 g 指针，BX 寄存器对应 g 结构体的类型。然后通过 runtime·convT2E 函数将类型转为接口。因为我们使用的不是 g 结构体指针类型，因此返回的接口表示的 g 结构体值类型。理论上我们也可以构造 g 指针类型的接口，但是因为 Go 汇编语言的限制，我们无法使用 <code>type·*runtime·g</code> 标识符。</p>
+<p>基于 g 返回的接口，就可以容易获取 goid 了：</p>
+<pre><code class="language-go">func GetGoid() int64 {
+	g := getg()
+	gid := reflect.ValueOf(g).FieldByName(&quot;goid&quot;).Int()
+	return goid
+}
+</code></pre>
+<p>上述代码通过反射直接获取 goid，理论上只要反射的接口和 goid 成员的名字不发生变化，代码都可以正常运行。经过实际测试，以上的代码可以在 Go1.8、Go1.9 和 Go1.10 版本中正确运行。乐观推测，如果 g 结构体类型的名字不发生变化，Go 语言反射的机制也不发生变化，那么未来 Go 语言版本应该也是可以运行的。</p>
+<p>反射虽然具备一定的灵活性，但是反射的性能一直是被大家诟病的地方。一个改进的思路是通过反射获取 goid 的偏移量，然后通过 g 指针和偏移量获取 goid，这样反射只需要在初始化阶段执行一次。</p>
+<p>下面是 g_goid_offset 变量的初始化代码：</p>
+<pre><code class="language-go">var g_goid_offset uintptr = func() uintptr {
+	g := GetGroutine()
+	if f, ok := reflect.TypeOf(g).FieldByName(&quot;goid&quot;); ok {
+		return f.Offset
+	}
+	panic(&quot;can not find g.goid field&quot;)
+}()
+</code></pre>
+<p>有了正确的 goid 偏移量之后，采用前面讲过的方式获取 goid：</p>
+<pre><code class="language-go">func GetGroutineId() int64 {
+	g := getg()
+	p := (*int64)(unsafe.Pointer(uintptr(g) + g_goid_offset))
+	return *p
+}
+</code></pre>
+<p>至此我们获取 goid 的实现思路已经足够完善了，不过汇编的代码依然有严重的安全隐患。</p>
+<p>虽然 getg 函数是用 NOSPLIT 标志声明的禁止栈分裂的函数类型，但是 getg 内部又调用了更为复杂的 runtime·convT2E 函数。runtime·convT2E 函数如果遇到栈空间不足，可能触发栈分裂的操作。而栈分裂时，GC 将要挪动栈上所有函数的参数和返回值和局部变量中的栈指针。但是我们的 getg 函数并没有提供局部变量的指针信息。</p>
+<p>下面是改进后的 getg 函数的完整实现：</p>
+<pre><code>// func getg() interface{}
+TEXT ·getg(SB), NOSPLIT, $32-16
+	NO_LOCAL_POINTERS
+
+	MOVQ $0, ret_type+0(FP)
+	MOVQ $0, ret_data+8(FP)
+	GO_RESULTS_INITIALIZED
+
+	// get runtime.g
+	MOVQ (TLS), AX
+
+	// get runtime.g type
+	MOVQ $type·runtime·g(SB), BX
+
+	// convert (*g) to interface{}
+	MOVQ AX, 8(SP)
+	MOVQ BX, 0(SP)
+	CALL runtime·convT2E(SB)
+	MOVQ 16(SP), AX
+	MOVQ 24(SP), BX
+
+	// return interface{}
+	MOVQ AX, ret_type+0(FP)
+	MOVQ BX, ret_data+8(FP)
+	RET
+</code></pre>
+<p>其中 NO_LOCAL_POINTERS 表示函数没有局部指针变量。同时对返回的接口进行零值初始化，初始化完成后通过 GO_RESULTS_INITIALIZED 告知 GC。这样可以在保证栈分裂时，GC 能够正确处理返回值和局部变量中的指针。</p>
+<h2>3.8.5 goid 的应用: 局部存储</h2>
+<p>有了 goid 之后，构造 Goroutine 局部存储就非常容易了。我们可以定义一个 gls 包提供 goid 的特性：</p>
+<pre><code class="language-go">package gls
+
+var gls struct {
+	m map[int64]map[interface{}]interface{}
+	sync.Mutex
+}
+
+func init() {
+	gls.m = make(map[int64]map[interface{}]interface{})
+}
+</code></pre>
+<p>gls 包变量简单包装了 map，同时通过 <code>sync.Mutex</code> 互斥量支持并发访问。</p>
+<p>然后定义一个 getMap 内部函数，用于获取每个 Goroutine 字节的 map：</p>
+<pre><code class="language-go">func getMap() map[interface{}]interface{} {
+	gls.Lock()
+	defer gls.Unlock()
+
+	goid := GetGoid()
+	if m, _ := gls.m[goid]; m != nil {
+		return m
+	}
+
+	m := make(map[interface{}]interface{})
+	gls.m[goid] = m
+	return m
+}
+</code></pre>
+<p>获取到 Goroutine 私有的 map 之后，就是正常的增、删、改操作接口了：</p>
+<pre><code class="language-go">func Get(key interface{}) interface{} {
+	return getMap()[key]
+}
+func Put(key interface{}, v interface{}) {
+	getMap()[key] = v
+}
+func Delete(key interface{}) {
+	delete(getMap(), key)
+}
+</code></pre>
+<p>最后我们再提供一个 Clean 函数，用于释放 Goroutine 对应的 map 资源：</p>
+<pre><code class="language-go">func Clean() {
+	gls.Lock()
+	defer gls.Unlock()
+
+	delete(gls.m, GetGoid())
+}
+</code></pre>
+<p>这样一个极简的 Goroutine 局部存储 gls 对象就完成了。</p>
+<p>下面是使用局部存储简单的例子：</p>
+<pre><code class="language-go">import (
+	gls &quot;path/to/gls&quot;
+)
+
+func main() {
+	var wg sync.WaitGroup
+	for i := 0; i &lt; 5; i++ {
+		wg.Add(1)
+		go func(idx int) {
+			defer wg.Done()
+			defer gls.Clean()
+
+			defer func() {
+				fmt.Printf(&quot;%d: number = %d\n&quot;, idx, gls.Get(&quot;number&quot;))
+			}()
+			gls.Put(&quot;number&quot;, idx+100)
+		}(i)
+	}
+	wg.Wait()
+}
+</code></pre>
+<p>通过 Goroutine 局部存储，不同层次函数之间可以共享存储资源。同时为了避免资源泄漏，需要在 Goroutine 的根函数中，通过 defer 语句调用 gls.Clean() 函数释放资源。</p>
+
+
+                        <hr><table><tr><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/css.png"></td><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/cch.png"></td></tr></table>
+
+                        
+                            <div id="giscus-container"></div>
+                        
+
+                        
+                            <footer class="page-footer">
+                                <span>© 2019-2022 | <a href="https://github.com/chai2010/advanced-go-programming-book">柴树杉、曹春晖</a> 保留所有权利</span>
+                            </footer>
+                        
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../ch3-asm/ch3-07-hack-asm.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                        
+                            <!-- ../ch3-asm/ch3-09-debug.html -->
+                            <a rel="next" href="../ch3-asm/ch3-09-debug.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../ch3-asm/ch3-07-hack-asm.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                
+                    <a rel="next" href="../ch3-asm/ch3-09-debug.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../static/wabook/mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/book.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script type="text/javascript" charset="utf-8">
+            var pagePath = "ch3-asm/ch3-08-goroutine-id.md"
+        </script>
+
+        <!-- Custom JS scripts -->
+        
+            <script src="../static/wabook/giscus.js" type="text/javascript" charset="utf-8"></script>
+        
+
+    </body>
+</html>

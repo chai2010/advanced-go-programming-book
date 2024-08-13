@@ -1,0 +1,729 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using https://github.com/wa-lang/wabook -->
+        <meta charset="UTF-8">
+        <title>Delve调试器 - Go语言高级编程</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../static/wabook/css/variables.css">
+        <link rel="stylesheet" href="../static/wabook/css/general.css">
+        <link rel="stylesheet" href="../static/wabook/css/chrome.css">
+        <link rel="stylesheet" href="../static/wabook/css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../static/wabook/FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../static/wabook/fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../static/wabook/highlight.css">
+        <link rel="stylesheet" href="../static/wabook/tomorrow-night.css">
+        <link rel="stylesheet" href="../static/wabook/ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('wabook-theme');
+                var sidebar = localStorage.getItem('wabook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('wabook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('wabook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('wabook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('wabook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter">
+  <li class="chapter-item expanded ">
+    <a href="../index.html" >Go语言高级编程</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../preface.html" >前言</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../ch1-basic/readme.html" ><strong aria-hidden="true">1.</strong> 语言基础</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-01-genesis.html" ><strong aria-hidden="true">1.1.</strong> Go语言创世纪</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-02-hello-revolution.html" ><strong aria-hidden="true">1.2.</strong> Hello, World 的革命</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-03-array-string-and-slice.html" ><strong aria-hidden="true">1.3.</strong> 数组、字符串和切片</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-04-func-method-interface.html" ><strong aria-hidden="true">1.4.</strong> 函数、方法和接口</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-05-mem.html" ><strong aria-hidden="true">1.5.</strong> 面向并发的内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-06-goroutine.html" ><strong aria-hidden="true">1.6.</strong> 常见的并发模式</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-07-error-and-panic.html" ><strong aria-hidden="true">1.7.</strong> 错误和异常</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-08-ext.html" ><strong aria-hidden="true">1.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch2-cgo/readme.html" ><strong aria-hidden="true">2.</strong> CGO编程</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-01-hello-cgo.html" ><strong aria-hidden="true">2.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-02-basic.html" ><strong aria-hidden="true">2.2.</strong> CGO基础</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-03-cgo-types.html" ><strong aria-hidden="true">2.3.</strong> 类型转换</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-04-func.html" ><strong aria-hidden="true">2.4.</strong> 函数调用</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-05-internal.html" ><strong aria-hidden="true">2.5.</strong> 内部机制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-06-qsort.html" ><strong aria-hidden="true">2.6.</strong> 实战: 封装qsort</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-07-memory.html" ><strong aria-hidden="true">2.7.</strong> CGO内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-08-class.html" ><strong aria-hidden="true">2.8.</strong> C++类包装</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-09-static-shared-lib.html" ><strong aria-hidden="true">2.9.</strong> 静态库和动态库</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-10-link.html" ><strong aria-hidden="true">2.10.</strong> 编译和链接参数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-11-ext.html" ><strong aria-hidden="true">2.11.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch3-asm/readme.html" ><strong aria-hidden="true">3.</strong> 汇编语言</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-01-basic.html" ><strong aria-hidden="true">3.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-02-arch.html" ><strong aria-hidden="true">3.2.</strong> 计算机结构</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-03-const-and-var.html" ><strong aria-hidden="true">3.3.</strong> 常量和全局变量</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-04-func.html" ><strong aria-hidden="true">3.4.</strong> 函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-05-control-flow.html" ><strong aria-hidden="true">3.5.</strong> 控制流</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-06-func-again.html" ><strong aria-hidden="true">3.6.</strong> 再论函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-07-hack-asm.html" ><strong aria-hidden="true">3.7.</strong> 汇编语言的威力</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-08-goroutine-id.html" ><strong aria-hidden="true">3.8.</strong> 例子：Goroutine ID</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-09-debug.html" class="active"><strong aria-hidden="true">3.9.</strong> Delve调试器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-10-ext.html" ><strong aria-hidden="true">3.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch4-rpc/readme.html" ><strong aria-hidden="true">4.</strong> 第4章 RPC和Protobuf</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-01-rpc-intro.html" ><strong aria-hidden="true">4.1.</strong> RPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-02-pb-intro.html" ><strong aria-hidden="true">4.2.</strong> Protobuf</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-03-netrpc-hack.html" ><strong aria-hidden="true">4.3.</strong> 玩转RPC</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-04-grpc.html" ><strong aria-hidden="true">4.4.</strong> gRPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-05-grpc-hack.html" ><strong aria-hidden="true">4.5.</strong> gRPC进阶</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-06-grpc-ext.html" ><strong aria-hidden="true">4.6.</strong> gRPC和Protobuf扩展</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-07-pbgo.html" ><strong aria-hidden="true">4.7.</strong> pbgo: 基于Protobuf的框架</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-08-grpcurl.html" ><strong aria-hidden="true">4.8.</strong> grpcurl工具</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-09-ext.html" ><strong aria-hidden="true">4.9.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch5-web/readme.html" ><strong aria-hidden="true">5.</strong> Go和Web</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-01-introduction.html" ><strong aria-hidden="true">5.1.</strong> Web开发简介</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-02-router.html" ><strong aria-hidden="true">5.2.</strong> 请求路由</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-03-middleware.html" ><strong aria-hidden="true">5.3.</strong> 中间件</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-04-validator.html" ><strong aria-hidden="true">5.4.</strong> 请求校验</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-05-database.html" ><strong aria-hidden="true">5.5.</strong> 和数据库打交道</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-06-ratelimit.html" ><strong aria-hidden="true">5.6.</strong> 服务流量限制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-07-layout-of-web-project.html" ><strong aria-hidden="true">5.7.</strong> 大型Web项目分层</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-08-interface-and-web.html" ><strong aria-hidden="true">5.8.</strong> 接口和表驱动开发</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-09-gated-launch.html" ><strong aria-hidden="true">5.9.</strong> 灰度发布和A/B测试</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-10-ext.html" ><strong aria-hidden="true">5.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch6-cloud/readme.html" ><strong aria-hidden="true">6.</strong> 分布式系统</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-01-dist-id.html" ><strong aria-hidden="true">6.1.</strong> 分布式 id 生成器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-02-lock.html" ><strong aria-hidden="true">6.2.</strong> 分布式锁</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-03-delay-job.html" ><strong aria-hidden="true">6.3.</strong> 延时任务系统</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-04-search-engine.html" ><strong aria-hidden="true">6.4.</strong> 分布式搜索引擎</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-05-load-balance.html" ><strong aria-hidden="true">6.5.</strong> 负载均衡</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-06-config.html" ><strong aria-hidden="true">6.6.</strong> 分布式配置管理</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-07-crawler.html" ><strong aria-hidden="true">6.7.</strong> 分布式爬虫</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-08-ext.html" ><strong aria-hidden="true">6.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../appendix/readme.html" ><strong aria-hidden="true">7.</strong> 附录</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-a-trap.html" ><strong aria-hidden="true">7.1.</strong> 附录A: Go语言常见坑</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-b-gems.html" ><strong aria-hidden="true">7.2.</strong> 附录B: 有趣的代码片段</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-c-author.html" ><strong aria-hidden="true">7.3.</strong> 附录C: 作者简介</a>
+    </li>
+  </ol>
+</ol>
+
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                    </div>
+
+                    <h1 class="menu-title"><a href="../index.html">Go语言高级编程</a></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/chai2010/advanced-go-programming-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/chai2010/advanced-go-programming-book/edit/master/ch3-asm/ch3-09-debug.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+
+                    <main>
+                        <ul dir="auto"><li><em>凹语言(Go实现, 面向WASM设计): <a href="https://github.com/wa-lang/wa">https://github.com/wa-lang/wa</a></em></li><li><em>WaBook(Go语言实现的MD电子书构建工具): <a href="https://github.com/wa-lang/wabook">https://github.com/wa-lang/wabook</a></em></li></ul><hr>
+
+                        <h1>3.9 Delve 调试器</h1>
+<p>目前 Go 语言支持 GDB、LLDB 和 Delve 几种调试器。其中 GDB 是最早支持的调试工具，LLDB 是 macOS 系统推荐的标准调试工具。但是 GDB 和 LLDB 对 Go 语言的专有特性都缺乏很大支持，而只有 Delve 是专门为 Go 语言设计开发的调试工具。而且 Delve 本身也是采用 Go 语言开发，对 Windows 平台也提供了一样的支持。本节我们基于 Delve 简单解释如何调试 Go 汇编程序。</p>
+<h2>3.9.1 Delve 入门</h2>
+<p>首先根据官方的文档正确安装 Delve 调试器。我们会先构造一个简单的 Go 语言代码，用于熟悉下 Delve 的简单用法。</p>
+<p>创建 main.go 文件，main 函数先通过循初始化一个切片，然后输出切片的内容：</p>
+<pre><code class="language-go">package main
+
+import (
+	&quot;fmt&quot;
+)
+
+func main() {
+	nums := make([]int, 5)
+	for i := 0; i &lt;len(nums); i++ {
+		nums[i] = i * i
+	}
+	fmt.Println(nums)
+}
+</code></pre>
+<p>命令行进入包所在目录，然后输入 <code>dlv debug</code> 命令进入调试：</p>
+<pre><code>$ dlv debug
+Type 'help' for list of commands.
+(dlv)
+</code></pre>
+<p>输入 help 命令可以查看到 Delve 提供的调试命令列表：</p>
+<pre><code>(dlv) help
+The following commands are available:
+    args ------------------------ Print function arguments.
+    break (alias: b) ------------ Sets a breakpoint.
+    breakpoints (alias: bp) ----- Print out info for active breakpoints.
+    clear ----------------------- Deletes breakpoint.
+    clearall -------------------- Deletes multiple breakpoints.
+    condition (alias: cond) ----- Set breakpoint condition.
+    config ---------------------- Changes configuration parameters.
+    continue (alias: c) --------- Run until breakpoint or program termination.
+    disassemble (alias: disass) - Disassembler.
+    down ------------------------ Move the current frame down.
+    exit (alias: quit | q) ------ Exit the debugger.
+    frame ----------------------- Set the current frame, or execute command...
+    funcs ----------------------- Print list of functions.
+    goroutine ------------------- Shows or changes current goroutine
+    goroutines ------------------ List program goroutines.
+    help (alias: h) ------------- Prints the help message.
+    list (alias: ls | l) -------- Show source code.
+    locals ---------------------- Print local variables.
+    next (alias: n) ------------- Step over to next source line.
+    on -------------------------- Executes a command when a breakpoint is hit.
+    print (alias: p) ------------ Evaluate an expression.
+    regs ------------------------ Print contents of CPU registers.
+    restart (alias: r) ---------- Restart process.
+    set ------------------------- Changes the value of a variable.
+    source ---------------------- Executes a file containing a list of delve...
+    sources --------------------- Print list of source files.
+    stack (alias: bt) ----------- Print stack trace.
+    step (alias: s) ------------- Single step through program.
+    step-instruction (alias: si)  Single step a single cpu instruction.
+    stepout --------------------- Step out of the current function.
+    thread (alias: tr) ---------- Switch to the specified thread.
+    threads --------------------- Print out info for every traced thread.
+    trace (alias: t) ------------ Set tracepoint.
+    types ----------------------- Print list of types
+    up -------------------------- Move the current frame up.
+    vars ------------------------ Print package variables.
+    whatis ---------------------- Prints type of an expression.
+Type help followed by a command for full documentation.
+(dlv)
+</code></pre>
+<p>每个 Go 程序的入口是 main.main 函数，我们可以用 break 在此设置一个断点：</p>
+<pre><code>(dlv) break main.main
+Breakpoint 1 set at 0x10ae9b8 for main.main() ./main.go:7
+</code></pre>
+<p>然后通过 breakpoints 查看已经设置的所有断点：</p>
+<pre><code>(dlv) breakpoints
+Breakpoint unrecovered-panic at 0x102a380 for runtime.startpanic()
+    /usr/local/go/src/runtime/panic.go:588 (0)
+        print runtime.curg._panic.arg
+Breakpoint 1 at 0x10ae9b8 for main.main() ./main.go:7 (0)
+</code></pre>
+<p>我们发现除了我们自己设置的 main.main 函数断点外，Delve 内部已经为 panic 异常函数设置了一个断点。</p>
+<p>通过 vars 命令可以查看全部包级的变量。因为最终的目标程序可能含有大量的全局变量，我们可以通过一个正则参数选择想查看的全局变量：</p>
+<pre><code>(dlv) vars main
+main.initdone· = 2
+runtime.main_init_done = chan bool 0/0
+runtime.mainStarted = true
+(dlv)
+</code></pre>
+<p>然后就可以通过 continue 命令让程序运行到下一个断点处：</p>
+<pre><code>(dlv) continue
+&gt; main.main() ./main.go:7 (hits goroutine(1):1 total:1) (PC: 0x10ae9b8)
+     2:
+     3: import (
+     4:         &quot;fmt&quot;
+     5: )
+     6:
+=&gt;   7: func main() {
+     8:         nums := make([]int, 5)
+     9:         for i := 0; i &lt;len(nums); i++ {
+    10:                 nums[i] = i * i
+    11:         }
+    12:         fmt.Println(nums)
+(dlv)
+</code></pre>
+<p>输入 next 命令单步执行进入 main 函数内部：</p>
+<pre><code>(dlv) next
+&gt; main.main() ./main.go:8 (PC: 0x10ae9cf)
+     3: import (
+     4:         &quot;fmt&quot;
+     5: )
+     6:
+     7: func main() {
+=&gt;   8:         nums := make([]int, 5)
+     9:         for i := 0; i &lt;len(nums); i++ {
+    10:                 nums[i] = i * i
+    11:         }
+    12:         fmt.Println(nums)
+    13: }
+(dlv)
+</code></pre>
+<p>进入函数之后可以通过 args 和 locals 命令查看函数的参数和局部变量：</p>
+<pre><code>(dlv) args
+(no args)
+(dlv) locals
+nums = []int len: 842350763880, cap: 17491881, nil
+</code></pre>
+<p>因为 main 函数没有参数，因此 args 命令没有任何输出。而 locals 命令则输出了局部变量 nums 切片的值：此时切片还未完成初始化，切片的底层指针为 nil，长度和容量都是一个随机数值。</p>
+<p>再次输入 next 命令单步执行后就可以查看到 nums 切片初始化之后的结果了：</p>
+<pre><code>(dlv) next
+&gt; main.main() ./main.go:9 (PC: 0x10aea12)
+     4:         &quot;fmt&quot;
+     5: )
+     6:
+     7: func main() {
+     8:         nums := make([]int, 5)
+=&gt;   9:         for i := 0; i &lt;len(nums); i++ {
+    10:                 nums[i] = i * i
+    11:         }
+    12:         fmt.Println(nums)
+    13: }
+(dlv) locals
+nums = []int len: 5, cap: 5, [...]
+i = 17601536
+(dlv)
+</code></pre>
+<p>此时因为调试器已经到了 for 语句行，因此局部变量出现了还未初始化的循环迭代变量 i。</p>
+<p>下面我们通过组合使用 break 和 condition 命令，在循环内部设置一个条件断点，当循环变量 i 等于 3 时断点生效：</p>
+<pre><code>(dlv) break main.go:10
+Breakpoint 2 set at 0x10aea33 for main.main() ./main.go:10
+(dlv) condition 2 i==3
+(dlv)
+</code></pre>
+<p>然后通过 continue 执行到刚设置的条件断点，并且输出局部变量：</p>
+<pre><code>(dlv) continue
+&gt; main.main() ./main.go:10 (hits goroutine(1):1 total:1) (PC: 0x10aea33)
+     5: )
+     6:
+     7: func main() {
+     8:         nums := make([]int, 5)
+     9:         for i := 0; i &lt;len(nums); i++ {
+=&gt;  10:                 nums[i] = i * i
+    11:         }
+    12:         fmt.Println(nums)
+    13: }
+(dlv) locals
+nums = []int len: 5, cap: 5, [...]
+i = 3
+(dlv) print nums
+[]int len: 5, cap: 5, [0,1,4,0,0]
+(dlv)
+</code></pre>
+<p>我们发现当循环变量 i 等于 3 时，nums 切片的前 3 个元素已经正确初始化。</p>
+<p>我们还可以通过 stack 查看当前执行函数的栈帧信息：</p>
+<pre><code>(dlv) stack
+0  0x00000000010aea33 in main.main
+   at ./main.go:10
+1  0x000000000102bd60 in runtime.main
+   at /usr/local/go/src/runtime/proc.go:198
+2  0x0000000001053bd1 in runtime.goexit
+   at /usr/local/go/src/runtime/asm_amd64.s:2361
+(dlv)
+</code></pre>
+<p>或者通过 goroutine 和 goroutines 命令查看当前 Goroutine 相关的信息：</p>
+<pre><code>(dlv) goroutine
+Thread 101686 at ./main.go:10
+Goroutine 1:
+  Runtime: ./main.go:10 main.main (0x10aea33)
+  User: ./main.go:10 main.main (0x10aea33)
+  Go: /usr/local/go/src/runtime/asm_amd64.s:258 runtime.rt0_go (0x1051643)
+  Start: /usr/local/go/src/runtime/proc.go:109 runtime.main (0x102bb90)
+(dlv) goroutines
+[4 goroutines]
+* Goroutine 1 - User: ./main.go:10 main.main (0x10aea33) (thread 101686)
+  Goroutine 2 - User: /usr/local/go/src/runtime/proc.go:292 \
+                runtime.gopark (0x102c189)
+  Goroutine 3 - User: /usr/local/go/src/runtime/proc.go:292 \
+                runtime.gopark (0x102c189)
+  Goroutine 4 - User: /usr/local/go/src/runtime/proc.go:292 \
+                runtime.gopark (0x102c189)
+(dlv)
+</code></pre>
+<p>最后完成调试工作后输入 quit 命令退出调试器。至此我们已经掌握了 Delve 调试器器的简单用法。</p>
+<h2>3.9.2 调试汇编程序</h2>
+<p>用 Delve 调试 Go 汇编程序的过程比调试 Go 语言程序更加简单。调试汇编程序时，我们需要时刻关注寄存器的状态，如果涉及函数调用或局部变量或参数还需要重点关注栈寄存器 SP 的状态。</p>
+<p>为了编译演示，我们重新实现一个更简单的 main 函数：</p>
+<pre><code class="language-go">package main
+
+func main() { asmSayHello() }
+
+func asmSayHello()
+</code></pre>
+<p>在 main 函数中调用汇编语言实现的 asmSayHello 函数输出一个字符串。</p>
+<p>asmSayHello 函数在 main_amd64.s 文件中实现：</p>
+<pre><code>#include &quot;textflag.h&quot;
+#include &quot;funcdata.h&quot;
+
+// &quot;Hello World!\n&quot;
+DATA  text&lt;&gt;+0(SB)/8,$&quot;Hello Wo&quot;
+DATA  text&lt;&gt;+8(SB)/8,$&quot;rld!\n&quot;
+GLOBL text&lt;&gt;(SB),NOPTR,$16
+
+// func asmSayHello()
+TEXT ·asmSayHello(SB), $16-0
+	NO_LOCAL_POINTERS
+	MOVQ $text&lt;&gt;+0(SB), AX
+	MOVQ AX, (SP)
+	MOVQ $16, 8(SP)
+	CALL runtime·printstring(SB)
+	RET
+</code></pre>
+<p>参考前面的调试流程，在执行到 main 函数断点时，可以 disassemble 反汇编命令查看 main 函数对应的汇编代码：</p>
+<pre><code>(dlv) break main.main
+Breakpoint 1 set at 0x105011f for main.main() ./main.go:3
+(dlv) continue
+&gt; main.main() ./main.go:3 (hits goroutine(1):1 total:1) (PC: 0x105011f)
+  1: package main
+  2:
+=&gt;3: func main() { asmSayHello() }
+  4:
+  5: func asmSayHello()
+(dlv) disassemble
+TEXT main.main(SB) /path/to/pkg/main.go
+  main.go:3 0x1050110  65488b0c25a0080000 mov rcx, qword ptr g  [0x8a0]
+  main.go:3 0x1050119  483b6110           cmp rsp, qword ptr [r  +0x10]
+  main.go:3 0x105011d  761a               jbe 0x1050139
+=&gt;main.go:3 0x105011f* 4883ec08           sub rsp, 0x8
+  main.go:3 0x1050123  48892c24           mov qword ptr [rsp], rbp
+  main.go:3 0x1050127  488d2c24           lea rbp, ptr [rsp]
+  main.go:3 0x105012b  e880000000         call $main.asmSayHello
+  main.go:3 0x1050130  488b2c24           mov rbp, qword ptr [rsp]
+  main.go:3 0x1050134  4883c408           add rsp, 0x8
+  main.go:3 0x1050138  c3                 ret
+  main.go:3 0x1050139  e87288ffff         call $runtime.morestack_noctxt
+  main.go:3 0x105013e  ebd0               jmp $main.main
+(dlv)
+</code></pre>
+<p>虽然 main 函数内部只有一行函数调用语句，但是却生成了很多汇编指令。在函数的开头通过比较 rsp 寄存器判断栈空间是否不足，如果不足则跳转到 0x1050139 地址调用 runtime.morestack 函数进行栈扩容，然后跳回到 main 函数开始位置重新进行栈空间测试。而在 asmSayHello 函数调用之前，先扩展 rsp 空间用于临时存储 rbp 寄存器的状态，在函数返回后通过栈恢复 rbp 的值并回收临时栈空间。通过对比 Go 语言代码和对应的汇编代码，我们可以加深对 Go 汇编语言的理解。</p>
+<p>从汇编语言角度深刻 Go 语言各种特性的工作机制对调试工作也是一个很大的帮助。如果希望在汇编指令层面调试 Go 代码，Delve 还提供了一个 step-instruction 单步执行汇编指令的命令。</p>
+<p>现在我们依然用 break 命令在 asmSayHello 函数设置断点，并且输入 continue 命令让调试器执行到断点位置停下：</p>
+<pre><code>(dlv) break main.asmSayHello
+Breakpoint 2 set at 0x10501bf for main.asmSayHello() ./main_amd64.s:10
+(dlv) continue
+&gt; main.asmSayHello() ./main_amd64.s:10 (hits goroutine(1):1 total:1) (PC: 0x10501bf)
+     5: DATA  text&lt;&gt;+0(SB)/8,$&quot;Hello Wo&quot;
+     6: DATA  text&lt;&gt;+8(SB)/8,$&quot;rld!\n&quot;
+     7: GLOBL text&lt;&gt;(SB),NOPTR,$16
+     8:
+     9: // func asmSayHello()
+=&gt;  10: TEXT ·asmSayHello(SB), $16-0
+    11:         NO_LOCAL_POINTERS
+    12:         MOVQ $text&lt;&gt;+0(SB), AX
+    13:         MOVQ AX, (SP)
+    14:         MOVQ $16, 8(SP)
+    15:         CALL runtime·printstring(SB)
+(dlv)
+</code></pre>
+<p>此时我们可以通过 regs 查看全部的寄存器状态：</p>
+<pre><code>(dlv) regs
+       rax = 0x0000000001050110
+       rbx = 0x0000000000000000
+       rcx = 0x000000c420000300
+       rdx = 0x0000000001070be0
+       rdi = 0x000000c42007c020
+       rsi = 0x0000000000000001
+       rbp = 0x000000c420049f78
+       rsp = 0x000000c420049f70
+        r8 = 0x7fffffffffffffff
+        r9 = 0xffffffffffffffff
+       r10 = 0x0000000000000100
+       r11 = 0x0000000000000286
+       r12 = 0x000000c41fffff7c
+       r13 = 0x0000000000000000
+       r14 = 0x0000000000000178
+       r15 = 0x0000000000000004
+       rip = 0x00000000010501bf
+    rflags = 0x0000000000000206
+...
+(dlv)
+</code></pre>
+<p>因为 AMD64 的各种寄存器非常多，项目的信息中刻意省略了非通用的寄存器。如果再单步执行到 13 行时，可以发现 AX 寄存器值的变化。</p>
+<pre><code>(dlv) regs
+       rax = 0x00000000010a4060
+       rbx = 0x0000000000000000
+       rcx = 0x000000c420000300
+...
+(dlv)
+</code></pre>
+<p>因此我们可以推断汇编程序内部定义的 <code>text&lt;&gt;</code> 数据的地址为 0x00000000010a4060。我们可以用过 print 命令来查看该内存内的数据：</p>
+<pre><code>(dlv) print *(*[5]byte)(uintptr(0x00000000010a4060))
+[5]uint8 [72,101,108,108,111]
+(dlv)
+</code></pre>
+<p>我们可以发现输出的 <code>[5]uint8 [72,101,108,108,111]</code> 刚好是对应 “Hello” 字符串。通过类似的方法，我们可以通过查看 SP 对应的栈指针位置，然后查看栈中局部变量的值。</p>
+<p>至此我们就掌握了 Go 汇编程序的简单调试技术。</p>
+
+
+                        <hr><table><tr><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/css.png"></td><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/cch.png"></td></tr></table>
+
+                        
+                            <div id="giscus-container"></div>
+                        
+
+                        
+                            <footer class="page-footer">
+                                <span>© 2019-2022 | <a href="https://github.com/chai2010/advanced-go-programming-book">柴树杉、曹春晖</a> 保留所有权利</span>
+                            </footer>
+                        
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../ch3-asm/ch3-08-goroutine-id.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                        
+                            <!-- ../ch3-asm/ch3-10-ext.html -->
+                            <a rel="next" href="../ch3-asm/ch3-10-ext.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../ch3-asm/ch3-08-goroutine-id.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                
+                    <a rel="next" href="../ch3-asm/ch3-10-ext.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../static/wabook/mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/book.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script type="text/javascript" charset="utf-8">
+            var pagePath = "ch3-asm/ch3-09-debug.md"
+        </script>
+
+        <!-- Custom JS scripts -->
+        
+            <script src="../static/wabook/giscus.js" type="text/javascript" charset="utf-8"></script>
+        
+
+    </body>
+</html>

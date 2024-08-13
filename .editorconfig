@@ -1,0 +1,30 @@
+# Copyright 2017 <chaishushan{AT}gmail.com>. All rights reserved.
+# Use of this source code is governed by a Apache
+# license that can be found in the LICENSE file.
+
+# http://editorconfig.org/
+
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+charset = utf-8
+end_of_line = lf
+trim_trailing_whitespace = true
+insert_final_newline = false
+
+[*]
+indent_style = tab
+
+[*.{go,proto}]
+charset = utf-8
+indent_style = tab
+
+# Matches the exact files either package.json or .travis.yml
+[{package.json,.travis.yml}]
+indent_style = space
+indent_size = 2
+
+[*.yaml]
+indent_style = space
+indent_size = 2

@@ -1,0 +1,741 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using https://github.com/wa-lang/wabook -->
+        <meta charset="UTF-8">
+        <title>错误和异常 - Go语言高级编程</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../static/wabook/css/variables.css">
+        <link rel="stylesheet" href="../static/wabook/css/general.css">
+        <link rel="stylesheet" href="../static/wabook/css/chrome.css">
+        <link rel="stylesheet" href="../static/wabook/css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../static/wabook/FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../static/wabook/fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../static/wabook/highlight.css">
+        <link rel="stylesheet" href="../static/wabook/tomorrow-night.css">
+        <link rel="stylesheet" href="../static/wabook/ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('wabook-theme');
+                var sidebar = localStorage.getItem('wabook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('wabook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('wabook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('wabook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('wabook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter">
+  <li class="chapter-item expanded ">
+    <a href="../index.html" >Go语言高级编程</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../preface.html" >前言</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../ch1-basic/readme.html" ><strong aria-hidden="true">1.</strong> 语言基础</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-01-genesis.html" ><strong aria-hidden="true">1.1.</strong> Go语言创世纪</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-02-hello-revolution.html" ><strong aria-hidden="true">1.2.</strong> Hello, World 的革命</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-03-array-string-and-slice.html" ><strong aria-hidden="true">1.3.</strong> 数组、字符串和切片</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-04-func-method-interface.html" ><strong aria-hidden="true">1.4.</strong> 函数、方法和接口</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-05-mem.html" ><strong aria-hidden="true">1.5.</strong> 面向并发的内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-06-goroutine.html" ><strong aria-hidden="true">1.6.</strong> 常见的并发模式</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-07-error-and-panic.html" class="active"><strong aria-hidden="true">1.7.</strong> 错误和异常</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-08-ext.html" ><strong aria-hidden="true">1.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch2-cgo/readme.html" ><strong aria-hidden="true">2.</strong> CGO编程</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-01-hello-cgo.html" ><strong aria-hidden="true">2.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-02-basic.html" ><strong aria-hidden="true">2.2.</strong> CGO基础</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-03-cgo-types.html" ><strong aria-hidden="true">2.3.</strong> 类型转换</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-04-func.html" ><strong aria-hidden="true">2.4.</strong> 函数调用</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-05-internal.html" ><strong aria-hidden="true">2.5.</strong> 内部机制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-06-qsort.html" ><strong aria-hidden="true">2.6.</strong> 实战: 封装qsort</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-07-memory.html" ><strong aria-hidden="true">2.7.</strong> CGO内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-08-class.html" ><strong aria-hidden="true">2.8.</strong> C++类包装</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-09-static-shared-lib.html" ><strong aria-hidden="true">2.9.</strong> 静态库和动态库</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-10-link.html" ><strong aria-hidden="true">2.10.</strong> 编译和链接参数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-11-ext.html" ><strong aria-hidden="true">2.11.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch3-asm/readme.html" ><strong aria-hidden="true">3.</strong> 汇编语言</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-01-basic.html" ><strong aria-hidden="true">3.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-02-arch.html" ><strong aria-hidden="true">3.2.</strong> 计算机结构</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-03-const-and-var.html" ><strong aria-hidden="true">3.3.</strong> 常量和全局变量</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-04-func.html" ><strong aria-hidden="true">3.4.</strong> 函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-05-control-flow.html" ><strong aria-hidden="true">3.5.</strong> 控制流</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-06-func-again.html" ><strong aria-hidden="true">3.6.</strong> 再论函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-07-hack-asm.html" ><strong aria-hidden="true">3.7.</strong> 汇编语言的威力</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-08-goroutine-id.html" ><strong aria-hidden="true">3.8.</strong> 例子：Goroutine ID</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-09-debug.html" ><strong aria-hidden="true">3.9.</strong> Delve调试器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-10-ext.html" ><strong aria-hidden="true">3.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch4-rpc/readme.html" ><strong aria-hidden="true">4.</strong> 第4章 RPC和Protobuf</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-01-rpc-intro.html" ><strong aria-hidden="true">4.1.</strong> RPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-02-pb-intro.html" ><strong aria-hidden="true">4.2.</strong> Protobuf</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-03-netrpc-hack.html" ><strong aria-hidden="true">4.3.</strong> 玩转RPC</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-04-grpc.html" ><strong aria-hidden="true">4.4.</strong> gRPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-05-grpc-hack.html" ><strong aria-hidden="true">4.5.</strong> gRPC进阶</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-06-grpc-ext.html" ><strong aria-hidden="true">4.6.</strong> gRPC和Protobuf扩展</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-07-pbgo.html" ><strong aria-hidden="true">4.7.</strong> pbgo: 基于Protobuf的框架</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-08-grpcurl.html" ><strong aria-hidden="true">4.8.</strong> grpcurl工具</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-09-ext.html" ><strong aria-hidden="true">4.9.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch5-web/readme.html" ><strong aria-hidden="true">5.</strong> Go和Web</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-01-introduction.html" ><strong aria-hidden="true">5.1.</strong> Web开发简介</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-02-router.html" ><strong aria-hidden="true">5.2.</strong> 请求路由</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-03-middleware.html" ><strong aria-hidden="true">5.3.</strong> 中间件</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-04-validator.html" ><strong aria-hidden="true">5.4.</strong> 请求校验</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-05-database.html" ><strong aria-hidden="true">5.5.</strong> 和数据库打交道</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-06-ratelimit.html" ><strong aria-hidden="true">5.6.</strong> 服务流量限制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-07-layout-of-web-project.html" ><strong aria-hidden="true">5.7.</strong> 大型Web项目分层</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-08-interface-and-web.html" ><strong aria-hidden="true">5.8.</strong> 接口和表驱动开发</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-09-gated-launch.html" ><strong aria-hidden="true">5.9.</strong> 灰度发布和A/B测试</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-10-ext.html" ><strong aria-hidden="true">5.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch6-cloud/readme.html" ><strong aria-hidden="true">6.</strong> 分布式系统</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-01-dist-id.html" ><strong aria-hidden="true">6.1.</strong> 分布式 id 生成器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-02-lock.html" ><strong aria-hidden="true">6.2.</strong> 分布式锁</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-03-delay-job.html" ><strong aria-hidden="true">6.3.</strong> 延时任务系统</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-04-search-engine.html" ><strong aria-hidden="true">6.4.</strong> 分布式搜索引擎</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-05-load-balance.html" ><strong aria-hidden="true">6.5.</strong> 负载均衡</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-06-config.html" ><strong aria-hidden="true">6.6.</strong> 分布式配置管理</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-07-crawler.html" ><strong aria-hidden="true">6.7.</strong> 分布式爬虫</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-08-ext.html" ><strong aria-hidden="true">6.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../appendix/readme.html" ><strong aria-hidden="true">7.</strong> 附录</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-a-trap.html" ><strong aria-hidden="true">7.1.</strong> 附录A: Go语言常见坑</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-b-gems.html" ><strong aria-hidden="true">7.2.</strong> 附录B: 有趣的代码片段</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-c-author.html" ><strong aria-hidden="true">7.3.</strong> 附录C: 作者简介</a>
+    </li>
+  </ol>
+</ol>
+
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                    </div>
+
+                    <h1 class="menu-title"><a href="../index.html">Go语言高级编程</a></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/chai2010/advanced-go-programming-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/chai2010/advanced-go-programming-book/edit/master/ch1-basic/ch1-07-error-and-panic.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+
+                    <main>
+                        <ul dir="auto"><li><em>凹语言(Go实现, 面向WASM设计): <a href="https://github.com/wa-lang/wa">https://github.com/wa-lang/wa</a></em></li><li><em>WaBook(Go语言实现的MD电子书构建工具): <a href="https://github.com/wa-lang/wabook">https://github.com/wa-lang/wabook</a></em></li></ul><hr>
+
+                        <h1>1.7 错误和异常</h1>
+<p>错误处理是每个编程语言都要考虑的一个重要话题。在 Go 语言的错误处理中，错误是软件包 API 和应用程序用户界面的一个重要组成部分。</p>
+<p>在程序中总有一部分函数总是要求必须能够成功的运行。比如 <code>strconv.Itoa</code> 将整数转换为字符串，从数组或切片中读写元素，从 <code>map</code> 读取已经存在的元素等。这类操作在运行时几乎不会失败，除非程序中有 BUG，或遇到灾难性的、不可预料的情况，比如运行时的内存溢出。如果真的遇到真正异常情况，我们只要简单终止程序就可以了。</p>
+<p>排除异常的情况，如果程序运行失败仅被认为是几个预期的结果之一。对于那些将运行失败看作是预期结果的函数，它们会返回一个额外的返回值，通常是最后一个来传递错误信息。如果导致失败的原因只有一个，额外的返回值可以是一个布尔值，通常被命名为 ok。比如，当从一个 <code>map</code> 查询一个结果时，可以通过额外的布尔值判断是否成功：</p>
+<pre><code class="language-go">if v, ok := m[&quot;key&quot;]; ok {
+	return v
+}
+</code></pre>
+<p>但是导致失败的原因通常不止一种，很多时候用户希望了解更多的错误信息。如果只是用简单的布尔类型的状态值将不能满足这个要求。在 C 语言中，默认采用一个整数类型的 <code>errno</code> 来表达错误，这样就可以根据需要定义多种错误类型。在 Go 语言中，<code>syscall.Errno</code> 就是对应 C 语言中 <code>errno</code> 类型的错误。在 <code>syscall</code> 包中的接口，如果有返回错误的话，底层也是 <code>syscall.Errno</code> 错误类型。</p>
+<p>比如我们通过 <code>syscall</code> 包的接口来修改文件的模式时，如果遇到错误我们可以通过将 <code>err</code> 强制断言为 <code>syscall.Errno</code> 错误类型来处理：</p>
+<pre><code class="language-go">err := syscall.Chmod(&quot;:invalid path:&quot;, 0666)
+if err != nil {
+	log.Fatal(err.(syscall.Errno))
+}
+</code></pre>
+<p>我们还可以进一步地通过类型查询或类型断言来获取底层真实的错误类型，这样就可以获取更详细的错误信息。不过一般情况下我们并不关心错误在底层的表达方式，我们只需要知道它是一个错误就可以了。当返回的错误值不是 <code>nil</code> 时，我们可以通过调用 <code>error</code> 接口类型的 <code>Error</code> 方法来获得字符串类型的错误信息。</p>
+<p>在 Go 语言中，错误被认为是一种可以预期的结果；而异常则是一种非预期的结果，发生异常可能表示程序中存在 BUG 或发生了其它不可控的问题。Go 语言推荐使用 <code>recover</code> 函数将内部异常转为错误处理，这使得用户可以真正的关心业务相关的错误处理。</p>
+<p>如果某个接口简单地将所有普通的错误当做异常抛出，将会使错误信息杂乱且没有价值。就像在 <code>main</code> 函数中直接捕获全部一样，是没有意义的：</p>
+<pre><code class="language-go">func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Fatal(r)
+		}
+	}()
+
+	...
+}
+</code></pre>
+<p>捕获异常不是最终的目的。如果异常不可预测，直接输出异常信息是最好的处理方式。</p>
+<h2>1.7.1 错误处理策略</h2>
+<p>让我们演示一个文件复制的例子：函数需要打开两个文件，然后将其中一个文件的内容复制到另一个文件：</p>
+<pre><code class="language-go">func CopyFile(dstName, srcName string) (written int64, err error) {
+	src, err := os.Open(srcName)
+	if err != nil {
+		return
+	}
+
+	dst, err := os.Create(dstName)
+	if err != nil {
+		return
+	}
+
+	written, err = io.Copy(dst, src)
+	dst.Close()
+	src.Close()
+	return
+}
+</code></pre>
+<p>上面的代码虽然能够工作，但是隐藏一个 bug。如果第一个 <code>os.Open</code> 调用成功，但是第二个 <code>os.Create</code> 调用失败，那么会在没有释放 <code>src</code> 文件资源的情况下返回。虽然我们可以通过在第二个返回语句前添加 <code>src.Close()</code> 调用来修复这个 BUG；但是当代码变得复杂时，类似的问题将很难被发现和修复。我们可以通过 <code>defer</code> 语句来确保每个被正常打开的文件都能被正常关闭：</p>
+<pre><code class="language-go">func CopyFile(dstName, srcName string) (written int64, err error) {
+	src, err := os.Open(srcName)
+	if err != nil {
+		return
+	}
+	defer src.Close()
+
+	dst, err := os.Create(dstName)
+	if err != nil {
+		return
+	}
+	defer dst.Close()
+
+	return io.Copy(dst, src)
+}
+</code></pre>
+<p><code>defer</code>语句可以让我们在打开文件时马上思考如何关闭文件。不管函数如何返回，文件关闭语句始终会被执行。同时 <code>defer</code> 语句可以保证，即使 <code>io.Copy</code> 发生了异常，文件依然可以安全地关闭。</p>
+<p>前文我们说到，Go 语言中的导出函数一般不抛出异常，一个未受控的异常可以看作是程序的 BUG。但是对于那些提供类似 Web 服务的框架而言；它们经常需要接入第三方的中间件。因为第三方的中间件是否存在 BUG 是否会抛出异常，Web 框架本身是不能确定的。为了提高系统的稳定性，Web 框架一般会通过 <code>recover</code> 来防御性地捕获所有处理流程中可能产生的异常，然后将异常转为普通的错误返回。</p>
+<p>让我们以 JSON 解析器为例，说明 recover 的使用场景。考虑到 JSON 解析器的复杂性，即使某个语言解析器目前工作正常，也无法肯定它没有漏洞。因此，当某个异常出现时，我们不会选择让解析器崩溃，而是会将 panic 异常当作普通的解析错误，并附加额外信息提醒用户报告此错误。</p>
+<pre><code class="language-go">func ParseJSON(input string) (s *Syntax, err error) {
+	defer func() {
+		if p := recover(); p != nil {
+			err = fmt.Errorf(&quot;JSON: internal error: %v&quot;, p)
+		}
+	}()
+	// ...parser...
+}
+</code></pre>
+<p>标准库中的 <code>json</code> 包，在内部递归解析 JSON 数据的时候如果遇到错误，会通过抛出异常的方式来快速跳出深度嵌套的函数调用，然后由最外一级的接口通过 <code>recover</code> 捕获 <code>panic</code>，然后返回相应的错误信息。</p>
+<p>Go 语言库的实现习惯: 即使在包内部使用了 <code>panic</code>，但是在导出函数时会被转化为明确的错误值。</p>
+<h2>1.7.2 获取错误的上下文</h2>
+<p>有时候为了方便上层用户理解；底层实现者会将底层的错误重新包装为新的错误类型返回给用户：</p>
+<pre><code class="language-go">if _, err := html.Parse(resp.Body); err != nil {
+	return nil, fmt.Errorf(&quot;parsing %s as HTML: %v&quot;, url,err)
+}
+</code></pre>
+<p>上层用户在遇到错误时，可以很容易从业务层面理解错误发生的原因。但是鱼和熊掌总是很难兼得，在上层用户获得新的错误的同时，我们也丢失了底层最原始的错误类型（只剩下错误描述信息了）。</p>
+<p>为了记录这种错误类型在包装的变迁过程中的信息，我们一般会定义一个辅助的 <code>WrapError</code> 函数，用于包装原始的错误，同时保留完整的原始错误类型。为了问题定位的方便，同时也为了能记录错误发生时的函数调用状态，我们很多时候希望在出现致命错误的时候保存完整的函数调用信息。同时，为了支持 RPC 等跨网络的传输，我们可能要需要将错误序列化为类似 JSON 格式的数据，然后再从这些数据中将错误解码恢复出来。</p>
+<p>为此，我们可以定义自己的 <code>github.com/chai2010/errors</code> 包，里面是以下的错误类型：</p>
+<pre><code class="language-go">
+type Error interface {
+	Caller() []CallerInfo
+	Wraped() []error
+	Code() int
+	error
+
+	private()
+}
+
+type CallerInfo struct {
+	FuncName string
+	FileName string
+	FileLine int
+}
+</code></pre>
+<p>其中 <code>Error</code> 为接口类型，是 <code>error</code> 接口类型的扩展，用于给错误增加调用栈信息，同时支持错误的多级嵌套包装，支持错误码格式。为了使用方便，我们可以定义以下的辅助函数：</p>
+<pre><code class="language-go">func New(msg string) error
+func NewWithCode(code int, msg string) error
+
+func Wrap(err error, msg string) error
+func WrapWithCode(code int, err error, msg string) error
+
+func FromJson(json string) (Error, error)
+func ToJson(err error) string
+</code></pre>
+<p><code>New</code>用于构建新的错误类型，和标准库中 <code>errors.New</code> 功能类似，但是增加了出错时的函数调用栈信息。<code>FromJson</code> 用于从 JSON 字符串编码的错误中恢复错误对象。<code>NewWithCode</code> 则是构造一个带错误码的错误，同时也包含出错时的函数调用栈信息。<code>Wrap</code> 和 <code>WrapWithCode</code> 则是错误二次包装函数，用于将底层的错误包装为新的错误，但是保留的原始的底层错误信息。这里返回的错误对象都可以直接调用 <code>json.Marshal</code> 将错误编码为 JSON 字符串。</p>
+<p>我们可以这样使用包装函数:</p>
+<pre><code class="language-go">import (
+	&quot;github.com/chai2010/errors&quot;
+)
+
+func loadConfig() error {
+	_, err := ioutil.ReadFile(&quot;/path/to/file&quot;)
+	if err != nil {
+		return errors.Wrap(err, &quot;read failed&quot;)
+	}
+
+	// ...
+}
+
+func setup() error {
+	err := loadConfig()
+	if err != nil {
+		return errors.Wrap(err, &quot;invalid config&quot;)
+	}
+
+	// ...
+}
+
+func main() {
+	if err := setup(); err != nil {
+		log.Fatal(err)
+	}
+
+	// ...
+}
+</code></pre>
+<p>上面的例子中，错误被进行了 2 层包装。我们可以这样遍历原始错误经历了哪些包装流程：</p>
+<pre><code class="language-go">	for i, e := range err.(errors.Error).Wraped() {
+		fmt.Printf(&quot;wrapped(%d): %v\n&quot;, i, e)
+	}
+</code></pre>
+<p>同时也可以获取每个包装错误的函数调用堆栈信息：</p>
+<pre><code class="language-go">	for i, x := range err.(errors.Error).Caller() {
+		fmt.Printf(&quot;caller:%d: %s\n&quot;, i, x.FuncName)
+	}
+</code></pre>
+<p>如果需要将错误通过网络传输，可以用 <code>errors.ToJson(err)</code> 编码为 JSON 字符串：</p>
+<pre><code class="language-go">// 以 JSON 字符串方式发送错误
+func sendError(ch chan&lt;- string, err error) {
+	ch &lt;- errors.ToJson(err)
+}
+
+// 接收 JSON 字符串格式的错误
+func recvError(ch &lt;-chan string) error {
+	p, err := errors.FromJson(&lt;-ch)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return p
+}
+</code></pre>
+<p>对于基于 http 协议的网络服务，我们还可以给错误绑定一个对应的 http 状态码：</p>
+<pre><code class="language-go">err := errors.NewWithCode(404, &quot;http error code&quot;)
+
+fmt.Println(err)
+fmt.Println(err.(errors.Error).Code())
+</code></pre>
+<p>在 Go 语言中，错误处理也有一套独特的编码风格。检查某个子函数是否失败后，我们通常将处理失败的逻辑代码放在处理成功的代码之前。如果某个错误会导致函数返回，那么成功时的逻辑代码不应放在 <code>else</code> 语句块中，而应直接放在函数体中。</p>
+<pre><code class="language-go">f, err := os.Open(&quot;filename.ext&quot;)
+if err != nil {
+	// 失败的情形, 马上返回错误
+}
+
+// 正常的处理流程
+</code></pre>
+<p>Go 语言中大部分函数的代码结构几乎相同，首先是一系列的初始检查，用于防止错误发生，之后是函数的实际逻辑。</p>
+<h2>1.7.3 错误的错误返回</h2>
+<p>Go 语言中的错误是一种接口类型。接口信息中包含了原始类型和原始的值。只有当接口的类型和原始的值都为空的时候，接口的值才对应 <code>nil</code>。其实当接口中类型为空的时候，原始值必然也是空的；反之，当接口对应的原始值为空的时候，接口对应的原始类型并不一定为空的。</p>
+<p>在下面的例子中，试图返回自定义的错误类型，当没有错误的时候返回 <code>nil</code>：</p>
+<pre><code class="language-go">func returnsError() error {
+	var p *MyError = nil
+	if bad() {
+		p = ErrBad
+	}
+	return p // Will always return a non-nil error.
+}
+</code></pre>
+<p>但是，最终返回的结果其实并非是 <code>nil</code>：是一个正常的错误，错误的值是一个 <code>MyError</code> 类型的空指针。下面是改进的 <code>returnsError</code>：</p>
+<pre><code class="language-go">func returnsError() error {
+	if bad() {
+		return (*MyError)(err)
+	}
+	return nil
+}
+</code></pre>
+<p>因此，在处理错误返回值的时候，没有错误的返回值最好直接写为 <code>nil</code>。</p>
+<p>Go 语言作为一个强类型语言，不同类型之间必须要显式的转换（而且必须有相同的基础类型）。但是，Go 语言中 <code>interface</code> 是一个例外：非接口类型到接口类型，或者是接口类型之间的转换都是隐式的。这是为了支持鸭子类型，当然会牺牲一定的安全性。</p>
+<h2>1.7.4 剖析异常</h2>
+<p><code>panic</code>支持抛出任意类型的异常（而不仅仅是 <code>error</code> 类型的错误），<code>recover</code> 函数调用的返回值和 <code>panic</code> 函数的输入参数类型一致，它们的函数签名如下：</p>
+<pre><code class="language-go">func panic(interface{})
+func recover() interface{}
+</code></pre>
+<p>Go 语言函数调用的正常流程是函数执行返回语句返回结果，在这个流程中是没有异常的，因此在这个流程中执行 <code>recover</code> 异常捕获函数始终是返回 <code>nil</code>。另一种是异常流程: 当函数调用 <code>panic</code> 抛出异常，函数将停止执行后续的普通语句，但是之前注册的 <code>defer</code> 函数调用仍然保证会被正常执行，然后再返回到调用者。对于当前函数的调用者，因为处理异常状态还没有被捕获，和直接调用 <code>panic</code> 函数的行为类似。在异常发生时，如果在 <code>defer</code> 中执行 <code>recover</code> 调用，它可以捕获触发 <code>panic</code> 时的参数，并且恢复到正常的执行流程。</p>
+<p>在非 <code>defer</code> 语句中执行 <code>recover</code> 调用是初学者常犯的错误:</p>
+<pre><code class="language-go">func main() {
+	if r := recover(); r != nil {
+		log.Fatal(r)
+	}
+
+	panic(123)
+
+	if r := recover(); r != nil {
+		log.Fatal(r)
+	}
+}
+</code></pre>
+<p>上面程序中两个 <code>recover</code> 调用都不能捕获任何异常。在第一个 <code>recover</code> 调用执行时，函数必然是在正常的非异常执行流程中，这时候 <code>recover</code> 调用将返回 <code>nil</code>。发生异常时，第二个 <code>recover</code> 调用将没有机会被执行到，因为 <code>panic</code> 调用会导致函数马上执行已经注册 <code>defer</code> 的函数后返回。</p>
+<p>其实 <code>recover</code> 函数调用有着更严格的要求：我们必须在 <code>defer</code> 函数中直接调用 <code>recover</code>。如果 <code>defer</code> 中调用的是 <code>recover</code> 函数的包装函数的话，异常的捕获工作将失败！比如，有时候我们可能希望包装自己的 <code>MyRecover</code> 函数，在内部增加必要的日志信息然后再调用 <code>recover</code>，这是错误的做法：</p>
+<pre><code class="language-go">func main() {
+	defer func() {
+		// 无法捕获异常
+		if r := MyRecover(); r != nil {
+			fmt.Println(r)
+		}
+	}()
+	panic(1)
+}
+
+func MyRecover() interface{} {
+	log.Println(&quot;trace...&quot;)
+	return recover()
+}
+</code></pre>
+<p>同样，如果是在嵌套的 <code>defer</code> 函数中调用 <code>recover</code> 也将导致无法捕获异常：</p>
+<pre><code class="language-go">func main() {
+	defer func() {
+		defer func() {
+			// 无法捕获异常
+			if r := recover(); r != nil {
+				fmt.Println(r)
+			}
+		}()
+	}()
+	panic(1)
+}
+</code></pre>
+<p>2 层嵌套的 <code>defer</code> 函数中直接调用 <code>recover</code> 和 1 层 <code>defer</code> 函数中调用包装的 <code>MyRecover</code> 函数一样，都是经过了 2 个函数帧才到达真正的 <code>recover</code> 函数，这个时候 Goroutine 的对应上一级栈帧中已经没有异常信息。</p>
+<p>如果我们直接在 <code>defer</code> 语句中调用 <code>MyRecover</code> 函数又可以正常工作了：</p>
+<pre><code class="language-go">func MyRecover() interface{} {
+	return recover()
+}
+
+func main() {
+	// 可以正常捕获异常
+	defer MyRecover()
+	panic(1)
+}
+</code></pre>
+<p>但是，如果 <code>defer</code> 语句直接调用 <code>recover</code> 函数，依然不能正常捕获异常：</p>
+<pre><code class="language-go">func main() {
+	// 无法捕获异常
+	defer recover()
+	panic(1)
+}
+</code></pre>
+<p>必须要和有异常的栈帧只隔一个栈帧，<code>recover</code> 函数才能正常捕获异常。换言之，<code>recover</code> 函数捕获的是祖父一级调用函数栈帧的异常（刚好可以跨越一层 <code>defer</code> 函数）！</p>
+<p>当然，为了避免 <code>recover</code> 调用者不能识别捕获到的异常, 应该避免用 <code>nil</code> 为参数抛出异常:</p>
+<pre><code class="language-go">func main() {
+	defer func() {
+		if r := recover(); r != nil { ... }
+		// 虽然总是返回 nil, 但是可以恢复异常状态
+	}()
+
+	// 警告: 用 nil 为参数抛出异常
+	panic(nil)
+}
+</code></pre>
+<p>当希望将捕获到的异常转为错误时，如果希望忠实返回原始的信息，需要针对不同的类型分别处理：</p>
+<pre><code class="language-go">func foo() (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			switch x := r.(type) {
+			case string:
+				err = errors.New(x)
+			case error:
+				err = x
+			default:
+				err = fmt.Errorf(&quot;Unknown panic: %v&quot;, r)
+			}
+		}
+	}()
+
+	panic(&quot;TODO&quot;)
+}
+</code></pre>
+<p>基于这个代码模板，我们甚至可以模拟出不同类型的异常。通过为定义不同类型的保护接口，我们就可以区分异常的类型了：</p>
+<pre><code class="language-go">func main {
+	defer func() {
+		if r := recover(); r != nil {
+			switch x := r.(type) {
+			case runtime.Error:
+				// 这是运行时错误类型异常
+			case error:
+				// 普通错误类型异常
+			default:
+				// 其他类型异常
+			}
+		}
+	}()
+
+	// ...
+}
+</code></pre>
+<p>不过这样做和 Go 语言简单直接的编程哲学背道而驰了。</p>
+
+
+                        <hr><table><tr><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/css.png"></td><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/cch.png"></td></tr></table>
+
+                        
+                            <div id="giscus-container"></div>
+                        
+
+                        
+                            <footer class="page-footer">
+                                <span>© 2019-2022 | <a href="https://github.com/chai2010/advanced-go-programming-book">柴树杉、曹春晖</a> 保留所有权利</span>
+                            </footer>
+                        
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../ch1-basic/ch1-06-goroutine.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                        
+                            <!-- ../ch1-basic/ch1-08-ext.html -->
+                            <a rel="next" href="../ch1-basic/ch1-08-ext.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../ch1-basic/ch1-06-goroutine.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                
+                    <a rel="next" href="../ch1-basic/ch1-08-ext.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../static/wabook/mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/book.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script type="text/javascript" charset="utf-8">
+            var pagePath = "ch1-basic/ch1-07-error-and-panic.md"
+        </script>
+
+        <!-- Custom JS scripts -->
+        
+            <script src="../static/wabook/giscus.js" type="text/javascript" charset="utf-8"></script>
+        
+
+    </body>
+</html>

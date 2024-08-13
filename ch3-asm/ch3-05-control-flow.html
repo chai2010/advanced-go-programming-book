@@ -1,0 +1,606 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using https://github.com/wa-lang/wabook -->
+        <meta charset="UTF-8">
+        <title>控制流 - Go语言高级编程</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../static/wabook/css/variables.css">
+        <link rel="stylesheet" href="../static/wabook/css/general.css">
+        <link rel="stylesheet" href="../static/wabook/css/chrome.css">
+        <link rel="stylesheet" href="../static/wabook/css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../static/wabook/FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../static/wabook/fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../static/wabook/highlight.css">
+        <link rel="stylesheet" href="../static/wabook/tomorrow-night.css">
+        <link rel="stylesheet" href="../static/wabook/ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('wabook-theme');
+                var sidebar = localStorage.getItem('wabook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('wabook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('wabook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('wabook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('wabook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter">
+  <li class="chapter-item expanded ">
+    <a href="../index.html" >Go语言高级编程</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../preface.html" >前言</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../ch1-basic/readme.html" ><strong aria-hidden="true">1.</strong> 语言基础</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-01-genesis.html" ><strong aria-hidden="true">1.1.</strong> Go语言创世纪</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-02-hello-revolution.html" ><strong aria-hidden="true">1.2.</strong> Hello, World 的革命</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-03-array-string-and-slice.html" ><strong aria-hidden="true">1.3.</strong> 数组、字符串和切片</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-04-func-method-interface.html" ><strong aria-hidden="true">1.4.</strong> 函数、方法和接口</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-05-mem.html" ><strong aria-hidden="true">1.5.</strong> 面向并发的内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-06-goroutine.html" ><strong aria-hidden="true">1.6.</strong> 常见的并发模式</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-07-error-and-panic.html" ><strong aria-hidden="true">1.7.</strong> 错误和异常</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-08-ext.html" ><strong aria-hidden="true">1.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch2-cgo/readme.html" ><strong aria-hidden="true">2.</strong> CGO编程</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-01-hello-cgo.html" ><strong aria-hidden="true">2.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-02-basic.html" ><strong aria-hidden="true">2.2.</strong> CGO基础</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-03-cgo-types.html" ><strong aria-hidden="true">2.3.</strong> 类型转换</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-04-func.html" ><strong aria-hidden="true">2.4.</strong> 函数调用</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-05-internal.html" ><strong aria-hidden="true">2.5.</strong> 内部机制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-06-qsort.html" ><strong aria-hidden="true">2.6.</strong> 实战: 封装qsort</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-07-memory.html" ><strong aria-hidden="true">2.7.</strong> CGO内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-08-class.html" ><strong aria-hidden="true">2.8.</strong> C++类包装</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-09-static-shared-lib.html" ><strong aria-hidden="true">2.9.</strong> 静态库和动态库</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-10-link.html" ><strong aria-hidden="true">2.10.</strong> 编译和链接参数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-11-ext.html" ><strong aria-hidden="true">2.11.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch3-asm/readme.html" ><strong aria-hidden="true">3.</strong> 汇编语言</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-01-basic.html" ><strong aria-hidden="true">3.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-02-arch.html" ><strong aria-hidden="true">3.2.</strong> 计算机结构</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-03-const-and-var.html" ><strong aria-hidden="true">3.3.</strong> 常量和全局变量</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-04-func.html" ><strong aria-hidden="true">3.4.</strong> 函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-05-control-flow.html" class="active"><strong aria-hidden="true">3.5.</strong> 控制流</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-06-func-again.html" ><strong aria-hidden="true">3.6.</strong> 再论函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-07-hack-asm.html" ><strong aria-hidden="true">3.7.</strong> 汇编语言的威力</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-08-goroutine-id.html" ><strong aria-hidden="true">3.8.</strong> 例子：Goroutine ID</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-09-debug.html" ><strong aria-hidden="true">3.9.</strong> Delve调试器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-10-ext.html" ><strong aria-hidden="true">3.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch4-rpc/readme.html" ><strong aria-hidden="true">4.</strong> 第4章 RPC和Protobuf</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-01-rpc-intro.html" ><strong aria-hidden="true">4.1.</strong> RPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-02-pb-intro.html" ><strong aria-hidden="true">4.2.</strong> Protobuf</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-03-netrpc-hack.html" ><strong aria-hidden="true">4.3.</strong> 玩转RPC</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-04-grpc.html" ><strong aria-hidden="true">4.4.</strong> gRPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-05-grpc-hack.html" ><strong aria-hidden="true">4.5.</strong> gRPC进阶</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-06-grpc-ext.html" ><strong aria-hidden="true">4.6.</strong> gRPC和Protobuf扩展</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-07-pbgo.html" ><strong aria-hidden="true">4.7.</strong> pbgo: 基于Protobuf的框架</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-08-grpcurl.html" ><strong aria-hidden="true">4.8.</strong> grpcurl工具</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-09-ext.html" ><strong aria-hidden="true">4.9.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch5-web/readme.html" ><strong aria-hidden="true">5.</strong> Go和Web</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-01-introduction.html" ><strong aria-hidden="true">5.1.</strong> Web开发简介</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-02-router.html" ><strong aria-hidden="true">5.2.</strong> 请求路由</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-03-middleware.html" ><strong aria-hidden="true">5.3.</strong> 中间件</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-04-validator.html" ><strong aria-hidden="true">5.4.</strong> 请求校验</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-05-database.html" ><strong aria-hidden="true">5.5.</strong> 和数据库打交道</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-06-ratelimit.html" ><strong aria-hidden="true">5.6.</strong> 服务流量限制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-07-layout-of-web-project.html" ><strong aria-hidden="true">5.7.</strong> 大型Web项目分层</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-08-interface-and-web.html" ><strong aria-hidden="true">5.8.</strong> 接口和表驱动开发</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-09-gated-launch.html" ><strong aria-hidden="true">5.9.</strong> 灰度发布和A/B测试</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-10-ext.html" ><strong aria-hidden="true">5.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch6-cloud/readme.html" ><strong aria-hidden="true">6.</strong> 分布式系统</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-01-dist-id.html" ><strong aria-hidden="true">6.1.</strong> 分布式 id 生成器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-02-lock.html" ><strong aria-hidden="true">6.2.</strong> 分布式锁</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-03-delay-job.html" ><strong aria-hidden="true">6.3.</strong> 延时任务系统</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-04-search-engine.html" ><strong aria-hidden="true">6.4.</strong> 分布式搜索引擎</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-05-load-balance.html" ><strong aria-hidden="true">6.5.</strong> 负载均衡</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-06-config.html" ><strong aria-hidden="true">6.6.</strong> 分布式配置管理</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-07-crawler.html" ><strong aria-hidden="true">6.7.</strong> 分布式爬虫</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-08-ext.html" ><strong aria-hidden="true">6.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../appendix/readme.html" ><strong aria-hidden="true">7.</strong> 附录</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-a-trap.html" ><strong aria-hidden="true">7.1.</strong> 附录A: Go语言常见坑</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-b-gems.html" ><strong aria-hidden="true">7.2.</strong> 附录B: 有趣的代码片段</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-c-author.html" ><strong aria-hidden="true">7.3.</strong> 附录C: 作者简介</a>
+    </li>
+  </ol>
+</ol>
+
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                    </div>
+
+                    <h1 class="menu-title"><a href="../index.html">Go语言高级编程</a></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/chai2010/advanced-go-programming-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/chai2010/advanced-go-programming-book/edit/master/ch3-asm/ch3-05-control-flow.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+
+                    <main>
+                        <ul dir="auto"><li><em>凹语言(Go实现, 面向WASM设计): <a href="https://github.com/wa-lang/wa">https://github.com/wa-lang/wa</a></em></li><li><em>WaBook(Go语言实现的MD电子书构建工具): <a href="https://github.com/wa-lang/wabook">https://github.com/wa-lang/wabook</a></em></li></ul><hr>
+
+                        <h1>3.5 控制流</h1>
+<p>程序主要有顺序、分支和循环几种执行流程。本节主要讨论如何将 Go 语言的控制流比较直观地转译为汇编程序，或者说如何以汇编思维来编写 Go 语言代码。</p>
+<h2>3.5.1 顺序执行</h2>
+<p>顺序执行是我们比较熟悉的工作模式，类似俗称流水账编程。所有不含分支、循环和 goto 语句，并且没有递归调用的 Go 函数一般都是顺序执行的。</p>
+<p>比如有如下顺序执行的代码：</p>
+<pre><code class="language-go">func main() {
+	var a = 10
+	println(a)
+
+	var b = (a+a)*a
+	println(b)
+}
+</code></pre>
+<p>我们尝试用 Go 汇编的思维改写上述函数。因为 X86 指令中一般只有 2 个操作数，因此在用汇编改写时要求出现的变量表达式中最多只能有一个运算符。同时对于一些函数调用，也需要用汇编中可以调用的函数来改写。</p>
+<p>第一步改写依然是使用 Go 语言，只不过是用汇编的思维改写：</p>
+<pre><code>func main() {
+	var a, b int
+
+	a = 10
+	runtime.printint(a)
+	runtime.printnl()
+
+	b = a
+	b += b
+	b *= a
+	runtime.printint(b)
+	runtime.printnl()
+}
+</code></pre>
+<p>首选模仿 C 语言的处理方式在函数入口处声明全部的局部变量。然后根据 MOV、ADD、MUL 等指令的风格，将之前的变量表达式展开为用 <code>=</code>、<code>+=</code> 和 <code>*=</code> 几种运算表达的多个指令。最后用 runtime 包内部的 printint 和 printnl 函数代替之前的 println 函数输出结果。</p>
+<p>经过用汇编的思维改写过后，上述的 Go 函数虽然看着繁琐了一点，但是还是比较容易理解的。下面我们进一步尝试将改写后的函数继续转译为汇编函数：</p>
+<pre><code>TEXT ·main(SB), $24-0
+	MOVQ $0, a-8*2(SP) // a = 0
+	MOVQ $0, b-8*1(SP) // b = 0
+
+	// 将新的值写入 a 对应内存
+	MOVQ $10, AX       // AX = 10
+	MOVQ AX, a-8*2(SP) // a = AX
+
+	// 以 a 为参数调用函数
+	MOVQ AX, 0(SP)
+	CALL runtime·printint(SB)
+	CALL runtime·printnl(SB)
+
+	// 函数调用后, AX/BX 寄存器可能被污染, 需要重新加载
+	MOVQ a-8*2(SP), AX // AX = a
+	MOVQ b-8*1(SP), BX // BX = b
+
+	// 计算 b 值, 并写入内存
+	MOVQ AX, BX        // BX = AX  // b = a
+	ADDQ BX, BX        // BX += BX // b += a
+	IMULQ AX, BX       // BX *= AX // b *= a
+	MOVQ BX, b-8*1(SP) // b = BX
+
+	// 以 b 为参数调用函数
+	MOVQ BX, 0(SP)
+	CALL runtime·printint(SB)
+	CALL runtime·printnl(SB)
+
+	RET
+</code></pre>
+<p>汇编实现 main 函数的第一步是要计算函数栈帧的大小。因为函数内有 a、b 两个 int 类型变量，同时调用的 runtime·printint 函数参数是一个 int 类型并且没有返回值，因此 main 函数的栈帧是 3 个 int 类型组成的 24 个字节的栈内存空间。</p>
+<p>在函数的开始处先将变量初始化为 0 值，其中 <code>a-8*2(SP)</code> 对应 a 变量、<code>a-8*1(SP)</code> 对应 b 变量（因为 a 变量先定义，因此 a 变量的地址更小）。</p>
+<p>然后给 a 变量分配一个 AX 寄存器，并且通过 AX 寄存器将 a 变量对应的内存设置为 10，AX 也是 10。为了输出 a 变量，需要将 AX 寄存器的值放到 <code>0(SP)</code> 位置，这个位置的变量将在调用 runtime·printint 函数时作为它的参数被打印。因为我们之前已经将 AX 的值保存到 a 变量内存中了，因此在调用函数前并不需要再进行寄存器的备份工作。</p>
+<p>在调用函数返回之后，全部的寄存器将被视为可能被调用的函数修改，因此我们需要从 a、b 对应的内存中重新恢复寄存器 AX 和 BX。然后参考上面 Go 语言中 b 变量的计算方式更新 BX 对应的值，计算完成后同样将 BX 的值写入到 b 对应的内存。</p>
+<p>需要说明的是，上面的代码中 <code>IMULQ AX, BX</code> 使用了 <code>IMULQ</code> 指令来计算乘法。没有使用 <code>MULQ</code> 指令的原因是 <code>MULQ</code> 指令默认使用 <code>AX</code> 保存结果。读者可以自己尝试用 <code>MULQ</code> 指令改写上述代码。</p>
+<p>最后以 b 变量作为参数再次调用 runtime·printint 函数进行输出工作。所有的寄存器同样可能被污染，不过 main 函数马上就返回了，因此不再需要恢复 AX、BX 等寄存器了。</p>
+<p>重新分析汇编改写后的整个函数会发现里面很多的冗余代码。我们并不需要 a、b 两个临时变量分配两个内存空间，而且也不需要在每个寄存器变化之后都要写入内存。下面是经过优化的汇编函数：</p>
+<pre><code>TEXT ·main(SB), $16-0
+	// var temp int
+
+	// 将新的值写入 a 对应内存
+	MOVQ $10, AX        // AX = 10
+	MOVQ AX, temp-8(SP) // temp = AX
+
+	// 以 a 为参数调用函数
+	CALL runtime·printint(SB)
+	CALL runtime·printnl(SB)
+
+	// 函数调用后, AX 可能被污染, 需要重新加载
+	MOVQ temp-8*1(SP), AX // AX = temp
+
+	// 计算 b 值, 不需要写入内存
+	MOVQ AX, BX        // BX = AX  // b = a
+	ADDQ BX, BX        // BX += BX // b += a
+	IMULQ AX, BX       // BX *= AX // b *= a
+
+	// ...
+</code></pre>
+<p>首先是将 main 函数的栈帧大小从 24 字节减少到 16 字节。唯一需要保存的是 a 变量的值，因此在调用 runtime·printint 函数输出时全部的寄存器都可能被污染，我们无法通过寄存器备份 a 变量的值，只有在栈内存中的值才是安全的。然后在 BX 寄存器并不需要保存到内存。其它部分的代码基本保持不变。</p>
+<h2>3.5.2 if/goto 跳转</h2>
+<p>Go 语言刚刚开源的时候并没有 goto 语句，后来 Go 语言虽然增加了 goto 语句，但是并不推荐在编程中使用。有一个和 cgo 类似的原则：如果可以不使用 goto 语句，那么就不要使用 goto 语句。Go 语言中的 goto 语句是有严格限制的：它无法跨越代码块，并且在被跨越的代码中不能含有变量定义的语句。虽然 Go 语言不推荐 goto 语句，但是 goto 确实每个汇编语言码农的最爱。因为 goto 近似等价于汇编语言中的无条件跳转指令 JMP，配合 if 条件 goto 就组成了有条件跳转指令，而有条件跳转指令正是构建整个汇编代码控制流的基石。</p>
+<p>为了便于理解，我们用 Go 语言构造一个模拟三元表达式的 If 函数：</p>
+<pre><code class="language-go">func If(ok bool, a, b int) int {
+	if ok {return a} else { return b }
+}
+</code></pre>
+<p>比如求两个数最大值的三元表达式 <code>(a&gt;b)?a:b</code> 用 If 函数可以这样表达：<code>If(a&gt;b, a, b)</code>。因为语言的限制，用来模拟三元表达式的 If 函数不支持泛型（可以将 a、b 和返回类型改为空接口，不过使用会繁琐一些）。</p>
+<p>这个函数虽然看似只有简单的一行，但是包含了 if 分支语句。在改用汇编实现前，我们还是先用汇编的思维来重新审视 If 函数。在改写时同样要遵循每个表达式只能有一个运算符的限制，同时 if 语句的条件部分必须只有一个比较符号组成，if 语句的 body 部分只能是一个 goto 语句。</p>
+<p>用汇编思维改写后的 If 函数实现如下：</p>
+<pre><code class="language-go">func If(ok int, a, b int) int {
+	if ok == 0 {goto L}
+	return a
+L:
+	return b
+}
+</code></pre>
+<p>因为汇编语言中没有 bool 类型，我们改用 int 类型代替 bool 类型（真实的汇编是用 byte 表示 bool 类型，可以通过 MOVBQZX 指令加载 byte 类型的值，这里做了简化处理）。当 ok 参数非 0 时返回变量 a，否则返回变量 b。我们将 ok 的逻辑反转下：当 ok 参数为 0 时，表示返回 b，否则返回变量 a。在 if 语句中，当 ok 参数为 0 时 goto 到 L 标号指定的语句，也就是返回变量 b。如果 if 条件不满足，也就是 ok 参数非 0，执行后面的语句返回变量 a。</p>
+<p>上述函数的实现已经非常接近汇编语言，下面是改为汇编实现的代码：</p>
+<pre><code>TEXT ·If(SB), NOSPLIT, $0-32
+	MOVQ ok+8*0(FP), CX // ok
+	MOVQ a+8*1(FP), AX  // a
+	MOVQ b+8*2(FP), BX  // b
+
+	CMPQ CX, $0         // test ok
+	JZ   L              // if ok == 0, goto L
+	MOVQ AX, ret+24(FP) // return a
+	RET
+
+L:
+	MOVQ BX, ret+24(FP) // return b
+	RET
+</code></pre>
+<p>首先是将三个参数加载到寄存器中，ok 参数对应 CX 寄存器，a、b 分别对应 AX、BX 寄存器。然后使用 CMPQ 比较指令将 CX 寄存器和常数 0 进行比较。如果比较的结果为 0，那么下一条 JZ 为 0 时跳转指令将跳转到 L 标号对应的语句，也就是返回变量 b 的值。如果比较的结果不为 0，那么 JZ 指令将没有效果，继续执行后面的指令，也就是返回变量 a 的值。</p>
+<p>在跳转指令中，跳转的目标一般是通过一个标号表示。不过在有些通过宏实现的函数中，更希望通过相对位置跳转，这时候可以通过 PC 寄存器的偏移量来计算临近跳转的位置。</p>
+<h2>3.5.3 for 循环</h2>
+<p>Go 语言的 for 循环有多种用法，我们这里只选择最经典的 for 结构来讨论。经典的 for 循环由初始化、结束条件、迭代步长三个部分组成，再配合循环体内部的 if 条件语言，这种 for 结构可以模拟其它各种循环类型。</p>
+<p>基于经典的 for 循环结构，我们定义一个 LoopAdd 函数，可以用于计算任意等差数列的和：</p>
+<pre><code class="language-go">func LoopAdd(cnt, v0, step int) int {
+	result := v0
+	for i := 0; i &lt; cnt; i++ {
+		result += step
+	}
+	return result
+}
+</code></pre>
+<p>比如 <code>1+2+...+100</code> 等差数列可以这样计算 <code>LoopAdd(100, 1, 1)</code>，而 <code>10+8+...+0</code> 等差数列则可以这样计算 <code>LoopAdd(5, 10, -2)</code>。在用汇编彻底重写之前先采用前面 <code>if/goto</code> 类似的技术来改造 for 循环。</p>
+<p>新的 LoopAdd 函数只有 if/goto 语句构成：</p>
+<pre><code class="language-go">func LoopAdd(cnt, v0, step int) int {
+	var i = 0
+	var result = 0
+
+LOOP_BEGIN:
+	result = v0
+
+LOOP_IF:
+	if i &lt;cnt { goto LOOP_BODY}
+	goto LOOP_END
+
+LOOP_BODY
+	i = i+1
+	result = result + step
+	goto LOOP_IF
+
+LOOP_END:
+
+	return result
+}
+</code></pre>
+<p>函数的开头先定义两个局部变量便于后续代码使用。然后将 for 语句的初始化、结束条件、迭代步长三个部分拆分为三个代码段，分别用 LOOP_BEGIN、LOOP_IF、LOOP_BODY 三个标号表示。其中 LOOP_BEGIN 循环初始化部分只会执行一次，因此该标号并不会被引用，可以省略。最后 LOOP_END 语句表示 for 循环的结束。四个标号分隔出的三个代码段分别对应 for 循环的初始化语句、循环条件和循环体，其中迭代语句被合并到循环体中了。</p>
+<p>下面用汇编语言重新实现 LoopAdd 函数</p>
+<pre><code>#include &quot;textflag.h&quot;
+
+// func LoopAdd(cnt, v0, step int) int
+TEXT ·LoopAdd(SB), NOSPLIT,  $0-32
+	MOVQ cnt+0(FP), AX   // cnt
+	MOVQ v0+8(FP), BX    // v0/result
+	MOVQ step+16(FP), CX // step
+
+LOOP_BEGIN:
+	MOVQ $0, DX          // i
+
+LOOP_IF:
+	CMPQ DX, AX          // compare i, cnt
+	JL   LOOP_BODY       // if i &lt; cnt: goto LOOP_BODY
+	JMP LOOP_END
+
+LOOP_BODY:
+	ADDQ $1, DX          // i++
+	ADDQ CX, BX          // result += step
+	JMP LOOP_IF
+
+LOOP_END:
+
+	MOVQ BX, ret+24(FP)  // return result
+	RET
+</code></pre>
+<p>其中 v0 和 result 变量复用了一个 BX 寄存器。在 LOOP_BEGIN 标号对应的指令部分，用 MOVQ 将 DX 寄存器初始化为 0，DX 对应变量 i，循环的迭代变量。在 LOOP_IF 标号对应的指令部分，使用 CMPQ 指令比较 DX 和 AX，如果循环没有结束则跳转到 LOOP_BODY 部分，否则跳转到 LOOP_END 部分结束循环。在 LOOP_BODY 部分，更新迭代变量并且执行循环体中的累加语句，然后直接跳转到 LOOP_IF 部分进入下一轮循环条件判断。LOOP_END 标号之后就是返回累加结果的语句。</p>
+<p>循环是最复杂的控制流，循环中隐含了分支和跳转语句。掌握了循环的写法基本也就掌握了汇编语言的基础写法。更极客的玩法是通过汇编语言打破传统的控制流，比如跨越多层函数直接返回，比如参考基因编辑的手段直接执行一个从 C 语言构建的代码片段等。总之掌握规律之后，你会发现其实汇编语言编程会变得异常简单和有趣。</p>
+
+
+                        <hr><table><tr><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/css.png"></td><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/cch.png"></td></tr></table>
+
+                        
+                            <div id="giscus-container"></div>
+                        
+
+                        
+                            <footer class="page-footer">
+                                <span>© 2019-2022 | <a href="https://github.com/chai2010/advanced-go-programming-book">柴树杉、曹春晖</a> 保留所有权利</span>
+                            </footer>
+                        
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../ch3-asm/ch3-04-func.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                        
+                            <!-- ../ch3-asm/ch3-06-func-again.html -->
+                            <a rel="next" href="../ch3-asm/ch3-06-func-again.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../ch3-asm/ch3-04-func.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                
+                    <a rel="next" href="../ch3-asm/ch3-06-func-again.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../static/wabook/mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/book.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script type="text/javascript" charset="utf-8">
+            var pagePath = "ch3-asm/ch3-05-control-flow.md"
+        </script>
+
+        <!-- Custom JS scripts -->
+        
+            <script src="../static/wabook/giscus.js" type="text/javascript" charset="utf-8"></script>
+        
+
+    </body>
+</html>

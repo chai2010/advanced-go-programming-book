@@ -1,0 +1,634 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using https://github.com/wa-lang/wabook -->
+        <meta charset="UTF-8">
+        <title>常量和全局变量 - Go语言高级编程</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../static/wabook/css/variables.css">
+        <link rel="stylesheet" href="../static/wabook/css/general.css">
+        <link rel="stylesheet" href="../static/wabook/css/chrome.css">
+        <link rel="stylesheet" href="../static/wabook/css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../static/wabook/FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../static/wabook/fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../static/wabook/highlight.css">
+        <link rel="stylesheet" href="../static/wabook/tomorrow-night.css">
+        <link rel="stylesheet" href="../static/wabook/ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('wabook-theme');
+                var sidebar = localStorage.getItem('wabook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('wabook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('wabook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('wabook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('wabook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter">
+  <li class="chapter-item expanded ">
+    <a href="../index.html" >Go语言高级编程</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../preface.html" >前言</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../ch1-basic/readme.html" ><strong aria-hidden="true">1.</strong> 语言基础</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-01-genesis.html" ><strong aria-hidden="true">1.1.</strong> Go语言创世纪</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-02-hello-revolution.html" ><strong aria-hidden="true">1.2.</strong> Hello, World 的革命</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-03-array-string-and-slice.html" ><strong aria-hidden="true">1.3.</strong> 数组、字符串和切片</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-04-func-method-interface.html" ><strong aria-hidden="true">1.4.</strong> 函数、方法和接口</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-05-mem.html" ><strong aria-hidden="true">1.5.</strong> 面向并发的内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-06-goroutine.html" ><strong aria-hidden="true">1.6.</strong> 常见的并发模式</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-07-error-and-panic.html" ><strong aria-hidden="true">1.7.</strong> 错误和异常</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-08-ext.html" ><strong aria-hidden="true">1.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch2-cgo/readme.html" ><strong aria-hidden="true">2.</strong> CGO编程</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-01-hello-cgo.html" ><strong aria-hidden="true">2.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-02-basic.html" ><strong aria-hidden="true">2.2.</strong> CGO基础</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-03-cgo-types.html" ><strong aria-hidden="true">2.3.</strong> 类型转换</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-04-func.html" ><strong aria-hidden="true">2.4.</strong> 函数调用</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-05-internal.html" ><strong aria-hidden="true">2.5.</strong> 内部机制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-06-qsort.html" ><strong aria-hidden="true">2.6.</strong> 实战: 封装qsort</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-07-memory.html" ><strong aria-hidden="true">2.7.</strong> CGO内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-08-class.html" ><strong aria-hidden="true">2.8.</strong> C++类包装</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-09-static-shared-lib.html" ><strong aria-hidden="true">2.9.</strong> 静态库和动态库</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-10-link.html" ><strong aria-hidden="true">2.10.</strong> 编译和链接参数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-11-ext.html" ><strong aria-hidden="true">2.11.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch3-asm/readme.html" ><strong aria-hidden="true">3.</strong> 汇编语言</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-01-basic.html" ><strong aria-hidden="true">3.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-02-arch.html" ><strong aria-hidden="true">3.2.</strong> 计算机结构</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-03-const-and-var.html" class="active"><strong aria-hidden="true">3.3.</strong> 常量和全局变量</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-04-func.html" ><strong aria-hidden="true">3.4.</strong> 函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-05-control-flow.html" ><strong aria-hidden="true">3.5.</strong> 控制流</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-06-func-again.html" ><strong aria-hidden="true">3.6.</strong> 再论函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-07-hack-asm.html" ><strong aria-hidden="true">3.7.</strong> 汇编语言的威力</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-08-goroutine-id.html" ><strong aria-hidden="true">3.8.</strong> 例子：Goroutine ID</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-09-debug.html" ><strong aria-hidden="true">3.9.</strong> Delve调试器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-10-ext.html" ><strong aria-hidden="true">3.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch4-rpc/readme.html" ><strong aria-hidden="true">4.</strong> 第4章 RPC和Protobuf</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-01-rpc-intro.html" ><strong aria-hidden="true">4.1.</strong> RPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-02-pb-intro.html" ><strong aria-hidden="true">4.2.</strong> Protobuf</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-03-netrpc-hack.html" ><strong aria-hidden="true">4.3.</strong> 玩转RPC</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-04-grpc.html" ><strong aria-hidden="true">4.4.</strong> gRPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-05-grpc-hack.html" ><strong aria-hidden="true">4.5.</strong> gRPC进阶</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-06-grpc-ext.html" ><strong aria-hidden="true">4.6.</strong> gRPC和Protobuf扩展</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-07-pbgo.html" ><strong aria-hidden="true">4.7.</strong> pbgo: 基于Protobuf的框架</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-08-grpcurl.html" ><strong aria-hidden="true">4.8.</strong> grpcurl工具</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-09-ext.html" ><strong aria-hidden="true">4.9.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch5-web/readme.html" ><strong aria-hidden="true">5.</strong> Go和Web</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-01-introduction.html" ><strong aria-hidden="true">5.1.</strong> Web开发简介</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-02-router.html" ><strong aria-hidden="true">5.2.</strong> 请求路由</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-03-middleware.html" ><strong aria-hidden="true">5.3.</strong> 中间件</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-04-validator.html" ><strong aria-hidden="true">5.4.</strong> 请求校验</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-05-database.html" ><strong aria-hidden="true">5.5.</strong> 和数据库打交道</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-06-ratelimit.html" ><strong aria-hidden="true">5.6.</strong> 服务流量限制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-07-layout-of-web-project.html" ><strong aria-hidden="true">5.7.</strong> 大型Web项目分层</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-08-interface-and-web.html" ><strong aria-hidden="true">5.8.</strong> 接口和表驱动开发</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-09-gated-launch.html" ><strong aria-hidden="true">5.9.</strong> 灰度发布和A/B测试</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-10-ext.html" ><strong aria-hidden="true">5.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch6-cloud/readme.html" ><strong aria-hidden="true">6.</strong> 分布式系统</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-01-dist-id.html" ><strong aria-hidden="true">6.1.</strong> 分布式 id 生成器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-02-lock.html" ><strong aria-hidden="true">6.2.</strong> 分布式锁</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-03-delay-job.html" ><strong aria-hidden="true">6.3.</strong> 延时任务系统</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-04-search-engine.html" ><strong aria-hidden="true">6.4.</strong> 分布式搜索引擎</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-05-load-balance.html" ><strong aria-hidden="true">6.5.</strong> 负载均衡</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-06-config.html" ><strong aria-hidden="true">6.6.</strong> 分布式配置管理</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-07-crawler.html" ><strong aria-hidden="true">6.7.</strong> 分布式爬虫</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-08-ext.html" ><strong aria-hidden="true">6.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../appendix/readme.html" ><strong aria-hidden="true">7.</strong> 附录</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-a-trap.html" ><strong aria-hidden="true">7.1.</strong> 附录A: Go语言常见坑</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-b-gems.html" ><strong aria-hidden="true">7.2.</strong> 附录B: 有趣的代码片段</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-c-author.html" ><strong aria-hidden="true">7.3.</strong> 附录C: 作者简介</a>
+    </li>
+  </ol>
+</ol>
+
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                    </div>
+
+                    <h1 class="menu-title"><a href="../index.html">Go语言高级编程</a></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/chai2010/advanced-go-programming-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/chai2010/advanced-go-programming-book/edit/master/ch3-asm/ch3-03-const-and-var.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+
+                    <main>
+                        <ul dir="auto"><li><em>凹语言(Go实现, 面向WASM设计): <a href="https://github.com/wa-lang/wa">https://github.com/wa-lang/wa</a></em></li><li><em>WaBook(Go语言实现的MD电子书构建工具): <a href="https://github.com/wa-lang/wabook">https://github.com/wa-lang/wabook</a></em></li></ul><hr>
+
+                        <h1>3.3 常量和全局变量</h1>
+<p>程序中的一切变量的初始值都直接或间接地依赖常量或常量表达式生成。在 Go 语言中很多变量是默认零值初始化的，但是 Go 汇编中定义的变量最好还是手工通过常量初始化。有了常量之后，就可以衍生定义全局变量，并使用常量组成的表达式初始化其它各种变量。本节将简单讨论 Go 汇编语言中常量和全局变量的用法。</p>
+<h2>3.3.1 常量</h2>
+<p>Go 汇编语言中常量以 $ 美元符号为前缀。常量的类型有整数常量、浮点数常量、字符常量和字符串常量等几种类型。以下是几种类型常量的例子：</p>
+<pre><code>$1           // 十进制
+$0xf4f8fcff  // 十六进制
+$1.5         // 浮点数
+$'a'         // 字符
+$&quot;abcd&quot;      // 字符串
+</code></pre>
+<p>其中整数类型常量默认是十进制格式，也可以用十六进制格式表示整数常量。所有的常量最终都必须和要初始化的变量内存大小匹配。</p>
+<p>对于数值型常量，可以通过常量表达式构成新的常量：</p>
+<pre><code>$2+2      // 常量表达式
+$3&amp;1&lt;&lt;2   // == $4
+$(3&amp;1)&lt;&lt;2 // == $4
+</code></pre>
+<p>其中常量表达式中运算符的优先级和 Go 语言保持一致。</p>
+<p>Go 汇编语言中的常量其实不仅仅只有编译时常量，还包含运行时常量。比如包中全局的变量和全局函数在运行时地址也是固定不变的，这里地址不会改变的包变量和函数的地址也是一种汇编常量。</p>
+<p>下面是本章第一节用汇编定义的字符串代码：</p>
+<pre><code>GLOBL ·NameData(SB),$8
+DATA  ·NameData(SB)/8,$&quot;gopher&quot;
+
+GLOBL ·Name(SB),$16
+DATA  ·Name+0(SB)/8,$·NameData(SB)
+DATA  ·Name+8(SB)/8,$6
+</code></pre>
+<p>其中 <code>$·NameData(SB)</code> 也是以 $ 美元符号为前缀，因此也可以将它看作是一个常量，它对应的是 NameData 包变量的地址。在汇编指令中，我们也可以通过 LEA 指令来获取 NameData 变量的地址。</p>
+<h2>3.3.2 全局变量</h2>
+<p>在 Go 语言中，变量根据作用域和生命周期有全局变量和局部变量之分。全局变量是包一级的变量，全局变量一般有着较为固定的内存地址，生命周期跨越整个程序运行时间。而局部变量一般是函数内定义的的变量，只有在函数被执行的时间才被在栈上创建，当函数调用完成后将回收（暂时不考虑闭包对局部变量捕获的问题）。</p>
+<p>从 Go 汇编语言角度来看，全局变量和局部变量有着非常大的差异。在 Go 汇编中全局变量和全局函数更为相似，都是通过一个人为定义的符号来引用对应的内存，区别只是内存中存放是数据还是要执行的指令。因为在冯诺伊曼系统结构的计算机中指令也是数据，而且指令和数据存放在统一编址的内存中。因为指令和数据并没有本质的差别，因此我们甚至可以像操作数据那样动态生成指令（这是所有 JIT 技术的原理）。而局部变量则需在了解了汇编函数之后，才能通过 SP 栈空间来隐式定义。</p>
+<p>在 Go 汇编语言中，内存是通过 SB 伪寄存器定位。SB 是 Static base pointer 的缩写，意为静态内存的开始地址。我们可以将 SB 想象为一个和内容容量有相同大小的字节数组，所有的静态全局符号通常可以通过 SB 加一个偏移量定位，而我们定义的符号其实就是相对于 SB 内存开始地址偏移量。对于 SB 伪寄存器，全局变量和全局函数的符号并没有任何区别。</p>
+<p>要定义全局变量，首先要声明一个变量对应的符号，以及变量对应的内存大小。导出变量符号的语法如下：</p>
+<pre><code>GLOBL symbol(SB), width
+</code></pre>
+<p>GLOBL 汇编指令用于定义名为 symbol 的变量，变量对应的内存宽度为 width，内存宽度部分必须用常量初始化。下面的代码通过汇编定义一个 int32 类型的 count 变量：</p>
+<pre><code>GLOBL ·count(SB),$4
+</code></pre>
+<p>其中符号 <code>·count</code> 以中点开头表示是当前包的变量，最终符号名为被展开为 <code>path/to/pkg.count</code>。count 变量的大小是 4 个字节，常量必须以 $ 美元符号开头。内存的宽度必须是 2 的指数倍，编译器最终会保证变量的真实地址对齐到机器字倍数。需要注意的是，在 Go 汇编中我们无法为 count 变量指定具体的类型。在汇编中定义全局变量时，我们只关心变量的名字和内存大小，变量最终的类型只能在 Go 语言中声明。</p>
+<p>变量定义之后，我们可以通过 DATA 汇编指令指定对应内存中的数据，语法如下：</p>
+<pre><code>DATA symbol+offset(SB)/width, value
+</code></pre>
+<p>具体的含义是从 symbol+offset 偏移量开始，width 宽度的内存，用 value 常量对应的值初始化。DATA 初始化内存时，width 必须是 1、2、4、8 几个宽度之一，因为再大的内存无法一次性用一个 uint64 大小的值表示。</p>
+<p>对于 int32 类型的 count 变量来说，我们既可以逐个字节初始化，也可以一次性初始化：</p>
+<pre><code>DATA ·count+0(SB)/1,$1
+DATA ·count+1(SB)/1,$2
+DATA ·count+2(SB)/1,$3
+DATA ·count+3(SB)/1,$4
+
+// or
+
+DATA ·count+0(SB)/4,$0x04030201
+</code></pre>
+<p>因为 X86 处理器是小端序，因此用十六进制 0x04030201 初始化全部的 4 个字节，和用 1、2、3、4 逐个初始化 4 个字节是一样的效果。</p>
+<p>最后还需要在 Go 语言中声明对应的变量（和 C 语言头文件声明变量的作用类似），这样垃圾回收器会根据变量的类型来管理其中的指针相关的内存数据。</p>
+<h3>3.3.2.1 数组类型</h3>
+<p>汇编中数组也是一种非常简单的类型。Go 语言中数组是一种有着扁平内存结构的基础类型。因此 <code>[2]byte</code> 类型和 <code>[1]uint16</code> 类型有着相同的内存结构。只有当数组和结构体结合之后情况才会变的稍微复杂。</p>
+<p>下面我们尝试用汇编定义一个 <code>[2]int</code> 类型的数组变量 num：</p>
+<pre><code class="language-go">var num [2]int
+</code></pre>
+<p>然后在汇编中定义一个对应 16 字节大小的变量，并用零值进行初始化：</p>
+<pre><code>GLOBL ·num(SB),$16
+DATA ·num+0(SB)/8,$0
+DATA ·num+8(SB)/8,$0
+</code></pre>
+<p>下图是 Go 语句和汇编语句定义变量时的对应关系：</p>
+<p><img src="../images/ch3-4-pkg-var-decl-01.ditaa.png" alt=""></p>
+<p><em>图 3-4 变量定义</em></p>
+<p>汇编代码中并不需要 NOPTR 标志，因为 Go 编译器会从 Go 语言语句声明的 <code>[2]int</code> 类型中推导出该变量内部没有指针数据。</p>
+<h3>3.3.2.2 bool 型变量</h3>
+<p>Go 汇编语言定义变量无法指定类型信息，因此需要先通过 Go 语言声明变量的类型。以下是在 Go 语言中声明的几个 bool 类型变量：</p>
+<pre><code class="language-go">var (
+	boolValue  bool
+	trueValue  bool
+	falseValue bool
+)
+</code></pre>
+<p>在 Go 语言中声明的变量不能含有初始化语句。然后下面是 amd64 环境的汇编定义：</p>
+<pre><code>GLOBL ·boolValue(SB),$1   // 未初始化
+
+GLOBL ·trueValue(SB),$1   // var trueValue = true
+DATA ·trueValue(SB)/1,$1  // 非 0 均为 true
+
+GLOBL ·falseValue(SB),$1  // var falseValue = false
+DATA ·falseValue(SB)/1,$0
+</code></pre>
+<p>bool 类型的内存大小为 1 个字节。并且汇编中定义的变量需要手工指定初始化值，否则将可能导致产生未初始化的变量。当需要将 1 个字节的 bool 类型变量加载到 8 字节的寄存器时，需要使用 MOVBQZX 指令将不足的高位用 0 填充。</p>
+<h3>3.3.2.3 int 型变量</h3>
+<p>所有的整数类型均有类似的定义的方式，比较大的差异是整数类型的内存大小和整数是否是有符号。下面是声明的 int32 和 uint32 类型变量：</p>
+<pre><code class="language-go">var int32Value int32
+
+var uint32Value uint32
+</code></pre>
+<p>在 Go 语言中声明的变量不能含有初始化语句。然后下面是 amd64 环境的汇编定义：</p>
+<pre><code>GLOBL ·int32Value(SB),$4
+DATA ·int32Value+0(SB)/1,$0x01  // 第 0 字节
+DATA ·int32Value+1(SB)/1,$0x02  // 第 1 字节
+DATA ·int32Value+2(SB)/2,$0x03  // 第 3-4 字节
+
+GLOBL ·uint32Value(SB),$4
+DATA ·uint32Value(SB)/4,$0x01020304 // 第 1-4 字节
+</code></pre>
+<p>汇编定义变量时初始化数据并不区分整数是否有符号。只有在 CPU 指令处理该寄存器数据时，才会根据指令的类型来取分数据的类型或者是否带有符号位。</p>
+<h3>3.3.2.4 float 型变量</h3>
+<p>Go 汇编语言通常无法区分变量是否是浮点数类型，与之相关的浮点数机器指令会将变量当作浮点数处理。Go 语言的浮点数遵循 IEEE754 标准，有 float32 单精度浮点数和 float64 双精度浮点数之分。</p>
+<p>IEEE754 标准中，最高位 1bit 为符号位，然后是指数位（指数为采用移码格式表示），然后是有效数部分（其中小数点左边的一个 bit 位被省略）。下图是 IEEE754 中 float32 类型浮点数的 bit 布局：</p>
+<p><img src="../images/ch3-5-ieee754.jpg" alt=""></p>
+<p><em>图 3-5 IEEE754 浮点数结构</em></p>
+<p>IEEE754 浮点数还有一些奇妙的特性：比如有正负两个 0；除了无穷大和无穷小 Inf 还有非数 NaN；同时如果两个浮点数有序那么对应的有符号整数也是有序的（反之则不一定成立，因为浮点数中存在的非数是不可排序的）。浮点数是程序中最难琢磨的角落，因为程序中很多手写的浮点数字面值常量根本无法精确表达，浮点数计算涉及到的误差舍入方式可能也的随机的。</p>
+<p>下面是在 Go 语言中声明两个浮点数（如果没有在汇编中定义变量，那么声明的同时也会定义变量）。</p>
+<pre><code class="language-go">var float32Value float32
+
+var float64Value float64
+</code></pre>
+<p>然后在汇编中定义并初始化上面声明的两个浮点数：</p>
+<pre><code>GLOBL ·float32Value(SB),$4
+DATA ·float32Value+0(SB)/4,$1.5      // var float32Value = 1.5
+
+GLOBL ·float64Value(SB),$8
+DATA ·float64Value(SB)/8,$0x01020304 // bit 方式初始化
+</code></pre>
+<p>我们在上一节精简的算术指令中都是针对整数，如果要通过整数指令处理浮点数的加减法必须根据浮点数的运算规则进行：先对齐小数点，然后进行整数加减法，最后再对结果进行归一化并处理精度舍入问题。不过在目前的主流 CPU 中，都针对浮点数提供了专有的计算指令。</p>
+<h3>3.3.2.5 string 类型变量</h3>
+<p>从 Go 汇编语言角度看，字符串只是一种结构体。string 的头结构定义如下：</p>
+<pre><code class="language-go">type reflect.StringHeader struct {
+	Data uintptr
+	Len  int
+}
+</code></pre>
+<p>在 amd64 环境中 StringHeader 有 16 个字节大小，因此我们先在 Go 代码声明字符串变量，然后在汇编中定义一个 16 字节大小的变量：</p>
+<pre><code class="language-go">var helloworld string
+</code></pre>
+<pre><code>GLOBL ·helloworld(SB),$16
+</code></pre>
+<p>同时我们可以为字符串准备真正的数据。在下面的汇编代码中，我们定义了一个 text 当前文件内的私有变量（以 <code>&lt;&gt;</code> 为后缀名），内容为 “Hello World!”：</p>
+<pre><code>GLOBL text&lt;&gt;(SB),NOPTR,$16
+DATA text&lt;&gt;+0(SB)/8,$&quot;Hello Wo&quot;
+DATA text&lt;&gt;+8(SB)/8,$&quot;rld!&quot;
+</code></pre>
+<p>虽然 <code>text&lt;&gt;</code> 私有变量表示的字符串只有 12 个字符长度，但是我们依然需要将变量的长度扩展为 2 的指数倍数，这里也就是 16 个字节的长度。其中 <code>NOPTR</code> 表示 <code>text&lt;&gt;</code> 不包含指针数据。</p>
+<p>然后使用 text 私有变量对应的内存地址对应的常量来初始化字符串头结构体中的 Data 部分，并且手工指定 Len 部分为字符串的长度：</p>
+<pre><code>DATA ·helloworld+0(SB)/8,$text&lt;&gt;(SB) // StringHeader.Data
+DATA ·helloworld+8(SB)/8,$12         // StringHeader.Len
+</code></pre>
+<p>需要注意的是，字符串是只读类型，要避免在汇编中直接修改字符串底层数据的内容。</p>
+<h3>3.3.2.6 slice 类型变量</h3>
+<p>slice 变量和 string 变量相似，只不过是对应的是切片头结构体而已。切片头的结构如下：</p>
+<pre><code class="language-go">type reflect.SliceHeader struct {
+	Data uintptr
+	Len  int
+	Cap  int
+}
+</code></pre>
+<p>对比可以发现，切片的头的前 2 个成员字符串是一样的。因此我们可以在前面字符串变量的基础上，再扩展一个 Cap 成员就成了切片类型了：</p>
+<pre><code class="language-go">var helloworld []byte
+</code></pre>
+<pre><code>GLOBL ·helloworld(SB),$24            // var helloworld []byte(&quot;Hello World!&quot;)
+DATA ·helloworld+0(SB)/8,$text&lt;&gt;(SB) // SliceHeader.Data
+DATA ·helloworld+8(SB)/8,$12         // SliceHeader.Len
+DATA ·helloworld+16(SB)/8,$16        // SliceHeader.Cap
+
+GLOBL text&lt;&gt;(SB),$16
+DATA text&lt;&gt;+0(SB)/8,$&quot;Hello Wo&quot;      // ...string data...
+DATA text&lt;&gt;+8(SB)/8,$&quot;rld!&quot;          // ...string data...
+</code></pre>
+<p>因为切片和字符串的相容性，我们可以将切片头的前 16 个字节临时作为字符串使用，这样可以省去不必要的转换。</p>
+<h3>3.3.2.7 map/channel 类型变量</h3>
+<p>map/channel 等类型并没有公开的内部结构，它们只是一种未知类型的指针，无法直接初始化。在汇编代码中我们只能为类似变量定义并进行 0 值初始化：</p>
+<pre><code class="language-go">var m map[string]int
+
+var ch chan int
+</code></pre>
+<pre><code>GLOBL ·m(SB),$8  // var m map[string]int
+DATA  ·m+0(SB)/8,$0
+
+GLOBL ·ch(SB),$8 // var ch chan int
+DATA  ·ch+0(SB)/8,$0
+</code></pre>
+<p>其实在 runtime 包中为汇编提供了一些辅助函数。比如在汇编中可以通过 runtime.makemap 和 runtime.makechan 内部函数来创建 map 和 chan 变量。辅助函数的签名如下：</p>
+<pre><code class="language-go">func makemap(mapType *byte, hint int, mapbuf *any) (hmap map[any]any)
+func makechan(chanType *byte, size int) (hchan chan any)
+</code></pre>
+<p>需要注意的是，makemap 是一种泛型函数，可以创建不同类型的 map，map 的具体类型是通过 mapType 参数指定。</p>
+<h2>3.3.3 变量的内存布局</h2>
+<p>我们已经多次强调，在 Go 汇编语言中变量是没有类型的。因此在 Go 语言中有着不同类型的变量，底层可能对应的是相同的内存结构。深刻理解每个变量的内存布局是汇编编程时的必备条件。</p>
+<p>首先查看前面已经见过的 <code>[2]int</code> 类型数组的内存布局：</p>
+<p><img src="../images/ch3-6-pkg-var-decl-02.ditaa.png" alt=""></p>
+<p><em>图 3-6 变量定义</em></p>
+<p>变量在 data 段分配空间，数组的元素地址依次从低向高排列。</p>
+<p>然后再查看下标准库图像包中 <code>image.Point</code> 结构体类型变量的内存布局：</p>
+<p><img src="../images/ch3-7-pkg-var-decl-03.ditaa.png" alt=""></p>
+<p><em>图 3-7 结构体变量定义</em></p>
+<p>变量也是在 data 段分配空间，变量结构体成员的地址也是依次从低向高排列。</p>
+<p>因此 <code>[2]int</code> 和 <code>image.Point</code> 类型底层有着近似相同的内存布局。</p>
+<h2>3.3.4 标识符规则和特殊标志</h2>
+<p>Go 语言的标识符可以由绝对的包路径加标识符本身定位，因此不同包中的标识符即使同名也不会有问题。Go 汇编是通过特殊的符号来表示斜杠和点符号，因为这样可以简化汇编器词法扫描部分代码的编写，只要通过字符串替换就可以了。</p>
+<p>下面是汇编中常见的几种标识符的使用方式（通常也适用于函数标识符）：</p>
+<pre><code>GLOBL ·pkg_name1(SB),$1
+GLOBL main·pkg_name2(SB),$1
+GLOBL my/pkg·pkg_name(SB),$1
+</code></pre>
+<p>此外，Go 汇编中可以定义仅当前文件可以访问的私有标识符（类似 C 语言中文件内 static 修饰的变量），以 <code>&lt;&gt;</code> 为后缀名：</p>
+<pre><code>GLOBL file_private&lt;&gt;(SB),$1
+</code></pre>
+<p>这样可以减少私有标识符对其它文件内标识符命名的干扰。</p>
+<p>此外，Go 汇编语言还在 &quot;textflag.h&quot; 文件定义了一些标志。其中用于变量的标志有 DUPOK、RODATA 和 NOPTR 几个。DUPOK 表示该变量对应的标识符可能有多个，在链接时只选择其中一个即可（一般用于合并相同的常量字符串，减少重复数据占用的空间）。RODATA 标志表示将变量定义在只读内存段，因此后续任何对此变量的修改操作将导致异常（recover 也无法捕获）。NOPTR 则表示此变量的内部不含指针数据，让垃圾回收器忽略对该变量的扫描。如果变量已经在 Go 代码中声明过的话，Go 编译器会自动分析出该变量是否包含指针，这种时候可以不用手写 NOPTR 标志。</p>
+<p>比如下面的例子是通过汇编来定义一个只读的 int 类型的变量：</p>
+<pre><code class="language-go">var const_id int // readonly
+</code></pre>
+<pre><code>#include &quot;textflag.h&quot;
+
+GLOBL ·const_id(SB),NOPTR|RODATA,$8
+DATA  ·const_id+0(SB)/8,$9527
+</code></pre>
+<p>我们使用 #include 语句包含定义标志的 &quot;textflag.h&quot; 头文件（和 C 语言中预处理相同）。然后 GLOBL 汇编命令在定义变量时，给变量增加了 NOPTR 和 RODATA 两个标志（多个标志之间采用竖杠分割），表示变量中没有指针数据同时定义在只读数据段。</p>
+<p>变量一般也叫可取地址的值，但是 const_id 虽然可以取地址，但是确实不能修改。不能修改的限制并不是由编译器提供，而是因为对该变量的修改会导致对只读内存段进行写，从而导致异常。</p>
+<h2>3.3.5 小结</h2>
+<p>以上我们初步展示了通过汇编定义全局变量的用法。但是真实的环境中我们并不推荐通过汇编定义变量——因为用 Go 语言定义变量更加简单和安全。在 Go 语言中定义变量，编译器可以帮助我们计算好变量的大小，生成变量的初始值，同时也包含了足够的类型信息。汇编语言的优势是挖掘机器的特性和性能，用汇编定义变量则无法发挥这些优势。因此在理解了汇编定义变量的用法后，建议大家谨慎使用。</p>
+
+
+                        <hr><table><tr><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/css.png"></td><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/cch.png"></td></tr></table>
+
+                        
+                            <div id="giscus-container"></div>
+                        
+
+                        
+                            <footer class="page-footer">
+                                <span>© 2019-2022 | <a href="https://github.com/chai2010/advanced-go-programming-book">柴树杉、曹春晖</a> 保留所有权利</span>
+                            </footer>
+                        
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../ch3-asm/ch3-02-arch.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                        
+                            <!-- ../ch3-asm/ch3-04-func.html -->
+                            <a rel="next" href="../ch3-asm/ch3-04-func.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../ch3-asm/ch3-02-arch.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                
+                    <a rel="next" href="../ch3-asm/ch3-04-func.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../static/wabook/mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/book.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script type="text/javascript" charset="utf-8">
+            var pagePath = "ch3-asm/ch3-03-const-and-var.md"
+        </script>
+
+        <!-- Custom JS scripts -->
+        
+            <script src="../static/wabook/giscus.js" type="text/javascript" charset="utf-8"></script>
+        
+
+    </body>
+</html>

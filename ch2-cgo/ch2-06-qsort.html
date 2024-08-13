@@ -1,0 +1,699 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using https://github.com/wa-lang/wabook -->
+        <meta charset="UTF-8">
+        <title>实战: 封装qsort - Go语言高级编程</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../static/wabook/css/variables.css">
+        <link rel="stylesheet" href="../static/wabook/css/general.css">
+        <link rel="stylesheet" href="../static/wabook/css/chrome.css">
+        <link rel="stylesheet" href="../static/wabook/css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../static/wabook/FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../static/wabook/fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../static/wabook/highlight.css">
+        <link rel="stylesheet" href="../static/wabook/tomorrow-night.css">
+        <link rel="stylesheet" href="../static/wabook/ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('wabook-theme');
+                var sidebar = localStorage.getItem('wabook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('wabook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('wabook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('wabook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('wabook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter">
+  <li class="chapter-item expanded ">
+    <a href="../index.html" >Go语言高级编程</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../preface.html" >前言</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../ch1-basic/readme.html" ><strong aria-hidden="true">1.</strong> 语言基础</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-01-genesis.html" ><strong aria-hidden="true">1.1.</strong> Go语言创世纪</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-02-hello-revolution.html" ><strong aria-hidden="true">1.2.</strong> Hello, World 的革命</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-03-array-string-and-slice.html" ><strong aria-hidden="true">1.3.</strong> 数组、字符串和切片</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-04-func-method-interface.html" ><strong aria-hidden="true">1.4.</strong> 函数、方法和接口</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-05-mem.html" ><strong aria-hidden="true">1.5.</strong> 面向并发的内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-06-goroutine.html" ><strong aria-hidden="true">1.6.</strong> 常见的并发模式</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-07-error-and-panic.html" ><strong aria-hidden="true">1.7.</strong> 错误和异常</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-08-ext.html" ><strong aria-hidden="true">1.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch2-cgo/readme.html" ><strong aria-hidden="true">2.</strong> CGO编程</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-01-hello-cgo.html" ><strong aria-hidden="true">2.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-02-basic.html" ><strong aria-hidden="true">2.2.</strong> CGO基础</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-03-cgo-types.html" ><strong aria-hidden="true">2.3.</strong> 类型转换</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-04-func.html" ><strong aria-hidden="true">2.4.</strong> 函数调用</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-05-internal.html" ><strong aria-hidden="true">2.5.</strong> 内部机制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-06-qsort.html" class="active"><strong aria-hidden="true">2.6.</strong> 实战: 封装qsort</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-07-memory.html" ><strong aria-hidden="true">2.7.</strong> CGO内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-08-class.html" ><strong aria-hidden="true">2.8.</strong> C++类包装</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-09-static-shared-lib.html" ><strong aria-hidden="true">2.9.</strong> 静态库和动态库</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-10-link.html" ><strong aria-hidden="true">2.10.</strong> 编译和链接参数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-11-ext.html" ><strong aria-hidden="true">2.11.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch3-asm/readme.html" ><strong aria-hidden="true">3.</strong> 汇编语言</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-01-basic.html" ><strong aria-hidden="true">3.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-02-arch.html" ><strong aria-hidden="true">3.2.</strong> 计算机结构</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-03-const-and-var.html" ><strong aria-hidden="true">3.3.</strong> 常量和全局变量</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-04-func.html" ><strong aria-hidden="true">3.4.</strong> 函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-05-control-flow.html" ><strong aria-hidden="true">3.5.</strong> 控制流</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-06-func-again.html" ><strong aria-hidden="true">3.6.</strong> 再论函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-07-hack-asm.html" ><strong aria-hidden="true">3.7.</strong> 汇编语言的威力</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-08-goroutine-id.html" ><strong aria-hidden="true">3.8.</strong> 例子：Goroutine ID</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-09-debug.html" ><strong aria-hidden="true">3.9.</strong> Delve调试器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-10-ext.html" ><strong aria-hidden="true">3.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch4-rpc/readme.html" ><strong aria-hidden="true">4.</strong> 第4章 RPC和Protobuf</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-01-rpc-intro.html" ><strong aria-hidden="true">4.1.</strong> RPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-02-pb-intro.html" ><strong aria-hidden="true">4.2.</strong> Protobuf</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-03-netrpc-hack.html" ><strong aria-hidden="true">4.3.</strong> 玩转RPC</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-04-grpc.html" ><strong aria-hidden="true">4.4.</strong> gRPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-05-grpc-hack.html" ><strong aria-hidden="true">4.5.</strong> gRPC进阶</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-06-grpc-ext.html" ><strong aria-hidden="true">4.6.</strong> gRPC和Protobuf扩展</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-07-pbgo.html" ><strong aria-hidden="true">4.7.</strong> pbgo: 基于Protobuf的框架</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-08-grpcurl.html" ><strong aria-hidden="true">4.8.</strong> grpcurl工具</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-09-ext.html" ><strong aria-hidden="true">4.9.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch5-web/readme.html" ><strong aria-hidden="true">5.</strong> Go和Web</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-01-introduction.html" ><strong aria-hidden="true">5.1.</strong> Web开发简介</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-02-router.html" ><strong aria-hidden="true">5.2.</strong> 请求路由</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-03-middleware.html" ><strong aria-hidden="true">5.3.</strong> 中间件</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-04-validator.html" ><strong aria-hidden="true">5.4.</strong> 请求校验</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-05-database.html" ><strong aria-hidden="true">5.5.</strong> 和数据库打交道</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-06-ratelimit.html" ><strong aria-hidden="true">5.6.</strong> 服务流量限制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-07-layout-of-web-project.html" ><strong aria-hidden="true">5.7.</strong> 大型Web项目分层</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-08-interface-and-web.html" ><strong aria-hidden="true">5.8.</strong> 接口和表驱动开发</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-09-gated-launch.html" ><strong aria-hidden="true">5.9.</strong> 灰度发布和A/B测试</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-10-ext.html" ><strong aria-hidden="true">5.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch6-cloud/readme.html" ><strong aria-hidden="true">6.</strong> 分布式系统</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-01-dist-id.html" ><strong aria-hidden="true">6.1.</strong> 分布式 id 生成器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-02-lock.html" ><strong aria-hidden="true">6.2.</strong> 分布式锁</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-03-delay-job.html" ><strong aria-hidden="true">6.3.</strong> 延时任务系统</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-04-search-engine.html" ><strong aria-hidden="true">6.4.</strong> 分布式搜索引擎</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-05-load-balance.html" ><strong aria-hidden="true">6.5.</strong> 负载均衡</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-06-config.html" ><strong aria-hidden="true">6.6.</strong> 分布式配置管理</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-07-crawler.html" ><strong aria-hidden="true">6.7.</strong> 分布式爬虫</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-08-ext.html" ><strong aria-hidden="true">6.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../appendix/readme.html" ><strong aria-hidden="true">7.</strong> 附录</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-a-trap.html" ><strong aria-hidden="true">7.1.</strong> 附录A: Go语言常见坑</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-b-gems.html" ><strong aria-hidden="true">7.2.</strong> 附录B: 有趣的代码片段</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-c-author.html" ><strong aria-hidden="true">7.3.</strong> 附录C: 作者简介</a>
+    </li>
+  </ol>
+</ol>
+
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                    </div>
+
+                    <h1 class="menu-title"><a href="../index.html">Go语言高级编程</a></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/chai2010/advanced-go-programming-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/chai2010/advanced-go-programming-book/edit/master/ch2-cgo/ch2-06-qsort.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+
+                    <main>
+                        <ul dir="auto"><li><em>凹语言(Go实现, 面向WASM设计): <a href="https://github.com/wa-lang/wa">https://github.com/wa-lang/wa</a></em></li><li><em>WaBook(Go语言实现的MD电子书构建工具): <a href="https://github.com/wa-lang/wabook">https://github.com/wa-lang/wabook</a></em></li></ul><hr>
+
+                        <h1>2.6 实战: 封装 qsort</h1>
+<p>qsort 快速排序函数是 C 语言的高阶函数，支持用于自定义排序比较函数，可以对任意类型的数组进行排序。本节我们尝试基于 C 语言的 qsort 函数封装一个 Go 语言版本的 qsort 函数。</p>
+<h2>2.6.1 认识 qsort 函数</h2>
+<p>qsort 快速排序函数由 <code>&lt;stdlib.h&gt;</code> 标准库提供，函数的声明如下：</p>
+<pre><code class="language-c">void qsort(
+	void* base, size_t num, size_t size,
+	int (*cmp)(const void*, const void*)
+);
+</code></pre>
+<p>其中 base 参数是要排序数组的首个元素的地址，num 是数组中元素的个数，size 是数组中每个元素的大小。最关键是 cmp 比较函数，用于对数组中任意两个元素进行排序。cmp 排序函数的两个指针参数分别是要比较的两个元素的地址，如果第一个参数对应元素大于第二个参数对应的元素将返回结果大于 0，如果两个元素相等则返回 0，如果第一个元素小于第二个元素则返回结果小于 0。</p>
+<p>下面的例子是用 C 语言的 qsort 对一个 int 类型的数组进行排序：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define DIM(x) (sizeof(x)/sizeof((x)[0]))
+
+static int cmp(const void* a, const void* b) {
+	const int* pa = (int*)a;
+	const int* pb = (int*)b;
+	return *pa - *pb;
+}
+
+int main() {
+	int values[] = { 42, 8, 109, 97, 23, 25};
+	int i;
+
+	qsort(values, DIM(values), sizeof(values[0]), cmp);
+
+	for(i = 0; i &lt; DIM(values); i++) {
+		printf (&quot;%d&quot;,values[i]);
+	}
+	return 0;
+}
+</code></pre>
+<p>其中 <code>DIM(values)</code> 宏用于计算数组元素的个数，<code>sizeof(values[0])</code> 用于计算数组元素的大小。
+cmp 是用于排序时比较两个元素大小的回调函数。为了避免对全局名字空间的污染，我们将 cmp 回调函数定义为仅当前文件内可访问的静态函数。</p>
+<h2>2.6.2 将 qsort 函数从 Go 包导出</h2>
+<p>为了方便 Go 语言的非 CGO 用户使用 qsort 函数，我们需要将 C 语言的 qsort 函数包装为一个外部可以访问的 Go 函数。</p>
+<p>用 Go 语言将 qsort 函数重新包装为 <code>qsort.Sort</code> 函数：</p>
+<pre><code class="language-go">package qsort
+
+//typedef int (*qsort_cmp_func_t)(const void* a, const void* b);
+import &quot;C&quot;
+import &quot;unsafe&quot;
+
+func Sort(
+	base unsafe.Pointer, num, size C.size_t,
+	cmp C.qsort_cmp_func_t,
+) {
+	C.qsort(base, num, size, cmp)
+}
+</code></pre>
+<p>因为 Go 语言的 CGO 语言不好直接表达 C 语言的函数类型，因此在 C 语言空间将比较函数类型重新定义为一个 <code>qsort_cmp_func_t</code> 类型。</p>
+<p>虽然 Sort 函数已经导出了，但是对于 qsort 包之外的用户依然不能直接使用该函数——Sort 函数的参数还包含了虚拟的 C 包提供的类型。
+在 CGO 的内部机制一节中我们已经提过，虚拟的 C 包下的任何名称其实都会被映射为包内的私有名字。比如 <code>C.size_t</code> 会被展开为 <code>_Ctype_size_t</code>，<code>C.qsort_cmp_func_t</code> 类型会被展开为 <code>_Ctype_qsort_cmp_func_t</code>。</p>
+<p>被 CGO 处理后的 Sort 函数的类型如下：</p>
+<pre><code class="language-go">func Sort(
+	base unsafe.Pointer, num, size _Ctype_size_t,
+	cmp _Ctype_qsort_cmp_func_t,
+)
+</code></pre>
+<p>这样将会导致包外部用于无法构造 <code>_Ctype_size_t</code> 和 <code>_Ctype_qsort_cmp_func_t</code> 类型的参数而无法使用 Sort 函数。因此，导出的 Sort 函数的参数和返回值要避免对虚拟 C 包的依赖。</p>
+<p>重新调整 Sort 函数的参数类型和实现如下：</p>
+<pre><code class="language-go">/*
+#include &lt;stdlib.h&gt;
+
+typedef int (*qsort_cmp_func_t)(const void* a, const void* b);
+*/
+import &quot;C&quot;
+import &quot;unsafe&quot;
+
+type CompareFunc C.qsort_cmp_func_t
+
+func Sort(base unsafe.Pointer, num, size int, cmp CompareFunc) {
+	C.qsort(base, C.size_t(num), C.size_t(size), C.qsort_cmp_func_t(cmp))
+}
+</code></pre>
+<p>我们将虚拟 C 包中的类型通过 Go 语言类型代替，在内部调用 C 函数时重新转型为 C 函数需要的类型。因此外部用户将不再依赖 qsort 包内的虚拟 C 包。</p>
+<p>以下代码展示的 Sort 函数的使用方式：</p>
+<pre><code class="language-go">package main
+
+//extern int go_qsort_compare(void* a, void* b);
+import &quot;C&quot;
+
+import (
+	&quot;fmt&quot;
+	&quot;unsafe&quot;
+
+	qsort &quot;.&quot;
+)
+
+//export go_qsort_compare
+func go_qsort_compare(a, b unsafe.Pointer) C.int {
+	pa, pb := (*C.int)(a), (*C.int)(b)
+	return C.int(*pa - *pb)
+}
+
+func main() {
+	values := []int32{42, 9, 101, 95, 27, 25}
+
+	qsort.Sort(unsafe.Pointer(&amp;values[0]),
+		len(values), int(unsafe.Sizeof(values[0])),
+		qsort.CompareFunc(C.go_qsort_compare),
+	)
+	fmt.Println(values)
+}
+</code></pre>
+<p>为了使用 Sort 函数，我们需要将 Go 语言的切片取首地址、元素个数、元素大小等信息作为调用参数，同时还需要提供一个 C 语言规格的比较函数。
+其中 go_qsort_compare 是用 Go 语言实现的，并导出到 C 语言空间的函数，用于 qsort 排序时的比较函数。</p>
+<p>目前已经实现了对 C 语言的 qsort 初步包装，并且可以通过包的方式被其它用户使用。但是 <code>qsort.Sort</code> 函数已经有很多不便使用之处：用户要提供 C 语言的比较函数，这对许多 Go 语言用户是一个挑战。下一步我们将继续改进 qsort 函数的包装函数，尝试通过闭包函数代替 C 语言的比较函数。</p>
+<p>消除用户对 CGO 代码的直接依赖。</p>
+<h2>2.6.3 改进：闭包函数作为比较函数</h2>
+<p>在改进之前我们先回顾下 Go 语言 sort 包自带的排序函数的接口：</p>
+<pre><code class="language-go">func Slice(slice interface{}, less func(i, j int) bool)
+</code></pre>
+<p>标准库的 sort.Slice 因为支持通过闭包函数指定比较函数，对切片的排序非常简单：</p>
+<pre><code class="language-go">import &quot;sort&quot;
+
+func main() {
+	values := []int32{42, 9, 101, 95, 27, 25}
+
+	sort.Slice(values, func(i, j int) bool {
+		return values[i] &lt; values[j]
+	})
+
+	fmt.Println(values)
+}
+</code></pre>
+<p>我们也尝试将 C 语言的 qsort 函数包装为以下格式的 Go 语言函数：</p>
+<pre><code class="language-go">package qsort
+
+func Sort(base unsafe.Pointer, num, size int, cmp func(a, b unsafe.Pointer) int)
+</code></pre>
+<p>闭包函数无法导出为 C 语言函数，因此无法直接将闭包函数传入 C 语言的 qsort 函数。
+为此我们可以用 Go 构造一个可以导出为 C 语言的代理函数，然后通过一个全局变量临时保存当前的闭包比较函数。</p>
+<p>代码如下：</p>
+<pre><code class="language-go">var go_qsort_compare_info struct {
+	fn func(a, b unsafe.Pointer) int
+	sync.Mutex
+}
+
+//export _cgo_qsort_compare
+func _cgo_qsort_compare(a, b unsafe.Pointer) C.int {
+	return C.int(go_qsort_compare_info.fn(a, b))
+}
+</code></pre>
+<p>其中导出的 C 语言函数 <code>_cgo_qsort_compare</code> 是公用的 qsort 比较函数，内部通过 <code>go_qsort_compare_info.fn</code> 来调用当前的闭包比较函数。</p>
+<p>新的 Sort 包装函数实现如下：</p>
+<pre><code class="language-go">/*
+#include &lt;stdlib.h&gt;
+
+typedef int (*qsort_cmp_func_t)(const void* a, const void* b);
+extern int _cgo_qsort_compare(void* a, void* b);
+*/
+import &quot;C&quot;
+
+func Sort(base unsafe.Pointer, num, size int, cmp func(a, b unsafe.Pointer) int) {
+	go_qsort_compare_info.Lock()
+	defer go_qsort_compare_info.Unlock()
+
+	go_qsort_compare_info.fn = cmp
+
+	C.qsort(base, C.size_t(num), C.size_t(size),
+		C.qsort_cmp_func_t(C._cgo_qsort_compare),
+	)
+}
+</code></pre>
+<p>每次排序前，对全局的 go_qsort_compare_info 变量加锁，同时将当前的闭包函数保存到全局变量，然后调用 C 语言的 qsort 函数。</p>
+<p>基于新包装的函数，我们可以简化之前的排序代码：</p>
+<pre><code class="language-go">func main() {
+	values := []int32{42, 9, 101, 95, 27, 25}
+
+	qsort.Sort(unsafe.Pointer(&amp;values[0]), len(values), int(unsafe.Sizeof(values[0])),
+		func(a, b unsafe.Pointer) int {
+			pa, pb := (*int32)(a), (*int32)(b)
+			return int(*pa - *pb)
+		},
+	)
+
+	fmt.Println(values)
+}
+</code></pre>
+<p>现在排序不再需要通过 CGO 实现 C 语言版本的比较函数了，可以传入 Go 语言闭包函数作为比较函数。
+但是导入的排序函数依然依赖 unsafe 包，这是违背 Go 语言编程习惯的。</p>
+<h2>2.6.4 改进：消除用户对 unsafe 包的依赖</h2>
+<p>前一个版本的 qsort.Sort 包装函数已经比最初的 C 语言版本的 qsort 易用很多，但是依然保留了很多 C 语言底层数据结构的细节。
+现在我们将继续改进包装函数，尝试消除对 unsafe 包的依赖，并实现一个类似标准库中 sort.Slice 的排序函数。</p>
+<p>新的包装函数声明如下：</p>
+<pre><code class="language-go">package qsort
+
+func Slice(slice interface{}, less func(a, b int) bool)
+</code></pre>
+<p>首先，我们将 slice 作为接口类型参数传入，这样可以适配不同的切片类型。
+然后切片的首个元素的地址、元素个数和元素大小可以通过 reflect 反射包从切片中获取。</p>
+<p>为了保存必要的排序上下文信息，我们需要在全局包变量增加要排序数组的地址、元素个数和元素大小等信息，比较函数改为 less：</p>
+<pre><code class="language-go">var go_qsort_compare_info struct {
+	base     unsafe.Pointer
+	elemnum  int
+	elemsize int
+	less     func(a, b int) bool
+	sync.Mutex
+}
+</code></pre>
+<p>同样比较函数需要根据元素指针、排序数组的开始地址和元素的大小计算出元素对应数组的索引下标，
+然后根据 less 函数的比较结果返回 qsort 函数需要格式的比较结果。</p>
+<pre><code class="language-go">//export _cgo_qsort_compare
+func _cgo_qsort_compare(a, b unsafe.Pointer) C.int {
+	var (
+		// array memory is locked
+		base     = uintptr(go_qsort_compare_info.base)
+		elemsize = uintptr(go_qsort_compare_info.elemsize)
+	)
+
+	i := int((uintptr(a) - base) / elemsize)
+	j := int((uintptr(b) - base) / elemsize)
+
+	switch {
+	case go_qsort_compare_info.less(i, j): // v[i] &lt; v[j]
+		return -1
+	case go_qsort_compare_info.less(j, i): // v[i] &gt; v[j]
+		return +1
+	default:
+		return 0
+	}
+}
+</code></pre>
+<p>新的 Slice 函数的实现如下：</p>
+<pre><code class="language-go">
+func Slice(slice interface{}, less func(a, b int) bool) {
+	sv := reflect.ValueOf(slice)
+	if sv.Kind() != reflect.Slice {
+		panic(fmt.Sprintf(&quot;qsort called with non-slice value of type %T&quot;, slice))
+	}
+	if sv.Len() == 0 {
+		return
+	}
+
+	go_qsort_compare_info.Lock()
+	defer go_qsort_compare_info.Unlock()
+
+	defer func() {
+		go_qsort_compare_info.base = nil
+		go_qsort_compare_info.elemnum = 0
+		go_qsort_compare_info.elemsize = 0
+		go_qsort_compare_info.less = nil
+	}()
+
+	// baseMem = unsafe.Pointer(sv.Index(0).Addr().Pointer())
+	// baseMem maybe moved, so must saved after call C.fn
+	go_qsort_compare_info.base = unsafe.Pointer(sv.Index(0).Addr().Pointer())
+	go_qsort_compare_info.elemnum = sv.Len()
+	go_qsort_compare_info.elemsize = int(sv.Type().Elem().Size())
+	go_qsort_compare_info.less = less
+
+	C.qsort(
+		go_qsort_compare_info.base,
+		C.size_t(go_qsort_compare_info.elemnum),
+		C.size_t(go_qsort_compare_info.elemsize),
+		C.qsort_cmp_func_t(C._cgo_qsort_compare),
+	)
+}
+</code></pre>
+<p>首先需要判断传入的接口类型必须是切片类型。然后通过反射获取 qsort 函数需要的切片信息，并调用 C 语言的 qsort 函数。</p>
+<p>基于新包装的函数我们可以采用和标准库相似的方式排序切片：</p>
+<pre><code class="language-go">import (
+	&quot;fmt&quot;
+
+	qsort &quot;.&quot;
+)
+
+func main() {
+	values := []int64{42, 9, 101, 95, 27, 25}
+
+	qsort.Slice(values, func(i, j int) bool {
+		return values[i] &lt; values[j]
+	})
+
+	fmt.Println(values)
+}
+</code></pre>
+<p>为了避免在排序过程中，排序数组的上下文信息 <code>go_qsort_compare_info</code> 被修改，我们进行了全局加锁。
+因此目前版本的 qsort.Slice 函数是无法并发执行的，读者可以自己尝试改进这个限制。</p>
+
+
+                        <hr><table><tr><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/css.png"></td><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/cch.png"></td></tr></table>
+
+                        
+                            <div id="giscus-container"></div>
+                        
+
+                        
+                            <footer class="page-footer">
+                                <span>© 2019-2022 | <a href="https://github.com/chai2010/advanced-go-programming-book">柴树杉、曹春晖</a> 保留所有权利</span>
+                            </footer>
+                        
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../ch2-cgo/ch2-05-internal.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                        
+                            <!-- ../ch2-cgo/ch2-07-memory.html -->
+                            <a rel="next" href="../ch2-cgo/ch2-07-memory.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../ch2-cgo/ch2-05-internal.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                
+                    <a rel="next" href="../ch2-cgo/ch2-07-memory.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../static/wabook/mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/book.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script type="text/javascript" charset="utf-8">
+            var pagePath = "ch2-cgo/ch2-06-qsort.md"
+        </script>
+
+        <!-- Custom JS scripts -->
+        
+            <script src="../static/wabook/giscus.js" type="text/javascript" charset="utf-8"></script>
+        
+
+    </body>
+</html>

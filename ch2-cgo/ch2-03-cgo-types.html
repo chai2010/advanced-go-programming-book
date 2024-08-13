@@ -1,0 +1,848 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using https://github.com/wa-lang/wabook -->
+        <meta charset="UTF-8">
+        <title>类型转换 - Go语言高级编程</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../static/wabook/css/variables.css">
+        <link rel="stylesheet" href="../static/wabook/css/general.css">
+        <link rel="stylesheet" href="../static/wabook/css/chrome.css">
+        <link rel="stylesheet" href="../static/wabook/css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../static/wabook/FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../static/wabook/fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../static/wabook/highlight.css">
+        <link rel="stylesheet" href="../static/wabook/tomorrow-night.css">
+        <link rel="stylesheet" href="../static/wabook/ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('wabook-theme');
+                var sidebar = localStorage.getItem('wabook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('wabook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('wabook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('wabook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('wabook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter">
+  <li class="chapter-item expanded ">
+    <a href="../index.html" >Go语言高级编程</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../preface.html" >前言</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../ch1-basic/readme.html" ><strong aria-hidden="true">1.</strong> 语言基础</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-01-genesis.html" ><strong aria-hidden="true">1.1.</strong> Go语言创世纪</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-02-hello-revolution.html" ><strong aria-hidden="true">1.2.</strong> Hello, World 的革命</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-03-array-string-and-slice.html" ><strong aria-hidden="true">1.3.</strong> 数组、字符串和切片</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-04-func-method-interface.html" ><strong aria-hidden="true">1.4.</strong> 函数、方法和接口</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-05-mem.html" ><strong aria-hidden="true">1.5.</strong> 面向并发的内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-06-goroutine.html" ><strong aria-hidden="true">1.6.</strong> 常见的并发模式</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-07-error-and-panic.html" ><strong aria-hidden="true">1.7.</strong> 错误和异常</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-08-ext.html" ><strong aria-hidden="true">1.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch2-cgo/readme.html" ><strong aria-hidden="true">2.</strong> CGO编程</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-01-hello-cgo.html" ><strong aria-hidden="true">2.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-02-basic.html" ><strong aria-hidden="true">2.2.</strong> CGO基础</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-03-cgo-types.html" class="active"><strong aria-hidden="true">2.3.</strong> 类型转换</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-04-func.html" ><strong aria-hidden="true">2.4.</strong> 函数调用</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-05-internal.html" ><strong aria-hidden="true">2.5.</strong> 内部机制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-06-qsort.html" ><strong aria-hidden="true">2.6.</strong> 实战: 封装qsort</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-07-memory.html" ><strong aria-hidden="true">2.7.</strong> CGO内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-08-class.html" ><strong aria-hidden="true">2.8.</strong> C++类包装</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-09-static-shared-lib.html" ><strong aria-hidden="true">2.9.</strong> 静态库和动态库</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-10-link.html" ><strong aria-hidden="true">2.10.</strong> 编译和链接参数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-11-ext.html" ><strong aria-hidden="true">2.11.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch3-asm/readme.html" ><strong aria-hidden="true">3.</strong> 汇编语言</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-01-basic.html" ><strong aria-hidden="true">3.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-02-arch.html" ><strong aria-hidden="true">3.2.</strong> 计算机结构</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-03-const-and-var.html" ><strong aria-hidden="true">3.3.</strong> 常量和全局变量</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-04-func.html" ><strong aria-hidden="true">3.4.</strong> 函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-05-control-flow.html" ><strong aria-hidden="true">3.5.</strong> 控制流</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-06-func-again.html" ><strong aria-hidden="true">3.6.</strong> 再论函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-07-hack-asm.html" ><strong aria-hidden="true">3.7.</strong> 汇编语言的威力</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-08-goroutine-id.html" ><strong aria-hidden="true">3.8.</strong> 例子：Goroutine ID</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-09-debug.html" ><strong aria-hidden="true">3.9.</strong> Delve调试器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-10-ext.html" ><strong aria-hidden="true">3.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch4-rpc/readme.html" ><strong aria-hidden="true">4.</strong> 第4章 RPC和Protobuf</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-01-rpc-intro.html" ><strong aria-hidden="true">4.1.</strong> RPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-02-pb-intro.html" ><strong aria-hidden="true">4.2.</strong> Protobuf</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-03-netrpc-hack.html" ><strong aria-hidden="true">4.3.</strong> 玩转RPC</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-04-grpc.html" ><strong aria-hidden="true">4.4.</strong> gRPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-05-grpc-hack.html" ><strong aria-hidden="true">4.5.</strong> gRPC进阶</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-06-grpc-ext.html" ><strong aria-hidden="true">4.6.</strong> gRPC和Protobuf扩展</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-07-pbgo.html" ><strong aria-hidden="true">4.7.</strong> pbgo: 基于Protobuf的框架</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-08-grpcurl.html" ><strong aria-hidden="true">4.8.</strong> grpcurl工具</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-09-ext.html" ><strong aria-hidden="true">4.9.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch5-web/readme.html" ><strong aria-hidden="true">5.</strong> Go和Web</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-01-introduction.html" ><strong aria-hidden="true">5.1.</strong> Web开发简介</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-02-router.html" ><strong aria-hidden="true">5.2.</strong> 请求路由</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-03-middleware.html" ><strong aria-hidden="true">5.3.</strong> 中间件</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-04-validator.html" ><strong aria-hidden="true">5.4.</strong> 请求校验</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-05-database.html" ><strong aria-hidden="true">5.5.</strong> 和数据库打交道</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-06-ratelimit.html" ><strong aria-hidden="true">5.6.</strong> 服务流量限制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-07-layout-of-web-project.html" ><strong aria-hidden="true">5.7.</strong> 大型Web项目分层</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-08-interface-and-web.html" ><strong aria-hidden="true">5.8.</strong> 接口和表驱动开发</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-09-gated-launch.html" ><strong aria-hidden="true">5.9.</strong> 灰度发布和A/B测试</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-10-ext.html" ><strong aria-hidden="true">5.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch6-cloud/readme.html" ><strong aria-hidden="true">6.</strong> 分布式系统</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-01-dist-id.html" ><strong aria-hidden="true">6.1.</strong> 分布式 id 生成器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-02-lock.html" ><strong aria-hidden="true">6.2.</strong> 分布式锁</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-03-delay-job.html" ><strong aria-hidden="true">6.3.</strong> 延时任务系统</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-04-search-engine.html" ><strong aria-hidden="true">6.4.</strong> 分布式搜索引擎</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-05-load-balance.html" ><strong aria-hidden="true">6.5.</strong> 负载均衡</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-06-config.html" ><strong aria-hidden="true">6.6.</strong> 分布式配置管理</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-07-crawler.html" ><strong aria-hidden="true">6.7.</strong> 分布式爬虫</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-08-ext.html" ><strong aria-hidden="true">6.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../appendix/readme.html" ><strong aria-hidden="true">7.</strong> 附录</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-a-trap.html" ><strong aria-hidden="true">7.1.</strong> 附录A: Go语言常见坑</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-b-gems.html" ><strong aria-hidden="true">7.2.</strong> 附录B: 有趣的代码片段</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-c-author.html" ><strong aria-hidden="true">7.3.</strong> 附录C: 作者简介</a>
+    </li>
+  </ol>
+</ol>
+
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                    </div>
+
+                    <h1 class="menu-title"><a href="../index.html">Go语言高级编程</a></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/chai2010/advanced-go-programming-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/chai2010/advanced-go-programming-book/edit/master/ch2-cgo/ch2-03-cgo-types.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+
+                    <main>
+                        <ul dir="auto"><li><em>凹语言(Go实现, 面向WASM设计): <a href="https://github.com/wa-lang/wa">https://github.com/wa-lang/wa</a></em></li><li><em>WaBook(Go语言实现的MD电子书构建工具): <a href="https://github.com/wa-lang/wabook">https://github.com/wa-lang/wabook</a></em></li></ul><hr>
+
+                        <h1>2.3 类型转换</h1>
+<p>最初 CGO 是为了达到方便从 Go 语言函数调用 C 语言函数（用 C 语言实现 Go 语言声明的函数）以复用 C 语言资源这一目的而出现的（因为 C 语言还会涉及回调函数，自然也会涉及到从 C 语言函数调用 Go 语言函数（用 Go 语言实现 C 语言声明的函数））。现在，它已经演变为 C 语言和 Go 语言双向通讯的桥梁。要想利用好 CGO 特性，自然需要了解此二语言类型之间的转换规则，这是本节要讨论的问题。</p>
+<h2>2.3.1 数值类型</h2>
+<p>在 Go 语言中访问 C 语言的符号时，一般是通过虚拟的 “C” 包访问，比如 <code>C.int</code> 对应 C 语言的 <code>int</code> 类型。有些 C 语言的类型是由多个关键字组成，但通过虚拟的 “C” 包访问 C 语言类型时名称部分不能有空格字符，比如 <code>unsigned int</code> 不能直接通过 <code>C.unsigned int</code> 访问。因此 CGO 为 C 语言的基础数值类型都提供了相应转换规则，比如 <code>C.uint</code> 对应 C 语言的 <code>unsigned int</code>。</p>
+<p>Go 语言中数值类型和 C 语言数据类型基本上是相似的，以下是它们的对应关系表 2-1 所示。</p>
+<table>
+<thead>
+<tr>
+<th>C 语言类型</th>
+<th>CGO 类型</th>
+<th>Go 语言类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>char</td>
+<td>C.char</td>
+<td>byte</td>
+</tr>
+<tr>
+<td>singed char</td>
+<td>C.schar</td>
+<td>int8</td>
+</tr>
+<tr>
+<td>unsigned char</td>
+<td>C.uchar</td>
+<td>uint8</td>
+</tr>
+<tr>
+<td>short</td>
+<td>C.short</td>
+<td>int16</td>
+</tr>
+<tr>
+<td>unsigned short</td>
+<td>C.ushort</td>
+<td>uint16</td>
+</tr>
+<tr>
+<td>int</td>
+<td>C.int</td>
+<td>int32</td>
+</tr>
+<tr>
+<td>unsigned int</td>
+<td>C.uint</td>
+<td>uint32</td>
+</tr>
+<tr>
+<td>long</td>
+<td>C.long</td>
+<td>int32</td>
+</tr>
+<tr>
+<td>unsigned long</td>
+<td>C.ulong</td>
+<td>uint32</td>
+</tr>
+<tr>
+<td>long long int</td>
+<td>C.longlong</td>
+<td>int64</td>
+</tr>
+<tr>
+<td>unsigned long long int</td>
+<td>C.ulonglong</td>
+<td>uint64</td>
+</tr>
+<tr>
+<td>float</td>
+<td>C.float</td>
+<td>float32</td>
+</tr>
+<tr>
+<td>double</td>
+<td>C.double</td>
+<td>float64</td>
+</tr>
+<tr>
+<td>size_t</td>
+<td>C.size_t</td>
+<td>uint</td>
+</tr>
+</tbody>
+</table>
+<p><em>表 2-1 Go 语言和 C 语言类型对比</em></p>
+<p>需要注意的是，虽然在 C 语言中 <code>int</code>、<code>short</code> 等类型没有明确定义内存大小，但是在 CGO 中它们的内存大小是确定的。在 CGO 中，C 语言的 <code>int</code> 和 <code>long</code> 类型都是对应 4 个字节的内存大小，<code>size_t</code> 类型可以当作 Go 语言 <code>uint</code> 无符号整数类型对待。</p>
+<p>CGO 中，虽然 C 语言的 <code>int</code> 固定为 4 字节的大小，但是 Go 语言自己的 <code>int</code> 和 <code>uint</code> 却在 32 位和 64 位系统下分别对应 4 个字节和 8 个字节大小。如果需要在 C 语言中访问 Go 语言的 <code>int</code> 类型，可以通过 <code>GoInt</code> 类型访问，<code>GoInt</code> 类型在 CGO 工具生成的 <code>_cgo_export.h</code> 头文件中定义。其实在 <code>_cgo_export.h</code> 头文件中，每个基本的 Go 数值类型都定义了对应的 C 语言类型，它们一般都是以单词 Go 为前缀。下面是 64 位环境下，<code>_cgo_export.h</code> 头文件生成的 Go 数值类型的定义，其中 <code>GoInt</code> 和 <code>GoUint</code> 类型分别对应 <code>GoInt64</code> 和 <code>GoUint64</code>：</p>
+<pre><code class="language-c">typedef signed char GoInt8;
+typedef unsigned char GoUint8;
+typedef short GoInt16;
+typedef unsigned short GoUint16;
+typedef int GoInt32;
+typedef unsigned int GoUint32;
+typedef long long GoInt64;
+typedef unsigned long long GoUint64;
+typedef GoInt64 GoInt;
+typedef GoUint64 GoUint;
+typedef float GoFloat32;
+typedef double GoFloat64;
+</code></pre>
+<p>除了 <code>GoInt</code> 和 <code>GoUint</code> 之外，我们并不推荐直接访问 <code>GoInt32</code>、<code>GoInt64</code> 等类型。更好的做法是通过 C 语言的 C99 标准引入的 <code>&lt;stdint.h&gt;</code> 头文件。为了提高 C 语言的可移植性，在 <code>&lt;stdint.h&gt;</code> 文件中，不但每个数值类型都提供了明确内存大小，而且和 Go 语言的类型命名更加一致。Go 语言类型 <code>&lt;stdint.h&gt;</code> 头文件类型对比如表 2-2 所示。</p>
+<table>
+<thead>
+<tr>
+<th>C 语言类型</th>
+<th>CGO 类型</th>
+<th>Go 语言类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>int8_t</td>
+<td>C.int8_t</td>
+<td>int8</td>
+</tr>
+<tr>
+<td>uint8_t</td>
+<td>C.uint8_t</td>
+<td>uint8</td>
+</tr>
+<tr>
+<td>int16_t</td>
+<td>C.int16_t</td>
+<td>int16</td>
+</tr>
+<tr>
+<td>uint16_t</td>
+<td>C.uint16_t</td>
+<td>uint16</td>
+</tr>
+<tr>
+<td>int32_t</td>
+<td>C.int32_t</td>
+<td>int32</td>
+</tr>
+<tr>
+<td>uint32_t</td>
+<td>C.uint32_t</td>
+<td>uint32</td>
+</tr>
+<tr>
+<td>int64_t</td>
+<td>C.int64_t</td>
+<td>int64</td>
+</tr>
+<tr>
+<td>uint64_t</td>
+<td>C.uint64_t</td>
+<td>uint64</td>
+</tr>
+</tbody>
+</table>
+<p><em>表 2-2 <code>&lt;stdint.h&gt;</code> 类型对比</em></p>
+<p>前文说过，如果 C 语言的类型是由多个关键字组成，则无法通过虚拟的 “C” 包直接访问(比如 C 语言的 <code>unsigned short</code> 不能直接通过 <code>C.unsigned short</code> 访问)。但是，在 <code>&lt;stdint.h&gt;</code> 中通过使用 C 语言的 <code>typedef</code> 关键字将 <code>unsigned short</code> 重新定义为 <code>uint16_t</code> 这样一个单词的类型后，我们就可以通过 <code>C.uint16_t</code> 访问原来的 <code>unsigned short</code> 类型了。对于比较复杂的 C 语言类型，推荐使用 <code>typedef</code> 关键字提供一个规则的类型命名，这样更利于在 CGO 中访问。</p>
+<h2>2.3.2 Go 字符串和切片</h2>
+<p>在 CGO 生成的 <code>_cgo_export.h</code> 头文件中还会为 Go 语言的字符串、切片、字典、接口和管道等特有的数据类型生成对应的 C 语言类型：</p>
+<pre><code class="language-c">typedef struct {const char *p; GoInt n;} GoString;
+typedef void *GoMap;
+typedef void *GoChan;
+typedef struct {void *t; void *v;} GoInterface;
+typedef struct {void *data; GoInt len; GoInt cap;} GoSlice;
+</code></pre>
+<p>不过需要注意的是，其中只有字符串和切片在 CGO 中有一定的使用价值，因为 CGO 为他们的某些 GO 语言版本的操作函数生成了 C 语言版本，因此二者可以在 Go 调用 C 语言函数时马上使用; 而 CGO 并未针对其他的类型提供相关的辅助函数，且 Go 语言特有的内存模型导致我们无法保持这些由 Go 语言管理的内存指针，所以它们 C 语言环境并无使用的价值。</p>
+<p>在导出的 C 语言函数中我们可以直接使用 Go 字符串和切片。假设有以下两个导出函数：</p>
+<pre><code class="language-go">//export helloString
+func helloString(s string) {}
+
+//export helloSlice
+func helloSlice(s []byte) {}
+</code></pre>
+<p>CGO 生成的 <code>_cgo_export.h</code> 头文件会包含以下的函数声明：</p>
+<pre><code class="language-c">extern void helloString(GoString p0);
+extern void helloSlice(GoSlice p0);
+</code></pre>
+<p>不过需要注意的是，如果使用了 GoString 类型则会对 <code>_cgo_export.h</code> 头文件产生依赖，而这个头文件是动态输出的。</p>
+<p>Go1.10 针对 Go 字符串增加了一个 <code>_GoString_</code> 预定义类型，可以降低在 cgo 代码中可能对 <code>_cgo_export.h</code> 头文件产生的循环依赖的风险。我们可以调整 helloString 函数的 C 语言声明为：</p>
+<pre><code class="language-c">extern void helloString(_GoString_ p0);
+</code></pre>
+<p>因为 <code>_GoString_</code> 是预定义类型，我们无法通过此类型直接访问字符串的长度和指针等信息。Go1.10 同时也增加了以下两个函数用于获取字符串结构中的长度和指针信息：</p>
+<pre><code class="language-c">size_t _GoStringLen(_GoString_ s);
+const char *_GoStringPtr(_GoString_ s);
+</code></pre>
+<p>更严谨的做法是为 C 语言函数接口定义严格的头文件，然后基于稳定的头文件实现代码。</p>
+<h2>2.3.3 结构体、联合、枚举类型</h2>
+<p>C 语言的结构体、联合、枚举类型不能作为匿名成员被嵌入到 Go 语言的结构体中。在 Go 语言中，我们可以通过 <code>C.struct_xxx</code> 来访问 C 语言中定义的 <code>struct xxx</code> 结构体类型。结构体的内存布局按照 C 语言的通用对齐规则，在 32 位 Go 语言环境 C 语言结构体也按照 32 位对齐规则，在 64 位 Go 语言环境按照 64 位的对齐规则。对于指定了特殊对齐规则的结构体，无法在 CGO 中访问。</p>
+<p>结构体的简单用法如下：</p>
+<pre><code class="language-go">/*
+struct A {
+	int i;
+	float f;
+};
+*/
+import &quot;C&quot;
+import &quot;fmt&quot;
+
+func main() {
+	var a C.struct_A
+	fmt.Println(a.i)
+	fmt.Println(a.f)
+}
+</code></pre>
+<p>如果结构体的成员名字中碰巧是 Go 语言的关键字，可以通过在成员名开头添加下划线来访问：</p>
+<pre><code class="language-go">/*
+struct A {
+	int type; // type 是 Go 语言的关键字
+};
+*/
+import &quot;C&quot;
+import &quot;fmt&quot;
+
+func main() {
+	var a C.struct_A
+	fmt.Println(a._type) // _type 对应 type
+}
+</code></pre>
+<p>但是如果有 2 个成员：一个是以 Go 语言关键字命名，另一个刚好是以下划线和 Go 语言关键字命名，那么以 Go 语言关键字命名的成员将无法访问（被屏蔽）：</p>
+<pre><code class="language-go">/*
+struct A {
+	int   type;  // type 是 Go 语言的关键字
+	float _type; // 将屏蔽 CGO 对 type 成员的访问
+};
+*/
+import &quot;C&quot;
+import &quot;fmt&quot;
+
+func main() {
+	var a C.struct_A
+	fmt.Println(a._type) // _type 对应 _type
+}
+</code></pre>
+<p>C 语言结构体中位字段对应的成员无法在 Go 语言中访问，如果需要操作位字段成员，需要通过在 C 语言中定义辅助函数来完成。对应零长数组的成员，无法在 Go 语言中直接访问数组的元素，但其中零长的数组成员所在位置的偏移量依然可以通过 <code>unsafe.Offsetof(a.arr)</code> 来访问。</p>
+<pre><code class="language-go">/*
+struct A {
+	int   size: 10; // 位字段无法访问
+	float arr[];    // 零长的数组也无法访问
+};
+*/
+import &quot;C&quot;
+import &quot;fmt&quot;
+
+func main() {
+	var a C.struct_A
+	fmt.Println(a.size) // 错误: 位字段无法访问
+	fmt.Println(a.arr)  // 错误: 零长的数组也无法访问
+}
+</code></pre>
+<p>在 C 语言中，我们无法直接访问 Go 语言定义的结构体类型。</p>
+<p>对于联合类型，我们可以通过 <code>C.union_xxx</code> 来访问 C 语言中定义的 <code>union xxx</code> 类型。但是 Go 语言中并不支持 C 语言联合类型，它们会被转为对应大小的字节数组。</p>
+<pre><code class="language-go">/*
+#include &lt;stdint.h&gt;
+
+union B1 {
+	int i;
+	float f;
+};
+
+union B2 {
+	int8_t i8;
+	int64_t i64;
+};
+*/
+import &quot;C&quot;
+import &quot;fmt&quot;
+
+func main() {
+	var b1 C.union_B1;
+	fmt.Printf(&quot;%T\n&quot;, b1) // [4]uint8
+
+	var b2 C.union_B2;
+	fmt.Printf(&quot;%T\n&quot;, b2) // [8]uint8
+}
+</code></pre>
+<p>如果需要操作 C 语言的联合类型变量，一般有三种方法：第一种是在 C 语言中定义辅助函数；第二种是通过 Go 语言的 &quot;encoding/binary&quot; 手工解码成员 (需要注意大端小端问题)；第三种是使用 <code>unsafe</code> 包强制转型为对应类型 (这是性能最好的方式)。下面展示通过 <code>unsafe</code> 包访问联合类型成员的方式：</p>
+<pre><code class="language-go">/*
+#include &lt;stdint.h&gt;
+
+union B {
+	int i;
+	float f;
+};
+*/
+import &quot;C&quot;
+import &quot;fmt&quot;
+
+func main() {
+	var b C.union_B;
+	fmt.Println(&quot;b.i:&quot;, *(*C.int)(unsafe.Pointer(&amp;b)))
+	fmt.Println(&quot;b.f:&quot;, *(*C.float)(unsafe.Pointer(&amp;b)))
+}
+</code></pre>
+<p>虽然 <code>unsafe</code> 包访问最简单、性能也最好，但是对于有嵌套联合类型的情况处理会导致问题复杂化。对于复杂的联合类型，推荐通过在 C 语言中定义辅助函数的方式处理。</p>
+<p>对于枚举类型，我们可以通过 <code>C.enum_xxx</code> 来访问 C 语言中定义的 <code>enum xxx</code> 结构体类型。</p>
+<pre><code class="language-go">/*
+enum C {
+	ONE,
+	TWO,
+};
+*/
+import &quot;C&quot;
+import &quot;fmt&quot;
+
+func main() {
+	var c C.enum_C = C.TWO
+	fmt.Println(c)
+	fmt.Println(C.ONE)
+	fmt.Println(C.TWO)
+}
+</code></pre>
+<p>在 C 语言中，枚举类型底层对应 <code>int</code> 类型，支持负数类型的值。我们可以通过 <code>C.ONE</code>、<code>C.TWO</code> 等直接访问定义的枚举值。</p>
+<h2>2.3.4 数组、字符串和切片</h2>
+<p>在 C 语言中，数组名其实对应于一个指针，指向特定类型特定长度的一段内存，但是这个指针不能被修改；当把数组名传递给一个函数时，实际上传递的是数组第一个元素的地址。为了讨论方便，我们将一段特定长度的内存统称为数组。C 语言的字符串是一个 char 类型的数组，字符串的长度需要根据表示结尾的 NULL 字符的位置确定。C 语言中没有切片类型。</p>
+<p>在 Go 语言中，数组是一种值类型，而且数组的长度是数组类型的一个部分。Go 语言字符串对应一段长度确定的只读 byte 类型的内存。Go 语言的切片则是一个简化版的动态数组。</p>
+<p>Go 语言和 C 语言的数组、字符串和切片之间的相互转换可以简化为 Go 语言的切片和 C 语言中指向一定长度内存的指针之间的转换。</p>
+<p>CGO 的 C 虚拟包提供了以下一组函数，用于 Go 语言和 C 语言之间数组和字符串的双向转换：</p>
+<pre><code class="language-go">// Go string to C string
+// The C string is allocated in the C heap using malloc.
+// It is the caller's responsibility to arrange for it to be
+// freed, such as by calling C.free (be sure to include stdlib.h
+// if C.free is needed).
+func C.CString(string) *C.char
+
+// Go []byte slice to C array
+// The C array is allocated in the C heap using malloc.
+// It is the caller's responsibility to arrange for it to be
+// freed, such as by calling C.free (be sure to include stdlib.h
+// if C.free is needed).
+func C.CBytes([]byte) unsafe.Pointer
+
+// C string to Go string
+func C.GoString(*C.char) string
+
+// C data with explicit length to Go string
+func C.GoStringN(*C.char, C.int) string
+
+// C data with explicit length to Go []byte
+func C.GoBytes(unsafe.Pointer, C.int) []byte
+</code></pre>
+<p>其中 <code>C.CString</code> 针对输入的 Go 字符串，克隆一个 C 语言格式的字符串；返回的字符串由 C 语言的 <code>malloc</code> 函数分配，不使用时需要通过 C 语言的 <code>free</code> 函数释放。<code>C.CBytes</code> 函数的功能和 <code>C.CString</code> 类似，用于从输入的 Go 语言字节切片克隆一个 C 语言版本的字节数组，同样返回的数组需要在合适的时候释放。<code>C.GoString</code> 用于将从 NULL 结尾的 C 语言字符串克隆一个 Go 语言字符串。<code>C.GoStringN</code> 是另一个字符数组克隆函数。<code>C.GoBytes</code> 用于从 C 语言数组，克隆一个 Go 语言字节切片。</p>
+<p>该组辅助函数都是以克隆的方式运行。当 Go 语言字符串和切片向 C 语言转换时，克隆的内存由 C 语言的 <code>malloc</code> 函数分配，最终可以通过 <code>free</code> 函数释放。当 C 语言字符串或数组向 Go 语言转换时，克隆的内存由 Go 语言分配管理。通过该组转换函数，转换前和转换后的内存依然在各自的语言环境中，它们并没有跨越 Go 语言和 C 语言。克隆方式实现转换的优点是接口和内存管理都很简单，缺点是克隆需要分配新的内存和复制操作都会导致额外的开销。</p>
+<p>在 <code>reflect</code> 包中有字符串和切片的定义：</p>
+<pre><code class="language-go">type StringHeader struct {
+    Data uintptr
+    Len  int
+}
+
+type SliceHeader struct {
+    Data uintptr
+    Len  int
+    Cap  int
+}
+</code></pre>
+<p>如果不希望单独分配内存，可以在 Go 语言中直接访问 C 语言的内存空间：</p>
+<pre><code class="language-go">/*
+#include &lt;string.h&gt;
+char arr[10];
+char *s = &quot;Hello&quot;;
+*/
+import &quot;C&quot;
+import (
+	&quot;reflect&quot;
+	&quot;unsafe&quot;
+)
+func main() {
+	// 通过 reflect.SliceHeader 转换
+	var arr0 []byte
+	var arr0Hdr = (*reflect.SliceHeader)(unsafe.Pointer(&amp;arr0))
+	arr0Hdr.Data = uintptr(unsafe.Pointer(&amp;C.arr[0]))
+	arr0Hdr.Len = 10
+	arr0Hdr.Cap = 10
+
+	// 通过切片语法转换
+	arr1 := (*[31]byte)(unsafe.Pointer(&amp;C.arr[0]))[:10:10]
+
+	var s0 string
+	var s0Hdr = (*reflect.StringHeader)(unsafe.Pointer(&amp;s0))
+	s0Hdr.Data = uintptr(unsafe.Pointer(C.s))
+	s0Hdr.Len = int(C.strlen(C.s))
+
+	sLen := int(C.strlen(C.s))
+    	s1 := string((*[31]byte)(unsafe.Pointer(C.s))[:sLen:sLen])
+}
+</code></pre>
+<p>因为 Go 语言的字符串是只读的，用户需要自己保证 Go 字符串在使用期间，底层对应的 C 字符串内容不会发生变化、内存不会被提前释放掉。</p>
+<p>在 CGO 中，会为字符串和切片生成和上面结构对应的 C 语言版本的结构体：</p>
+<pre><code class="language-c">typedef struct {const char *p; GoInt n;} GoString;
+typedef struct {void *data; GoInt len; GoInt cap;} GoSlice;
+</code></pre>
+<p>在 C 语言中可以通过 <code>GoString</code> 和 <code>GoSlice</code> 来访问 Go 语言的字符串和切片。如果是 Go 语言中数组类型，可以将数组转为切片后再行转换。如果字符串或切片对应的底层内存空间由 Go 语言的运行时管理，那么在 C 语言中不能长时间保存 Go 内存对象。</p>
+<p>关于 CGO 内存模型的细节在稍后章节中会详细讨论。</p>
+<h2>2.3.5 指针间的转换</h2>
+<p>在 C 语言中，不同类型的指针是可以显式或隐式转换的，如果是隐式只是会在编译时给出一些警告信息。但是 Go 语言对于不同类型的转换非常严格，任何 C 语言中可能出现的警告信息在 Go 语言中都可能是错误！指针是 C 语言的灵魂，指针间的自由转换也是 cgo 代码中经常要解决的第一个重要的问题。</p>
+<p>在 Go 语言中两个指针的类型完全一致则不需要转换可以直接通用。如果一个指针类型是用 type 命令在另一个指针类型基础之上构建的，换言之两个指针底层是相同完全结构的指针，那么我我们可以通过直接强制转换语法进行指针间的转换。但是 cgo 经常要面对的是 2 个完全不同类型的指针间的转换，原则上这种操作在纯 Go 语言代码是严格禁止的。</p>
+<p>cgo 存在的一个目的就是打破 Go 语言的禁止，恢复 C 语言应有的指针的自由转换和指针运算。以下代码演示了如何将 X 类型的指针转化为 Y 类型的指针：</p>
+<pre><code class="language-go">var p *X
+var q *Y
+
+q = (*Y)(unsafe.Pointer(p)) // *X =&gt; *Y
+p = (*X)(unsafe.Pointer(q)) // *Y =&gt; *X
+</code></pre>
+<p>为了实现 X 类型指针到 Y 类型指针的转换，我们需要借助 <code>unsafe.Pointer</code> 作为中间桥接类型实现不同类型指针之间的转换。<code>unsafe.Pointer</code> 指针类型类似 C 语言中的 <code>void*</code> 类型的指针。</p>
+<p>下面是指针间的转换流程的示意图：</p>
+<p><img src="../images/ch2-1-x-ptr-to-y-ptr.uml.png" alt=""></p>
+<p><em>图 2-1 X 类型指针转 Y 类型指针</em></p>
+<p>任何类型的指针都可以通过强制转换为 <code>unsafe.Pointer</code> 指针类型去掉原有的类型信息，然后再重新赋予新的指针类型而达到指针间的转换的目的。</p>
+<h2>2.3.6 数值和指针的转换</h2>
+<p>不同类型指针间的转换看似复杂，但是在 cgo 中已经算是比较简单的了。在 C 语言中经常遇到用普通数值表示指针的场景，也就是说如何实现数值和指针的转换也是 cgo 需要面对的一个问题。</p>
+<p>为了严格控制指针的使用，Go 语言禁止将数值类型直接转为指针类型！不过，Go 语言针对 <code>unsafe.Pointr</code> 指针类型特别定义了一个 uintptr 类型。我们可以 uintptr 为中介，实现数值类型到 <code>unsafe.Pointr</code> 指针类型到转换。再结合前面提到的方法，就可以实现数值和指针的转换了。</p>
+<p>下面流程图演示了如何实现 int32 类型到 C 语言的 <code>char*</code> 字符串指针类型的相互转换：</p>
+<p><img src="../images/ch2-2-int32-to-char-ptr.uml.png" alt=""></p>
+<p><em>图 2-2 int32 和 <code>char*</code> 指针转换</em></p>
+<p>转换分为几个阶段，在每个阶段实现一个小目标：首先是 int32 到 uintptr 类型，然后是 uintptr 到 <code>unsafe.Pointr</code> 指针类型，最后是 <code>unsafe.Pointr</code> 指针类型到 <code>*C.char</code> 类型。</p>
+<h2>2.3.7 切片间的转换</h2>
+<p>在 C 语言中数组也一种指针，因此两个不同类型数组之间的转换和指针间转换基本类似。但是在 Go 语言中，数组或数组对应的切片都不再是指针类型，因此我们也就无法直接实现不同类型的切片之间的转换。</p>
+<p>不过 Go 语言的 reflect 包提供了切片类型的底层结构，再结合前面讨论到不同类型之间的指针转换技术就可以实现 <code>[]X</code> 和 <code>[]Y</code> 类型的切片转换：</p>
+<pre><code class="language-go">var p []X
+var q []Y
+
+pHdr := (*reflect.SliceHeader)(unsafe.Pointer(&amp;p))
+qHdr := (*reflect.SliceHeader)(unsafe.Pointer(&amp;q))
+
+pHdr.Data = qHdr.Data
+pHdr.Len = qHdr.Len * unsafe.Sizeof(q[0]) / unsafe.Sizeof(p[0])
+pHdr.Cap = qHdr.Cap * unsafe.Sizeof(q[0]) / unsafe.Sizeof(p[0])
+</code></pre>
+<p>不同切片类型之间转换的思路是先构造一个空的目标切片，然后用原有的切片底层数据填充目标切片。如果 X 和 Y 类型的大小不同，需要重新设置 Len 和 Cap 属性。需要注意的是，如果 X 或 Y 是空类型，上述代码中可能导致除 0 错误，实际代码需要根据情况酌情处理。</p>
+<p>下面演示了切片间的转换的具体流程：</p>
+<p><img src="../images/ch2-3-x-slice-to-y-slice.uml.png" alt=""></p>
+<p><em>图 2-3 X 类型切片转 Y 类型切片</em></p>
+<p>针对 CGO 中常用的功能，作者封装了 &quot;github.com/chai2010/cgo&quot; 包，提供基本的转换功能，具体的细节可以参考实现代码。</p>
+
+
+                        <hr><table><tr><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/css.png"></td><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/cch.png"></td></tr></table>
+
+                        
+                            <div id="giscus-container"></div>
+                        
+
+                        
+                            <footer class="page-footer">
+                                <span>© 2019-2022 | <a href="https://github.com/chai2010/advanced-go-programming-book">柴树杉、曹春晖</a> 保留所有权利</span>
+                            </footer>
+                        
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../ch2-cgo/ch2-02-basic.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                        
+                            <!-- ../ch2-cgo/ch2-04-func.html -->
+                            <a rel="next" href="../ch2-cgo/ch2-04-func.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../ch2-cgo/ch2-02-basic.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                
+                    <a rel="next" href="../ch2-cgo/ch2-04-func.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../static/wabook/mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/book.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script type="text/javascript" charset="utf-8">
+            var pagePath = "ch2-cgo/ch2-03-cgo-types.md"
+        </script>
+
+        <!-- Custom JS scripts -->
+        
+            <script src="../static/wabook/giscus.js" type="text/javascript" charset="utf-8"></script>
+        
+
+    </body>
+</html>

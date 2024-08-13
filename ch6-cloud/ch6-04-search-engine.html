@@ -1,0 +1,730 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using https://github.com/wa-lang/wabook -->
+        <meta charset="UTF-8">
+        <title>分布式搜索引擎 - Go语言高级编程</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../static/wabook/css/variables.css">
+        <link rel="stylesheet" href="../static/wabook/css/general.css">
+        <link rel="stylesheet" href="../static/wabook/css/chrome.css">
+        <link rel="stylesheet" href="../static/wabook/css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../static/wabook/FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../static/wabook/fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../static/wabook/highlight.css">
+        <link rel="stylesheet" href="../static/wabook/tomorrow-night.css">
+        <link rel="stylesheet" href="../static/wabook/ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('wabook-theme');
+                var sidebar = localStorage.getItem('wabook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('wabook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('wabook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('wabook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('wabook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter">
+  <li class="chapter-item expanded ">
+    <a href="../index.html" >Go语言高级编程</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../preface.html" >前言</a>
+  </li>
+  <li class="chapter-item expanded ">
+    <a href="../ch1-basic/readme.html" ><strong aria-hidden="true">1.</strong> 语言基础</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-01-genesis.html" ><strong aria-hidden="true">1.1.</strong> Go语言创世纪</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-02-hello-revolution.html" ><strong aria-hidden="true">1.2.</strong> Hello, World 的革命</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-03-array-string-and-slice.html" ><strong aria-hidden="true">1.3.</strong> 数组、字符串和切片</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-04-func-method-interface.html" ><strong aria-hidden="true">1.4.</strong> 函数、方法和接口</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-05-mem.html" ><strong aria-hidden="true">1.5.</strong> 面向并发的内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-06-goroutine.html" ><strong aria-hidden="true">1.6.</strong> 常见的并发模式</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-07-error-and-panic.html" ><strong aria-hidden="true">1.7.</strong> 错误和异常</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch1-basic/ch1-08-ext.html" ><strong aria-hidden="true">1.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch2-cgo/readme.html" ><strong aria-hidden="true">2.</strong> CGO编程</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-01-hello-cgo.html" ><strong aria-hidden="true">2.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-02-basic.html" ><strong aria-hidden="true">2.2.</strong> CGO基础</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-03-cgo-types.html" ><strong aria-hidden="true">2.3.</strong> 类型转换</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-04-func.html" ><strong aria-hidden="true">2.4.</strong> 函数调用</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-05-internal.html" ><strong aria-hidden="true">2.5.</strong> 内部机制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-06-qsort.html" ><strong aria-hidden="true">2.6.</strong> 实战: 封装qsort</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-07-memory.html" ><strong aria-hidden="true">2.7.</strong> CGO内存模型</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-08-class.html" ><strong aria-hidden="true">2.8.</strong> C++类包装</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-09-static-shared-lib.html" ><strong aria-hidden="true">2.9.</strong> 静态库和动态库</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-10-link.html" ><strong aria-hidden="true">2.10.</strong> 编译和链接参数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch2-cgo/ch2-11-ext.html" ><strong aria-hidden="true">2.11.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch3-asm/readme.html" ><strong aria-hidden="true">3.</strong> 汇编语言</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-01-basic.html" ><strong aria-hidden="true">3.1.</strong> 快速入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-02-arch.html" ><strong aria-hidden="true">3.2.</strong> 计算机结构</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-03-const-and-var.html" ><strong aria-hidden="true">3.3.</strong> 常量和全局变量</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-04-func.html" ><strong aria-hidden="true">3.4.</strong> 函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-05-control-flow.html" ><strong aria-hidden="true">3.5.</strong> 控制流</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-06-func-again.html" ><strong aria-hidden="true">3.6.</strong> 再论函数</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-07-hack-asm.html" ><strong aria-hidden="true">3.7.</strong> 汇编语言的威力</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-08-goroutine-id.html" ><strong aria-hidden="true">3.8.</strong> 例子：Goroutine ID</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-09-debug.html" ><strong aria-hidden="true">3.9.</strong> Delve调试器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch3-asm/ch3-10-ext.html" ><strong aria-hidden="true">3.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch4-rpc/readme.html" ><strong aria-hidden="true">4.</strong> 第4章 RPC和Protobuf</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-01-rpc-intro.html" ><strong aria-hidden="true">4.1.</strong> RPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-02-pb-intro.html" ><strong aria-hidden="true">4.2.</strong> Protobuf</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-03-netrpc-hack.html" ><strong aria-hidden="true">4.3.</strong> 玩转RPC</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-04-grpc.html" ><strong aria-hidden="true">4.4.</strong> gRPC入门</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-05-grpc-hack.html" ><strong aria-hidden="true">4.5.</strong> gRPC进阶</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-06-grpc-ext.html" ><strong aria-hidden="true">4.6.</strong> gRPC和Protobuf扩展</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-07-pbgo.html" ><strong aria-hidden="true">4.7.</strong> pbgo: 基于Protobuf的框架</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-08-grpcurl.html" ><strong aria-hidden="true">4.8.</strong> grpcurl工具</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch4-rpc/ch4-09-ext.html" ><strong aria-hidden="true">4.9.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch5-web/readme.html" ><strong aria-hidden="true">5.</strong> Go和Web</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-01-introduction.html" ><strong aria-hidden="true">5.1.</strong> Web开发简介</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-02-router.html" ><strong aria-hidden="true">5.2.</strong> 请求路由</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-03-middleware.html" ><strong aria-hidden="true">5.3.</strong> 中间件</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-04-validator.html" ><strong aria-hidden="true">5.4.</strong> 请求校验</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-05-database.html" ><strong aria-hidden="true">5.5.</strong> 和数据库打交道</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-06-ratelimit.html" ><strong aria-hidden="true">5.6.</strong> 服务流量限制</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-07-layout-of-web-project.html" ><strong aria-hidden="true">5.7.</strong> 大型Web项目分层</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-08-interface-and-web.html" ><strong aria-hidden="true">5.8.</strong> 接口和表驱动开发</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-09-gated-launch.html" ><strong aria-hidden="true">5.9.</strong> 灰度发布和A/B测试</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch5-web/ch5-10-ext.html" ><strong aria-hidden="true">5.10.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../ch6-cloud/readme.html" ><strong aria-hidden="true">6.</strong> 分布式系统</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-01-dist-id.html" ><strong aria-hidden="true">6.1.</strong> 分布式 id 生成器</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-02-lock.html" ><strong aria-hidden="true">6.2.</strong> 分布式锁</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-03-delay-job.html" ><strong aria-hidden="true">6.3.</strong> 延时任务系统</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-04-search-engine.html" class="active"><strong aria-hidden="true">6.4.</strong> 分布式搜索引擎</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-05-load-balance.html" ><strong aria-hidden="true">6.5.</strong> 负载均衡</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-06-config.html" ><strong aria-hidden="true">6.6.</strong> 分布式配置管理</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-07-crawler.html" ><strong aria-hidden="true">6.7.</strong> 分布式爬虫</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../ch6-cloud/ch6-08-ext.html" ><strong aria-hidden="true">6.8.</strong> 补充说明</a>
+    </li>
+  </ol>
+  <li class="chapter-item expanded ">
+    <a href="../appendix/readme.html" ><strong aria-hidden="true">7.</strong> 附录</a>
+  </li>
+  <ol class="section">
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-a-trap.html" ><strong aria-hidden="true">7.1.</strong> 附录A: Go语言常见坑</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-b-gems.html" ><strong aria-hidden="true">7.2.</strong> 附录B: 有趣的代码片段</a>
+    </li>
+    <li class="chapter-item expanded ">
+      <a href="../appendix/appendix-c-author.html" ><strong aria-hidden="true">7.3.</strong> 附录C: 作者简介</a>
+    </li>
+  </ol>
+</ol>
+
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                    </div>
+
+                    <h1 class="menu-title"><a href="../index.html">Go语言高级编程</a></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/chai2010/advanced-go-programming-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/chai2010/advanced-go-programming-book/edit/master/ch6-cloud/ch6-04-search-engine.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <!-- Page table of contents -->
+                    <div class="sidetoc"><nav class="pagetoc"></nav></div>
+
+                    <main>
+                        <ul dir="auto"><li><em>凹语言(Go实现, 面向WASM设计): <a href="https://github.com/wa-lang/wa">https://github.com/wa-lang/wa</a></em></li><li><em>WaBook(Go语言实现的MD电子书构建工具): <a href="https://github.com/wa-lang/wabook">https://github.com/wa-lang/wabook</a></em></li></ul><hr>
+
+                        <h1>6.4 分布式搜索引擎</h1>
+<p>在 Web 一章中，我们提到 MySQL 很脆弱。数据库系统本身要保证实时和强一致性，所以其功能设计上都是为了满足这种一致性需求。比如 write ahead log 的设计，基于 B + 树实现的索引和数据组织，以及基于 MVCC 实现的事务等等。</p>
+<p>关系型数据库一般被用于实现 OLTP 系统，所谓 OLTP，援引 wikipedia:</p>
+<blockquote>
+<p>在线交易处理（OLTP, Online transaction processing）是指透过信息系统、电脑网络及数据库，以线上交易的方式处理一般即时性的作业数据，和更早期传统数据库系统大量批量的作业方式并不相同。OLTP 通常被运用于自动化的数据处理工作，如订单输入、金融业务… 等反复性的日常性交易活动。和其相对的是属于决策分析层次的联机分析处理（OLAP）。</p>
+</blockquote>
+<p>在互联网的业务场景中，也有一些实时性要求不高 (可以接受多秒的延迟)，但是查询复杂性却很高的场景。举个例子，在电商的 WMS 系统中，或者在大多数业务场景丰富的 CRM 或者客服系统中，可能需要提供几十个字段的随意组合查询功能。这种系统的数据维度天生众多，比如一个电商的 WMS 中对一件货物的描述，可能有下面这些字段：</p>
+<blockquote>
+<p>仓库 id，入库时间，库位分区 id，储存货架 id，入库操作员 id，出库操作员 id，库存数量，过期时间，SKU 类型，产品品牌，产品分类，内件数量</p>
+</blockquote>
+<p>除了上述信息，如果商品在仓库内有流转。可能还有有关联的流程 id，当前的流转状态等等。</p>
+<p>想像一下，如果我们所经营的是一个大型电商，每天有千万级别的订单，那么在这个数据库中查询和建立合适的索引都是一件非常难的事情。</p>
+<p>在 CRM 或客服类系统中，常常有根据关键字进行搜索的需求，大型互联网公司每天会接收数以万计的用户投诉。而考虑到事件溯源，用户的投诉至少要存 2~3 年。又是千万级甚至上亿的数据。根据关键字进行一次 like 查询，可能整个 MySQL 就直接挂掉了。</p>
+<p>这时候我们就需要搜索引擎来救场了。</p>
+<h2>搜索引擎</h2>
+<p>Elasticsearch 是开源分布式搜索引擎的霸主，其依赖于 Lucene 实现，在部署和运维方面做了很多优化。当今搭建一个分布式搜索引擎比起 Sphinx 的时代已经是容易很多很多了。只要简单配置客户端 IP 和端口就可以了。</p>
+<h3>倒排列表</h3>
+<p>虽然 es 是针对搜索场景来定制的，但如前文所言，实际应用中常常用 es 来作为 database 来使用，就是因为倒排列表的特性。可以用比较朴素的观点来理解倒排索引：</p>
+<p><img src="../images/ch6-posting_list.png" alt="posting-list"></p>
+<p><em>图 6-10 倒排列表</em></p>
+<p>对 Elasticsearch 中的数据进行查询时，本质就是求多个排好序的序列求交集。非数值类型字段涉及到分词问题，大多数内部使用场景下，我们可以直接使用默认的 bi-gram 分词。什么是 bi-gram 分词呢：</p>
+<p>即将所有 <code>Ti</code> 和 <code>T(i+1)</code> 组成一个词（在 Elasticsearch 中叫 term），然后再编排其倒排列表，这样我们的倒排列表大概就是这样的：</p>
+<p><img src="../images/ch6-terms.png" alt="terms"></p>
+<p><em>图 6-11 “今天天气很好” 的分词结果</em></p>
+<p>当用户搜索'天气很好'时，其实就是求：天气、气很、很好三组倒排列表的交集，但这里的相等判断逻辑有些特殊，用伪代码表示一下：</p>
+<pre><code class="language-go">func equal() {
+	if postEntry.docID of '天气' == postEntry.docID of '气很' &amp;&amp;
+		postEntry.offset + 1 of '天气' == postEntry.offset of '气很' {
+			return true
+	}
+
+	if postEntry.docID of '气很' == postEntry.docID of '很好' &amp;&amp;
+		postEntry.offset + 1 of '气很' == postEntry.offset of '很好' {
+		return true
+	}
+
+	if postEntry.docID of '天气' == postEntry.docID of '很好' &amp;&amp;
+		postEntry.offset + 2 of '天气' == postEntry.offset of '很好' {
+		return true
+	}
+
+	return false
+}
+</code></pre>
+<p>多个有序列表求交集的时间复杂度是：<code>O(N*M)</code>，N 为给定列表当中元素数最小的集合，M 为给定列表的个数。</p>
+<p>在整个算法中起决定作用的一是最短的倒排列表的长度，其次是词数总和，一般词数不会很大（想像一下，你会在搜索引擎里输入几百字来搜索么？），所以起决定性作用的，一般是所有倒排列表中，最短的那一个的长度。</p>
+<p>因此，文档总数很多的情况下，搜索词的倒排列表最短的那一个不长时，搜索速度也是很快的。如果用关系型数据库，那就需要按照索引（如果有的话）来慢慢扫描了。</p>
+<h3>查询 DSL</h3>
+<p>es 定义了一套查询 DSL，当我们把 es 当数据库使用时，需要用到其 bool 查询。举个例子：</p>
+<pre><code class="language-json">{
+  &quot;query&quot;: {
+    &quot;bool&quot;: {
+      &quot;must&quot;: [
+        {
+          &quot;match&quot;: {
+            &quot;field_1&quot;: {
+              &quot;query&quot;: &quot;1&quot;,
+              &quot;type&quot;: &quot;phrase&quot;
+            }
+          }
+        },
+        {
+          &quot;match&quot;: {
+            &quot;field_2&quot;: {
+              &quot;query&quot;: &quot;2&quot;,
+              &quot;type&quot;: &quot;phrase&quot;
+            }
+          }
+        },
+        {
+          &quot;match&quot;: {
+            &quot;field_3&quot;: {
+              &quot;query&quot;: &quot;3&quot;,
+              &quot;type&quot;: &quot;phrase&quot;
+            }
+          }
+        },
+        {
+          &quot;match&quot;: {
+            &quot;field_4&quot;: {
+              &quot;query&quot;: &quot;4&quot;,
+              &quot;type&quot;: &quot;phrase&quot;
+            }
+          }
+        }
+      ]
+    }
+  },
+  &quot;from&quot;: 0,
+  &quot;size&quot;: 1
+}
+</code></pre>
+<p>看起来比较麻烦，但表达的意思很简单：</p>
+<pre><code class="language-go">if field_1 == 1 &amp;&amp; field_2 == 2 &amp;&amp; field_3 == 3 &amp;&amp; field_4 == 4 {
+    return true
+}
+</code></pre>
+<p>用 bool should query 可以表示 or 的逻辑：</p>
+<pre><code class="language-json">{
+  &quot;query&quot;: {
+    &quot;bool&quot;: {
+      &quot;should&quot;: [
+        {
+          &quot;match&quot;: {
+            &quot;field_1&quot;: {
+              &quot;query&quot;: &quot;1&quot;,
+              &quot;type&quot;: &quot;phrase&quot;
+            }
+          }
+        },
+        {
+          &quot;match&quot;: {
+            &quot;field_2&quot;: {
+              &quot;query&quot;: &quot;2&quot;,
+              &quot;type&quot;: &quot;phrase&quot;
+            }
+          }
+        }
+      ]
+    }
+  },
+  &quot;from&quot;: 0,
+  &quot;size&quot;: 1
+}
+</code></pre>
+<p>这里表示的是类似：</p>
+<pre><code class="language-go">if field_1 == 1 || field_2 == 2 {
+	return true
+}
+</code></pre>
+<p>这些 Go 代码里 <code>if</code> 后面跟着的表达式在编程语言中有专有名词来表达 <code>Boolean Expression</code>：</p>
+<pre><code class="language-go">4 &gt; 1
+5 == 2
+3 &lt;i &amp;&amp; x&gt; 10
+</code></pre>
+<p>es 的 <code>Bool Query</code> 方案，就是用 json 来表达了这种程序语言中的 Boolean Expression，为什么可以这么做呢？因为 json 本身是可以表达树形结构的，我们的程序代码在被编译器 parse 之后，也会变成 AST，而 AST 抽象语法树，顾名思义，就是树形结构。理论上 json 能够完备地表达一段程序代码被 parse 之后的结果。这里的 Boolean Expression 被编译器 Parse 之后也会生成差不多的树形结构，而且只是整个编译器实现的一个很小的子集。</p>
+<h3>基于 client SDK 做开发</h3>
+<p>初始化：</p>
+<pre><code class="language-go">// 选用 elastic 版本时
+// 注意与自己使用的 elasticsearch 要对应
+import (
+	elastic &quot;gopkg.in/olivere/elastic.v3&quot;
+)
+
+var esClient *elastic.Client
+
+func initElasticsearchClient(host string, port string) {
+	var err error
+	esClient, err = elastic.NewClient(
+		elastic.SetURL(fmt.Sprintf(&quot;http://%s:%s&quot;, host, port)),
+		elastic.SetMaxRetries(3),
+	)
+
+	if err != nil {
+		// log error
+	}
+}
+</code></pre>
+<p>插入：</p>
+<pre><code class="language-go">func insertDocument(db string, table string, obj map[string]interface{}) {
+
+	id := obj[&quot;id&quot;]
+
+	var indexName, typeName string
+	// 数据库中的 database/table 概念，可以简单映射到 es 的 index 和 type
+	// 不过需要注意，因为 es 中的 _type 本质上只是 document 的一个字段
+	// 所以单个 index 内容过多会导致性能问题
+	// 在新版本中 type 已经废弃
+	// 为了让不同表的数据落入不同的 index，这里我们用 table+name 作为 index 的名字
+	indexName = fmt.Sprintf(&quot;%v_%v&quot;, db, table)
+	typeName = table
+
+	// 正常情况
+	res, err := esClient.Index().Index(indexName).Type(typeName).Id(id).BodyJson(obj).Do()
+	if err != nil {
+		// handle error
+	} else {
+		// insert success
+	}
+}
+</code></pre>
+<p>获取：</p>
+<pre><code class="language-go">func query(indexName string, typeName string) (*elastic.SearchResult, error) {
+	// 通过 bool must 和 bool should 添加 bool 查询条件
+	q := elastic.NewBoolQuery().Must(elastic.NewMatchPhraseQuery(&quot;id&quot;, 1),
+	elastic.NewBoolQuery().Must(elastic.NewMatchPhraseQuery(&quot;male&quot;, &quot;m&quot;)))
+
+	q = q.Should(
+		elastic.NewMatchPhraseQuery(&quot;name&quot;, &quot;alex&quot;),
+		elastic.NewMatchPhraseQuery(&quot;name&quot;, &quot;xargin&quot;),
+	)
+
+	searchService := esClient.Search(indexName).Type(typeName)
+	res, err := searchService.Query(q).Do()
+	if err != nil {
+		// log error
+		return nil, err
+	}
+
+	return res, nil
+}
+</code></pre>
+<p>删除：</p>
+<pre><code class="language-go">func deleteDocument(
+	indexName string, typeName string, obj map[string]interface{},
+) {
+	id := obj[&quot;id&quot;]
+
+	res, err := esClient.Delete().Index(indexName).Type(typeName).Id(id).Do()
+	if err != nil {
+		// handle error
+	} else {
+		// delete success
+	}
+}
+</code></pre>
+<p>因为 Lucene 的性质，本质上搜索引擎内的数据是不可变的，所以如果要对文档进行更新，Lucene 内部是按照 id 进行完全覆盖 (本质是取同一 id 最新的 segment 中的数据) 的操作，所以与插入的情况是一样的。</p>
+<p>使用 es 作为数据库使用时，需要注意，因为 es 有索引合并的操作，所以数据插入到 es 中到可以查询的到需要一段时间（由 es 的 refresh_interval 决定）。所以千万不要把 es 当成强一致的关系型数据库来使用。</p>
+<h3>将 sql 转换为 DSL</h3>
+<p>比如我们有一段 bool 表达式，<code>user_id = 1 and (product_id = 1 and (star_num = 4 or star_num = 5) and banned = 1)</code>，写成 SQL 是如下形式：</p>
+<pre><code class="language-sql">select * from xxx where user_id = 1 and (
+	product_id = 1 and (star_num = 4 or star_num = 5) and banned = 1
+)
+</code></pre>
+<p>写成 es 的 DSL 是如下形式：</p>
+<pre><code class="language-json">{
+  &quot;query&quot;: {
+    &quot;bool&quot;: {
+      &quot;must&quot;: [
+        {
+          &quot;match&quot;: {
+            &quot;user_id&quot;: {
+              &quot;query&quot;: &quot;1&quot;,
+              &quot;type&quot;: &quot;phrase&quot;
+            }
+          }
+        },
+        {
+          &quot;match&quot;: {
+            &quot;product_id&quot;: {
+              &quot;query&quot;: &quot;1&quot;,
+              &quot;type&quot;: &quot;phrase&quot;
+            }
+          }
+        },
+        {
+          &quot;bool&quot;: {
+            &quot;should&quot;: [
+              {
+                &quot;match&quot;: {
+                  &quot;star_num&quot;: {
+                    &quot;query&quot;: &quot;4&quot;,
+                    &quot;type&quot;: &quot;phrase&quot;
+                  }
+                }
+              },
+              {
+                &quot;match&quot;: {
+                  &quot;star_num&quot;: {
+                    &quot;query&quot;: &quot;5&quot;,
+                    &quot;type&quot;: &quot;phrase&quot;
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          &quot;match&quot;: {
+            &quot;banned&quot;: {
+              &quot;query&quot;: &quot;1&quot;,
+              &quot;type&quot;: &quot;phrase&quot;
+            }
+          }
+        }
+      ]
+    }
+  },
+  &quot;from&quot;: 0,
+  &quot;size&quot;: 1
+}
+</code></pre>
+<p>es 的 DSL 虽然很好理解，但是手写起来非常费劲。前面提供了基于 SDK 的方式来写，但也不足够灵活。</p>
+<p>SQL 的 where 部分就是 boolean expression。我们之前提到过，这种 bool 表达式在被解析之后，和 es 的 DSL 的结构长得差不多，我们能不能直接通过这种 “差不多” 的猜测来直接帮我们把 SQL 转换成 DSL 呢？</p>
+<p>当然可以，我们把 SQL 的 where 被 Parse 之后的结构和 es 的 DSL 的结构做个对比：</p>
+<p><img src="../images/ch6-ast-dsl.png" alt="ast"></p>
+<p><em>图 6-12 AST 和 DSL 之间的对应关系</em></p>
+<p>既然结构上完全一致，逻辑上我们就可以相互转换。我们以广度优先对 AST 树进行遍历，然后将二元表达式转换成 json 字符串，再拼装起来就可以了，限于篇幅，本文中就不给出示例了，读者朋友可以查看：</p>
+<blockquote>
+<p>github.com/cch123/elasticsql</p>
+</blockquote>
+<p>来学习具体的实现。</p>
+<h2>异构数据同步</h2>
+<p>在实际应用中，我们很少直接向搜索引擎中写入数据。更为常见的方式是，将 MySQL 或其它关系型数据中的数据同步到搜索引擎中。而搜索引擎的使用方只能对数据进行查询，无法进行修改和删除。</p>
+<p>常见的同步方案有两种：</p>
+<h3>通过时间戳进行增量数据同步</h3>
+<p><img src="../images/ch6-sync.png" alt="sync to es"></p>
+<p><em>图 6-13 基于时间戳的数据同步</em></p>
+<p>这种同步方式与业务强绑定，例如 WMS 系统中的出库单，我们并不需要非常实时，稍微有延迟也可以接受，那么我们可以每分钟从 MySQL 的出库单表中，把最近十分钟创建的所有出库单取出，批量存入 es 中，取数据的操作需要执行的逻辑可以表达为下面的 SQL：</p>
+<pre><code class="language-sql">select * from wms_orders where update_time &gt;= date_sub(now(), interval 10 minute);
+</code></pre>
+<p>当然，考虑到边界情况，我们可以让这个时间段的数据与前一次的有一些重叠：</p>
+<pre><code class="language-sql">select * from wms_orders where update_time &gt;= date_sub(
+	now(), interval 11 minute
+);
+</code></pre>
+<p>取最近 11 分钟有变动的数据覆盖更新到 es 中。这种方案的缺点显而易见，我们必须要求业务数据严格遵守一定的规范。比如这里的，必须要有 update_time 字段，并且每次创建和更新都要保证该字段有正确的时间值。否则我们的同步逻辑就会丢失数据。</p>
+<h3>通过 binlog 进行数据同步</h3>
+<p><img src="../images/ch6-binlog-sync.png" alt="binlog-sync"></p>
+<p><em>图 6-13 基于 binlog 的数据同步</em></p>
+<p>业界使用较多的是阿里开源的 Canal，来进行 binlog 解析与同步。canal 会伪装成 MySQL 的从库，然后解析好行格式的 binlog，再以更容易解析的格式（例如 json）发送到消息队列。</p>
+<p>由下游的 Kafka 消费者负责把上游数据表的自增主键作为 es 的文档的 id 进行写入，这样可以保证每次接收到 binlog 时，对应 id 的数据都被覆盖更新为最新。MySQL 的 Row 格式的 binlog 会将每条记录的所有字段都提供给下游，所以在向异构数据目标同步数据时，不需要考虑数据是插入还是更新，只要一律按 id 进行覆盖即可。</p>
+<p>这种模式同样需要业务遵守一条数据表规范，即表中必须有唯一主键 id 来保证我们进入 es 的数据不会发生重复。一旦不遵守该规范，那么就会在同步时导致数据重复。当然，你也可以为每一张需要的表去定制消费者的逻辑，这就不是通用系统讨论的范畴了。</p>
+
+
+                        <hr><table><tr><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/css.png"></td><td><img width="222px" src="https://chai2010.cn/advanced-go-programming-book/cch.png"></td></tr></table>
+
+                        
+                            <div id="giscus-container"></div>
+                        
+
+                        
+                            <footer class="page-footer">
+                                <span>© 2019-2022 | <a href="https://github.com/chai2010/advanced-go-programming-book">柴树杉、曹春晖</a> 保留所有权利</span>
+                            </footer>
+                        
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../ch6-cloud/ch6-03-delay-job.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                        
+                            <!-- ../ch6-cloud/ch6-05-load-balance.html -->
+                            <a rel="next" href="../ch6-cloud/ch6-05-load-balance.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../ch6-cloud/ch6-03-delay-job.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                
+                    <a rel="next" href="../ch6-cloud/ch6-05-load-balance.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../static/wabook/mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/wabook/book.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script type="text/javascript" charset="utf-8">
+            var pagePath = "ch6-cloud/ch6-04-search-engine.md"
+        </script>
+
+        <!-- Custom JS scripts -->
+        
+            <script src="../static/wabook/giscus.js" type="text/javascript" charset="utf-8"></script>
+        
+
+    </body>
+</html>
