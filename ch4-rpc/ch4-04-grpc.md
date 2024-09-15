@@ -230,7 +230,7 @@ for {
 
 ```go
 import (
-	"github.com/moby/moby/pkg/pubsub"
+	"github.com/moby/pubsub"
 )
 
 func main() {
