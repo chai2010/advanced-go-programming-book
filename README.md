@@ -24,6 +24,7 @@
 
 ![[https://www.epubit.com/bookDetails?id=UB8e75a5d38685c](https://www.epubit.com/bookDetails?id=UB8e75a5d38685c)](gobook-v2.jpg)
 
+- 简介: https://mp.weixin.qq.com/s/fJihKW7HKBDRgAW9L-rG1w
 - 异步：https://www.epubit.com/bookDetails?id=UB8e75a5d38685c
 - 豆瓣：https://book.douban.com/subject/37436371/
 - 当当：https://product.dangdang.com/11990190944.html
